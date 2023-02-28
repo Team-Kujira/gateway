@@ -1,10 +1,12 @@
 import { msg, registry } from 'kujira.js';
 import { GasPrice, SigningStargateClient, coins } from '@cosmjs/stargate';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import 'jest-extended';
+jest.setTimeout(30 * 60 * 1000);
 
 it('Kujira Playground', async () => {
   const RPC_ENDPOINT = 'https://rpc-harpoon.kujira.app';
-  const MNEMONIC = '...';
+  const MNEMONIC = process.env.TEST_KUJIRA_MNEMONIC || '';
 
   const signer = await DirectSecp256k1HdWallet.fromMnemonic(MNEMONIC);
 
