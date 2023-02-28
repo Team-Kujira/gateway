@@ -1,5 +1,5 @@
-import { tx, registry } from 'kujira.js';
-import { GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import { msg, registry } from 'kujira.js';
+import { GasPrice, SigningStargateClient, coins } from '@cosmjs/stargate';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 
 it('Kujira Playground', async () => {
@@ -22,12 +22,12 @@ it('Kujira Playground', async () => {
 
   const [account] = await signer.getAccounts();
 
-  const msg = tx.wasm.msgExecuteContract({
+  const result = msg.wasm.msgExecuteContract({
     sender: account.address,
     contract: FIN_KUJI_DEMO,
     msg: Buffer.from(JSON.stringify({ submit_order: { price: '210.5' } })),
     funds: coins(1000000, 'ukuji'),
   });
 
-  await client.signAndBroadcast(account.address, [msg], 'auto');
+  await client.signAndBroadcast(account.address, [result], 'auto');
 });
