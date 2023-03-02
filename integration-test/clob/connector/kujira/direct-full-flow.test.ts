@@ -7,7 +7,6 @@ import { kujiraQueryClient } from 'kujira.js';
 
 jest.setTimeout(30 * 60 * 1000);
 
-
 let account: any;
 let markets: any;
 let querier: any;
@@ -17,19 +16,20 @@ let response: any;
 
 beforeAll(async () => {
   const rpcEndpoint = getNotNullOrThrowError<string>(
-      process.env.TEST_KUJIRA_RPC_ENDPOINT
+    process.env.TEST_KUJIRA_RPC_ENDPOINT ||
+      'https://test-rpc-kujira.mintthemoon.xyz:443'
   );
 
   const mnemonic = getNotNullOrThrowError<string>(
-      process.env.TEST_KUJIRA_MNEMONIC
+    process.env.TEST_KUJIRA_MNEMONIC
   );
 
   const prefix = getNotNullOrThrowError<string>(
-      process.env.TEST_KUJIRA_PREFIX || 'kujira'
+    process.env.TEST_KUJIRA_PREFIX || 'kujira'
   );
 
   const accountNumber = getNotNullOrThrowError<number>(
-      Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || 0
+    Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || 0
   );
 
   const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
@@ -67,7 +67,6 @@ beforeAll(async () => {
 });
 
 describe('Kujira Full Flow', () => {
-
   describe('Markets', () => {
     it('Get one market', async () => {
       request = {};
@@ -90,7 +89,7 @@ describe('Kujira Full Flow', () => {
     });
   });
 
-  describe('Order books',  () => {
+  describe('Order books', () => {
     it('Get one order book', async () => {
       console.log('');
     });
@@ -118,7 +117,7 @@ describe('Kujira Full Flow', () => {
     });
   });
 
-  describe('Orders',  () => {
+  describe('Orders', () => {
     /*
     Full flow for testing orders
     =============================
