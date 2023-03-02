@@ -103,19 +103,19 @@ describe('Kujira Full Flow', () => {
 
   describe('Order books', () => {
     it('Get one order book', async () => {
-      request = {
-        address: markets[1],
-        query: {
+      request = [
+        markets[1],
+        {
           book: {
             offset: 0,
             limit: 10,
           },
         },
-      };
+      ];
 
       logRequest(request, testTitle);
 
-      response = await querier.wasm.queryContractSmart(...request);
+      response = await querier.wasm.queryContractSmart.apply(null, request);
 
       logResponse(response, testTitle);
     });
