@@ -7,21 +7,29 @@ import { kujiraQueryClient } from 'kujira.js';
 
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Kujira Full Flow', async () => {
+
+let account: any;
+let markets: any;
+let querier: any;
+
+let request: any;
+let response: any;
+
+beforeAll(async () => {
   const rpcEndpoint = getNotNullOrThrowError<string>(
-    process.env.TEST_KUJIRA_RPC_ENDPOINT
+      process.env.TEST_KUJIRA_RPC_ENDPOINT
   );
 
   const mnemonic = getNotNullOrThrowError<string>(
-    process.env.TEST_KUJIRA_MNEMONIC
+      process.env.TEST_KUJIRA_MNEMONIC
   );
 
   const prefix = getNotNullOrThrowError<string>(
-    process.env.TEST_KUJIRA_PREFIX || 'kujira'
+      process.env.TEST_KUJIRA_PREFIX || 'kujira'
   );
 
   const accountNumber = getNotNullOrThrowError<number>(
-    process.env.TEST_KUJIRA_ACCOUNT_NUMBER || 0
+      Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || 0
   );
 
   const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
@@ -37,15 +45,15 @@ describe('Kujira Full Flow', async () => {
     ],
   });
 
-  const [account] = await signer.getAccounts();
+  [account] = await signer.getAccounts();
 
-  const tokens = {
-    1: 'KUJI',
-    2: 'DEMO',
-    3: 'USK',
-  };
+  // const tokens = {
+  //   1: 'KUJI',
+  //   2: 'DEMO',
+  //   3: 'USK',
+  // };
 
-  const markets = {
+  markets = {
     1: 'kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh', // KUJI/DEMO
     2: 'kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6', // KUJI/USK
     3: 'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg', // DEMO/USK
@@ -55,12 +63,12 @@ describe('Kujira Full Flow', async () => {
     dispatchInterval: 2000,
   });
   const client = await Tendermint34Client.create(rpcClient);
-  const querier = kujiraQueryClient({ client });
+  querier = kujiraQueryClient({ client });
+});
 
-  let request: any;
-  let response: any;
+describe('Kujira Full Flow', () => {
 
-  describe('Markets', async () => {
+  describe('Markets', () => {
     it('Get one market', async () => {
       request = {};
 
@@ -82,7 +90,7 @@ describe('Kujira Full Flow', async () => {
     });
   });
 
-  describe('Order books', async () => {
+  describe('Order books',  () => {
     it('Get one order book', async () => {
       console.log('');
     });
@@ -96,7 +104,7 @@ describe('Kujira Full Flow', async () => {
     });
   });
 
-  describe('Tickers', async () => {
+  describe('Tickers', () => {
     it('Get one ticker', async () => {
       console.log('');
     });
@@ -110,7 +118,7 @@ describe('Kujira Full Flow', async () => {
     });
   });
 
-  describe('Orders', async () => {
+  describe('Orders',  () => {
     /*
     Full flow for testing orders
     =============================
@@ -122,10 +130,17 @@ describe('Kujira Full Flow', async () => {
 
     create a buy order 1 for market 1
 
-    check the available wallet balances from the tokens 1 and 2
+    check the available wallet balances from the tokens 1 and 2*/
 
-    get the open order 1
+    // get the open order 1
+    it('Get open orders 1', async () => {
+      const result = await querier.wasm.queryContractSmart(markets[1], {
+        orders_by_user: { address: account.address, limit: 10 },
+      });
+      console.log(result);
+    });
 
+    /*
     create a sell order 2 for market 2
 
     check the available wallet balances from the tokens 1 and 2
