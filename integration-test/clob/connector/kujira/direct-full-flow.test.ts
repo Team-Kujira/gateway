@@ -1,5 +1,9 @@
 import 'jest-extended';
-import { getNotNullOrThrowError } from '../../../helpers';
+import {
+  getNotNullOrThrowError,
+  logRequest,
+  logResponse,
+} from '../../../helpers';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
@@ -13,6 +17,8 @@ let querier: any;
 
 let request: any;
 let response: any;
+
+let testTitle: string;
 
 beforeAll(async () => {
   const rpcEndpoint = getNotNullOrThrowError<string>(
@@ -66,6 +72,10 @@ beforeAll(async () => {
   querier = kujiraQueryClient({ client });
 });
 
+beforeEach(async () => {
+  testTitle = expect.getState().currentTestName;
+});
+
 describe('Kujira Full Flow', () => {
   describe('Markets', () => {
     it('Get one market', async () => {
@@ -91,7 +101,21 @@ describe('Kujira Full Flow', () => {
 
   describe('Order books', () => {
     it('Get one order book', async () => {
-      console.log('');
+      request = [
+        markets[1],
+        {
+          book: {
+            offset: 0,
+            limit: 10,
+          },
+        },
+      ];
+
+      logRequest(request, testTitle);
+
+      response = await querier.wasm.queryContractSmart(...request);
+
+      logResponse(response, testTitle);
     });
 
     it('Get two order books for two different markets', async () => {
