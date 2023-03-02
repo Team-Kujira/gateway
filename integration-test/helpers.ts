@@ -159,3 +159,7 @@ export function logRequest(target: any, title: string) {
 export function logResponse(target: any, title: string) {
   log(target, title, 'response');
 }
+
+export function logOutput(target: any, title: string) {
+  log(target, title, 'output');
+}

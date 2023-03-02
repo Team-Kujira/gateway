@@ -1,8 +1,9 @@
 import 'jest-extended';
 import {
   getNotNullOrThrowError,
-  logRequest,
-  logResponse,
+  logOutput as helperLogOutput,
+  logRequest as helperLogRequest,
+  logResponse as helperLogResponse,
 } from '../../../helpers';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -23,6 +24,10 @@ let request: any;
 let response: any;
 
 let testTitle: string;
+let logRequest: (target: any) => void;
+let logResponse: (target: any) => void;
+let logOutput: (target: any) => void;
+
 const ordersMap = Map({}).asMutable();
 
 beforeAll(async () => {
@@ -91,6 +96,9 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   testTitle = expect.getState().currentTestName;
+  logRequest = (target: any) => helperLogRequest(target, testTitle);
+  logResponse = (target: any) => helperLogResponse(target, testTitle);
+  logOutput = (target: any) => helperLogOutput(target, testTitle);
 });
 
 describe('Kujira Full Flow', () => {
@@ -98,11 +106,11 @@ describe('Kujira Full Flow', () => {
     it('Get one market', async () => {
       request = [markets[1]];
 
-      logRequest(request, testTitle);
+      logRequest(request);
 
       response = await querier.wasm.getContractInfo.apply(null, request);
 
-      logResponse(response, testTitle);
+      logResponse(response);
     });
 
     it('Get two markets', async () => {
@@ -126,11 +134,11 @@ describe('Kujira Full Flow', () => {
         },
       ];
 
-      logRequest(request, testTitle);
+      logRequest(request);
 
       response = await querier.wasm.queryContractSmart.apply(null, request);
 
-      logResponse(response, testTitle);
+      logResponse(response);
     });
 
     it('Get two order books for two different markets', async () => {
@@ -147,17 +155,25 @@ describe('Kujira Full Flow', () => {
       request = [
         markets[1],
         {
-          price: {
-            price: '0',
+          book: {
+            offset: 0,
+            limit: 1,
           },
         },
       ];
 
-      logRequest(request, testTitle);
+      logRequest(request);
 
       response = await querier.wasm.queryContractSmart.apply(null, request);
 
-      logResponse(response, testTitle);
+      logResponse(response);
+
+      const output =
+        (response['base'][0]['quote_price'] +
+          response['base'][0]['quote_price']) /
+        2;
+
+      logOutput(output);
     });
 
     it('Get two tickers for two different markets', async () => {
