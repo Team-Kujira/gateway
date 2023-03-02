@@ -7,13 +7,14 @@ import {
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
-import { kujiraQueryClient } from 'kujira.js';
+import { KujiraQueryClient, kujiraQueryClient } from 'kujira.js';
+import { AccountData } from '@cosmjs/proto-signing/build/signer';
 
 jest.setTimeout(30 * 60 * 1000);
 
-let account: any;
+let account: AccountData;
 let markets: any;
-let querier: any;
+let querier: KujiraQueryClient;
 
 let request: any;
 let response: any;
@@ -21,35 +22,36 @@ let response: any;
 let testTitle: string;
 
 beforeAll(async () => {
-  const rpcEndpoint = getNotNullOrThrowError<string>(
+  const rpcEndpoint: string = getNotNullOrThrowError<string>(
     process.env.TEST_KUJIRA_RPC_ENDPOINT ||
       'https://test-rpc-kujira.mintthemoon.xyz:443'
   );
 
-  const mnemonic = getNotNullOrThrowError<string>(
+  const mnemonic: string = getNotNullOrThrowError<string>(
     process.env.TEST_KUJIRA_MNEMONIC
   );
 
-  const prefix = getNotNullOrThrowError<string>(
+  const prefix: string = getNotNullOrThrowError<string>(
     process.env.TEST_KUJIRA_PREFIX || 'kujira'
   );
 
-  const accountNumber = getNotNullOrThrowError<number>(
+  const accountNumber: number = getNotNullOrThrowError<number>(
     Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || 0
   );
 
-  const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
-    prefix: prefix,
-    hdPaths: [
-      [
-        Slip10RawIndex.hardened(44),
-        Slip10RawIndex.hardened(118),
-        Slip10RawIndex.hardened(0),
-        Slip10RawIndex.normal(0),
-        Slip10RawIndex.normal(accountNumber),
+  const signer: DirectSecp256k1HdWallet =
+    await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+      prefix: prefix,
+      hdPaths: [
+        [
+          Slip10RawIndex.hardened(44),
+          Slip10RawIndex.hardened(118),
+          Slip10RawIndex.hardened(0),
+          Slip10RawIndex.normal(0),
+          Slip10RawIndex.normal(accountNumber),
+        ],
       ],
-    ],
-  });
+    });
 
   [account] = await signer.getAccounts();
 
@@ -65,10 +67,10 @@ beforeAll(async () => {
     3: 'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg', // DEMO/USK
   };
 
-  const rpcClient = new HttpBatchClient(rpcEndpoint, {
+  const rpcClient: HttpBatchClient = new HttpBatchClient(rpcEndpoint, {
     dispatchInterval: 2000,
   });
-  const client = await Tendermint34Client.create(rpcClient);
+  const client: Tendermint34Client = await Tendermint34Client.create(rpcClient);
   querier = kujiraQueryClient({ client });
 });
 
@@ -101,15 +103,15 @@ describe('Kujira Full Flow', () => {
 
   describe('Order books', () => {
     it('Get one order book', async () => {
-      request = [
-        markets[1],
-        {
+      request = {
+        address: markets[1],
+        query: {
           book: {
             offset: 0,
             limit: 10,
           },
         },
-      ];
+      };
 
       logRequest(request, testTitle);
 
