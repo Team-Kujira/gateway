@@ -16,9 +16,9 @@ const { Map } = require('immutable');
 jest.setTimeout(30 * 60 * 1000);
 
 let account: AccountData;
-let markets: any;
 let querier: KujiraQueryClient;
-let stargateClient: any;
+let stargateClient: SigningStargateClient;
+let markets: any;
 
 let request: any;
 let response: any;
@@ -129,7 +129,7 @@ describe('Kujira Full Flow', () => {
         {
           book: {
             offset: 0,
-            limit: 10,
+            limit: 100,
           },
         },
       ];
@@ -169,8 +169,8 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
 
       const output =
-        (response['base'][0]['quote_price'] +
-          response['base'][0]['quote_price']) /
+        (Number(response['base'][0]['quote_price']) +
+          Number(response['quote'][0]['quote_price'])) /
         2;
 
       logOutput(output);
@@ -290,27 +290,53 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create a buy order 1 for market 1', async () => {
-      const result = msg.wasm.msgExecuteContract({
+      const market = markets[1];
+      const price = 999.99;
+      const amount = 1000000;
+      const denom = 'ukuji';
+
+      const message = msg.wasm.msgExecuteContract({
         sender: account.address,
-        contract: markets[1],
-        msg: Buffer.from(JSON.stringify({ submit_order: { price: '210.5' } })),
-        funds: coins(1000000, 'ukuji'),
+        contract: market,
+        msg: Buffer.from(
+          JSON.stringify({ submit_order: { price: price.toString() } })
+        ),
+        funds: coins(amount, denom),
       });
-      const response = await stargateClient.signAndBroadcast(
+
+      request = [account.address, [message], 'auto'];
+
+      logRequest(request);
+
+      response = await stargateClient.signAndBroadcast(
         account.address,
-        [result],
+        [message],
         'auto'
       );
-      console.log(response);
-      const order_idx: number = JSON.parse(response['rawLog'])[0]
-        ['events'].filter((obj: any) => {
-          return obj['type'] == 'wasm';
-        })[0]
-        ['attributes'].filter((obj: any) => {
-          return obj['key'] == 'order_idx';
-        })[0]['value'];
-      ordersMap.set(1, order_idx);
-      console.log(order_idx);
+
+      logResponse(response);
+
+      const orderId: number = response['events']
+        .filter((obj: any) => obj['type'] == 'wasm')[0]
+        ['attributes'].filter((obj: any) => obj['key'] == 'order_idx')[0][
+        'value'
+      ];
+      ordersMap.set(1, orderId);
+
+      const output = {
+        id: null, // TODO Can we add a custom order id?!!!
+        exchangeId: orderId,
+        marketName: market,
+        ownderAddress: account.address, // TODO Use the info from the response!!!
+        side: 'SELL', // TODO Use the info from the response!!!
+        price: price,
+        amount: amount,
+        type: 'LIMIT', // TODO Can we have other types? Try to get the info from the response!!!
+        status: 'OPEN', // TODO Try to get the info from the response!!!
+        fee: response['gasUsed'], // TODO Is this the fee?!!!
+      };
+
+      logOutput(output);
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
