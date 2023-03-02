@@ -1,11 +1,76 @@
 import 'jest-extended';
+import { getNotNullOrThrowError } from '../../../helpers';
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { Slip10RawIndex } from '@cosmjs/crypto';
+import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
+import { kujiraQueryClient } from 'kujira.js';
 
 jest.setTimeout(30 * 60 * 1000);
 
 describe('Kujira Full Flow', async () => {
+  const rpcEndpoint = getNotNullOrThrowError<string>(
+    process.env.TEST_KUJIRA_RPC_ENDPOINT
+  );
+
+  const mnemonic = getNotNullOrThrowError<string>(
+    process.env.TEST_KUJIRA_MNEMONIC
+  );
+
+  const prefix = getNotNullOrThrowError<string>(
+    process.env.TEST_KUJIRA_PREFIX || 'kujira'
+  );
+
+  const accountNumber = getNotNullOrThrowError<number>(
+    process.env.TEST_KUJIRA_ACCOUNT_NUMBER || 0
+  );
+
+  const signer = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+    prefix: prefix,
+    hdPaths: [
+      [
+        Slip10RawIndex.hardened(44),
+        Slip10RawIndex.hardened(118),
+        Slip10RawIndex.hardened(0),
+        Slip10RawIndex.normal(0),
+        Slip10RawIndex.normal(accountNumber),
+      ],
+    ],
+  });
+
+  const [account] = await signer.getAccounts();
+
+  const tokens = {
+    1: 'KUJI',
+    2: 'DEMO',
+    3: 'USK',
+  };
+
+  const markets = {
+    1: 'kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh', // KUJI/DEMO
+    2: 'kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6', // KUJI/USK
+    3: 'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg', // DEMO/USK
+  };
+
+  const rpcClient = new HttpBatchClient(rpcEndpoint, {
+    dispatchInterval: 2000,
+  });
+  const client = await Tendermint34Client.create(rpcClient);
+  const querier = kujiraQueryClient({ client });
+
+  let request: any;
+  let response: any;
+
   describe('Markets', async () => {
     it('Get one market', async () => {
-      console.log('');
+      request = {};
+
+      console.log(`request:`);
+      console.log(request);
+
+      response = null;
+
+      console.log(`response:`);
+      console.log(response);
     });
 
     it('Get two markets', async () => {
