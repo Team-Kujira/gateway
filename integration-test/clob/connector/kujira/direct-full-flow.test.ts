@@ -130,17 +130,10 @@ describe('Kujira Full Flow', () => {
 
     create a buy order 1 for market 1
 
-    check the available wallet balances from the tokens 1 and 2*/
+    check the available wallet balances from the tokens 1 and 2
 
-    // get the open order 1
-    it('Get open orders 1', async () => {
-      const result = await querier.wasm.queryContractSmart(markets[1], {
-        orders_by_user: { address: account.address, limit: 10 },
-      });
-      console.log(result);
-    });
+    get the open order 1
 
-    /*
     create a sell order 2 for market 2
 
     check the available wallet balances from the tokens 1 and 2
@@ -266,7 +259,10 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all open orders', async () => {
-      console.log('');
+      const result = await querier.wasm.queryContractSmart(markets[1], {
+        orders_by_user: { address: account.address, limit: 100 },
+      });
+      console.log(result);
     });
 
     it('Cancel the order 1', async () => {
