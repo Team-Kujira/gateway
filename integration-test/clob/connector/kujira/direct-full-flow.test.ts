@@ -7,19 +7,23 @@ import {
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
-import { KujiraQueryClient, kujiraQueryClient } from 'kujira.js';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
+import { msg, registry, kujiraQueryClient, KujiraQueryClient } from 'kujira.js';
+import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+const { Map } = require('immutable');
 
 jest.setTimeout(30 * 60 * 1000);
 
 let account: AccountData;
 let markets: any;
 let querier: KujiraQueryClient;
+let stargateClient: any;
 
 let request: any;
 let response: any;
 
 let testTitle: string;
+let ordersMap = Map({}).asMutable();
 
 beforeAll(async () => {
   const rpcEndpoint: string = getNotNullOrThrowError<string>(
@@ -70,8 +74,19 @@ beforeAll(async () => {
   const rpcClient: HttpBatchClient = new HttpBatchClient(rpcEndpoint, {
     dispatchInterval: 2000,
   });
+
   const client: Tendermint34Client = await Tendermint34Client.create(rpcClient);
+
   querier = kujiraQueryClient({ client });
+
+  stargateClient = await SigningStargateClient.connectWithSigner(
+      rpcEndpoint,
+      signer,
+      {
+        registry,
+        gasPrice: GasPrice.fromString('0.00125ukuji'),
+      }
+  );
 });
 
 beforeEach(async () => {
@@ -248,7 +263,17 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create a buy order 1 for market 1', async () => {
-      console.log('');
+      let result = msg.wasm.msgExecuteContract({
+        sender: account.address,
+        contract: markets[1],
+        msg: Buffer.from(JSON.stringify({ submit_order: { price: '210.5' } })),
+        funds: coins(1000000, 'ukuji'),
+      });
+      const response = await stargateClient.signAndBroadcast(account.address, [result], 'auto');
+      console.log(response);
+      const order_idx: number = JSON.parse(response["rawLog"])[0]['events'].filter((obj: any) => {return (obj["type"] == "wasm")})[0]["attributes"].filter((obj: any) => {return (obj["key"] == "order_idx")})[0]["value"];
+      ordersMap.set(1, order_idx);
+      console.log(order_idx);
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {

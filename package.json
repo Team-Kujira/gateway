@@ -67,6 +67,7 @@
     "express": "^4.17.1",
     "express-winston": "^4.1.0",
     "fs-extra": "^10.0.0",
+    "immutable": "^4.2.4",
     "js-yaml": "^4.1.0",
     "kujira.js": "https://github.com/Team-Kujira/kujira.js",
     "level": "^8.0.0",
