@@ -8,12 +8,7 @@ import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
-import {
-  msg,
-  registry,
-  kujiraQueryClient,
-  KujiraQueryClient,
-} from 'kujira.js/src';
+import { msg, registry, kujiraQueryClient, KujiraQueryClient } from 'kujira.js';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 const { Map } = require('immutable');
 
@@ -101,15 +96,13 @@ beforeEach(async () => {
 describe('Kujira Full Flow', () => {
   describe('Markets', () => {
     it('Get one market', async () => {
-      request = {};
+      request = [markets[1]];
 
-      console.log(`request:`);
-      console.log(request);
+      logRequest(request, testTitle);
 
-      response = null;
+      response = await querier.wasm.getContractInfo.apply(null, request);
 
-      console.log(`response:`);
-      console.log(response);
+      logResponse(response, testTitle);
     });
 
     it('Get two markets', async () => {
@@ -151,7 +144,20 @@ describe('Kujira Full Flow', () => {
 
   describe('Tickers', () => {
     it('Get one ticker', async () => {
-      console.log('');
+      request = [
+        markets[1],
+        {
+          price: {
+            price: '0',
+          },
+        },
+      ];
+
+      logRequest(request, testTitle);
+
+      response = await querier.wasm.queryContractSmart.apply(null, request);
+
+      logResponse(response, testTitle);
     });
 
     it('Get two tickers for two different markets', async () => {
