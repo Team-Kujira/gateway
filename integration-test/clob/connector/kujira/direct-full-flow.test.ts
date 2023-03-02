@@ -8,7 +8,12 @@ import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
-import { msg, registry, kujiraQueryClient, KujiraQueryClient } from 'kujira.js';
+import {
+  msg,
+  registry,
+  kujiraQueryClient,
+  KujiraQueryClient,
+} from 'kujira.js/src';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 const { Map } = require('immutable');
 
