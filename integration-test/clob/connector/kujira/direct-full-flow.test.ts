@@ -420,8 +420,32 @@ describe('Kujira Full Flow', () => {
       console.log('');
     });
 
-    it('Get the open order 1', async () => {
-      console.log('');
+    it('Get the open order 1 by idx', async () => {
+      request = [
+        markets[1],
+        {
+          order: {
+            order_idx: '56243',
+          },
+        },
+      ];
+
+      response = await querier.wasm.queryContractSmart.apply(null, request);
+
+      logResponse(response);
+
+      const output = {
+        idx: '',
+        owner: '',
+        market: '', // TODO add market pair symbol!!!
+        offer_amount: '',
+        side: '', // TODO add order side!!!
+        filled_amount: '',
+        original_offer_amount: '',
+        created_at: '', // TODO convert timestamp to humam format!!!
+      };
+
+      logOutput(output);
     });
 
     it('Create a sell order 2 for market 2', async () => {
