@@ -13,7 +13,6 @@ import {
   fin,
   KujiraQueryClient,
   kujiraQueryClient,
-  MAINNET,
   msg,
   registry,
   TESTNET,
@@ -28,7 +27,7 @@ let account: AccountData;
 let querier: KujiraQueryClient;
 let stargateClient: SigningStargateClient;
 let markets: any;
-let market_pairs: any;
+let marketPairs: any;
 
 let request: any;
 let response: any;
@@ -88,7 +87,7 @@ beforeAll(async () => {
     3: 'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg', // DEMO/USK
   };
 
-  market_pairs = {
+  marketPairs = {
     1: ['KUJI', 'DEMO'],
     2: ['KUJI', 'USK'],
     3: ['DEMO', 'USK'],
@@ -122,24 +121,20 @@ beforeEach(async () => {
 describe('Kujira Full Flow', () => {
   describe('Markets', () => {
     it('Get one market', async () => {
-      response =
-        fin.PAIRS.find((it) => it.address == markets[1]) &&
-        fin.PAIRS.find((it) => it.chainID == MAINNET);
+      response = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find(
+          (it) => it.address == markets[1] && it.chainID == network
+        )
+      );
 
       logResponse(response);
 
-      const output =
-        'address: ' +
-        response['address'] +
-        '; ' +
-        'chainID: ' +
-        response['chainID'] +
-        '; ' +
-        'base: ' +
-        response['denoms'][0]['symbol'] +
-        '; ' +
-        'quote: ' +
-        response['denoms'][1]['symbol'];
+      const output = {
+        address: response['address'],
+        chainID: response['chainID'],
+        base: response['denoms'][0]['symbol'],
+        quote: response['denoms'][1]['symbol'],
+      };
 
       logOutput(output);
     });
@@ -151,7 +146,7 @@ describe('Kujira Full Flow', () => {
         response = fin.PAIRS.find(
           (it) =>
             [it.denoms[0]['symbol'], it.denoms[1]['symbol']] ==
-            [market_pairs[i][0], market_pairs[i][1]]
+            [marketPairs[i][0], marketPairs[i][1]]
         );
 
         if (!response) response = 'Market not found...';
