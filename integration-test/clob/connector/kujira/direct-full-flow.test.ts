@@ -611,7 +611,31 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the filled order 2', async () => {
-      console.log('');
+      request = [
+        markets[1],
+        {
+          orders_by_user: { address: account.address, limit: 100 },
+        },
+      ];
+
+      logRequest(request);
+
+      response = await querier.wasm.queryContractSmart.apply(null, request);
+
+      logResponse(response);
+
+      const output: [any] = response.orders
+        .filter((it: any) => {
+          return parseFloat(it['offer_amount']) == 0;
+        })
+        .filter((it: any) => {
+          parseInt(it['idx']) == ordersMap.get(2);
+        });
+
+      logOutput(output);
+      if (output.length != 1) {
+        throw new Error('Order 2 was not received');
+      }
     });
 
     it('Get all filled orders and check that order 2 is present', async () => {
