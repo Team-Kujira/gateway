@@ -498,10 +498,24 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all open orders', async () => {
-      const result = await querier.wasm.queryContractSmart(markets[1], {
-        orders_by_user: { address: account.address, limit: 100 },
+      request = [
+        markets[1],
+        {
+          orders_by_user: { address: account.address, limit: 100 },
+        },
+      ];
+
+      logRequest(request);
+
+      response = await querier.wasm.queryContractSmart.apply(null, request);
+
+      logResponse(response);
+
+      const output = response.orders.filter((it: any) => {
+        return parseFloat(it['offer_amount']) > 0;
       });
-      console.log(result);
+
+      logOutput(output);
     });
 
     it('Cancel the order 1', async () => {
