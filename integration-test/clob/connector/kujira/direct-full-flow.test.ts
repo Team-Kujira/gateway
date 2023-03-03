@@ -20,15 +20,23 @@ import {
 } from 'kujira.js';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 
-const { Map } = require('immutable');
+import { Map as ImmutableMap } from 'immutable';
 
 jest.setTimeout(30 * 60 * 1000);
 
 let account: AccountData;
 let querier: KujiraQueryClient;
 let stargateClient: SigningStargateClient;
-let markets: any;
-let marketPairs: any;
+
+const allowedMarkets: ImmutableMap<number, Record<any, any>> = ImmutableMap<
+  number,
+  Record<any, any>
+>().asMutable();
+const orders: ImmutableMap<number, Record<any, any>> = ImmutableMap<
+  number,
+  Record<any, any>
+>().asMutable();
+const allowedMarketsIds: Array<string> = [];
 
 let request: any;
 let response: any;
@@ -38,11 +46,13 @@ let logRequest: (target: any) => void;
 let logResponse: (target: any) => void;
 let logOutput: (target: any) => void;
 
-const ordersMap = Map({}).asMutable();
-
-const network = TESTNET;
+let network: string;
 
 beforeAll(async () => {
+  network = getNotNullOrThrowError<string>(
+    process.env.TEST_KUJIRA_NETWORK || TESTNET
+  );
+
   const rpcEndpoint: string = getNotNullOrThrowError<string>(
     process.env.TEST_KUJIRA_RPC_ENDPOINT ||
       'https://test-rpc-kujira.mintthemoon.xyz:443'
@@ -60,6 +70,14 @@ beforeAll(async () => {
     Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || 0
   );
 
+  const marketsAddresses = {
+    1: 'kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh', // KUJI/DEMO
+    2: 'kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6', // KUJI/USK
+    3: 'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg', // DEMO/USK
+  };
+
+  const gasPrice = '0.00125ukuji';
+
   const signer: DirectSecp256k1HdWallet =
     await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
       prefix: prefix,
@@ -76,24 +94,6 @@ beforeAll(async () => {
 
   [account] = await signer.getAccounts();
 
-  // const tokens = {
-  //   1: 'KUJI',
-  //   2: 'DEMO',
-  //   3: 'USK',
-  // };
-
-  markets = {
-    1: 'kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh', // KUJI/DEMO
-    2: 'kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6', // KUJI/USK
-    3: 'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg', // DEMO/USK
-  };
-
-  marketPairs = {
-    1: ['KUJI', 'DEMO'],
-    2: ['KUJI', 'USK'],
-    3: ['DEMO', 'USK'],
-  };
-
   const rpcClient: HttpBatchClient = new HttpBatchClient(rpcEndpoint, {
     dispatchInterval: 2000,
   });
@@ -107,9 +107,202 @@ beforeAll(async () => {
     signer,
     {
       registry,
-      gasPrice: GasPrice.fromString('0.00125ukuji'),
+      gasPrice: GasPrice.fromString(gasPrice),
     }
   );
+
+  for (const [order, marketAddress] of Object.entries(marketsAddresses)) {
+    const pair = getNotNullOrThrowError<fin.Pair>(
+      fin.PAIRS.find(
+        (it) => it.address == marketAddress && it.chainID == network
+      )
+    );
+
+    allowedMarkets.set(Number(order), {
+      pair: pair,
+      address: pair.address,
+      base: pair.denoms[0],
+      quote: pair.denoms[1],
+    });
+
+    allowedMarketsIds.push(pair.address);
+  }
+
+  orders.set(1, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'BUY',
+    price: 0.001,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(2, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'SELL',
+    price: 999.99,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(3, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'BUY',
+    price: 0.001,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(4, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'SELL',
+    price: 999.99,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(5, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'BUY',
+    price: 0.001,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(6, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'SELL',
+    price: 999.99,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(7, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'BUY',
+    price: 0.001,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(8, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'SELL',
+    price: 999.99,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(9, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'BUY',
+    price: 0.001,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(10, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'BUY',
+    price: 0.001,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
+
+  orders.set(11, {
+    id: null,
+    exchangeOrderId: null,
+    ownerAddress: account.address,
+    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
+      .address,
+    side: 'SELL',
+    price: 999.99,
+    amount: 10,
+    type: 'LIMIT',
+    payerAddress: account.address,
+    status: null,
+    signature: null,
+    fee: null,
+  });
 });
 
 beforeEach(async () => {
@@ -121,11 +314,13 @@ beforeEach(async () => {
 
 describe('Kujira Full Flow', () => {
   describe('Markets', () => {
-    it('Get one market', async () => {
+    it('Get market 1', async () => {
+      const marketId = getNotNullOrThrowError<Record<any, any>>(
+        allowedMarkets.get(1)
+      ).address;
+
       response = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find(
-          (it) => it.address == markets[1] && it.chainID == network
-        )
+        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
       );
 
       logResponse(response);
@@ -140,31 +335,48 @@ describe('Kujira Full Flow', () => {
       logOutput(output);
     });
 
-    it('Get two markets', async () => {
-      const selected_markets = [1, 2];
+    it('Get markets 2 and 3', async () => {
+      const marketIds = [
+        getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(2)).address,
+        getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(3)).address,
+      ];
 
-      for (const i of selected_markets) {
-        response = fin.PAIRS.find(
-          (it) =>
-            [it.denoms[0]['symbol'], it.denoms[1]['symbol']] ==
-            [marketPairs[i][0], marketPairs[i][1]]
-        );
+      logRequest(marketIds);
 
-        if (!response) response = 'Market not found...';
-      }
+      response = fin.PAIRS.filter((it) => marketIds.includes(it.address));
 
       logResponse(response);
+
+      // TODO fill the missing fields!!!
+      const output = {};
+
+      logOutput(output);
     });
 
     it('Get all markets', async () => {
-      console.log('');
+      logRequest({});
+
+      response = fin.PAIRS.filter((it) =>
+        allowedMarketsIds.includes(it.address)
+      );
+
+      logResponse(response);
+
+      // TODO fill the missing fields!!!
+      const output = {};
+
+      logOutput(output);
     });
   });
 
   describe('Order books', () => {
     it('Get one order book', async () => {
+      const marketId = getNotNullOrThrowError<Record<any, any>>(
+        allowedMarkets.get(1)
+      ).address;
+
       request = [
-        markets[1],
+        marketId,
         {
           book: {
             offset: 0,
@@ -199,8 +411,12 @@ describe('Kujira Full Flow', () => {
 
   describe('Tickers', () => {
     it('Get one ticker', async () => {
+      const marketId = getNotNullOrThrowError<Record<any, any>>(
+        allowedMarkets.get(1)
+      ).address;
+
       request = [
-        markets[1],
+        marketId,
         {
           book: {
             offset: 0,
@@ -337,21 +553,35 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create a buy order 1 for market 1', async () => {
-      const market = markets[1];
-      const price = 0.001;
-      const amount = 10;
-      const pair = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == market && it.chainID == network)
+      const targetOrderId = 1;
+      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
+        orders.get(targetOrderId)
       );
-      const denom = pair.denoms[1];
+
+      const market = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find(
+          (it) => it.address == targetOrder.marketId && it.chainID == network
+        )
+      );
+
+      let denom: Denom;
+      if (targetOrder.side == 'BUY') {
+        denom = market.denoms[1];
+      } else if (targetOrder.side == 'SELL') {
+        denom = market.denoms[0];
+      } else {
+        throw Error('Unrecognized order side.');
+      }
 
       const message = msg.wasm.msgExecuteContract({
-        sender: account.address,
-        contract: market,
+        sender: targetOrder.ownerAdress,
+        contract: market.address,
         msg: Buffer.from(
-          JSON.stringify({ submit_order: { price: price.toString() } })
+          JSON.stringify({
+            submit_order: { price: targetOrder.price.toString() },
+          })
         ),
-        funds: coins(amount, denom.reference),
+        funds: coins(targetOrder.amount, denom.reference),
       });
 
       request = [account.address, [message], 'auto'];
@@ -366,18 +596,19 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const orderId: number = response['events']
+      const exchangeOrderId: number = response['events']
         .filter((obj: any) => obj['type'] == 'wasm')[0]
         ['attributes'].filter((obj: any) => obj['key'] == 'order_idx')[0][
         'value'
       ];
 
+      targetOrder.exchangeOrderId = exchangeOrderId;
+
       const sender: string = response['events']
         .filter((obj: any) => obj['type'] == 'transfer')[0]
         ['attributes'].filter((obj: any) => obj['key'] == 'sender')[0]['value'];
-      ordersMap.set(1, orderId);
 
-      const offer_denom: Denom = Denom.from(
+      const offerDenom: Denom = Denom.from(
         response['events']
           .filter((obj: any) => obj['type'] == 'wasm')[0]
           ['attributes'].filter((obj: any) => obj['key'] == 'offer_denom')[0][
@@ -389,24 +620,24 @@ describe('Kujira Full Flow', () => {
         .filter((obj: any) => obj['type'] == 'tx')[0]
         ['attributes'].filter((obj: any) => obj['key'] == 'fee')[0]['value'];
 
-      let side: string = '';
-      if (offer_denom.eq(pair.denoms[0])) {
+      let side: string;
+      if (offerDenom.eq(market.denoms[0])) {
         side = 'SELL';
-      } else if (offer_denom.eq(pair.denoms[1])) {
+      } else if (offerDenom.eq(market.denoms[1])) {
         side = 'BUY';
       } else {
         throw new Error("Can't define the order side, implementation error");
       }
-      ordersMap.set(1, orderId);
 
+      // TODO fill the fields, possibly using the response only!!!
       const output = {
         id: null, // TODO Can we add a custom order id?!!!
-        exchangeId: orderId,
-        marketName: market,
+        exchangeId: exchangeOrderId,
+        marketId: null,
         ownerAddress: sender,
         side: side,
-        price: price,
-        amount: amount,
+        price: null,
+        amount: null,
         type: 'LIMIT', // TODO Can we have other types? Try to get the info from the response!!!
         status: 'OPEN', // TODO Try to get the info from the response!!!
         fee: fee,
@@ -420,12 +651,20 @@ describe('Kujira Full Flow', () => {
       console.log('');
     });
 
-    it('Get the open order 1 by idx', async () => {
+    it('Get the open order 1', async () => {
+      const targetOrderId = 1;
+      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
+        orders.get(targetOrderId)
+      );
+      const marketId = getNotNullOrThrowError<Record<any, any>>(
+        allowedMarkets.get(1)
+      ).address;
+
       request = [
-        markets[1],
+        marketId,
         {
           order: {
-            order_idx: '56243',
+            order_idx: targetOrder.exchangeOrderId,
           },
         },
       ];
@@ -434,36 +673,42 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const output = {
-        idx: '',
-        owner: '',
-        market: '', // TODO add market pair symbol!!!
-        offer_amount: '',
-        side: '', // TODO add order side!!!
-        filled_amount: '',
-        original_offer_amount: '',
-        created_at: '', // TODO convert timestamp to humam format!!!
-      };
+      // TODO fill fields from the response!!!
+      const output = {};
 
       logOutput(output);
     });
 
     it('Create a sell order 2 for market 2', async () => {
-      const market = markets[2];
-      const price = 999.99;
-      const amount = 10;
-      const pair = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == market && it.chainID == network)
+      const targetOrderId = 2;
+      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
+        orders.get(targetOrderId)
       );
-      const denom = pair.denoms[0];
+
+      const market = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find(
+          (it) => it.address == targetOrder.marketId && it.chainID == network
+        )
+      );
+
+      let denom: Denom;
+      if (targetOrder.side == 'BUY') {
+        denom = market.denoms[1];
+      } else if (targetOrder.side == 'SELL') {
+        denom = market.denoms[0];
+      } else {
+        throw Error('Unrecognized order side.');
+      }
 
       const message = msg.wasm.msgExecuteContract({
-        sender: account.address,
-        contract: market,
+        sender: targetOrder.ownerAdress,
+        contract: market.address,
         msg: Buffer.from(
-          JSON.stringify({ submit_order: { price: price.toString() } })
+          JSON.stringify({
+            submit_order: { price: targetOrder.price.toString() },
+          })
         ),
-        funds: coins(amount, denom.reference),
+        funds: coins(targetOrder.amount, denom.reference),
       });
 
       request = [account.address, [message], 'auto'];
@@ -478,24 +723,52 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const orderId: number = response['events']
+      const exchangeOrderId: number = response['events']
         .filter((obj: any) => obj['type'] == 'wasm')[0]
         ['attributes'].filter((obj: any) => obj['key'] == 'order_idx')[0][
         'value'
       ];
-      ordersMap.set(1, orderId);
 
+      targetOrder.exchangeOrderId = exchangeOrderId;
+
+      const sender: string = response['events']
+        .filter((obj: any) => obj['type'] == 'transfer')[0]
+        ['attributes'].filter((obj: any) => obj['key'] == 'sender')[0]['value'];
+
+      const offerDenom: Denom = Denom.from(
+        response['events']
+          .filter((obj: any) => obj['type'] == 'wasm')[0]
+          ['attributes'].filter((obj: any) => obj['key'] == 'offer_denom')[0][
+          'value'
+        ]
+      );
+
+      const fee: string = response['events']
+        .filter((obj: any) => obj['type'] == 'tx')[0]
+        ['attributes'].filter((obj: any) => obj['key'] == 'fee')[0]['value'];
+
+      let side: string;
+      if (offerDenom.eq(market.denoms[0])) {
+        side = 'SELL';
+      } else if (offerDenom.eq(market.denoms[1])) {
+        side = 'BUY';
+      } else {
+        throw new Error("Can't define the order side, implementation error");
+      }
+
+      // TODO fill the fields, possibly using the response only!!!
       const output = {
         id: null, // TODO Can we add a custom order id?!!!
-        exchangeId: orderId,
-        marketName: market,
-        ownerAddress: account.address, // TODO Use the info from the response!!!
-        side: 'SELL', // TODO Use the info from the response!!!
-        price: price,
-        amount: amount,
+        exchangeId: exchangeOrderId,
+        marketId: null,
+        ownerAddress: sender,
+        side: side,
+        price: null,
+        amount: null,
         type: 'LIMIT', // TODO Can we have other types? Try to get the info from the response!!!
         status: 'OPEN', // TODO Try to get the info from the response!!!
-        fee: response['gasUsed'], // TODO Is this the fee?!!!
+        fee: fee,
+        signature: response['transactionHash'],
       };
 
       logOutput(output);
@@ -522,42 +795,72 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all open orders', async () => {
-      request = [
-        markets[1],
-        {
-          orders_by_user: { address: account.address, limit: 100 },
-        },
-      ];
+      let output = {};
 
-      logRequest(request);
+      for (const marketId of allowedMarketsIds) {
+        // const market = getNotNullOrThrowError<Record<any, any>>(
+        //   allowedMarkets.find((it) => it.address == marketId)
+        // );
 
-      response = await querier.wasm.queryContractSmart.apply(null, request);
+        request = [
+          marketId,
+          {
+            orders_by_user: {
+              address: account.address,
+              limit: 100,
+            },
+          },
+        ];
 
-      logResponse(response);
+        logRequest(request);
 
-      const output = response.orders.filter((it: any) => {
-        return parseFloat(it['offer_amount']) > 0;
-      });
+        response = await querier.wasm.queryContractSmart.apply(null, request);
+
+        logResponse(response);
+
+        // const marketName: string =
+        //   `${market.denoms[0].symbol}/${market.denoms[1].symbol}`.toString();
+        //
+        // const orders = response.orders.filter((it: any) => {
+        //   return parseFloat(it['offer_amount']) > 0;
+        // });
+
+        // TODO fill the output!!!
+        output = {};
+      }
 
       logOutput(output);
     });
 
     it('Cancel the order 1', async () => {
-      const id = ordersMap.get(1);
-      const market = markets[1];
-      const amount = 1000;
-      const pair = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == market && it.chainID == network)
+      const targetOrderId = getNotNullOrThrowError<number>(orders.get(1));
+      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
+        orders.get(targetOrderId)
       );
-      const denom = pair.denoms[1];
+
+      const market = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find(
+          (it) => it.address == targetOrder.marketId && it.chainID == network
+        )
+      );
+      const amount = 1000;
+
+      let denom: Denom;
+      if (targetOrder.side == 'BUY') {
+        denom = market.denoms[1];
+      } else if (targetOrder.side == 'SELL') {
+        denom = market.denoms[0];
+      } else {
+        throw Error('Unrecognized order side.');
+      }
 
       const message = msg.wasm.msgExecuteContract({
         sender: account.address,
-        contract: market,
+        contract: market.address,
         msg: Buffer.from(
           JSON.stringify({
             retract_order: {
-              order_idx: id.toString(),
+              order_idx: targetOrderId.toString(),
               // amount: null, for partial retraction
             },
             // retract_orders: {
@@ -583,7 +886,7 @@ describe('Kujira Full Flow', () => {
       // TODO fix the remaining fields!!!
       const output = {
         id: null,
-        exchangeId: id,
+        exchangeId: targetOrderId,
         marketName: market,
         ownerAddress: null, // TODO Use the info from the response!!!
         side: null,
@@ -635,8 +938,13 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the filled order 2', async () => {
+      const targetOrderId = 2;
+      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
+        orders.get(targetOrderId)
+      );
+
       request = [
-        markets[1],
+        targetOrder.marketId,
         {
           orders_by_user: { address: account.address, limit: 100 },
         },
@@ -652,9 +960,12 @@ describe('Kujira Full Flow', () => {
         .filter((it: any) => {
           return parseFloat(it['offer_amount']) == 0;
         })
-        .filter((it: any) => {
-          parseInt(it['idx']) == ordersMap.get(2);
-        });
+        .filter(
+          (it: any) =>
+            Number(it['idx']) ==
+            getNotNullOrThrowError<Record<any, any>>(orders.get(2))
+              .exchangeOrderId
+        );
 
       logOutput(output);
       if (output.length != 1) {
@@ -699,7 +1010,45 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Cancel all the open orders', async () => {
-      console.log('');
+      // for (const marketId of allowedMarketsIds) {
+      //   const amount = 1000;
+      //   const pair = getNotNullOrThrowError<fin.Pair>(
+      //     fin.PAIRS.find((it) => it.address == market && it.chainID == network)
+      //   );
+      //   const denom = pair.denoms[1];
+      //
+      //   const buyOrders = orders;
+      //
+      //   const message = msg.wasm.msgExecuteContract({
+      //     sender: account.address,
+      //     contract: market,
+      //     msg: Buffer.from(
+      //       JSON.stringify({
+      //         retract_orders: {
+      //           order_idxs: ids,
+      //         },
+      //       })
+      //     ),
+      //     funds: coins(amount, denom.reference),
+      //   });
+      //
+      //   request = [account.address, [message], 'auto'];
+      //
+      //   logRequest(request);
+      //
+      //   response = await stargateClient.signAndBroadcast(
+      //     account.address,
+      //     [message],
+      //     'auto'
+      //   );
+      //
+      //   logResponse(response);
+      //
+      //   // TODO fix the remaining fields!!!
+      //   const output = {};
+      //
+      //   logOutput(output);
+      // }
     });
 
     it('Check the wallet balances from the tokens 2 and 3', async () => {
