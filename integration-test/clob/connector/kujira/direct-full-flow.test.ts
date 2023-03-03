@@ -420,12 +420,12 @@ describe('Kujira Full Flow', () => {
       console.log('');
     });
 
-    it('Get the open order 1 by idx', async () => {
+    it('Get the open order 1', async () => {
       request = [
         markets[1],
         {
           order: {
-            order_idx: '56243',
+            order_idx: ordersMap.get(1).toString(),
           },
         },
       ];
@@ -634,7 +634,7 @@ describe('Kujira Full Flow', () => {
       console.log('');
     });
 
-    it('Get the filled order 2', async () => {
+    it('Get the filled order 2', async () => { // TODO rewrite by searching by one order!!!
       request = [
         markets[1],
         {
