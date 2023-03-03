@@ -19,6 +19,7 @@ import {
   TESTNET,
 } from 'kujira.js';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import assert from "assert";
 
 const { Map } = require('immutable');
 
@@ -661,9 +662,8 @@ describe('Kujira Full Flow', () => {
         });
 
       logOutput(output);
-      if (output.length != 1) {
-        throw new Error('Order 2 was not received');
-      }
+
+      assert(output.length == 1);
     });
 
     it('Get all open orders and check that the orders 1, 2, 3, 4, and 5 are missing', async () => {
