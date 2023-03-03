@@ -403,7 +403,7 @@ describe('Kujira Full Flow', () => {
         id: null, // TODO Can we add a custom order id?!!!
         exchangeId: orderId,
         marketName: market,
-        ownderAddress: sender,
+        ownerAddress: sender,
         side: side,
         price: price,
         amount: amount,
@@ -465,7 +465,7 @@ describe('Kujira Full Flow', () => {
         id: null, // TODO Can we add a custom order id?!!!
         exchangeId: orderId,
         marketName: market,
-        ownderAddress: account.address, // TODO Use the info from the response!!!
+        ownerAddress: account.address, // TODO Use the info from the response!!!
         side: 'SELL', // TODO Use the info from the response!!!
         price: price,
         amount: amount,
@@ -561,12 +561,13 @@ describe('Kujira Full Flow', () => {
         id: null,
         exchangeId: id,
         marketName: market,
-        ownderAddress: null, // TODO Use the info from the response!!!
+        ownerAddress: null, // TODO Use the info from the response!!!
         side: null,
         price: null,
         amount: null,
         type: null,
         status: 'CANCELED', // Or CANCELATION_PENDING
+        signature: null,
         fee: response['gasUsed'],
       };
 
