@@ -129,7 +129,7 @@ describe('Kujira Full Flow', () => {
         {
           book: {
             offset: 0,
-            limit: 100,
+            limit: 3,
           },
         },
       ];
@@ -139,6 +139,14 @@ describe('Kujira Full Flow', () => {
       response = await querier.wasm.queryContractSmart.apply(null, request);
 
       logResponse(response);
+
+      const output = {
+        market: null, // TODO fill!!!
+        asks: response['base'],
+        bids: response['quote'],
+      };
+
+      logOutput(output);
     });
 
     it('Get two order books for two different markets', async () => {
