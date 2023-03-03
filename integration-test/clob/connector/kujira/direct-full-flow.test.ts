@@ -477,7 +477,58 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Cancel the order 1', async () => {
-      console.log('');
+      const id = ordersMap.get(1);
+      const market = markets[1];
+      const amount = 1000;
+      const pair = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find((it) => it.address == market && it.chainID == network)
+      );
+      const denom = pair.denoms[1];
+
+      const message = msg.wasm.msgExecuteContract({
+        sender: account.address,
+        contract: market,
+        msg: Buffer.from(
+          JSON.stringify({
+            retract_order: {
+              order_idx: id.toString(),
+              // amount: null, for partial retraction
+            },
+            // retract_orders: {
+            //   order_idxs: [id],
+            // },
+          })
+        ),
+        funds: coins(amount, denom.reference),
+      });
+
+      request = [account.address, [message], 'auto'];
+
+      logRequest(request);
+
+      response = await stargateClient.signAndBroadcast(
+        account.address,
+        [message],
+        'auto'
+      );
+
+      logResponse(response);
+
+      // TODO fix the remaining fields!!!
+      const output = {
+        id: null,
+        exchangeId: id,
+        marketName: market,
+        ownderAddress: null, // TODO Use the info from the response!!!
+        side: null,
+        price: null,
+        amount: null,
+        type: null,
+        status: 'CANCELED', // Or CANCELATION_PENDING
+        fee: response['gasUsed'],
+      };
+
+      logOutput(output);
     });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
