@@ -11,6 +11,7 @@ import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
 import {
   fin,
+  Denom,
   KujiraQueryClient,
   kujiraQueryClient,
   msg,
@@ -370,19 +371,46 @@ describe('Kujira Full Flow', () => {
         ['attributes'].filter((obj: any) => obj['key'] == 'order_idx')[0][
         'value'
       ];
+
+      const sender: string = response['events']
+        .filter((obj: any) => obj['type'] == 'transfer')[0]
+        ['attributes'].filter((obj: any) => obj['key'] == 'sender')[0]['value'];
+      ordersMap.set(1, orderId);
+
+      const offer_denom: Denom = Denom.from(
+        response['events']
+          .filter((obj: any) => obj['type'] == 'wasm')[0]
+          ['attributes'].filter((obj: any) => obj['key'] == 'offer_denom')[0][
+          'value'
+        ]
+      );
+
+      const fee: string = response['events']
+        .filter((obj: any) => obj['type'] == 'tx')[0]
+        ['attributes'].filter((obj: any) => obj['key'] == 'fee')[0]['value'];
+
+      let side: string = '';
+      if (offer_denom.eq(pair.denoms[0])) {
+        side = 'SELL';
+      } else if (offer_denom.eq(pair.denoms[1])) {
+        side = 'BUY';
+      } else {
+        throw new Error("Can't define the order side, implementation error");
+      }
       ordersMap.set(1, orderId);
 
       const output = {
         id: null, // TODO Can we add a custom order id?!!!
         exchangeId: orderId,
         marketName: market,
-        ownderAddress: account.address, // TODO Use the info from the response!!!
-        side: 'SELL', // TODO Use the info from the response!!!
+        ownderAddress: sender,
+        side: side,
         price: price,
         amount: amount,
         type: 'LIMIT', // TODO Can we have other types? Try to get the info from the response!!!
         status: 'OPEN', // TODO Try to get the info from the response!!!
-        fee: response['gasUsed'], // TODO Is this the fee?!!!
+        fee: fee,
+        signature: response['transactionHash'],
       };
 
       logOutput(output);
