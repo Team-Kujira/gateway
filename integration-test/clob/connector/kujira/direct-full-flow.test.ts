@@ -10,14 +10,16 @@ import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
 import {
+  fin,
+  KujiraQueryClient,
+  kujiraQueryClient,
+  MAINNET,
   msg,
   registry,
-  kujiraQueryClient,
-  KujiraQueryClient,
-  fin,
-  MAINNET,
+  TESTNET,
 } from 'kujira.js';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+
 const { Map } = require('immutable');
 
 jest.setTimeout(30 * 60 * 1000);
@@ -37,6 +39,8 @@ let logResponse: (target: any) => void;
 let logOutput: (target: any) => void;
 
 const ordersMap = Map({}).asMutable();
+
+const network = TESTNET;
 
 beforeAll(async () => {
   const rpcEndpoint: string = getNotNullOrThrowError<string>(
@@ -338,9 +342,12 @@ describe('Kujira Full Flow', () => {
 
     it('Create a buy order 1 for market 1', async () => {
       const market = markets[1];
-      const price = 999.99;
-      const amount = 1000000;
-      const denom = 'ukuji';
+      const price = 0.001;
+      const amount = 10;
+      const pair = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find((it) => it.address == market && it.chainID == network)
+      );
+      const denom = pair.denoms[1];
 
       const message = msg.wasm.msgExecuteContract({
         sender: account.address,
@@ -348,7 +355,7 @@ describe('Kujira Full Flow', () => {
         msg: Buffer.from(
           JSON.stringify({ submit_order: { price: price.toString() } })
         ),
-        funds: coins(amount, denom),
+        funds: coins(amount, denom.reference),
       });
 
       request = [account.address, [message], 'auto'];
@@ -395,7 +402,56 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create a sell order 2 for market 2', async () => {
-      console.log('');
+      const market = markets[2];
+      const price = 999.99;
+      const amount = 10;
+      const pair = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find((it) => it.address == market && it.chainID == network)
+      );
+      const denom = pair.denoms[0];
+
+      const message = msg.wasm.msgExecuteContract({
+        sender: account.address,
+        contract: market,
+        msg: Buffer.from(
+          JSON.stringify({ submit_order: { price: price.toString() } })
+        ),
+        funds: coins(amount, denom.reference),
+      });
+
+      request = [account.address, [message], 'auto'];
+
+      logRequest(request);
+
+      response = await stargateClient.signAndBroadcast(
+        account.address,
+        [message],
+        'auto'
+      );
+
+      logResponse(response);
+
+      const orderId: number = response['events']
+        .filter((obj: any) => obj['type'] == 'wasm')[0]
+        ['attributes'].filter((obj: any) => obj['key'] == 'order_idx')[0][
+        'value'
+      ];
+      ordersMap.set(1, orderId);
+
+      const output = {
+        id: null, // TODO Can we add a custom order id?!!!
+        exchangeId: orderId,
+        marketName: market,
+        ownderAddress: account.address, // TODO Use the info from the response!!!
+        side: 'SELL', // TODO Use the info from the response!!!
+        price: price,
+        amount: amount,
+        type: 'LIMIT', // TODO Can we have other types? Try to get the info from the response!!!
+        status: 'OPEN', // TODO Try to get the info from the response!!!
+        fee: response['gasUsed'], // TODO Is this the fee?!!!
+      };
+
+      logOutput(output);
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
