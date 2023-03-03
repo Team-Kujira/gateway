@@ -634,7 +634,11 @@ describe('Kujira Full Flow', () => {
       console.log('');
     });
 
-    it('Get the filled order 2', async () => { // TODO rewrite by searching by one order!!!
+    it('Get the filled order 2', async () => {
+      console.log('');
+    });
+
+    it('Get all filled orders and check that order 2 is present', async () => {
       request = [
         markets[1],
         {
@@ -653,17 +657,13 @@ describe('Kujira Full Flow', () => {
           return parseFloat(it['offer_amount']) == 0;
         })
         .filter((it: any) => {
-          parseInt(it['idx']) == ordersMap.get(2);
+          return parseInt(it['idx']) == ordersMap.get(2);
         });
 
       logOutput(output);
       if (output.length != 1) {
         throw new Error('Order 2 was not received');
       }
-    });
-
-    it('Get all filled orders and check that order 2 is present', async () => {
-      console.log('');
     });
 
     it('Get all open orders and check that the orders 1, 2, 3, 4, and 5 are missing', async () => {
