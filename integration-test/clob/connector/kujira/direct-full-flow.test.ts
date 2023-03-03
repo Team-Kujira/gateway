@@ -15,7 +15,7 @@ import {
   kujiraQueryClient,
   KujiraQueryClient,
   fin,
-  MAINNET,
+  TESTNET,
 } from 'kujira.js';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 const { Map } = require('immutable');
@@ -27,6 +27,7 @@ let querier: KujiraQueryClient;
 let stargateClient: SigningStargateClient;
 let markets: any;
 let market_pairs: any;
+const network = TESTNET;
 
 let request: any;
 let response: any;
@@ -118,24 +119,20 @@ beforeEach(async () => {
 describe('Kujira Full Flow', () => {
   describe('Markets', () => {
     it('Get one market', async () => {
-      response =
-        fin.PAIRS.find((it) => it.address == markets[1]) &&
-        fin.PAIRS.find((it) => it.chainID == MAINNET);
+      response = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find(
+          (it) => it.address == markets[1] && it.chainID == network
+        )
+      );
 
       logResponse(response);
 
-      const output =
-        'address: ' +
-        response['address'] +
-        '; ' +
-        'chainID: ' +
-        response['chainID'] +
-        '; ' +
-        'base: ' +
-        response['denoms'][0]['symbol'] +
-        '; ' +
-        'quote: ' +
-        response['denoms'][1]['symbol'];
+      const output = {
+        address: response['address'],
+        chainID: response['chainID'],
+        base: response['denoms'][0]['symbol'],
+        quote: response['denoms'][1]['symbol'],
+      };
 
       logOutput(output);
     });
