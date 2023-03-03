@@ -9,7 +9,14 @@ import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
-import { msg, registry, kujiraQueryClient, KujiraQueryClient } from 'kujira.js';
+import {
+  msg,
+  registry,
+  kujiraQueryClient,
+  KujiraQueryClient,
+  fin,
+  MAINNET,
+} from 'kujira.js';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 const { Map } = require('immutable');
 
@@ -19,6 +26,7 @@ let account: AccountData;
 let querier: KujiraQueryClient;
 let stargateClient: SigningStargateClient;
 let markets: any;
+let market_pairs: any;
 
 let request: any;
 let response: any;
@@ -76,6 +84,12 @@ beforeAll(async () => {
     3: 'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg', // DEMO/USK
   };
 
+  market_pairs = {
+    1: ['KUJI', 'DEMO'],
+    2: ['KUJI', 'USK'],
+    3: ['DEMO', 'USK'],
+  };
+
   const rpcClient: HttpBatchClient = new HttpBatchClient(rpcEndpoint, {
     dispatchInterval: 2000,
   });
@@ -104,17 +118,42 @@ beforeEach(async () => {
 describe('Kujira Full Flow', () => {
   describe('Markets', () => {
     it('Get one market', async () => {
-      request = [markets[1]];
-
-      logRequest(request);
-
-      response = await querier.wasm.getContractInfo.apply(null, request);
+      response =
+        fin.PAIRS.find((it) => it.address == markets[1]) &&
+        fin.PAIRS.find((it) => it.chainID == MAINNET);
 
       logResponse(response);
+
+      const output =
+        'address: ' +
+        response['address'] +
+        '; ' +
+        'chainID: ' +
+        response['chainID'] +
+        '; ' +
+        'base: ' +
+        response['denoms'][0]['symbol'] +
+        '; ' +
+        'quote: ' +
+        response['denoms'][1]['symbol'];
+
+      logOutput(output);
     });
 
     it('Get two markets', async () => {
-      console.log('');
+      const selected_markets = [1, 2];
+
+      for (const i of selected_markets) {
+        response = fin.PAIRS.find(
+          (it) =>
+            [it.denoms[0]['symbol'], it.denoms[1]['symbol']] ==
+            [market_pairs[i][0], market_pairs[i][1]]
+        );
+
+        if (!response) response = 'Market not found...';
+      }
+
+      logResponse(response);
     });
 
     it('Get all markets', async () => {
