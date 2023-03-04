@@ -311,7 +311,7 @@ beforeEach(async () => {
   logOutput = (target: any) => helperLogOutput(target, testTitle);
 });
 
-describe('Kujira Full Flow', () => {
+describe('Cosmos and Kujira Use Cases', () => {
   it('Get information from one market', async () => {
     console.log('Not implemented.');
   });
