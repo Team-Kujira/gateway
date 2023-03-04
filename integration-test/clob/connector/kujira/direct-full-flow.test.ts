@@ -998,6 +998,26 @@ describe('Kujira Full Flow', () => {
 
     it('Get all orders (open or filled) and check that the order 2 is present', async () => {
       console.log('Not implemented.');
+      request = [
+        markets[1],
+        {
+          orders_by_user: { address: account.address, limit: 100 },
+        },
+      ];
+
+      logRequest(request);
+
+      response = await querier.wasm.queryContractSmart.apply(null, request);
+
+      logResponse(response);
+
+      const output: [any] = response.orders.filter((it: any) => {
+        return parseInt(it['idx']) == ordersMap.get(2);
+      });
+
+      logOutput(output);
+
+      assert(output.length == 1);
     });
 
     it('Force the filling of orders 6 and 7', async () => {
