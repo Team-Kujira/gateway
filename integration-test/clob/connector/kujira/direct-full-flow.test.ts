@@ -49,6 +49,12 @@ let logOutput: (target: any) => void;
 
 let network: string;
 
+const getMarket = (ordinal: number) =>
+  getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(ordinal));
+
+const getOrder = (ordinal: number) =>
+  getNotNullOrThrowError<Record<any, any>>(orders.get(ordinal));
+
 beforeAll(async () => {
   network = getNotNullOrThrowError<string>(
     process.env.TEST_KUJIRA_NETWORK || TESTNET
@@ -133,8 +139,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'BUY',
     price: 0.001,
     amount: 10,
@@ -149,8 +154,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'SELL',
     price: 999.99,
     amount: 10,
@@ -165,8 +169,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'BUY',
     price: 0.001,
     amount: 10,
@@ -181,8 +184,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'SELL',
     price: 999.99,
     amount: 10,
@@ -197,8 +199,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'BUY',
     price: 0.001,
     amount: 10,
@@ -213,8 +214,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'SELL',
     price: 999.99,
     amount: 10,
@@ -229,8 +229,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'BUY',
     price: 0.001,
     amount: 10,
@@ -245,8 +244,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'SELL',
     price: 999.99,
     amount: 10,
@@ -261,8 +259,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'BUY',
     price: 0.001,
     amount: 10,
@@ -277,8 +274,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'BUY',
     price: 0.001,
     amount: 10,
@@ -293,8 +289,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(1))
-      .address,
+    marketId: getMarket(1).address,
     side: 'SELL',
     price: 999.99,
     amount: 10,
@@ -316,9 +311,15 @@ beforeEach(async () => {
 describe('Kujira Full Flow', () => {
   describe('Markets', () => {
     it('Get market 1', async () => {
-      const marketId = getNotNullOrThrowError<Record<any, any>>(
-        allowedMarkets.get(1)
-      ).address;
+      const targetMarketOrdinal = 1;
+
+      const marketId = getMarket(targetMarketOrdinal).address;
+
+      request = {
+        id: marketId,
+      };
+
+      logRequest(request);
 
       response = getNotNullOrThrowError<fin.Pair>(
         fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
@@ -326,6 +327,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         address: response['address'],
         chainID: response['chainID'],
@@ -337,25 +339,33 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get markets 2 and 3', async () => {
+      const targetMarketOrdinals = [2, 3];
+
       const marketIds = [
-        getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(2)).address,
-        getNotNullOrThrowError<Record<any, any>>(allowedMarkets.get(3)).address,
+        getMarket(targetMarketOrdinals[0]).address,
+        getMarket(targetMarketOrdinals[1]).address,
       ];
 
-      logRequest(marketIds);
+      request = {
+        ids: marketIds,
+      };
+
+      logRequest(request);
 
       response = fin.PAIRS.filter((it) => marketIds.includes(it.address));
 
       logResponse(response);
 
-      // TODO fill the missing fields!!!
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {};
 
       logOutput(output);
     });
 
     it('Get all markets', async () => {
-      logRequest({});
+      request = {};
+
+      logRequest(request);
 
       response = fin.PAIRS.filter((it) =>
         allowedMarketsIds.includes(it.address)
@@ -363,7 +373,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO fill the missing fields!!!
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {};
 
       logOutput(output);
@@ -371,10 +381,10 @@ describe('Kujira Full Flow', () => {
   });
 
   describe('Order books', () => {
-    it('Get one order book', async () => {
-      const marketId = getNotNullOrThrowError<Record<any, any>>(
-        allowedMarkets.get(1)
-      ).address;
+    it('Get order book from market 1', async () => {
+      const targetMarketOrdinal = 1;
+
+      const marketId = getMarket(targetMarketOrdinal).address;
 
       request = [
         marketId,
@@ -392,8 +402,9 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
-        market: null, // TODO fill!!!
+        market: null,
         asks: response['base'],
         bids: response['quote'],
       };
@@ -401,20 +412,20 @@ describe('Kujira Full Flow', () => {
       logOutput(output);
     });
 
-    it('Get two order books for two different markets', async () => {
-      console.log('');
+    it('Get order books from the markets 2 and 3', async () => {
+      console.log('Not implemented.');
     });
 
     it('Get all order books', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
   });
 
   describe('Tickers', () => {
-    it('Get one ticker', async () => {
-      const marketId = getNotNullOrThrowError<Record<any, any>>(
-        allowedMarkets.get(1)
-      ).address;
+    it('Get ticker from market 1', async () => {
+      const targetMarketOrdinal = 1;
+
+      const marketId = getMarket(targetMarketOrdinal).address;
 
       request = [
         marketId,
@@ -432,20 +443,24 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const output =
-        (Number(response['base'][0]['quote_price']) +
-          Number(response['quote'][0]['quote_price'])) /
-        2;
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
+      const output = {
+        price:
+          (Number(response['base'][0]['quote_price']) +
+            Number(response['quote'][0]['quote_price'])) /
+          2,
+        timestamp: null,
+      };
 
       logOutput(output);
     });
 
-    it('Get two tickers for two different markets', async () => {
-      console.log('');
+    it('Get tickers from markets 2 and 3', async () => {
+      console.log('Not implemented.');
     });
 
     it('Get all tickers', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
   });
 
@@ -550,19 +565,17 @@ describe('Kujira Full Flow', () => {
     */
 
     it('Get the available wallet balances from the tokens 1, 2, and 3', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Create a buy order 1 for market 1', async () => {
-      const targetOrderId = 1;
-      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
-        orders.get(targetOrderId)
-      );
+      const targetOrderOrdinal = 1;
+      const targetOrder = getOrder(targetOrderOrdinal);
+
+      const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find(
-          (it) => it.address == targetOrder.marketId && it.chainID == network
-        )
+        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
       );
 
       let denom: Denom;
@@ -630,17 +643,17 @@ describe('Kujira Full Flow', () => {
         throw new Error("Can't define the order side, implementation error");
       }
 
-      // TODO fill the fields, possibly using the response only!!!
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
-        id: null, // TODO Can we add a custom order id?!!!
+        id: null,
         exchangeId: exchangeOrderId,
         marketId: null,
         ownerAddress: sender,
         side: side,
         price: null,
         amount: null,
-        type: 'LIMIT', // TODO Can we have other types? Try to get the info from the response!!!
-        status: 'OPEN', // TODO Try to get the info from the response!!!
+        type: null,
+        status: null,
         fee: fee,
         signature: response['transactionHash'],
       };
@@ -649,17 +662,14 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get the open order 1', async () => {
-      const targetOrderId = 1;
-      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
-        orders.get(targetOrderId)
-      );
-      const marketId = getNotNullOrThrowError<Record<any, any>>(
-        allowedMarkets.get(1)
-      ).address;
+      const targetOrderOrdinal = 1;
+      const targetOrder = getOrder(targetOrderOrdinal);
+      const marketId = targetOrder.marketId;
+
       request = [
         marketId,
         {
@@ -673,22 +683,20 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO fill fields from the response!!!
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {};
 
       logOutput(output);
     });
 
     it('Create a sell order 2 for market 2', async () => {
-      const targetOrderId = 2;
-      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
-        orders.get(targetOrderId)
-      );
+      const targetOrderOrdinal = 2;
+      const targetOrder = getOrder(targetOrderOrdinal);
+
+      const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find(
-          (it) => it.address == targetOrder.marketId && it.chainID == network
-        )
+        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
       );
 
       let denom: Denom;
@@ -756,17 +764,17 @@ describe('Kujira Full Flow', () => {
         throw new Error("Can't define the order side, implementation error");
       }
 
-      // TODO fill the fields, possibly using the response only!!!
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
-        id: null, // TODO Can we add a custom order id?!!!
+        id: null,
         exchangeId: exchangeOrderId,
         marketId: null,
         ownerAddress: sender,
         side: side,
         price: null,
         amount: null,
-        type: 'LIMIT', // TODO Can we have other types? Try to get the info from the response!!!
-        status: 'OPEN', // TODO Try to get the info from the response!!!
+        type: null,
+        status: null,
         fee: fee,
         signature: response['transactionHash'],
       };
@@ -775,33 +783,29 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get the open order 2', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Create 7 orders at once', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get the open orders 6 and 7', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all open orders', async () => {
       let output = {};
 
       for (const marketId of allowedMarketsIds) {
-        // const market = getNotNullOrThrowError<Record<any, any>>(
-        //   allowedMarkets.find((it) => it.address == marketId)
-        // );
-
         request = [
           marketId,
           {
@@ -825,23 +829,21 @@ describe('Kujira Full Flow', () => {
         //   return parseFloat(it['offer_amount']) > 0;
         // });
 
-        // TODO fill the output!!!
-        output = {};
+        // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
+        output = { ...output };
       }
 
       logOutput(output);
     });
 
     it('Cancel the order 1', async () => {
-      const targetOrderId = getNotNullOrThrowError<number>(orders.get(1));
-      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
-        orders.get(targetOrderId)
-      );
+      const targetOrderOrdinal = 1;
+      const targetOrder = getOrder(targetOrderOrdinal);
+
+      const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find(
-          (it) => it.address == targetOrder.marketId && it.chainID == network
-        )
+        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
       );
       const amount = 1000;
 
@@ -860,7 +862,7 @@ describe('Kujira Full Flow', () => {
         msg: Buffer.from(
           JSON.stringify({
             retract_order: {
-              order_idx: targetOrderId.toString(),
+              order_idx: targetOrderOrdinal.toString(),
               // amount: null, for partial retraction
             },
             // retract_orders: {
@@ -883,12 +885,12 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO fix the remaining fields!!!
+      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         id: null,
-        exchangeId: targetOrderId,
+        exchangeId: targetOrderOrdinal,
         marketName: market,
-        ownerAddress: null, // TODO Use the info from the response!!!
+        ownerAddress: null,
         side: null,
         price: null,
         amount: null,
@@ -902,51 +904,54 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it("Check that it's not possible to get the canceled order 1", async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all open orders and check that order 1 is missing', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Cancel the orders 3, 4, and 5 from markets 1 and 2', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it("Check that it's not possible to get the canceled orders 3, 4, and 5 from the markets 1 and 2", async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all open orders and check that the orders 1, 3, 4, and 5 are missing', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Force the filling of order 2', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get the filled order 2', async () => {
-      const targetOrderId = 2;
-      const targetOrder = getNotNullOrThrowError<Record<any, any>>(
-        orders.get(targetOrderId)
-      );
+      const targetOrderOrdinal = 2;
+      const targetOrder = getOrder(targetOrderOrdinal);
+
+      const marketId = targetOrder.marketId;
 
       request = [
-        targetOrder.marketId,
+        marketId,
         {
-          orders_by_user: { address: account.address, limit: 100 },
+          orders_by_user: {
+            address: account.address,
+            limit: 100,
+          },
         },
       ];
 
@@ -973,113 +978,135 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all open orders and check that the orders 1, 2, 3, 4, and 5 are missing', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all orders (open or filled) and check that the order 2 is present', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Force the filling of orders 6 and 7', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get the filled orders 6 and 7', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, and 7 are missing', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Cancel all the open orders', async () => {
-      // for (const marketId of allowedMarketsIds) {
-      //   const amount = 1000;
-      //   const pair = getNotNullOrThrowError<fin.Pair>(
-      //     fin.PAIRS.find((it) => it.address == market && it.chainID == network)
-      //   );
-      //   const denom = pair.denoms[1];
-      //
-      //   const buyOrders = orders;
-      //
-      //   const message = msg.wasm.msgExecuteContract({
-      //     sender: account.address,
-      //     contract: market,
-      //     msg: Buffer.from(
-      //       JSON.stringify({
-      //         retract_orders: {
-      //           order_idxs: ids,
-      //         },
-      //       })
-      //     ),
-      //     funds: coins(amount, denom.reference),
-      //   });
-      //
-      //   request = [account.address, [message], 'auto'];
-      //
-      //   logRequest(request);
-      //
-      //   response = await stargateClient.signAndBroadcast(
-      //     account.address,
-      //     [message],
-      //     'auto'
-      //   );
-      //
-      //   logResponse(response);
-      //
-      //   // TODO fix the remaining fields!!!
-      //   const output = {};
-      //
-      //   logOutput(output);
-      // }
+      const ordersIds = [];
+      let output = {};
+
+      for (const marketId of allowedMarketsIds) {
+        request = [
+          marketId,
+          {
+            orders_by_user: {
+              address: account.address,
+              limit: 100,
+            },
+          },
+        ];
+
+        logRequest(request);
+
+        response = await querier.wasm.queryContractSmart.apply(null, request);
+
+        logResponse(response);
+
+        // TODO fill with the correct value!!!
+        ordersIds.push(response['order_idx']);
+
+        const amount = 1000;
+        const pair = getNotNullOrThrowError<fin.Pair>(
+          fin.PAIRS.find(
+            (it) => it.address == marketId && it.chainID == network
+          )
+        );
+        const denom = pair.denoms[1];
+
+        const message = msg.wasm.msgExecuteContract({
+          sender: account.address,
+          contract: marketId,
+          msg: Buffer.from(
+            JSON.stringify({
+              retract_orders: {
+                order_idxs: ordersIds,
+              },
+            })
+          ),
+          funds: coins(amount, denom.reference),
+        });
+
+        request = [account.address, [message], 'auto'];
+
+        logRequest(request);
+
+        response = await stargateClient.signAndBroadcast(
+          account.address,
+          [message],
+          'auto'
+        );
+
+        logResponse(response);
+
+        // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
+        output = { ...output };
+      }
+
+      logOutput(output);
     });
 
     it('Check the wallet balances from the tokens 2 and 3', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all open orders and check that there are no open orders', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Create 2 orders at once', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Cet all open orders and check that the orders 10 and 11 are present', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 6, 7, 10, and 11 are present', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Cancel all the open orders', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Check the wallet balances from the tokens 2 and 3', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
 
     it('Get all open orders and check that there are no open orders', async () => {
-      console.log('');
+      console.log('Not implemented.');
     });
   });
 });
