@@ -313,43 +313,43 @@ beforeEach(async () => {
 
 describe('Cosmos and Kujira Use Cases', () => {
   it('Get information from one market', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (PARTIAL) The response haven't information as "minimumOrderSize" and "tickSize"!!!
   });
 
   it('Get information from several markets', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (YES(If Single)) If we have a market list, we can get information from that markets using the single getter method!!!
   });
 
   it('Get information from all markets', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (PARTIAL) We have not a complete list of markets yet. We can get information only from the markets listed in pairs.ts!!!
   });
 
   it('Get the order book from one market', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (PARTIAL) We can get the order book, but the orders in the response haven't informations like "orderExchangeId", "status" and "owner"!!!
   });
 
   it('Get the order books from several markets', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (YES(If Single)) Not implemented, but we can use the single method!!!
   });
 
   it('Get the order books from all markets', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (YES(If Single)) Not implemented, but we can use the single method!!!
   });
 
   it('Get the ticker from one market', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (YES(MAIN)) The response don't have timestamp of the sample!!!
   });
 
   it('Get the tickers from several markets', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (YES(If Single)) If we have a market list, we can get information from that markets using the single getter method!!!
   });
 
   it('Get the tickers from all markets', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (PARTIAL) We have not a complete list of markets yet. We can get information only from the markets listed in pairs.ts!!!
   });
 
   it('Get a open order by its exchange order id from any user', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (YES) Using the 'order_idx', we can get order of any owner. Again, we can use 'orders_by_user' query to return the orders of an specific owner!!!
   });
 
   it('Get a cancelled order by its exchange order id from any user', async () => {
