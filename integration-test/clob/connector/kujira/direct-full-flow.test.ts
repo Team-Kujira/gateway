@@ -508,7 +508,7 @@ describe('Kujira Full Flow', () => {
 
     check the wallet balances from the tokens 1 and 2
 
-    check that it's not possible to get the canceled order 1
+    check that it's not possible to get the cancelled order 1
 
     get all open orders and check that order 1 is missing
 
@@ -516,7 +516,7 @@ describe('Kujira Full Flow', () => {
 
     check the wallet balances from the tokens 1, 2, and 3
 
-    check that it's not possible to get the canceled orders 3, 4, and 5 from the markets 1 and 2
+    check that it's not possible to get the cancelled orders 3, 4, and 5 from the markets 1 and 2
 
     get all open orders and check that the orders 1, 3, 4, and 5 are missing
 
@@ -898,7 +898,7 @@ describe('Kujira Full Flow', () => {
         price: null,
         amount: null,
         type: null,
-        status: 'CANCELED', // Or CANCELATION_PENDING
+        status: 'CANCELLED', // Or CANCELATION_PENDING
         signature: null,
         fee: response['gasUsed'],
       };
@@ -910,7 +910,7 @@ describe('Kujira Full Flow', () => {
       console.log('Not implemented.');
     });
 
-    it("Check that it's not possible to get the canceled order 1", async () => {
+    it("Check that it's not possible to get the cancelled order 1", async () => {
       console.log('Not implemented.');
     });
 
@@ -926,7 +926,7 @@ describe('Kujira Full Flow', () => {
       console.log('Not implemented.');
     });
 
-    it("Check that it's not possible to get the canceled orders 3, 4, and 5 from the markets 1 and 2", async () => {
+    it("Check that it's not possible to get the cancelled orders 3, 4, and 5 from the markets 1 and 2", async () => {
       console.log('Not implemented.');
     });
 

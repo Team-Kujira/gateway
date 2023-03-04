@@ -352,7 +352,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get a canceled order by its exchange order id from any user', async () => {
+  it('Get a cancelled order by its exchange order id from any user', async () => {
     console.log('Not implemented.');
   });
 
@@ -360,7 +360,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get a order (open, filled or canceled) by its exchange order id from any user', async () => {
+  it('Get a order (open, filled or cancelled) by its exchange order id from any user', async () => {
     console.log('Not implemented.');
   });
 
@@ -368,7 +368,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get a canceled order by its exchange order id from a user', async () => {
+  it('Get a cancelled order by its exchange order id from a user', async () => {
     console.log('Not implemented.');
   });
 
@@ -376,7 +376,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get a order (open, filled or canceled) by its exchange order id from a user', async () => {
+  it('Get a order (open, filled or cancelled) by its exchange order id from a user', async () => {
     console.log('Not implemented.');
   });
 
@@ -384,7 +384,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several canceled orders by theirs exchange orders ids from any users', async () => {
+  it('Get several cancelled orders by theirs exchange orders ids from any users', async () => {
     console.log('Not implemented.');
   });
 
@@ -392,7 +392,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several orders (open, filled or canceled) by theirs exchange orders ids from any users', async () => {
+  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from any users', async () => {
     console.log('Not implemented.');
   });
 
@@ -400,7 +400,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several canceled orders by theirs exchange orders ids from a user', async () => {
+  it('Get several cancelled orders by theirs exchange orders ids from a user', async () => {
     console.log('Not implemented.');
   });
 
@@ -408,7 +408,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several orders (open, filled or canceled) by theirs exchange orders ids from a user', async () => {
+  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from a user', async () => {
     console.log('Not implemented.');
   });
 
@@ -416,7 +416,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several canceled orders by theirs exchange orders ids from several users', async () => {
+  it('Get several cancelled orders by theirs exchange orders ids from several users', async () => {
     console.log('Not implemented.');
   });
 
@@ -424,7 +424,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several orders (open, filled or canceled) by theirs exchange orders ids from several users', async () => {
+  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from several users', async () => {
     console.log('Not implemented.');
   });
 
@@ -432,7 +432,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get all canceled orders from any users', async () => {
+  it('Get all cancelled orders from any users', async () => {
     console.log('Not implemented.');
   });
 
@@ -440,7 +440,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get all orders (open, filled or canceled) from any users', async () => {
+  it('Get all orders (open, filled or cancelled) from any users', async () => {
     console.log('Not implemented.');
   });
 
@@ -448,7 +448,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get all canceled orders from a user', async () => {
+  it('Get all cancelled orders from a user', async () => {
     console.log('Not implemented.');
   });
 
@@ -456,7 +456,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get all orders (open, filled or canceled) from a user', async () => {
+  it('Get all orders (open, filled or cancelled) from a user', async () => {
     console.log('Not implemented.');
   });
 
@@ -464,7 +464,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get all canceled orders from several users', async () => {
+  it('Get all cancelled orders from several users', async () => {
     console.log('Not implemented.');
   });
 
@@ -472,7 +472,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get all orders (open, filled or canceled) from several users', async () => {
+  it('Get all orders (open, filled or cancelled) from several users', async () => {
     console.log('Not implemented.');
   });
 
