@@ -31,7 +31,7 @@ export interface GetMarketsOptions {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetAllMarketsOptions {}
+export interface GetAllMarketsOptions extends GetMarketsOptions {}
 
 export interface GetOrderBookOptions {
   marketId?: MarketAddress;
@@ -42,7 +42,7 @@ export interface GetOrderBooksOptions {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetAllOrderBookOptions {}
+export interface GetAllOrderBookOptions extends GetOrderBooksOptions {}
 
 export interface GetTickerOptions {
   marketId?: MarketAddress;
@@ -53,7 +53,7 @@ export interface GetTickersOptions {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetAllTickerOptions {}
+export interface GetAllTickerOptions extends GetTickersOptions {}
 
 export interface GetOrderOptions {
   exchangeOrderId: ExchangeOrderId;
@@ -99,6 +99,9 @@ export interface CancelOrdersOptions {
   ownerAddress: [WalletAddress];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CancelAllOrdersOptions extends CancelOrdersOptions {}
+
 export interface SettleFundsOptions {
   marketId?: MarketAddress;
 
@@ -110,3 +113,6 @@ export interface SettleSeveralFundsOptions {
 
   ownerAddress: [WalletAddress];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SettleAllFundsOptions extends SettleSeveralFundsOptions {}
