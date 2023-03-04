@@ -568,7 +568,24 @@ describe('Kujira Full Flow', () => {
     */
 
     it('Get the available wallet balances from the tokens 1, 2, and 3', async () => {
-      console.log('Not implemented.');
+      // Get balance of a token
+      // const marketId = getNotNullOrThrowError<fin.Pair>(allowedMarkets.get(1));
+      //
+      // const pair = getNotNullOrThrowError<fin.Pair>(
+      //   fin.PAIRS.find(
+      //     (it) => it.address == marketId.address && it.chainID == network
+      //   )
+      // );
+      //
+      // const response = await stargateClient.getBalance(
+      //   account.address,
+      //   pair.denoms[1]['reference']
+      // );
+
+      // Get all balances
+      const response = await stargateClient.getAllBalances(account.address);
+
+      console.log(response);
     });
 
     it('Create a buy order 1 for market 1', async () => {
