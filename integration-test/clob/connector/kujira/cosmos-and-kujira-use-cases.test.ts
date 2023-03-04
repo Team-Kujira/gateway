@@ -348,35 +348,35 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.'); // TODO (PARTIAL) We have not a complete list of markets yet. We can get information only from the markets listed in pairs.ts!!!
   });
 
-  it('Get a open order by its exchange order id from any user', async () => {
-    console.log('Not implemented.'); // TODO (YES) Using the 'order_idx', we can get order of any owner. Again, we can use 'orders_by_user' query to return the orders of an specific owner!!!
+  it('Get an open order by its exchange order id from any user', async () => {
+    console.log('Not implemented.'); // TODO (YES) Using the 'order_idx', we can get an open order of any owner. Also we can use 'orders_by_user' query to return the orders of an specific owner!!!
   });
 
   it('Get a cancelled order by its exchange order id from any user', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (NO) The chain API don't implements this feature!!!
   });
 
   it('Get a filled order by its exchange order id from any user', async () => {
-    console.log('Not implemented.');
+    console.log('Not implemented.'); // TODO (YES) We can get the totally filled orders verifying if the 'offer_amount' equal to zero!!!
   });
 
-  it('Get a order (open, filled or cancelled) by its exchange order id from any user', async () => {
-    console.log('Not implemented.');
+  it('Get an order (open, filled or cancelled) by its exchange order id from any user', async () => {
+    console.log('Not implemented.'); // TODO (YES) We can get open and filled orders by the 'order_idx', but cancelled orders is not possible!!!
   });
 
-  it('Get a open order by its exchange order id from a user', async () => {
-    console.log('Not implemented.');
+  it('Get an open order by its exchange order id from an user', async () => {
+    console.log('Not implemented.'); // TODO (YES) With the 'order_idx', we can get an open order of any owner verifying if the order 'offer_amount' not equals to zero. If 'offer_amount' is zero, the order is totally filled!!!
   });
 
-  it('Get a cancelled order by its exchange order id from a user', async () => {
-    console.log('Not implemented.');
+  it('Get a cancelled order by its exchange order id from an user', async () => {
+    console.log('Not implemented.'); // TODO The chain API removed this feature!!!
   });
 
-  it('Get a filled order by its exchange order id from a user', async () => {
-    console.log('Not implemented.');
+  it('Get a filled order by its exchange order id from an user', async () => {
+    console.log('Not implemented.'); // TODO (YES) We can get any order by the 'order_idx', then if its 'offer_amount' equals to zero, represents that is a totally filled order!!!
   });
 
-  it('Get a order (open, filled or cancelled) by its exchange order id from a user', async () => {
+  it('Get an order (open, filled or cancelled) by its exchange order id from an user', async () => {
     console.log('Not implemented.');
   });
 
@@ -396,11 +396,11 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several open orders by theirs exchange orders ids from a user', async () => {
+  it('Get several open orders by theirs exchange orders ids from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several cancelled orders by theirs exchange orders ids from a user', async () => {
+  it('Get several cancelled orders by theirs exchange orders ids from an user', async () => {
     console.log('Not implemented.');
   });
 
@@ -408,7 +408,7 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from a user', async () => {
+  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from an user', async () => {
     console.log('Not implemented.');
   });
 
@@ -444,19 +444,19 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Get all open orders from a user', async () => {
+  it('Get all open orders from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all cancelled orders from a user', async () => {
+  it('Get all cancelled orders from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all filled orders from a user', async () => {
+  it('Get all filled orders from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all orders (open, filled or cancelled) from a user', async () => {
+  it('Get all orders (open, filled or cancelled) from an user', async () => {
     console.log('Not implemented.');
   });
 
@@ -484,11 +484,11 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Create several orders (buy and sell) for a user and a market', async () => {
+  it('Create several orders (buy and sell) for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Create several orders (buy and sell) for a user and several markets', async () => {
+  it('Create several orders (buy and sell) for an user and several markets', async () => {
     console.log('Not implemented.');
   });
 
@@ -496,19 +496,19 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Replace a buy order for a user and a market', async () => {
+  it('Replace a buy order for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Replace a sell order for a user and a market', async () => {
+  it('Replace a sell order for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Replace several orders (buy and sell) for a user and a market', async () => {
+  it('Replace several orders (buy and sell) for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Replace several orders (buy and sell) for a user and several markets', async () => {
+  it('Replace several orders (buy and sell) for an user and several markets', async () => {
     console.log('Not implemented.');
   });
 
@@ -516,15 +516,15 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Cancel a order from a user and a market', async () => {
+  it('Cancel an order from an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Cancel several orders from a user and a market', async () => {
+  it('Cancel several orders from an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Cancel several orders from a user and a several markets', async () => {
+  it('Cancel several orders from an user and a several markets', async () => {
     console.log('Not implemented.');
   });
 
@@ -532,11 +532,11 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Cancel all orders from a user and a market', async () => {
+  it('Cancel all orders from an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Cancel all orders from a user and a several markets', async () => {
+  it('Cancel all orders from an user and a several markets', async () => {
     console.log('Not implemented.');
   });
 
@@ -544,11 +544,11 @@ describe('Cosmos and Kujira Use Cases', () => {
     console.log('Not implemented.');
   });
 
-  it('Settle funds for a user and a market', async () => {
+  it('Settle funds for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Settle funds for a user and a several markets', async () => {
+  it('Settle funds for an user and a several markets', async () => {
     console.log('Not implemented.');
   });
 

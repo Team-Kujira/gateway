@@ -686,6 +686,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open order 1', async () => {
+      // TODO We need to filter to open orders verifying the 'offer_amount' and 'filled_amount'!!!
       const targetOrderOrdinal = 1;
       const targetOrder = getOrder(targetOrderOrdinal);
       const marketId = targetOrder.marketId;
