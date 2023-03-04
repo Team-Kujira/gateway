@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import 'jest-extended';
 import {
   getNotNullOrThrowError,
@@ -965,12 +968,7 @@ describe('Kujira Full Flow', () => {
         .filter((it: any) => {
           return parseFloat(it['offer_amount']) == 0;
         })
-        .filter(
-          (it: any) =>
-            Number(it['idx']) ==
-            getNotNullOrThrowError<Record<any, any>>(orders.get(2))
-              .exchangeOrderId
-        );
+        .filter((it: any) => Number(it['idx']) == targetOrder.exchangeOrderId);
 
       logOutput(output);
 
