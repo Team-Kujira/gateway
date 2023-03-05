@@ -686,10 +686,11 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open order 1', async () => {
-      // TODO We need to filter to open orders verifying the 'offer_amount' and 'filled_amount'!!!
       const targetOrderOrdinal = 1;
       const targetOrder = getOrder(targetOrderOrdinal);
       const marketId = targetOrder.marketId;
+      let output = {}; // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
+      let filled: number;
 
       request = [
         marketId,
@@ -700,12 +701,37 @@ describe('Kujira Full Flow', () => {
         },
       ];
 
-      response = await querier.wasm.queryContractSmart.apply(null, request);
+      const result = await querier.wasm.queryContractSmart.apply(null, request);
+
+      if (result.original_offer_amount > result.offer_amount) {
+        filled = 100 * (1 - result.offer_amount / result.original_offer_amount);
+      } else {
+        filled = 0;
+      }
+
+      if (
+        result.original_offer_amount == result.filled_amount &&
+        result.offer_amount == 0
+      ) {
+        response = 'This order is finished.';
+        output = {
+          message: 'Order finished.',
+          status: 'filled',
+        };
+      } else {
+        response = result;
+        output = {
+          owner: result.owner,
+          original_offer_amount: result.original_offer_amount,
+          filled_amount: result.filled_amount,
+          filled_percentage: filled,
+          side: '', // TODO !!!
+          price: 0, // TODO !!!
+          status: 'open',
+        };
+      }
 
       logResponse(response);
-
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
-      const output = {};
 
       logOutput(output);
     });
