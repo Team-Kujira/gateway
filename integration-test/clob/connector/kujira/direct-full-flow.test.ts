@@ -302,7 +302,7 @@ beforeAll(async () => {
     id: null,
     exchangeOrderId: null,
     ownerAddress: account.address,
-    marketId: getMarket(1).address,
+    marketId: getMarket(2).address,
     side: 'SELL',
     price: 999.99,
     amount: 10,
@@ -1158,7 +1158,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create 2 orders at once', async () => {
-      const targetOrderOrdinals = [1, 2];
+      const targetOrderOrdinals = [10, 11];
       const targetOrders = getOrders(targetOrderOrdinals);
 
       const messages = [];
