@@ -58,6 +58,16 @@ const getMarket = (ordinal: number) =>
 const getOrder = (ordinal: number) =>
   getNotNullOrThrowError<Record<any, any>>(orders.get(ordinal));
 
+const getOrders = (ordinal: [number]) => {
+  const ordersArray = [];
+  for (const o in ordinal) {
+    ordersArray.push(
+      getNotNullOrThrowError<Record<any, any>>(orders.get(ordinal[o]))
+    );
+  }
+  return ordersArray;
+};
+
 beforeAll(async () => {
   network = getNotNullOrThrowError<string>(
     process.env.TEST_KUJIRA_NETWORK || TESTNET
@@ -608,7 +618,7 @@ describe('Kujira Full Flow', () => {
       }
 
       const message = msg.wasm.msgExecuteContract({
-        sender: targetOrder.ownerAdress,
+        sender: targetOrder.ownerAddress,
         contract: market.address,
         msg: Buffer.from(
           JSON.stringify({
@@ -1148,7 +1158,103 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create 2 orders at once', async () => {
-      console.log('Not implemented.');
+      const targetOrderOrdinals = [1, 2];
+      const targetOrders = getOrders(targetOrderOrdinals);
+
+      const messages = [];
+
+      for (const targetOrder of targetOrders) {
+        const marketId = targetOrder.marketId;
+        const market = getNotNullOrThrowError<fin.Pair>(
+          fin.PAIRS.find(
+            (it) => it.address == marketId && it.chainID == network
+          )
+        );
+
+        let denom: Denom;
+        if (targetOrder.side == 'BUY') {
+          denom = market.denoms[1];
+        } else if (targetOrder.side == 'SELL') {
+          denom = market.denoms[0];
+        } else {
+          throw Error('Unrecognized order side.');
+        }
+
+        const message = msg.wasm.msgExecuteContract({
+          sender: targetOrder.ownerAddress,
+          contract: market.address,
+          msg: Buffer.from(
+            JSON.stringify({
+              submit_order: { price: targetOrder.price.toString() },
+            })
+          ),
+          funds: coins(targetOrder.amount, denom.reference),
+        });
+
+        messages.push(message);
+      }
+
+      request = [account.address, messages, 'auto'];
+
+      logRequest(request);
+
+      response = await stargateClient.signAndBroadcast(
+        account.address,
+        messages,
+        'auto'
+      );
+
+      logResponse(response);
+
+      // const exchangeOrderId: number = response['events']
+      //   .filter((obj: any) => obj['type'] == 'wasm')[0]
+      //   ['attributes'].filter((obj: any) => obj['key'] == 'order_idx')[0][
+      //   'value'
+      // ];
+      //
+      // targetOrder.exchangeOrderId = exchangeOrderId;
+      //
+      // const sender: string = response['events']
+      //   .filter((obj: any) => obj['type'] == 'transfer')[0]
+      //   ['attributes'].filter((obj: any) => obj['key'] == 'sender')[0]['value'];
+      //
+      // const offerDenom: Denom = Denom.from(
+      //   response['events']
+      //     .filter((obj: any) => obj['type'] == 'wasm')[0]
+      //     ['attributes'].filter((obj: any) => obj['key'] == 'offer_denom')[0][
+      //     'value'
+      //   ]
+      // );
+      //
+      // const fee: string = response['events']
+      //   .filter((obj: any) => obj['type'] == 'tx')[0]
+      //   ['attributes'].filter((obj: any) => obj['key'] == 'fee')[0]['value'];
+      //
+      // let side: string;
+      // if (offerDenom.eq(market.denoms[0])) {
+      //   side = 'SELL';
+      // } else if (offerDenom.eq(market.denoms[1])) {
+      //   side = 'BUY';
+      // } else {
+      //   throw new Error("Can't define the order side, implementation error");
+      // }
+      //
+      // // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
+      // const output = {
+      //   id: null,
+      //   exchangeId: exchangeOrderId,
+      //   marketId: null,
+      //   ownerAddress: sender,
+      //   side: side,
+      //   price: null,
+      //   amount: null,
+      //   type: null,
+      //   status: null,
+      //   fee: fee,
+      //   signature: response['transactionHash'],
+      // };
+      //
+      // logOutput(output);
     });
 
     it('Cet all open orders and check that the orders 10 and 11 are present', async () => {

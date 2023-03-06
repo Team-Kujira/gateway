@@ -312,247 +312,247 @@ beforeEach(async () => {
 });
 
 describe('Cosmos and Kujira Use Cases', () => {
-  it('Get information from one market', async () => {
+  it('#01 - Get information from one market', async () => {
     console.log('Not implemented.'); // TODO (PARTIAL) The response haven't information as "minimumOrderSize" and "tickSize"!!!
   });
 
-  it('Get information from several markets', async () => {
+  it('#02 - Get information from several markets', async () => {
     console.log('Not implemented.'); // TODO (YES(If Single)) If we have a market list, we can get information from that markets using the single getter method!!!
   });
 
-  it('Get information from all markets', async () => {
+  it('#03 - Get information from all markets', async () => {
     console.log('Not implemented.'); // TODO (PARTIAL) We have not a complete list of markets yet. We can get information only from the markets listed in pairs.ts!!!
   });
 
-  it('Get the order book from one market', async () => {
+  it('#04 - Get the order book from one market', async () => {
     console.log('Not implemented.'); // TODO (PARTIAL) We can get the order book, but the orders in the response haven't informations like "orderExchangeId", "status" and "owner"!!!
   });
 
-  it('Get the order books from several markets', async () => {
+  it('#05 - Get the order books from several markets', async () => {
     console.log('Not implemented.'); // TODO (YES(If Single)) Not implemented, but we can use the single method!!!
   });
 
-  it('Get the order books from all markets', async () => {
+  it('#06 - Get the order books from all markets', async () => {
     console.log('Not implemented.'); // TODO (YES(If Single)) Not implemented, but we can use the single method!!!
   });
 
-  it('Get the ticker from one market', async () => {
+  it('#07 - Get the ticker from one market', async () => {
     console.log('Not implemented.'); // TODO (YES(MAIN)) The response don't have timestamp of the sample!!!
   });
 
-  it('Get the tickers from several markets', async () => {
+  it('#08 - Get the tickers from several markets', async () => {
     console.log('Not implemented.'); // TODO (YES(If Single)) If we have a market list, we can get information from that markets using the single getter method!!!
   });
 
-  it('Get the tickers from all markets', async () => {
+  it('#09 - Get the tickers from all markets', async () => {
     console.log('Not implemented.'); // TODO (PARTIAL) We have not a complete list of markets yet. We can get information only from the markets listed in pairs.ts!!!
   });
 
-  it('Get an open order by its exchange order id from any user', async () => {
+  it('#10 - Get an open order by its exchange order id from any user', async () => {
     console.log('Not implemented.'); // TODO (YES) Using the 'order_idx', we can get an open order of any owner. Also we can use 'orders_by_user' query to return the orders of an specific owner!!!
   });
 
-  it('Get a cancelled order by its exchange order id from any user', async () => {
+  it('#11 - Get a cancelled order by its exchange order id from any user', async () => {
     console.log('Not implemented.'); // TODO (NO) The chain API don't implements this feature!!!
   });
 
-  it('Get a filled order by its exchange order id from any user', async () => {
+  it('#12 - Get a filled order by its exchange order id from any user', async () => {
     console.log('Not implemented.'); // TODO (YES) We can get the totally filled orders verifying if the 'offer_amount' equal to zero!!!
   });
 
-  it('Get an order (open, filled or cancelled) by its exchange order id from any user', async () => {
+  it('#13 - Get an order (open, filled or cancelled) by its exchange order id from any user', async () => {
     console.log('Not implemented.'); // TODO (YES) We can get open and filled orders by the 'order_idx', but cancelled orders is not possible!!!
   });
 
-  it('Get an open order by its exchange order id from an user', async () => {
+  it('#14 - Get an open order by its exchange order id from an user', async () => {
     console.log('Not implemented.'); // TODO (YES) With the 'order_idx', we can get an open order of any owner verifying if the order 'offer_amount' not equals to zero. If 'offer_amount' is zero, the order is totally filled!!!
   });
 
-  it('Get a cancelled order by its exchange order id from an user', async () => {
-    console.log('Not implemented.'); // TODO The chain API removed this feature!!!
+  it('#15 - Get a cancelled order by its exchange order id from an user', async () => {
+    console.log('Not implemented.'); // TODO (NO) The chain API removed this feature!!!
   });
 
-  it('Get a filled order by its exchange order id from an user', async () => {
+  it('#16 - Get a filled order by its exchange order id from an user', async () => {
     console.log('Not implemented.'); // TODO (YES) We can get any order by the 'order_idx', then if its 'offer_amount' equals to zero, represents that is a totally filled order!!!
   });
 
-  it('Get an order (open, filled or cancelled) by its exchange order id from an user', async () => {
+  it('#17 - Get an order (open, filled or cancelled) by its exchange order id from an user', async () => {
+    console.log('Not implemented.'); // TODO (YES) Having the 'order_idx', we can get an open or a filled order for any user, but we can not get cancelled orders because chain API don't implements this feature!!!
+  });
+
+  it('#18 - Get several open orders by theirs exchange orders ids from any users', async () => {
+    console.log('Not implemented.'); // TODO (YES) We can use single methods of tests #10, #14 and #17!!!
+  });
+
+  it('#19 - Get several cancelled orders by theirs exchange orders ids from any users', async () => {
+    console.log('Not implemented.'); // TODO (NO) Equal to tests #11 and #15!!!
+  });
+
+  it('#20 - Get several filled orders by theirs exchange orders ids from any users', async () => {
+    console.log('Not implemented.'); // TODO (Yes) We can use single methods from tests #12, #13 and #16!!!
+  });
+
+  it('#21 - Get several orders (open, filled or cancelled) by theirs exchange orders ids from any users', async () => {
+    console.log('Not implemented.'); // TODO (Partially) Equal to tests #18 and #20!!!
+  });
+
+  it('#22 - Get several open orders by theirs exchange orders ids from an user', async () => {
+    console.log('Not implemented.'); // TODO (YES) Equal to test #18!!!
+  });
+
+  it('#23 - Get several cancelled orders by theirs exchange orders ids from an user', async () => {
+    console.log('Not implemented.'); // TODO (No) Equal to test #19!!!
+  });
+
+  it('#24 - Get several filled orders by theirs exchange orders ids from a user', async () => {
+    console.log('Not implemented.'); // TODO (YES) Equal to test #20!!!
+  });
+
+  it('#25 - Get several orders (open, filled or cancelled) by theirs exchange orders ids from an user', async () => {
+    console.log('Not implemented.'); // TODO (YES) Equal to test #21!!!
+  });
+
+  it('#26 - Get several open orders by theirs exchange orders ids from several users', async () => {
+    console.log('Not implemented.'); // TODO (YES) Equal to test #22!!!
+  });
+
+  it('#27 - Get several cancelled orders by theirs exchange orders ids from several users', async () => {
+    console.log('Not implemented.'); // TODO (NO) Equal to test #23!!!
+  });
+
+  it('#28 - Get several filled orders by theirs exchange orders ids from several users', async () => {
+    console.log('Not implemented.'); // TODO (YES) Equal to test #20!!!
+  });
+
+  it('#29 - Get several orders (open, filled or cancelled) by theirs exchange orders ids from several users', async () => {
+    console.log('Not implemented.'); // TODO (YES) Equal to test #21!!!
+  });
+
+  it('#30 - Get all open orders from any users', async () => {
+    console.log('Not implemented.'); // TODO (YES) We can use query like "orders_by_user" to get!!!
+  });
+
+  it('#31 - Get all cancelled orders from any users', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several open orders by theirs exchange orders ids from any users', async () => {
+  it('#32 - Get all filled orders from any users', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several cancelled orders by theirs exchange orders ids from any users', async () => {
+  it('#33 - Get all orders (open, filled or cancelled) from any users', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several filled orders by theirs exchange orders ids from any users', async () => {
+  it('#34 - Get all open orders from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from any users', async () => {
+  it('#35 - Get all cancelled orders from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several open orders by theirs exchange orders ids from an user', async () => {
+  it('#36 - Get all filled orders from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several cancelled orders by theirs exchange orders ids from an user', async () => {
+  it('#37 - Get all orders (open, filled or cancelled) from an user', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several filled orders by theirs exchange orders ids from a user', async () => {
+  it('#38 - Get all open orders from several users', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from an user', async () => {
+  it('#39 - Get all cancelled orders from several users', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several open orders by theirs exchange orders ids from several users', async () => {
+  it('#40 - Get all filled orders from several users', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several cancelled orders by theirs exchange orders ids from several users', async () => {
+  it('#41 - Get all orders (open, filled or cancelled) from several users', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several filled orders by theirs exchange orders ids from several users', async () => {
+  it('#42 - Create a buy order for a user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get several orders (open, filled or cancelled) by theirs exchange orders ids from several users', async () => {
+  it('#43 - Create a sell order for a user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all open orders from any users', async () => {
+  it('#44 - Create several orders (buy and sell) for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all cancelled orders from any users', async () => {
+  it('#45 - Create several orders (buy and sell) for an user and several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all filled orders from any users', async () => {
+  it('#46 - Create several orders (buy and sell) for several users and several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all orders (open, filled or cancelled) from any users', async () => {
+  it('#47 - Replace a buy order for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all open orders from an user', async () => {
+  it('#48 - Replace a sell order for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all cancelled orders from an user', async () => {
+  it('#49 - Replace several orders (buy and sell) for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all filled orders from an user', async () => {
+  it('#50 - Replace several orders (buy and sell) for an user and several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all orders (open, filled or cancelled) from an user', async () => {
+  it('#51 - Replace several orders (buy and sell) for several users and several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all open orders from several users', async () => {
+  it('#52 - Cancel an order from an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all cancelled orders from several users', async () => {
+  it('#53 - Cancel several orders from an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all filled orders from several users', async () => {
+  it('#54 - Cancel several orders from an user and a several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Get all orders (open, filled or cancelled) from several users', async () => {
+  it('#55 - Cancel several orders from several users and a several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Create a buy order for a user and a market', async () => {
+  it('#56 - Cancel all orders from an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Create a sell order for a user and a market', async () => {
+  it('#57 - Cancel all orders from an user and a several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Create several orders (buy and sell) for an user and a market', async () => {
+  it('#58 - Cancel all orders from several users and a several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Create several orders (buy and sell) for an user and several markets', async () => {
+  it('#59 - Settle funds for an user and a market', async () => {
     console.log('Not implemented.');
   });
 
-  it('Create several orders (buy and sell) for several users and several markets', async () => {
+  it('#60 - Settle funds for an user and a several markets', async () => {
     console.log('Not implemented.');
   });
 
-  it('Replace a buy order for an user and a market', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Replace a sell order for an user and a market', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Replace several orders (buy and sell) for an user and a market', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Replace several orders (buy and sell) for an user and several markets', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Replace several orders (buy and sell) for several users and several markets', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Cancel an order from an user and a market', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Cancel several orders from an user and a market', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Cancel several orders from an user and a several markets', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Cancel several orders from several users and a several markets', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Cancel all orders from an user and a market', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Cancel all orders from an user and a several markets', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Cancel all orders from several users and a several markets', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Settle funds for an user and a market', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Settle funds for an user and a several markets', async () => {
-    console.log('Not implemented.');
-  });
-
-  it('Settle funds for several users and a several markets', async () => {
+  it('#61 - Settle funds for several users and a several markets', async () => {
     console.log('Not implemented.');
   });
 });
