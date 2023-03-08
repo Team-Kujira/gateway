@@ -1,85 +1,79 @@
-export type MarketAddress = string;
-export type ExchangeOrderId = number;
-export type WalletAddress = string;
-export type Price = number;
-export type Amount = number;
+import {
+  MarketId,
+  OrderAmount,
+  OrderExchangeOrderId,
+  OrderOwnerAddress,
+  OrderPayerAddress,
+  OrderPrice,
+  OrderSide,
+  OrderStatus,
+  OrderType,
+} from '../../clob/clob.types';
 
-export enum OrderSide {
-  BUY = 'BUY',
-  SELL = 'SELL',
-}
-
-export enum OrderStatus {
-  OPEN = 'OPEN',
-  CANCELLED = 'CANCELLED',
-  FILLED = 'FILLED',
-  CREATION_PENDING = 'CREATION_PENDING',
-  CANCELLATION_PENDING = 'CANCELLATION_PENDING',
-  UNKNOWN = 'UNKNOWN',
-}
-
-export enum OrderType {
-  LIMIT = 'LIMIT',
-}
+export type KujiraMarket = any;
+export type BasicKujiraMarket = any;
+export type KujiraOrder = any;
+export type KujiraOrderBook = any;
+export type KujiraOrderParams = any;
 
 export interface GetMarketOptions {
-  id?: MarketAddress;
+  id?: MarketId;
 }
 
 export interface GetMarketsOptions {
-  ids?: [MarketAddress];
+  ids?: [MarketId];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllMarketsOptions extends GetMarketsOptions {}
 
 export interface GetOrderBookOptions {
-  marketId?: MarketAddress;
+  marketId?: MarketId;
 }
 
 export interface GetOrderBooksOptions {
-  marketIds?: [MarketAddress];
+  marketIds?: [MarketId];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllOrderBookOptions extends GetOrderBooksOptions {}
 
 export interface GetTickerOptions {
-  marketId?: MarketAddress;
+  marketId?: MarketId;
 }
 
 export interface GetTickersOptions {
-  marketIds?: [MarketAddress];
+  marketIds?: [MarketId];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllTickerOptions extends GetTickersOptions {}
 
 export interface GetOrderOptions {
-  exchangeOrderId: ExchangeOrderId;
+  exchangeOrderId: OrderExchangeOrderId;
 
-  ownerAddress?: WalletAddress;
+  ownerAddress?: OrderOwnerAddress;
 
   status?: OrderStatus;
 }
 
 export interface GetOrdersOptions {
-  exchangeOrderIds?: [ExchangeOrderId];
+  exchangeOrderIds?: [OrderExchangeOrderId];
 
-  ownerAddresses?: [WalletAddress];
+  ownerAddresses?: [OrderOwnerAddress];
 
   statuses?: [OrderStatus];
 }
 
 export interface PlaceOrderOptions {
   waitUntilIncludedInBlock?: boolean;
-  marketId: MarketAddress;
-  ownerAddress: WalletAddress;
+  marketId: MarketId;
+  ownerAddress: OrderOwnerAddress;
   side: OrderSide;
-  price: Price;
-  amount: Amount;
+  price: OrderPrice;
+  amount: OrderAmount;
   type: OrderType;
-  payerAddress?: WalletAddress;
+  payerAddress?: OrderPayerAddress;
 }
 
 export interface PlaceOrdersOptions {
@@ -88,30 +82,30 @@ export interface PlaceOrdersOptions {
 }
 
 export interface CancelOrderOptions {
-  exchangeOrderId: ExchangeOrderId;
+  exchangeOrderId: OrderExchangeOrderId;
 
-  ownerAddress: WalletAddress;
+  ownerAddress: OrderOwnerAddress;
 }
 
 export interface CancelOrdersOptions {
-  exchangeOrderIds?: [ExchangeOrderId];
+  exchangeOrderIds?: [OrderExchangeOrderId];
 
-  ownerAddress: [WalletAddress];
+  ownerAddresses: [OrderOwnerAddress];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CancelAllOrdersOptions extends CancelOrdersOptions {}
 
 export interface SettleFundsOptions {
-  marketId?: MarketAddress;
+  marketId?: MarketId;
 
-  ownerAddress: [WalletAddress];
+  ownerAddresses: [OrderOwnerAddress];
 }
 
 export interface SettleSeveralFundsOptions {
-  marketIds?: [MarketAddress];
+  marketIds?: [MarketId];
 
-  ownerAddress: [WalletAddress];
+  ownerAddresses: [OrderOwnerAddress];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

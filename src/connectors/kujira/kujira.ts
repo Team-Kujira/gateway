@@ -1,6 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// // @ts-nocheck
+// /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import {
   CancelOrderOptions,
@@ -11,6 +11,7 @@ import {
   GetAllOrderBookOptions,
   GetAllTickerOptions,
   GetMarketOptions,
+  GetMarketsOptions,
   GetOrderBookOptions,
   GetOrderBooksOptions,
   GetOrderOptions,
@@ -19,9 +20,10 @@ import {
   MarketAddress,
   PlaceOrderOptions,
   PlaceOrdersOptions,
+  SettleFundsOptions,
   SettleAllFundsOptions,
 } from './kujira.types';
-import { IMap } from '../../../../temporary/hummingbot/gateway/src/connectors/serum/serum.types';
+import { IMap } from '../../../../temporary/hummingbot/gateway/src/connectors/kujira/kujira.types';
 
 /**
  *
@@ -503,3 +505,5 @@ export class Kujira {
     // TODO implement!!!
   }
 }
+
+export type Kujiraish = Kujira;
