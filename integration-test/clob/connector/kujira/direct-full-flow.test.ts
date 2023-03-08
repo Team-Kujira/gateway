@@ -22,6 +22,7 @@ import {
   TESTNET,
 } from 'kujira.js';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 import assert from 'assert';
 
 import { Map as ImmutableMap } from 'immutable';
@@ -31,6 +32,7 @@ jest.setTimeout(30 * 60 * 1000);
 let account: AccountData;
 let querier: KujiraQueryClient;
 let stargateClient: SigningStargateClient;
+let signingCosmWasmClient: SigningCosmWasmClient;
 
 const allowedMarkets: ImmutableMap<number, Record<any, any>> = ImmutableMap<
   number,
@@ -123,6 +125,15 @@ beforeAll(async () => {
   querier = kujiraQueryClient({ client });
 
   stargateClient = await SigningStargateClient.connectWithSigner(
+    rpcEndpoint,
+    signer,
+    {
+      registry,
+      gasPrice: GasPrice.fromString(gasPrice),
+    }
+  );
+
+  signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(
     rpcEndpoint,
     signer,
     {
@@ -766,7 +777,7 @@ describe('Kujira Full Flow', () => {
       }
 
       const message = msg.wasm.msgExecuteContract({
-        sender: targetOrder.ownerAdress,
+        sender: targetOrder.ownerAddress,
         contract: market.address,
         msg: Buffer.from(
           JSON.stringify({
@@ -1275,6 +1286,31 @@ describe('Kujira Full Flow', () => {
 
     it('Get all open orders and check that there are no open orders', async () => {
       console.log('Not implemented.');
+    });
+
+    it('Settle funds for an order', async () => {
+      const targetOrderOrdinal = 2;
+      const targetOrder = getOrder(targetOrderOrdinal);
+      const marketId = targetOrder.marketId;
+
+      const market = getNotNullOrThrowError<fin.Pair>(
+        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
+      );
+
+      const finClient = new fin.FinClient(
+        signingCosmWasmClient,
+        account.address,
+        market.address
+      );
+
+      request = {
+        orderIdxs: [57324], // TODO Hard code to fast test. Change it.!!!
+        fee: 'auto',
+      };
+
+      response = await finClient.withdrawOrders(request);
+
+      console.log(response);
     });
   });
 });
