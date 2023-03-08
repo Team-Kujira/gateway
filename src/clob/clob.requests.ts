@@ -20,6 +20,10 @@ import {
   GetOrdersResponse,
   GetTickersRequest,
   GetTickersResponse,
+  MaxNumberOfFilledOrders,
+  OrderMarketId,
+  OrderOwnerAddress,
+  OrderReplaceIfExists,
   SettleFundsRequest,
   SettleFundsResponse,
 } from './clob.types';
@@ -55,13 +59,17 @@ export type CLOBGetTickersResponse = GetTickersResponse;
 
 export type CLOBGetOrdersRequest = NetworkSelectionRequest &
   (
-    | { ownerAddress: string; marketName: string; marketNames?: string[] }
+    | {
+        marketId?: OrderMarketId;
+        marketIds?: OrderMarketId[];
+        ownerAddress?: OrderOwnerAddress;
+      }
     | { order: GetOrderRequest }
     | {
         orders: GetOrdersRequest[];
       }
   ) & {
-    limit?: number;
+    maxNumberOfFilledOrders?: MaxNumberOfFilledOrders;
   };
 
 export type CLOBGetOrdersResponse = GetOrdersResponse;
@@ -76,7 +84,7 @@ export type CLOBCreateOrdersRequest = NetworkSelectionRequest &
     | {
         orders: CreateOrdersRequest[];
       }
-  ) & { replaceIfExists?: boolean };
+  ) & { replaceIfExists?: OrderReplaceIfExists };
 
 export type CLOBCreateOrdersResponse = CreateOrdersResponse;
 
@@ -86,7 +94,11 @@ export type CLOBCreateOrdersResponse = CreateOrdersResponse;
 
 export type CLOBCancelOrdersRequest = NetworkSelectionRequest &
   (
-    | { ownerAddress: string; marketName: string; marketNames?: string[] }
+    | {
+        marketId: OrderMarketId;
+        marketIds?: OrderMarketId[];
+        ownerAddress: OrderOwnerAddress;
+      }
     | { order: CancelOrderRequest }
     | {
         orders: CancelOrdersRequest[];
@@ -101,7 +113,11 @@ export type CLOBCancelOrdersResponse = CancelOrdersResponse;
 
 export type CLOBGetOpenOrdersRequest = NetworkSelectionRequest &
   (
-    | { ownerAddress: string; marketName?: string; marketNames?: string[] }
+    | {
+        marketId?: OrderMarketId;
+        marketIds?: OrderMarketId[];
+        ownerAddress?: OrderOwnerAddress;
+      }
     | { order: GetOpenOrderRequest }
     | {
         orders: GetOpenOrdersRequest[];
@@ -117,16 +133,16 @@ export type CLOBGetOpenOrdersResponse = GetOpenOrdersResponse;
 export type CLOBGetFilledOrdersRequest = NetworkSelectionRequest &
   (
     | {
-        // ownerAddress: string;
-        marketName: string;
-        marketNames?: string[];
+        marketId: OrderMarketId;
+        marketIds?: OrderMarketId[];
+        ownerAddress?: OrderOwnerAddress;
       }
     | { order: GetFilledOrderRequest }
     | {
         orders: GetFilledOrdersRequest[];
       }
   ) & {
-    limit?: number;
+    maxNumberOfFilledOrders?: MaxNumberOfFilledOrders;
   };
 
 export type CLOBGetFilledOrdersResponse = GetFilledOrdersResponse;
