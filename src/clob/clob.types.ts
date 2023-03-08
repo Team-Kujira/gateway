@@ -1,10 +1,10 @@
 import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 
-// export type FunctionType<Arguments, Return> = (...args: Arguments[]) => Return;
+export type FunctionType<Arguments, Return> = (...args: Arguments[]) => Return;
 
-// export type AsyncFunctionType<Arguments, Return> = (
-//   ...args: Arguments[]
-// ) => Promise<Return>;
+export type AsyncFunctionType<Arguments, Return> = (
+  ...args: Arguments[]
+) => Promise<Return>;
 
 export type IMap<K, V> = ImmutableMap<K, V>;
 export const IMap = ImmutableMap;
@@ -38,19 +38,43 @@ export type Price = FloatingNumber;
 export type Amount = FloatingNumber;
 export type Timestamp = number;
 
+export type ConnectorMarket = any;
+export type ConnectorTicker = any;
+export type ConnectorOrderBook = any;
+export type ConnectorOrder = any;
+
 export type MarketName = string;
-export type MarketAddress = Address;
+export type MarketId = Address;
 export type MarketProgramId = Address;
 export type MarketDeprecation = boolean;
 export type MarketMinimumOrderSize = FloatingNumber;
 export type MarketTickSize = FloatingNumber;
 export type MarketMinimumBaseIncrement = FloatingNumber;
 
-export type ConnectorMarket = null; // TODO fix!!!
+export type TickerPrice = FloatingNumber;
+export type TickerTimestamp = Timestamp;
+
+export type TransactionSignature = string;
+
+export type OrderId = string;
+export type OrderExchangeOrderId = string;
+export type OrderMarketName = MarketName;
+export type OrderMarketId = MarketId;
+export type OrderOwnerAddress = Address;
+export type OrderPayerAddress = Address;
+export type OrderPrice = Price;
+export type OrderAmount = Amount;
+export type OrderFillmentTimestamp = Timestamp;
+export type OrderTransactionSignatures = TransactionSignatures;
+
+export type Fund = TransactionSignature;
+
+export type FeeMaker = FloatingNumber;
+export type FeeTaker = FloatingNumber;
 
 export interface Market {
   name: MarketName;
-  address: MarketAddress;
+  address: MarketId;
   programId: MarketProgramId;
   deprecated: MarketDeprecation;
   minimumOrderSize: MarketMinimumOrderSize;
@@ -60,8 +84,6 @@ export interface Market {
   market: ConnectorMarket;
 }
 
-export type ConnectorOrderBook = null;
-
 export interface OrderBook {
   market: Market;
   bids: IMap<string, Order>;
@@ -69,35 +91,19 @@ export interface OrderBook {
   orderBook: ConnectorOrderBook;
 }
 
-export type TickerPrice = number;
-export type TickerTimestamp = number;
-
-export type ConnectorTicker = null;
-
 export interface Ticker {
   price: TickerPrice;
   timestamp: TickerTimestamp;
   ticker: ConnectorTicker;
 }
 
-export type OrderId = string;
-export type OrderExchangeOrderId = string;
-export type OrderMarketName = string;
-export type OrderMarketAddress = string;
-export type OrderOwnerAddress = Address;
-export type OrderPrice = Price;
-export type OrderAmount = Amount;
-export type OrderFillmentTimestamp = Timestamp;
-export type OrderTransactionSignatures = TransactionSignatures;
-
-export type ConnectorOrder = null;
-
 export interface Order {
   id?: OrderId; // Client custom id
   exchangeOrderId?: OrderExchangeOrderId;
   marketName: OrderMarketName;
-  marketAddress: OrderMarketAddress;
+  marketAddress: OrderMarketId;
   ownerAddress?: OrderOwnerAddress;
+  payerAddress?: OrderPayerAddress;
   price: OrderPrice;
   amount: OrderAmount;
   side: OrderSide;
@@ -108,21 +114,14 @@ export interface Order {
   order?: ConnectorOrder;
 }
 
-export type TransactionSignature = string;
-
-export type TransactionSignatures = {
+export interface TransactionSignatures {
   creation?: TransactionSignature;
   cancellation?: TransactionSignature;
   fundsSettlement?: TransactionSignature;
   creations?: TransactionSignature[];
   cancellations?: TransactionSignature[];
   fundsSettlements?: TransactionSignature[];
-};
-
-export type Fund = TransactionSignature;
-
-export type FeeMaker = FloatingNumber;
-export type FeeTaker = FloatingNumber;
+}
 
 export interface Fee {
   maker: FeeMaker;
