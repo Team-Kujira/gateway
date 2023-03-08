@@ -51,17 +51,13 @@ export interface GetAllTickerOptions extends GetTickersOptions {}
 
 export interface GetOrderOptions {
   exchangeOrderId: OrderExchangeOrderId;
-
   ownerAddress?: OrderOwnerAddress;
-
   status?: OrderStatus;
 }
 
 export interface GetOrdersOptions {
   exchangeOrderIds?: [OrderExchangeOrderId];
-
   ownerAddresses?: [OrderOwnerAddress];
-
   statuses?: [OrderStatus];
 }
 
@@ -83,13 +79,11 @@ export interface PlaceOrdersOptions {
 
 export interface CancelOrderOptions {
   exchangeOrderId: OrderExchangeOrderId;
-
   ownerAddress: OrderOwnerAddress;
 }
 
 export interface CancelOrdersOptions {
   exchangeOrderIds?: [OrderExchangeOrderId];
-
   ownerAddresses: [OrderOwnerAddress];
 }
 
@@ -98,13 +92,11 @@ export interface CancelAllOrdersOptions extends CancelOrdersOptions {}
 
 export interface SettleFundsOptions {
   marketId?: MarketId;
-
   ownerAddresses: [OrderOwnerAddress];
 }
 
 export interface SettleSeveralFundsOptions {
   marketIds?: [MarketId];
-
   ownerAddresses: [OrderOwnerAddress];
 }
 

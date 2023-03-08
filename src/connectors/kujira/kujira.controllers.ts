@@ -58,6 +58,7 @@ import {
   validateSettleFundsRequest,
   validateSettleFundsSeveralRequest,
 } from './kujira.validators';
+import { GetMarketOptions } from './kujira.types';
 
 /**
  * Get the all or the informed markets and their configurations.
@@ -79,7 +80,7 @@ export async function getMarkets(
     try {
       response.body = convertToJsonIfNeeded(
         convert<Market, CLOBGetMarketsResponse>(
-          await kujira.getMarket(request.name),
+          await kujira.getMarket({ id: request.id } as GetMarketOptions),
           Types.GetMarketsResponse
         )
       );
@@ -102,7 +103,7 @@ export async function getMarkets(
     try {
       response.body = convertToJsonIfNeeded(
         convert<IMap<string, Market>, CLOBGetMarketsResponse>(
-          await kujira.getMarkets(request.names),
+          await kujira.getMarkets(request.ids),
           Types.GetMarketsResponse
         )
       );
@@ -145,13 +146,13 @@ export async function getOrderBooks(
 ): Promise<ResponseWrapper<CLOBGetOrderBooksResponse>> {
   const response = new ResponseWrapper<CLOBGetOrderBooksResponse>();
 
-  if ('marketName' in request) {
+  if ('marketId' in request) {
     validateGetOrderBookRequest(request);
 
     try {
       response.body = convertToJsonIfNeeded(
         convert<OrderBook, CLOBGetOrderBooksResponse>(
-          await kujira.getOrderBook(request.marketName),
+          await kujira.getOrderBook(request.marketId),
           Types.GetOrderBooksResponse
         )
       );
@@ -168,13 +169,13 @@ export async function getOrderBooks(
     }
   }
 
-  if ('marketNames' in request) {
+  if ('marketIds' in request) {
     validateGetOrderBooksRequest(request);
 
     try {
       response.body = convertToJsonIfNeeded(
         convert<IMap<string, OrderBook>, CLOBGetOrderBooksResponse>(
-          await kujira.getOrderBooks(request.marketNames),
+          await kujira.getOrderBooks(request.marketIds),
           Types.GetOrderBooksResponse
         )
       );
@@ -217,13 +218,13 @@ export async function getTickers(
 ): Promise<ResponseWrapper<CLOBGetTickersResponse>> {
   const response = new ResponseWrapper<CLOBGetTickersResponse>();
 
-  if ('marketName' in request) {
+  if ('marketId' in request) {
     validateGetTickerRequest(request);
 
     try {
       response.body = convertToJsonIfNeeded(
         convert<Ticker, CLOBGetTickersResponse>(
-          await kujira.getTicker(request.marketName),
+          await kujira.getTicker(request.marketId),
           Types.GetTickersResponse
         )
       );
@@ -240,13 +241,13 @@ export async function getTickers(
     }
   }
 
-  if ('marketNames' in request) {
+  if ('marketIds' in request) {
     validateGetTickersRequest(request);
 
     try {
       response.body = convertToJsonIfNeeded(
         convert<IMap<string, Ticker>, CLOBGetTickersResponse>(
-          await kujira.getTickers(request.marketNames),
+          await kujira.getTickers(request.marketIds),
           Types.GetTickersResponse
         )
       );
@@ -295,7 +296,7 @@ export async function getOrders(
     try {
       response.body = convertToJsonIfNeeded(
         convert<Order, CLOBGetOrdersResponse>(
-          await kujira.getOrder(request.order, request.limit),
+          await kujira.getOrder(request.order, request.maxNumberOfFilledOrders),
           Types.GetOrdersResponse
         )
       );
@@ -316,7 +317,10 @@ export async function getOrders(
     validateGetOrdersRequest(request.orders);
 
     try {
-      const orders = await kujira.getOrders(request.orders, request.limit);
+      const orders = await kujira.getOrders(
+        request.orders,
+        request.maxNumberOfFilledOrders
+      );
 
       if (!orders.size) throw new OrderNotFoundError('No orders found.');
 
@@ -345,9 +349,9 @@ export async function getOrders(
     convert<IMap<string, IMap<string, Order>>, CLOBGetOrdersResponse>(
       await kujira.getAllOrders(
         request.ownerAddress,
-        request.marketName,
-        request.marketNames,
-        request.limit
+        request.marketId,
+        request.marketIds,
+        request.maxNumberOfFilledOrders
       ),
       Types.GetFilledOrdersResponse
     )
@@ -458,8 +462,8 @@ export async function cancelOrders(
     convert<IMap<string, Order>, CLOBCancelOrdersResponse>(
       await kujira.cancelAllOrders(
         request.ownerAddress,
-        request.marketName,
-        request.marketNames
+        request.marketId,
+        request.marketIds
       ),
       Types.CancelOrdersResponse
     )
@@ -540,8 +544,8 @@ export async function getOpenOrders(
     convert<IMap<string, IMap<string, Order>>, CLOBGetOpenOrdersResponse>(
       await kujira.getAllOpenOrders(
         request.ownerAddress,
-        request.marketName,
-        request.marketNames
+        request.marketId,
+        request.marketIds
       ),
       Types.GetOpenOrdersResponse
     )
@@ -572,7 +576,10 @@ export async function getFilledOrders(
     try {
       response.body = convertToJsonIfNeeded(
         convert<Order, CLOBGetFilledOrdersResponse>(
-          await kujira.getFilledOrder(request.order, request.limit),
+          await kujira.getFilledOrder(
+            request.order,
+            request.maxNumberOfFilledOrders
+          ),
           Types.GetFilledOrdersResponse
         )
       );
@@ -595,7 +602,10 @@ export async function getFilledOrders(
     try {
       response.body = convertToJsonIfNeeded(
         convert<IMap<string, Order>, CLOBGetFilledOrdersResponse>(
-          await kujira.getFilledOrders(request.orders, request.limit),
+          await kujira.getFilledOrders(
+            request.orders,
+            request.maxNumberOfFilledOrders
+          ),
           Types.GetFilledOrdersResponse
         )
       );
@@ -617,9 +627,9 @@ export async function getFilledOrders(
   response.body = convertToJsonIfNeeded(
     convert<IMap<string, IMap<string, Order>>, CLOBGetFilledOrdersResponse>(
       await kujira.getAllFilledOrders(
-        request.marketName,
-        request.marketNames,
-        request.limit
+        request.marketId,
+        request.marketIds,
+        request.maxNumberOfFilledOrders
       ),
       Types.GetFilledOrdersResponse
     )
@@ -644,14 +654,14 @@ export async function settleFunds(
 ): Promise<ResponseWrapper<CLOBPostSettleFundsResponse>> {
   const response = new ResponseWrapper<CLOBPostSettleFundsResponse>();
 
-  if ('marketName' in request) {
+  if ('marketId' in request) {
     validateSettleFundsRequest(request);
 
     try {
       response.body = convertToJsonIfNeeded(
         convert<Fund[], CLOBPostSettleFundsResponse>(
           await kujira.settleFundsForMarket(
-            request.marketName,
+            request.marketId,
             request.ownerAddress
           ),
           Types.PostSettleFundsResponse
@@ -670,14 +680,14 @@ export async function settleFunds(
     }
   }
 
-  if ('marketNames' in request) {
+  if ('marketIds' in request) {
     validateSettleFundsSeveralRequest(request);
 
     try {
       response.body = convertToJsonIfNeeded(
         convert<IMap<string, Fund[]>, CLOBPostSettleFundsResponse>(
           await kujira.settleFundsForMarkets(
-            request.marketNames,
+            request.marketIds,
             request.ownerAddress
           ),
           Types.PostSettleFundsResponse

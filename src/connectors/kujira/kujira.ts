@@ -280,7 +280,7 @@ export class Kujira {
    * @param options
    */
   async getTicker(options: GetTickerOptions = {}): Promise<Ticker> {
-    const market = await this.getMarket(marketName);
+    const market = await this.getMarket(marketId);
 
     for (const [source, config] of this.config.tickers.sources) {
       try {
@@ -314,7 +314,7 @@ export class Kujira {
           );
           const pythClient = new PythHttpClient(this.connection, pythPublicKey);
 
-          const split = marketName.split('/');
+          const split = marketId.split('/');
           const base = split[0]
             .replace(/(.*)\s\(NEW\)/, '$1')
             .replace(/([A-Za-z]+)/, '$1');
@@ -363,7 +363,7 @@ export class Kujira {
             // TODO Calculate mid price from the best bid and ask!!!
           } else {
             throw new TickerNotFoundError(
-              `Ticker data is currently not available for market "${marketName}".`
+              `Ticker data is currently not available for market "${marketId}".`
             );
           }
         } else {
@@ -377,7 +377,7 @@ export class Kujira {
     }
 
     throw new TickerNotFoundError(
-      `Ticker data is currently not available for market "${marketName}".`
+      `Ticker data is currently not available for market "${marketId}".`
     );
   }
 

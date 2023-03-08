@@ -170,14 +170,14 @@ export const convertKujiraMarketToMarket = (
 ): Market => {
   return {
     name: extraInfo.name,
-    address: extraInfo.address,
+    id: extraInfo.address,
     programId: extraInfo.programId,
     deprecated: extraInfo.deprecated,
     minimumOrderSize: market.minOrderSize,
     tickSize: market.tickSize,
     minimumBaseIncrement: market.decoded.baseLotSize,
-    fees: market.decoded.fee,
-    market: market,
+    fee: market.decoded.fee,
+    connectorMarket: market,
   } as Market;
 };
 
@@ -190,7 +190,7 @@ export const convertMarketBidsAndAsksToOrderBook = (
     market: market,
     asks: convertArrayOfKujiraOrdersToMapOfOrders(market, asks, undefined),
     bids: convertArrayOfKujiraOrdersToMapOfOrders(market, bids, undefined),
-    orderBook: {
+    connectorOrderBook: {
       asks: asks,
       bids: bids,
     },
@@ -251,7 +251,7 @@ export const convertKujiraOrderToOrder = (
       candidate?.id ||
       undefined,
     exchangeOrderId: order?.orderId.toString() || undefined, // TODO check the possibility to retrieve the exchange id from a new order.
-    marketName: market.name,
+    marketId: market.name,
     ownerAddress: ownerAddress || candidate?.ownerAddress,
     price: getNotNullOrThrowError(
       order?.price || candidate?.price,
@@ -270,9 +270,9 @@ export const convertKujiraOrderToOrder = (
       orderParameters && orderParameters.orderType
         ? convertKujiraTypeToOrderType(orderParameters.orderType)
         : undefined,
-    fillmentTimestamp: undefined,
+    fillingTimestamp: undefined,
     signatures: signatures,
-    order: order,
+    connectorOrder: order,
   };
 };
 
@@ -281,13 +281,13 @@ export const convertToGetMarketResponse = (
 ): GetMarketResponse => {
   return {
     name: input.name,
-    address: input.address,
+    id: input.id,
     programId: input.programId,
     deprecated: input.deprecated,
     minimumOrderSize: input.minimumOrderSize,
     tickSize: input.tickSize,
     minimumBaseIncrement: input.minimumBaseIncrement?.toString(),
-    fees: input.fees,
+    fee: input.fee,
   };
 };
 
@@ -317,15 +317,15 @@ export const convertToGetTickerResponse = (
 export const convertToGetOrderResponse = (input: Order): GetOrderResponse => {
   return {
     id: input.id,
-    exchangeId: input.exchangeId,
-    marketName: input.marketName,
+    exchangeOrderId: input.exchangeOrderId,
+    marketId: input.marketId,
     ownerAddress: input.ownerAddress,
     price: input.price,
     amount: input.amount,
     side: input.side,
     status: input.status,
     type: input.type,
-    fillmentTimestamp: input.fillmentTimestamp,
+    fillingTimestamp: input.fillingTimestamp,
   };
 };
 
@@ -334,8 +334,8 @@ export const convertToCreateOrderResponse = (
 ): CreateOrderResponse => {
   return {
     id: input.id,
-    exchangeId: input.exchangeId,
-    marketName: input.marketName,
+    exchangeOrderId: input.exchangeOrderId,
+    marketId: input.marketId,
     ownerAddress: input.ownerAddress,
     price: input.price,
     amount: input.amount,
@@ -352,8 +352,8 @@ export const convertToCancelOrderResponse = (
 ): CancelOrderResponse => {
   return {
     id: input.id,
-    exchangeId: input.exchangeId,
-    marketName: input.marketName,
+    exchangeOrderId: input.exchangeOrderId,
+    marketId: input.marketId,
     ownerAddress: getNotNullOrThrowError(
       input.ownerAddress,
       'Owner address is not defined.'
@@ -372,8 +372,8 @@ export const convertToGetOpenOrderResponse = (
 ): GetOpenOrderResponse => {
   return {
     id: input.id,
-    exchangeId: input.exchangeId,
-    marketName: input.marketName,
+    exchangeOrderId: input.exchangeOrderId,
+    marketId: input.marketId,
     ownerAddress: input.ownerAddress,
     price: input.price,
     amount: input.amount,
@@ -388,15 +388,15 @@ export const convertToGetFilledOrderResponse = (
 ): GetFilledOrderResponse => {
   return {
     id: input.id,
-    exchangeId: input.exchangeOrderId,
-    marketName: input.marketName,
+    exchangeOrderId: input.exchangeOrderId,
+    marketId: input.marketId,
     // ownerAddress: input.ownerAddress,
     price: input.price,
     amount: input.amount,
     side: input.side,
     status: input.status,
     type: input.type,
-    fillmentTimestamp: input.fillmentTimestamp,
+    fillingTimestamp: input.fillingTimestamp,
   };
 };
 

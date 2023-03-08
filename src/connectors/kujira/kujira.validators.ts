@@ -5,7 +5,7 @@ import {
   isFloatString,
   isNaturalNumberString,
 } from '../../services/validators';
-import { OrderSide, OrderType } from './kujira.types';
+import { OrderSide, OrderType } from '../../clob/clob.types';
 
 type Validator = <Item>(
   item: undefined | null | any | Item,
@@ -178,7 +178,7 @@ export const validateOrderClientIds: Validator = createValidator(
 );
 
 export const validateOrderExchangeId: Validator = createValidator(
-  'exchangeId',
+  'exchangeOrderId',
   (_, value) => value === undefined || isNaturalNumberString(value),
   (_, value) =>
     `Invalid exchange id (${value}), it needs to be in big number format.`,
@@ -186,7 +186,7 @@ export const validateOrderExchangeId: Validator = createValidator(
 );
 
 export const validateOrderExchangeIds: Validator = createValidator(
-  'exchangeIds',
+  'exchangeOrderIds',
   (_, values) => {
     let ok = true;
     values === undefined
@@ -199,14 +199,14 @@ export const validateOrderExchangeIds: Validator = createValidator(
 );
 
 export const validateOrderMarketName: Validator = createValidator(
-  'marketName',
+  'marketId',
   (_, value) => value.trim().length,
   (_, value) => `Invalid market name (${value}).`,
   false
 );
 
 export const validateOrderMarketNames: Validator = createValidator(
-  'marketNames',
+  'marketIds',
   (_, values) => {
     let ok = true;
     values === undefined
@@ -229,7 +229,7 @@ export const validateOrderSide: Validator = createValidator(
   'side',
   (_, value) =>
     value &&
-    Object.values(OrderSide)
+    (Object.values(OrderSide) as string[])
       .map((i) => i.toLowerCase())
       .includes(value.toLowerCase()),
   (_, value) => `Invalid order side (${value}).`,
@@ -293,8 +293,8 @@ export const validateGetOrderBookRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketName,
-        `No market name was informed. If you want to get an order book, please inform the parameter "marketName".`,
+        (request) => request.marketId,
+        `No market name was informed. If you want to get an order book, please inform the parameter "marketId".`,
         false
       ),
     ],
@@ -306,8 +306,8 @@ export const validateGetOrderBooksRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketNames && request.marketNames.length,
-        `No market names were informed. If you want to get all order books, please do not inform the parameter "marketNames".`,
+        (request) => request.marketIds && request.marketIds.length,
+        `No market names were informed. If you want to get all order books, please do not inform the parameter "marketIds".`,
         false
       ),
     ],
@@ -319,8 +319,8 @@ export const validateGetTickerRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketName,
-        `No market name was informed. If you want to get a ticker, please inform the parameter "marketName".`,
+        (request) => request.marketId,
+        `No market name was informed. If you want to get a ticker, please inform the parameter "marketId".`,
         false
       ),
     ],
@@ -332,8 +332,8 @@ export const validateGetTickersRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketNames && request.marketNames.length,
-        `No market names were informed. If you want to get all tickers, please do not inform the parameter "marketNames".`,
+        (request) => request.marketIds && request.marketIds.length,
+        `No market names were informed. If you want to get all tickers, please do not inform the parameter "marketIds".`,
         false
       ),
     ],
@@ -350,7 +350,7 @@ export const validateGetOrderRequest: RequestValidator = createRequestValidator(
         !(
           request &&
           request.id === undefined &&
-          request.exchangeId === undefined
+          request.exchangeOrderId === undefined
         ),
       `No client id or exchange id were informed.`,
       false
@@ -381,7 +381,7 @@ export const validateGetOrdersRequest: RequestValidator =
               !(
                 request &&
                 request.ids === undefined &&
-                request.exchangeIds === undefined
+                request.exchangeOrderIds === undefined
               ),
             `No client ids or exchange ids were informed.`,
             false
@@ -433,7 +433,7 @@ export const validateCreateOrdersRequest: RequestValidator =
           validateOrderType,
         ],
         (item, index) =>
-          `Invalid create orders request at position ${index} with id / exchange id "${item.id} / ${item.exchangeId}":`
+          `Invalid create orders request at position ${index} with id / exchange id "${item.id} / ${item.exchangeOrderId}":`
       ),
     ],
     StatusCodes.BAD_REQUEST
@@ -487,7 +487,7 @@ export const validateGetOpenOrderRequest: RequestValidator =
           !(
             request &&
             request.id === undefined &&
-            request.exchangeId === undefined
+            request.exchangeOrderId === undefined
           ),
         `No client id or exchange id were informed.`,
         false
@@ -518,7 +518,7 @@ export const validateGetOpenOrdersRequest: RequestValidator =
               !(
                 request &&
                 request.ids === undefined &&
-                request.exchangeIds === undefined
+                request.exchangeOrderIds === undefined
               ),
             `No client ids or exchange ids were informed.`,
             false
@@ -543,7 +543,7 @@ export const validateGetFilledOrderRequest: RequestValidator =
           !(
             request &&
             request.id === undefined &&
-            request.exchangeId === undefined
+            request.exchangeOrderId === undefined
           ),
         `No client id or exchange id were informed.`,
         false
@@ -574,7 +574,7 @@ export const validateGetFilledOrdersRequest: RequestValidator =
               !(
                 request &&
                 request.ids === undefined &&
-                request.exchangeIds === undefined
+                request.exchangeOrderIds === undefined
               ),
             `No client ids or exchange ids were informed.`,
             false
@@ -593,7 +593,7 @@ export const validateSettleFundsRequest: RequestValidator =
     [validateOrderMarketName, validateOrderOwnerAddress],
     StatusCodes.BAD_REQUEST,
     (request) =>
-      `Error when trying to settle funds for market "${request.marketName}."`
+      `Error when trying to settle funds for market "${request.marketId}."`
   );
 
 export const validateSettleFundsSeveralRequest: RequestValidator =
