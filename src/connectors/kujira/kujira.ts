@@ -47,7 +47,7 @@ import {
   convertKujiraMarketToMarket,
   convertToTicker,
 } from './kujira.convertors';
-import { TickerSource } from '../../../../temporary/hummingbot/gateway/src/connectors/serum/serum.types';
+import { TickerSource } from '../../../../temporary/hummingbot/gateway/src/connectors/kujira/kujira.types';
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
@@ -57,8 +57,6 @@ import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingco
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
   markets: new CacheContainer(new MemoryStorage()),
-  serumFindQuoteTokenAccountsForOwner: new CacheContainer(new MemoryStorage()),
-  serumFindBaseTokenAccountsForOwner: new CacheContainer(new MemoryStorage()),
 };
 
 export type Kujiraish = Kujira;
@@ -530,7 +528,7 @@ export class Kujira {
    * @param options
    */
   async cancelAllOrders(
-    options: CancelAllOrdersOptions
+    options?: CancelAllOrdersOptions
   ): Promise<IMap<OrderExchangeOrderId, Order>> {
     // TODO implement!!!
   }
@@ -558,7 +556,7 @@ export class Kujira {
    * @param options
    */
   async settleAllFunds(
-    options: SettleAllFundsOptions
+    options?: SettleAllFundsOptions
   ): Promise<IMap<MarketId, SettleFund>> {
     // TODO implement!!!
   }
