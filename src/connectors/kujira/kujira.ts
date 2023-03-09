@@ -1,12 +1,8 @@
-// // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// // @ts-nocheck
-// /* eslint-disable @typescript-eslint/no-unused-vars */
-
 import {
+  BasicKujiraMarket,
+  CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
-  CancelAllOrdersOptions,
-  ExchangeOrderId,
   GetAllMarketsOptions,
   GetAllOrderBookOptions,
   GetAllTickerOptions,
@@ -15,15 +11,57 @@ import {
   GetOrderBookOptions,
   GetOrderBooksOptions,
   GetOrderOptions,
+  GetOrdersOptions,
   GetTickerOptions,
   GetTickersOptions,
-  MarketAddress,
   PlaceOrderOptions,
   PlaceOrdersOptions,
-  SettleFundsOptions,
   SettleAllFundsOptions,
+  SettleFundsOptions,
+  SettleSeveralFundsOptions,
 } from './kujira.types';
-import { IMap } from '../../../../temporary/hummingbot/gateway/src/connectors/kujira/kujira.types';
+import {
+  IMap,
+  Market,
+  MarketId,
+  MarketNotFoundError,
+  Order,
+  OrderBook,
+  OrderExchangeOrderId,
+  SettleFund,
+  Ticker,
+  TickerNotFoundError,
+} from '../../clob/clob.types';
+import { KujiraConfig } from './kujira.config';
+import { CosmosConfig } from '../../chains/cosmos/cosmos.config';
+import { Cosmos } from '../../chains/cosmos/cosmos';
+import {
+  getNotNullOrThrowError,
+  promiseAllInBatches,
+  runWithRetryAndTimeout,
+} from './kujira.helpers';
+import { fin, KujiraQueryClient } from 'kujira.js';
+import axios from 'axios';
+import constants from './kujira.constants';
+import {
+  convertKujiraMarketToMarket,
+  convertToTicker,
+} from './kujira.convertors';
+import { TickerSource } from '../../../../temporary/hummingbot/gateway/src/connectors/serum/serum.types';
+import { Cache, CacheContainer } from 'node-ts-cache';
+import { MemoryStorage } from 'node-ts-cache-storage-memory';
+import { AccountData } from '@cosmjs/proto-signing/build/signer';
+import { SigningStargateClient } from '@cosmjs/stargate';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
+
+const caches = {
+  instances: new CacheContainer(new MemoryStorage()),
+  markets: new CacheContainer(new MemoryStorage()),
+  serumFindQuoteTokenAccountsForOwner: new CacheContainer(new MemoryStorage()),
+  serumFindBaseTokenAccountsForOwner: new CacheContainer(new MemoryStorage()),
+};
+
+export type Kujiraish = Kujira;
 
 /**
  *
@@ -45,13 +83,31 @@ export class Kujira {
    *
    * @private
    */
-  private readonly cosmosConfig: CosmosConfig;
+  private readonly cosmosConfig: CosmosConfig.Config;
 
   /**
    *
    * @private
    */
-  private readonly connection: Connection;
+  private readonly account: AccountData;
+
+  /**
+   *
+   * @private
+   */
+  private readonly querier: KujiraQueryClient;
+
+  /**
+   *
+   * @private
+   */
+  private readonly stargateClient: SigningStargateClient;
+
+  /**
+   *
+   * @private
+   */
+  private readonly signingCosmWasmClient: SigningCosmWasmClient;
 
   /**
    *
@@ -92,9 +148,14 @@ export class Kujira {
     this.network = network;
 
     this.config = KujiraConfig.config;
-    this.cosmosConfig = getCosmosConfig(chain, network);
+    this.cosmosConfig = CosmosConfig.config;
 
-    this.connection = new Connection(this.cosmosConfig.network.rpcUrl);
+    this.cosmos = null;
+
+    this.account = null;
+    this.querier = null;
+    this.stargateClient = null;
+    this.signingCosmWasmClient = null;
   }
 
   @Cache(caches.markets, { ttl: constants.cache.marketsData })
@@ -154,23 +215,18 @@ export class Kujira {
   }
 
   /**
-   */
-  getConnection(): Connection {
-    return this.connection;
-  }
-
-  /**
    *
    * @param options
    */
-  async getMarket(options: GetMarketOptions = {}): Promise<Market> {
+  async getMarket(options: GetMarketOptions): Promise<Market> {
     if (!options.id) throw new MarketNotFoundError(`No market informed.`);
 
     const markets = await this.getAllMarkets();
 
     const market = markets.get(options.id);
 
-    if (!market) throw new MarketNotFoundError(`Market "${id}" not found.`);
+    if (!market)
+      throw new MarketNotFoundError(`Market "${options.id}" not found.`);
 
     return market;
   }
@@ -180,12 +236,14 @@ export class Kujira {
    * @param options
    */
   async getMarkets(
-    options: GetMarketsOptions = {}
-  ): Promise<IMap<MarketAddress, Market>> {
+    options: GetMarketsOptions
+  ): Promise<IMap<MarketId, Market>> {
+    if (!options.ids) throw new MarketNotFoundError(`No market informed.`);
+
     const markets = IMap<string, Market>().asMutable();
 
-    const getMarket = async (id: MarketAddress): Promise<void> => {
-      const market = await this.getMarket(id);
+    const getMarket = async (id: MarketId): Promise<void> => {
+      const market = await this.getMarket({ id });
 
       markets.set(id, market);
     };
@@ -200,8 +258,8 @@ export class Kujira {
    */
   @Cache(caches.markets, { ttl: constants.cache.markets })
   async getAllMarkets(
-    options: GetAllMarketsOptions = {}
-  ): Promise<IMap<MarketAddress, Market>> {
+    options?: GetAllMarketsOptions
+  ): Promise<IMap<MarketId, Market>> {
     const allMarkets = IMap<string, Market>().asMutable();
 
     let marketsData: BasicKujiraMarket[] = await this.kujiraGetMarketsData();
@@ -235,7 +293,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getOrderBook(options: GetOrderBookOptions = {}): Promise<OrderBook> {
+  async getOrderBook(options: GetOrderBookOptions): Promise<OrderBook> {
     const market = await this.getMarket(options.marketId);
 
     const orderBook = await this.kujiraGetOrderBook(market.id);
@@ -248,8 +306,8 @@ export class Kujira {
    * @param options
    */
   async getOrderBooks(
-    options: GetOrderBooksOptions = {}
-  ): Promise<IMap<MarketAddress, OrderBook>> {
+    options: GetOrderBooksOptions
+  ): Promise<IMap<MarketId, OrderBook>> {
     const orderBooks = IMap<string, OrderBook>().asMutable();
 
     const getOrderBook = async (marketId: string): Promise<void> => {
@@ -268,8 +326,8 @@ export class Kujira {
    * @param _options
    */
   async getAllOrderBooks(
-    _options: GetAllOrderBookOptions = {}
-  ): Promise<IMap<MarketAddress, OrderBook>> {
+    _options: GetAllOrderBookOptions
+  ): Promise<IMap<MarketId, OrderBook>> {
     const marketsIds = Array.from((await this.getAllMarkets()).keys());
 
     return this.getOrderBooks(marketsIds);
@@ -279,7 +337,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getTicker(options: GetTickerOptions = {}): Promise<Ticker> {
+  async getTicker(options: GetTickerOptions): Promise<Ticker> {
     const market = await this.getMarket(marketId);
 
     for (const [source, config] of this.config.tickers.sources) {
@@ -294,15 +352,15 @@ export class Kujira {
 
           const finalUrl = (
             config.url ||
-            'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=kujira_dex&interval=1m&market=${marketAddress}'
-          ).replace('${marketAddress}', tickerAddress);
+            'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=kujira_dex&interval=1m&market=${MarketId}'
+          ).replace('${MarketId}', tickerAddress);
 
           const result: { price: any; last_updated_at: any } = (
             await runWithRetryAndTimeout(
               axios,
               axios.get,
               [finalUrl],
-              cosmosConstants.retry.all.maxNumberOfRetries,
+              constants.retry.all.maxNumberOfRetries,
               0
             )
           ).data.items[0];
@@ -333,7 +391,7 @@ export class Kujira {
               return getNotNullOrThrowError(result);
             },
             [symbol],
-            cosmosConstants.retry.all.maxNumberOfRetries,
+            constants.retry.all.maxNumberOfRetries,
             0
           );
 
@@ -386,8 +444,8 @@ export class Kujira {
    * @param options
    */
   async getTickers(
-    options: GetTickersOptions = {}
-  ): Promise<IMap<MarketAddress, Ticker>> {
+    options: GetTickersOptions
+  ): Promise<IMap<MarketId, Ticker>> {
     const tickers = IMap<string, Ticker>().asMutable();
 
     const getTicker = async (marketId: string): Promise<void> => {
@@ -406,8 +464,8 @@ export class Kujira {
    * @param _options
    */
   async getAllTickers(
-    _options: GetAllTickerOptions = {}
-  ): Promise<IMap<MarketAddress, Ticker>> {
+    _options: GetAllTickerOptions
+  ): Promise<IMap<MarketId, Ticker>> {
     const marketsIds = Array.from((await this.getAllMarkets()).keys());
 
     return await this.getTickers(marketsIds);
@@ -417,7 +475,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getOrder(options: GetOrderOptions = {}): Promise<Order> {
+  async getOrder(options: GetOrderOptions): Promise<Order> {
     // TODO implement!!!
   }
 
@@ -426,8 +484,8 @@ export class Kujira {
    * @param options
    */
   async getOrders(
-    options: GetOrdersOptions = {}
-  ): Promise<IMap<ExchangeOrderId, Order>> {
+    options: GetOrdersOptions
+  ): Promise<IMap<OrderExchangeOrderId, Order>> {
     // TODO implement!!!
   }
 
@@ -435,7 +493,7 @@ export class Kujira {
    *
    * @param options
    */
-  async placeOrder(options: PlaceOrderOptions = {}): Promise<Order> {
+  async placeOrder(options: PlaceOrderOptions): Promise<Order> {
     return (await this.placeOrders([candidate])).first();
   }
 
@@ -444,8 +502,8 @@ export class Kujira {
    * @param options
    */
   async placeOrders(
-    options: PlaceOrdersOptions = {}
-  ): Promise<IMap<ExchangeOrderId, Order>> {
+    options: PlaceOrdersOptions
+  ): Promise<IMap<OrderExchangeOrderId, Order>> {
     // TODO implement!!!
   }
 
@@ -453,7 +511,7 @@ export class Kujira {
    *
    * @param options
    */
-  async cancelOrder(options: CancelOrderOptions = {}): Promise<Order> {
+  async cancelOrder(options: CancelOrderOptions): Promise<Order> {
     // TODO implement!!!
   }
 
@@ -462,8 +520,8 @@ export class Kujira {
    * @param options
    */
   async cancelOrders(
-    options: CancelOrdersOptions = {}
-  ): Promise<IMap<ExchangeOrderId, Order>> {
+    options: CancelOrdersOptions
+  ): Promise<IMap<OrderExchangeOrderId, Order>> {
     // TODO implement!!!
   }
 
@@ -473,7 +531,7 @@ export class Kujira {
    */
   async cancelAllOrders(
     options: CancelAllOrdersOptions
-  ): Promise<IMap<ExchangeOrderId, Order>> {
+  ): Promise<IMap<OrderExchangeOrderId, Order>> {
     // TODO implement!!!
   }
 
@@ -481,7 +539,7 @@ export class Kujira {
    *
    * @param options
    */
-  async settleFunds(options: SettleFundsOptions = {}): Promise<SettleFunds> {
+  async settleFunds(options: SettleFundsOptions): Promise<SettleFund> {
     // TODO implement!!!
   }
 
@@ -490,8 +548,8 @@ export class Kujira {
    * @param options
    */
   async settleSeveralFunds(
-    options: SettleSeveralFundsOptions = {}
-  ): Promise<IMap<MarketAddress, SettleFunds>> {
+    options: SettleSeveralFundsOptions
+  ): Promise<IMap<MarketId, SettleFund>> {
     // TODO implement!!!
   }
 
@@ -500,10 +558,8 @@ export class Kujira {
    * @param options
    */
   async settleAllFunds(
-    options: SettleAllFundsOptions = {}
-  ): Promise<IMap<MarketAddress, SettleFunds>> {
+    options: SettleAllFundsOptions
+  ): Promise<IMap<MarketId, SettleFund>> {
     // TODO implement!!!
   }
 }
-
-export type Kujiraish = Kujira;

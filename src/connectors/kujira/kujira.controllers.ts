@@ -26,7 +26,7 @@ import {
   CLOBPostSettleFundsResponse,
 } from '../../clob/clob.requests';
 import {
-  Fund,
+  SettleFund,
   IMap,
   Market,
   MarketNotFoundError,
@@ -659,7 +659,7 @@ export async function settleFunds(
 
     try {
       response.body = convertToJsonIfNeeded(
-        convert<Fund[], CLOBPostSettleFundsResponse>(
+        convert<SettleFund[], CLOBPostSettleFundsResponse>(
           await kujira.settleFundsForMarket(
             request.marketId,
             request.ownerAddress
@@ -685,7 +685,7 @@ export async function settleFunds(
 
     try {
       response.body = convertToJsonIfNeeded(
-        convert<IMap<string, Fund[]>, CLOBPostSettleFundsResponse>(
+        convert<IMap<string, SettleFund[]>, CLOBPostSettleFundsResponse>(
           await kujira.settleFundsForMarkets(
             request.marketIds,
             request.ownerAddress
@@ -709,7 +709,7 @@ export async function settleFunds(
   validateSettleAllFundsRequest(request);
 
   response.body = convertToJsonIfNeeded(
-    convert<IMap<string, Fund[]>, CLOBPostSettleFundsResponse>(
+    convert<IMap<string, SettleFund[]>, CLOBPostSettleFundsResponse>(
       await kujira.settleAllFunds(request.ownerAddress),
       Types.PostSettleFundsResponse
     )

@@ -22,8 +22,7 @@ export const constants = {
     },
   },
   cache: {
-    marketsInformation:
-      configManager.get('kujira.cache.marketsInformation') || 3600, // in seconds
+    marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
     markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
   },
   orders: {

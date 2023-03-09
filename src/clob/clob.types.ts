@@ -72,7 +72,7 @@ export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionSignatures = TransactionSignatures;
 export type OrderReplaceIfExists = boolean;
 
-export type Fund = TransactionSignature;
+export type SettleFund = TransactionSignature;
 
 export type FeeMaker = Fee;
 export type FeeTaker = Fee;

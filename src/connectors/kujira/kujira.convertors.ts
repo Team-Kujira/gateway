@@ -5,7 +5,7 @@ import {
   CreateOrderResponse,
   CreateOrdersRequest,
   CreateOrdersResponse,
-  Fund,
+  SettleFund,
   GetFilledOrderResponse,
   GetFilledOrdersResponse,
   GetMarketResponse,
@@ -49,14 +49,14 @@ export enum Types {
   PostSettleFundsResponse = 'PostSettleFundsResponse',
 }
 
-type SingleInput = Market | OrderBook | Ticker | Order | Fund[];
+type SingleInput = Market | OrderBook | Ticker | Order | SettleFund[];
 
 type InputMap =
   | IMap<string, Market>
   | IMap<string, OrderBook>
   | IMap<string, Ticker>
   | IMap<string, Order>
-  | IMap<string, Fund[]>;
+  | IMap<string, SettleFund[]>;
 
 type InputMapMap = IMap<string, InputMap>;
 
@@ -151,7 +151,7 @@ export const convertSingle = <O extends Output>(
     return convertToGetFilledOrderResponse(input as Order) as O;
 
   if (type === Types.PostSettleFundsResponse)
-    return convertToPostSettleFundsResponse(input as Fund[]) as O;
+    return convertToPostSettleFundsResponse(input as SettleFund[]) as O;
 
   throw new Error(`Unsupported input type "${type}".`);
 };
@@ -401,7 +401,7 @@ export const convertToGetFilledOrderResponse = (
 };
 
 export const convertToPostSettleFundsResponse = (
-  input: Fund[]
+  input: SettleFund[]
 ): SettleFundsResponse => {
   return input;
 };

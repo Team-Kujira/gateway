@@ -1,6 +1,8 @@
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 import { AvailableNetworks } from '../../services/config-manager-types';
 
+const configManager = ConfigManagerV2.getInstance();
+
 export namespace KujiraConfig {
   export interface Config {
     availableNetworks: Array<AvailableNetworks>;
@@ -33,38 +35,32 @@ export namespace KujiraConfig {
   }
 
   export const config: Config = {
-    tradingTypes: ['SOL_CLOB'],
+    tradingTypes: ['CLOB_COSMOS_KUJIRA'],
     markets: {
-      url: ConfigManagerV2.getInstance().get(`kujira.markets.url`),
-      blacklist: ConfigManagerV2.getInstance().get(`kujira.markets.blacklist`),
-      whiteList: ConfigManagerV2.getInstance().get(`kujira.markets.whitelist`),
+      url: configManager.get(`kujira.markets.url`),
+      blacklist: configManager.get(`kujira.markets.blacklist`),
+      whiteList: configManager.get(`kujira.markets.whitelist`),
     },
     tickers: {
       sources: new Map(
-        Object.entries(
-          ConfigManagerV2.getInstance().get(`kujira.tickers.sources`)
-        )
+        Object.entries(configManager.get(`kujira.tickers.sources`))
       ),
     },
     transactions: {
       merge: {
-        createOrders: ConfigManagerV2.getInstance().get(
+        createOrders: configManager.get(
           `kujira.transactions.merge.createOrders`
         ),
-        cancelOrders: ConfigManagerV2.getInstance().get(
+        cancelOrders: configManager.get(
           `kujira.transactions.merge.cancelOrders`
         ),
-        settleFunds: ConfigManagerV2.getInstance().get(
-          `kujira.transactions.merge.settleFunds`
-        ),
+        settleFunds: configManager.get(`kujira.transactions.merge.settleFunds`),
       },
     },
     availableNetworks: [
       {
         chain: 'cosmos',
-        networks: Object.keys(
-          ConfigManagerV2.getInstance().get(`cosmos.networks`)
-        ),
+        networks: Object.keys(configManager.get(`cosmos.networks`)),
       },
     ],
   };
