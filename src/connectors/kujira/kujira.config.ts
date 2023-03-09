@@ -5,6 +5,11 @@ const configManager = ConfigManagerV2.getInstance();
 
 export namespace KujiraConfig {
   export interface Config {
+    gasPrice: string;
+    accountNumber: number;
+    prefix: string;
+    mnemonic: string;
+    rpcEndpoint: string;
     availableNetworks: Array<AvailableNetworks>;
     tradingTypes: Array<string>;
     markets: MarketsConfig;

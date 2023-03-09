@@ -16,6 +16,11 @@ export type KujiraOrder = any;
 export type KujiraOrderBook = any;
 export type KujiraOrderParams = any;
 
+export enum TickerSource {
+  NOMIMCS = 'nomics',
+  ORDER_BOOK = 'orderBook',
+}
+
 export interface GetMarketOptions {
   id?: MarketId;
 }

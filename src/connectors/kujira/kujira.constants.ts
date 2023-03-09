@@ -44,6 +44,9 @@ export const constants = {
       matchOrders: configManager.get('kujira.events.limit.matchOrders'),
     },
   },
+  prefix: 'kujira',
+  accountNumber: 0,
+  gasPrice: '0.00125ukuji',
 };
 
 export default constants;

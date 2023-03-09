@@ -19,6 +19,7 @@ import {
   SettleAllFundsOptions,
   SettleFundsOptions,
   SettleSeveralFundsOptions,
+  TickerSource,
 } from './kujira.types';
 import {
   IMap,
@@ -40,19 +41,27 @@ import {
   promiseAllInBatches,
   runWithRetryAndTimeout,
 } from './kujira.helpers';
-import { fin, KujiraQueryClient } from 'kujira.js';
+import {
+  fin,
+  kujiraQueryClient,
+  KujiraQueryClient,
+  registry,
+  TESTNET,
+} from 'kujira.js';
 import axios from 'axios';
 import constants from './kujira.constants';
 import {
   convertKujiraMarketToMarket,
   convertToTicker,
 } from './kujira.convertors';
-import { TickerSource } from '../../../../temporary/hummingbot/gateway/src/connectors/kujira/kujira.types';
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
-import { SigningStargateClient } from '@cosmjs/stargate';
+import { GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { Slip10RawIndex } from '@cosmjs/crypto';
+import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
@@ -87,25 +96,49 @@ export class Kujira {
    *
    * @private
    */
-  private readonly account: AccountData;
+  private accounts: readonly AccountData[];
 
   /**
    *
    * @private
    */
-  private readonly querier: KujiraQueryClient;
+  private account: AccountData;
 
   /**
    *
    * @private
    */
-  private readonly stargateClient: SigningStargateClient;
+  private directSecp256k1HdWallet: DirectSecp256k1HdWallet;
 
   /**
    *
    * @private
    */
-  private readonly signingCosmWasmClient: SigningCosmWasmClient;
+  private httpBatchClient: HttpBatchClient;
+
+  /**
+   *
+   * @private
+   */
+  private tendermint34Client: Tendermint34Client;
+
+  /**
+   *
+   * @private
+   */
+  private kujiraQueryClient: KujiraQueryClient;
+
+  /**
+   *
+   * @private
+   */
+  private signingStargateClient: SigningStargateClient;
+
+  /**
+   *
+   * @private
+   */
+  private signingCosmWasmClient: SigningCosmWasmClient;
 
   /**
    *
@@ -147,13 +180,6 @@ export class Kujira {
 
     this.config = KujiraConfig.config;
     this.cosmosConfig = CosmosConfig.config;
-
-    this.cosmos = null;
-
-    this.account = null;
-    this.querier = null;
-    this.stargateClient = null;
-    this.signingCosmWasmClient = null;
   }
 
   @Cache(caches.markets, { ttl: constants.cache.marketsData })
@@ -198,6 +224,67 @@ export class Kujira {
 
       this.cosmos = await Cosmos.getInstance(this.network);
       await this.cosmos.init();
+
+      const rpcEndpoint: string = this.config.rpcEndpoint;
+
+      // TODO this needs to come from the wallet!!!
+      const mnemonic: string = this.config.mnemonic;
+
+      const prefix: string = this.config.prefix || constants.prefix;
+
+      const accountNumber: number =
+        this.config.accountNumber || constants.accountNumber;
+
+      const gasPrice: string = this.config.gasPrice || constants.gasPrice;
+
+      // signer
+      this.directSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(
+        mnemonic,
+        {
+          prefix: prefix,
+          hdPaths: [
+            [
+              Slip10RawIndex.hardened(44),
+              Slip10RawIndex.hardened(118),
+              Slip10RawIndex.hardened(0),
+              Slip10RawIndex.normal(0),
+              Slip10RawIndex.normal(accountNumber),
+            ],
+          ],
+        }
+      );
+
+      this.accounts = await this.directSecp256k1HdWallet.getAccounts();
+
+      this.account = this.accounts[0];
+
+      this.httpBatchClient = new HttpBatchClient(rpcEndpoint, {
+        dispatchInterval: 2000,
+      });
+
+      this.tendermint34Client = await Tendermint34Client.create(
+        this.httpBatchClient
+      );
+
+      this.kujiraQueryClient = kujiraQueryClient({
+        client: this.tendermint34Client,
+      });
+
+      this.signingStargateClient =
+        await SigningStargateClient.connectWithSigner(
+          rpcEndpoint,
+          this.directSecp256k1HdWallet,
+          {
+            registry,
+            gasPrice: GasPrice.fromString(gasPrice),
+          }
+        );
+
+      this.signingCosmWasmClient =
+        await SigningCosmWasmClient.connectWithSigner(rpcEndpoint, signer, {
+          registry,
+          gasPrice: GasPrice.fromString(gasPrice),
+        });
 
       await this.getAllMarkets();
 
