@@ -62,6 +62,18 @@ import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingco
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
+import {
+  Address,
+  ChainID,
+  Denoms,
+  Precision,
+  DecimalDelta,
+  MultiSwap,
+  Pool,
+  Queue,
+  Calc,
+  KujiraMarket,
+} from './kujira.types';
 
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
@@ -297,6 +309,30 @@ export class Kujira {
    */
   ready(): boolean {
     return this._ready;
+  }
+
+  private async kujiraLoadMarket(
+    address: Address,
+    chainID: ChainID,
+    denoms: Denoms,
+    precision: Precision,
+    decimalDelta: DecimalDelta,
+    multiswap: MultiSwap,
+    pool: Pool,
+    queue: Queue,
+    calc: Calc
+  ): Promise<KujiraMarket> {
+    return await runWithRetryAndTimeout<Promise<KujiraMarket>>(
+      address,
+      chainID,
+      denoms,
+      precision,
+      decimalDelta,
+      multiswap,
+      pool,
+      queue,
+      calc
+    );
   }
 
   /**

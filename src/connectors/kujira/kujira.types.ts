@@ -9,12 +9,36 @@ import {
   OrderStatus,
   OrderType,
 } from '../../clob/clob.types';
+import { Market as ExtendedMarket } from './extensions/market';
 
-export type KujiraMarket = any;
+export type KujiraMarket = ExtendedMarket;
+export const KujiraMarket = ExtendedMarket;
 export type BasicKujiraMarket = any;
 export type KujiraOrder = any;
 export type KujiraOrderBook = any;
 export type KujiraOrderParams = any;
+export type Address = string;
+export type ChainID = string;
+export type Denom = any[];
+export type Denoms = [Denom, Denom];
+export type Precision = any[];
+export type DecimalDelta = number;
+export type MultiSwap = boolean;
+export type Pool = string;
+export type Queue = string;
+export type Calc = string;
+
+// export type KujiraMarket = {
+//   address: Address;
+//   chainID: ChainID;
+//   denoms: Denoms;
+//   precision: Precision;
+//   decimalDelta: DecimalDelta;
+//   multiswap: MultiSwap;
+//   pool: Pool;
+//   queue: Queue;
+//   calc: Calc;
+// };
 
 export enum TickerSource {
   NOMIMCS = 'nomics',
