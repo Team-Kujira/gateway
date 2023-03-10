@@ -44,9 +44,13 @@ export const constants = {
       matchOrders: configManager.get('kujira.events.limit.matchOrders'),
     },
   },
-  prefix: 'kujira',
-  accountNumber: 0,
-  gasPrice: '0.00125ukuji',
+  prefix: configManager.get('kujira.prefix') || 'kujira',
+  accountNumber: configManager.get('kujira.accountNumber') || 0,
+  gasPrice: configManager.get('kujira.gasPrice') || '0.00125ukuji',
+  orderBook: {
+    offset: configManager.get('kujira.orderBook.offset') || 0,
+    limit: configManager.get('kujira.orderBook.limit') || 100,
+  },
 };
 
 export default constants;

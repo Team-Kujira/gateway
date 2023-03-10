@@ -36,6 +36,7 @@ import {
   KujiraOrderBook,
   KujiraOrderParams,
 } from './kujira.types';
+import { fin, NETWORK } from 'kujira.js';
 
 export enum Types {
   GetMarketsResponse = 'GetMarketsResponse',
@@ -164,10 +165,7 @@ export const convertToJsonIfNeeded = (input: any): any => {
   return output;
 };
 
-export const convertKujiraMarketToMarket = (
-  market: KujiraMarket,
-  extraInfo: Record<string, unknown> | BasicKujiraMarket
-): Market => {
+export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
   return {
     name: extraInfo.name,
     id: extraInfo.address,
@@ -181,10 +179,9 @@ export const convertKujiraMarketToMarket = (
   } as Market;
 };
 
-export const convertMarketBidsAndAsksToOrderBook = (
+export const convertKujiraOrderBookToOrderBook = (
   market: Market,
-  asks: KujiraOrderBook,
-  bids: KujiraOrderBook
+  kujiraOrderBook: KujiraOrderBook
 ): OrderBook => {
   return {
     market: market,
@@ -404,6 +401,10 @@ export const convertToPostSettleFundsResponse = (
   input: SettleFund[]
 ): SettleFundsResponse => {
   return input;
+};
+
+export const convertNetworkToKujiraNetwork = (input: string): NETWORK => {
+  return input.toLowerCase() as NETWORK;
 };
 
 export const convertOrderSideToKujiraSide = (

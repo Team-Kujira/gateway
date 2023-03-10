@@ -2136,6 +2136,14 @@
     "@improbable-eng/grpc-web" "^0.13.0"
     google-protobuf "^3.13.0"
 
+"@injectivelabs/chain-api@^1.9.9":
+  version "1.9.11"
+  resolved "https://registry.yarnpkg.com/@injectivelabs/chain-api/-/chain-api-1.9.11.tgz#cca6a40402bfee64726b7310f885287c28fcabe8"
+  integrity sha512-GXV8HidgwSxgpi4NH2lr8KyZFJgZQimNZgwuhatL2WXLqdHJ+/U0BNPu/gowxIAh31Q5mRtTGolu3n/BV439eg==
+  dependencies:
+    "@injectivelabs/grpc-web" "^0.0.1"
+    google-protobuf "^3.13.0"
+
 "@injectivelabs/contracts@^1.0.105":
   version "1.0.105"
   resolved "https://registry.yarnpkg.com/@injectivelabs/contracts/-/contracts-1.0.105.tgz#b949a2077bbb89e1e6606080fb0d12a8036d8cc8"
@@ -2160,6 +2168,13 @@
     http-status-codes "^2.2.0"
     link-module-alias "^1.2.0"
     shx "^0.3.2"
+
+"@injectivelabs/grpc-web@^0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@injectivelabs/grpc-web/-/grpc-web-0.0.1.tgz#24c028f6db50e589e30505efd2077110c8b492ba"
+  integrity sha512-Pu5YgaZp+OvR5UWfqbrPdHer3+gDf+b5fQoY+t2VZx1IAVHX8bzbN9EreYTvTYtFeDpYRWM8P7app2u4EX5wTw==
+  dependencies:
+    browser-headers "^0.4.1"
 
 "@injectivelabs/indexer-api@1.9.3":
   version "1.9.3"
@@ -2684,9 +2699,9 @@
     long "^4.0.0"
 
 "@keplr-wallet/types@^0.11.12":
-  version "0.11.44"
-  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.11.44.tgz#37589ed9c6b20211de8480ecb99edc7b1eaa1e0f"
-  integrity sha512-QR7oh3r2yFP7vBHVh3MnTt+E+sFV4tATD8b6rnO7ym6B3Novm69TQgo4EM9uqh0LUSnWHPQFN9unyTKtnNvApw==
+  version "0.11.45"
+  resolved "https://registry.yarnpkg.com/@keplr-wallet/types/-/types-0.11.45.tgz#0ed229e31ba469852be3e09e6300fd23f157b1a4"
+  integrity sha512-h0yC9JyymqRnwlzLPwifiO/1czR56Gkdh/kRUfdPMv5Eyqkt89+pctj/CbSaQiXs5bEPgndgIvTsL4TMkTRqcg==
   dependencies:
     axios "^0.27.2"
     long "^4.0.0"
@@ -4891,7 +4906,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/google-protobuf@^3.15.5":
+"@types/google-protobuf@^3.15.5", "@types/google-protobuf@^3.15.6":
   version "3.15.6"
   resolved "https://registry.yarnpkg.com/@types/google-protobuf/-/google-protobuf-3.15.6.tgz#674a69493ef2c849b95eafe69167ea59079eb504"
   integrity sha512-pYVNNJ+winC4aek+lZp93sIKxnXt5qMkuKmaqS3WGuTq0Bw1ZDYNBgzG5kkdtwcv+GmYJGo3yEg6z2cKKAiEdw==
@@ -12421,13 +12436,15 @@ kleur@^3.0.3:
 
 "kujira.js@https://github.com/Team-Kujira/kujira.js":
   version "0.5.0"
-  resolved "https://github.com/Team-Kujira/kujira.js#fcb82ba88a990b21b5bdf688f0a3b28b99add52f"
+  resolved "https://github.com/Team-Kujira/kujira.js#073217b72015013b088a01b729a9c94ddc856c9d"
   dependencies:
     "@cosmjs/cosmwasm-stargate" "^0.29.4"
     "@cosmjs/launchpad" "^0.27.1"
     "@cosmjs/stargate" "^0.29.4"
     "@ethersproject/bignumber" "^5.7.0"
+    "@injectivelabs/chain-api" "^1.9.9"
     "@keplr-wallet/types" "^0.11.12"
+    "@types/google-protobuf" "^3.15.6"
     cosmjs-types "0.5.2"
     long "^4.0.0"
     text-encoding "^0.7.0"

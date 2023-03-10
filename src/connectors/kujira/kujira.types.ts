@@ -9,40 +9,20 @@ import {
   OrderStatus,
   OrderType,
 } from '../../clob/clob.types';
-import { Market as ExtendedMarket } from './extensions/market';
+import { fin } from 'kujira.js';
+import { JsonObject } from '@cosmjs/cosmwasm-stargate';
 
-export type KujiraMarket = ExtendedMarket;
-export const KujiraMarket = ExtendedMarket;
-export type BasicKujiraMarket = any;
+export type BasicKujiraMarket = fin.Pair;
 export type KujiraOrder = any;
-export type KujiraOrderBook = any;
+export type KujiraOrderBook = JsonObject;
 export type KujiraOrderParams = any;
-export type Address = string;
-export type ChainID = string;
-export type Denom = any[];
-export type Denoms = [Denom, Denom];
-export type Precision = any[];
-export type DecimalDelta = number;
-export type MultiSwap = boolean;
-export type Pool = string;
-export type Queue = string;
-export type Calc = string;
-
-// export type KujiraMarket = {
-//   address: Address;
-//   chainID: ChainID;
-//   denoms: Denoms;
-//   precision: Precision;
-//   decimalDelta: DecimalDelta;
-//   multiswap: MultiSwap;
-//   pool: Pool;
-//   queue: Queue;
-//   calc: Calc;
-// };
 
 export enum TickerSource {
-  NOMIMCS = 'nomics',
-  ORDER_BOOK = 'orderBook',
+  NOMICS = 'nomics',
+  ORDER_BOOK_SAP = 'orderBookSimpleAveragePrice',
+  ORDER_BOOK_WAP = 'orderBookWeightedAverage',
+  ORDER_BOOK_VWAP = 'orderBookVolumeWeightedAveragePrice',
+  LAST_FILLED_ORDER = 'lastFilledOrder',
 }
 
 export interface GetMarketOptions {
@@ -86,6 +66,7 @@ export interface GetOrderOptions {
 
 export interface GetOrdersOptions {
   exchangeOrderIds?: [OrderExchangeOrderId];
+  ownerAddress?: OrderOwnerAddress;
   ownerAddresses?: [OrderOwnerAddress];
   statuses?: [OrderStatus];
 }
