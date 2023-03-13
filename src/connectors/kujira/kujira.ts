@@ -29,6 +29,8 @@ import {
   Order,
   OrderBook,
   OrderExchangeOrderId,
+  OrderNotFoundError,
+  OrderSide,
   SettleFund,
   Ticker,
   TickerNotFoundError,
@@ -42,29 +44,35 @@ import {
   runWithRetryAndTimeout,
 } from './kujira.helpers';
 import {
+  Denom,
   fin,
   kujiraQueryClient,
   KujiraQueryClient,
-  NETWORK,
+  msg,
   registry,
 } from 'kujira.js';
+import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import constants from './kujira.constants';
 import {
+  convertArrayOfKujiraOrdersToMapOfOrders,
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
+  convertKujiraOrderToOrder,
   convertNetworkToKujiraNetwork,
   convertToTicker,
 } from './kujira.convertors';
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
-import { GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
-import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { DirectSecp256k1HdWallet, EncodeObject } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { JsonObject } from '@cosmjs/cosmwasm-stargate';
+import { StdFee } from '@cosmjs/amino';
+import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
 
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
@@ -96,10 +104,12 @@ export class Kujira {
   private readonly cosmosConfig: CosmosConfig.Config;
 
   /**
+   * The correct type for this property would be kujira.js/NETWORK
+   *  but the compile method is incompatible with it.
    *
    * @private
    */
-  private kujiraNetwork: NETWORK;
+  private readonly kujiraNetwork: keyof typeof contracts;
 
   /**
    *
@@ -201,6 +211,8 @@ export class Kujira {
 
     this.config = KujiraConfig.config;
     this.cosmosConfig = CosmosConfig.config;
+
+    this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
   }
 
   /**
@@ -209,8 +221,6 @@ export class Kujira {
   async init() {
     if (!this.isReady && !this.isInitializing) {
       this.isInitializing = true;
-
-      this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
 
       this.cosmos = await Cosmos.getInstance(this.network);
       await this.cosmos.init();
@@ -333,19 +343,27 @@ export class Kujira {
     return marketsData;
   }
 
-  private async kujiraGetOrderBook(market: Market): Promise<JsonObject> {
+  private async kujiraQueryClientWasmQueryContractSmart(
+    address: string,
+    query: JsonObject
+  ): Promise<JsonObject> {
     return await runWithRetryAndTimeout<Promise<JsonObject>>(
       this.kujiraQueryClient,
       this.kujiraQueryClient.wasm.queryContractSmart,
-      [
-        market.connectorMarket.address,
-        {
-          book: {
-            offset: constants.orderBook.offset,
-            limit: constants.orderBook.limit,
-          },
-        },
-      ]
+      [address, query]
+    );
+  }
+
+  private async kujiraSigningStargateClientSignAndBroadcast(
+    signerAddress: string,
+    messages: readonly EncodeObject[],
+    fee: StdFee | 'auto' | number,
+    memo?: string
+  ): Promise<DeliverTxResponse> {
+    return await runWithRetryAndTimeout<Promise<JsonObject>>(
+      this.signingStargateClient,
+      this.signingStargateClient.signAndBroadcast,
+      [signerAddress, messages, fee, memo]
     );
   }
 
@@ -426,7 +444,15 @@ export class Kujira {
   async getOrderBook(options: GetOrderBookOptions): Promise<OrderBook> {
     const market = await this.getMarket({ id: options.marketId });
 
-    const orderBook = await this.kujiraGetOrderBook(market);
+    const orderBook = await this.kujiraQueryClientWasmQueryContractSmart(
+      market.connectorMarket.address,
+      {
+        book: {
+          offset: constants.orderBook.offset,
+          limit: constants.orderBook.limit,
+        },
+      }
+    );
 
     return convertKujiraOrderBookToOrderBook(market, orderBook);
   }
@@ -472,7 +498,46 @@ export class Kujira {
 
     for (const [source, config] of this.config.tickers.sources) {
       try {
-        if (source === TickerSource.NOMICS) {
+        if (!source || source === TickerSource.ORDER_BOOK_SAP) {
+          const orderBook = await this.getOrderBook({ marketId: market.id });
+          const bestBid = orderBook.bestBid;
+          const bestAsk = orderBook.bestAsk;
+
+          const simpleAveragePrice =
+            (getNotNullOrThrowError<Order>(bestBid).price +
+              getNotNullOrThrowError<Order>(bestAsk).price) /
+            2;
+
+          const result = {
+            price: simpleAveragePrice,
+            timestamp: Date.now(),
+          };
+
+          return convertToTicker(result);
+        } else if (source === TickerSource.ORDER_BOOK_WAP) {
+          // TODO Calculate mid price from the best bid and ask!!!
+          throw Error('Not implemented.');
+        } else if (source === TickerSource.ORDER_BOOK_VWAP) {
+          // TODO Calculate mid price from the best bid and ask!!!
+          throw Error('Not implemented.');
+        } else if (source === TickerSource.LAST_FILLED_ORDER) {
+          const filledOrders = await this.getFilledOrders({});
+
+          if (filledOrders.size) {
+            const lastFilledOrder = filledOrders.values().next().value;
+
+            const result = {
+              price: lastFilledOrder.price,
+              timestamp: Date.now(),
+            };
+
+            return convertToTicker(result);
+          } else {
+            throw new TickerNotFoundError(
+              `Ticker data is currently not available for market "${market.id}".`
+            );
+          }
+        } else if (source === TickerSource.NOMICS) {
           const finalUrl = (
             config.url ||
             'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=kujira_dex&interval=1m&market=${marketAddress}'
@@ -489,30 +554,6 @@ export class Kujira {
           ).data.items[0];
 
           return convertToTicker(result);
-        } else if (source === TickerSource.LAST_FILLED_ORDER) {
-          const filledOrders = await this.getFilledOrders({});
-
-          if (filledOrders.size) {
-            const lastFilledOrder = filledOrders.values().next().value;
-
-            const result = {
-              price: lastFilledOrder.price,
-              timestamp: Date.now(),
-              ticker: lastFilledOrder,
-            };
-
-            return convertToTicker(result);
-          } else {
-            throw new TickerNotFoundError(
-              `Ticker data is currently not available for market "${market.id}".`
-            );
-          }
-        } else if (source === TickerSource.ORDER_BOOK_SAP) {
-          // TODO Calculate mid price from the best bid and ask!!!
-        } else if (source === TickerSource.ORDER_BOOK_WAP) {
-          // TODO Calculate mid price from the best bid and ask!!!
-        } else if (source === TickerSource.ORDER_BOOK_VWAP) {
-          // TODO Calculate mid price from the best bid and ask!!!
         } else {
           throw new TickerNotFoundError(
             `Ticker source (${source}) not supported, check your kujira configuration file.`
@@ -524,7 +565,7 @@ export class Kujira {
     }
 
     throw new TickerNotFoundError(
-      `Ticker data is currently not available for market "${marketId}".`
+      `Ticker data is currently not available for market "${options.marketId}".`
     );
   }
 
@@ -565,7 +606,68 @@ export class Kujira {
    * @param options
    */
   async getOrder(options: GetOrderOptions): Promise<Order> {
-    // TODO implement!!!
+    if (options.marketId) {
+      const market = await this.getMarket({ id: options.marketId });
+
+      const result = await this.kujiraQueryClientWasmQueryContractSmart(
+        market.connectorMarket.address,
+        {
+          order: {
+            order_idx: options.exchangeOrderId,
+          },
+        }
+      );
+
+      if (!result) {
+        throw new OrderNotFoundError(
+          `Order with id "${options.exchangeOrderId}" not found in market "${market.id}".`
+        );
+      }
+
+      const order = convertKujiraOrderToOrder(market, result);
+
+      if (options.status && order.status !== options.status) {
+        throw new OrderNotFoundError(
+          `Order with id "${options.exchangeOrderId}" with status "${options.status}" not found in market "${market.id}".`
+        );
+      } else if (
+        options.statuses &&
+        !options.statuses.includes(getNotNullOrThrowError(order.status))
+      ) {
+        throw new OrderNotFoundError(
+          `Order with id "${
+            options.exchangeOrderId
+          }" with one of the statuses "${options.statuses.join(
+            ', '
+          )}" not found in market "${market.id}".`
+        );
+      }
+
+      if (options.ownerAddress && order.ownerAddress !== options.ownerAddress) {
+        throw new OrderNotFoundError(
+          `Order with id "${options.exchangeOrderId}" with owner address "${options.ownerAddress}" not found in market "${market.id}".`
+        );
+      }
+
+      return result;
+    } else {
+      for (const market of (await this.getAllMarkets({})).values()) {
+        try {
+          const order = await this.getOrder({
+            ...options,
+            marketId: market.id,
+          });
+
+          return order;
+        } catch (exception) {
+          // Ignoring so other markets can be tried.
+        }
+      }
+
+      throw new OrderNotFoundError(
+        `Order with id "${options.exchangeOrderId}" not found in any market.`
+      );
+    }
   }
 
   /**
@@ -575,13 +677,65 @@ export class Kujira {
   async getOrders(
     options: GetOrdersOptions
   ): Promise<IMap<OrderExchangeOrderId, Order>> {
-    // TODO implement!!!
-  }
+    let orders: IMap<OrderExchangeOrderId, Order>;
 
-  async getFilledOrders(
-    options: GetOrdersOptions
-  ): Promise<IMap<OrderExchangeOrderId, Order>> {
-    // TODO implement!!!
+    if (options.marketId) {
+      const market = await this.getMarket({ id: options.marketId });
+
+      const results = await this.kujiraQueryClientWasmQueryContractSmart(
+        market.connectorMarket.address,
+        {
+          orders_by_user: {
+            address: this.account.address,
+            limit: constants.orders.filled.limit,
+          },
+        }
+      );
+
+      orders = convertArrayOfKujiraOrdersToMapOfOrders(market, results);
+    } else {
+      const marketIds =
+        options.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+
+      orders = IMap<OrderExchangeOrderId, Order>().asMutable();
+
+      const getOrders = async (marketId: string): Promise<void> => {
+        const marketOrders = await this.getOrders({
+          ...options,
+          marketId,
+        });
+
+        orders.merge(marketOrders);
+      };
+
+      await promiseAllInBatches(getOrders, marketIds);
+    }
+
+    orders.filter((order) => {
+      if (options.status && order.status !== options.status) {
+        return false;
+      } else if (
+        options.statuses &&
+        !options.statuses.includes(getNotNullOrThrowError(order.status))
+      ) {
+        return false;
+      }
+
+      if (options.ownerAddress && order.ownerAddress !== options.ownerAddress) {
+        return false;
+      } else if (
+        options.ownerAddresses &&
+        !options.ownerAddresses.includes(
+          getNotNullOrThrowError(order.ownerAddress)
+        )
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return orders;
   }
 
   /**
@@ -599,7 +753,45 @@ export class Kujira {
   async placeOrders(
     options: PlaceOrdersOptions
   ): Promise<IMap<OrderExchangeOrderId, Order>> {
-    // TODO implement!!!
+    const candidateMessages: EncodeObject[] = [];
+
+    for (const candidate of options.orders) {
+      const market = await this.getMarket({ id: candidate.marketId });
+
+      let denom: Denom;
+      if (candidate.side == OrderSide.BUY) {
+        denom = market.connectorMarket.denoms[1];
+      } else if (candidate.side == OrderSide.SELL) {
+        denom = market.connectorMarket.denoms[0];
+      } else {
+        throw Error('Unrecognized order side.');
+      }
+
+      const message = msg.wasm.msgExecuteContract({
+        sender: candidate.ownerAddress || this.account.address,
+        contract: market.id,
+        msg: Buffer.from(
+          JSON.stringify({
+            submit_order: { price: candidate.price },
+          })
+        ),
+        funds: coins(candidate.amount, denom.reference),
+      });
+
+      candidateMessages.push(message);
+    }
+
+    const messages: readonly EncodeObject[] = candidateMessages;
+
+    const results = await this.kujiraSigningStargateClientSignAndBroadcast(
+      this.account.address,
+      messages,
+      constants.orders.create.fee
+    );
+
+    const orders = convertArrayOfKujiraOrdersToMapOfOrders(results);
+
+    return orders;
   }
 
   /**
@@ -617,7 +809,32 @@ export class Kujira {
   async cancelOrders(
     options: CancelOrdersOptions
   ): Promise<IMap<OrderExchangeOrderId, Order>> {
-    // TODO implement!!!
+    const market = await this.getMarket({ id: options.marketId });
+
+    const message = msg.wasm.msgExecuteContract({
+      sender: this.account.address,
+      contract: market.id,
+      msg: Buffer.from(
+        JSON.stringify({
+          retract_orders: {
+            order_idxs: options.exchangeOrderIds,
+          },
+        })
+      ),
+      funds: coins(amount, denom.reference),
+    });
+
+    const messages: readonly EncodeObject[] = [message];
+
+    const results = await this.kujiraSigningStargateClientSignAndBroadcast(
+      this.account.address,
+      messages,
+      constants.orders.create.fee
+    );
+
+    const orders = convertArrayOfKujiraOrdersToMapOfOrders(results);
+
+    return orders;
   }
 
   /**

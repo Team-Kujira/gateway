@@ -60,21 +60,27 @@ export interface GetAllTickerOptions extends GetTickersOptions {}
 
 export interface GetOrderOptions {
   exchangeOrderId: OrderExchangeOrderId;
+  marketId?: MarketId;
+  marketIds?: [MarketId];
   ownerAddress?: OrderOwnerAddress;
   status?: OrderStatus;
+  statuses?: [OrderStatus];
 }
 
 export interface GetOrdersOptions {
   exchangeOrderIds?: [OrderExchangeOrderId];
+  marketId?: MarketId;
+  marketIds?: [MarketId];
   ownerAddress?: OrderOwnerAddress;
   ownerAddresses?: [OrderOwnerAddress];
+  status?: OrderStatus;
   statuses?: [OrderStatus];
 }
 
 export interface PlaceOrderOptions {
   waitUntilIncludedInBlock?: boolean;
   marketId: MarketId;
-  ownerAddress: OrderOwnerAddress;
+  ownerAddress?: OrderOwnerAddress;
   side: OrderSide;
   price: OrderPrice;
   amount: OrderAmount;
@@ -90,10 +96,12 @@ export interface PlaceOrdersOptions {
 export interface CancelOrderOptions {
   exchangeOrderId: OrderExchangeOrderId;
   ownerAddress: OrderOwnerAddress;
+  marketId: MarketId;
 }
 
 export interface CancelOrdersOptions {
   exchangeOrderIds?: [OrderExchangeOrderId];
+  marketId: MarketId;
   ownerAddresses: [OrderOwnerAddress];
 }
 

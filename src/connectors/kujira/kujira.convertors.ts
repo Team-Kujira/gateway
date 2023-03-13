@@ -37,6 +37,8 @@ import {
   KujiraOrderParams,
 } from './kujira.types';
 import { fin, NETWORK } from 'kujira.js';
+import contracts from 'kujira.js/src/resources/contracts.json';
+import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
 
 export enum Types {
   GetMarketsResponse = 'GetMarketsResponse',
@@ -56,7 +58,7 @@ type InputMap =
   | IMap<string, Market>
   | IMap<string, OrderBook>
   | IMap<string, Ticker>
-  | IMap<string, Order>
+  | IMap<OrderExchangeOrderId, Order>
   | IMap<string, SettleFund[]>;
 
 type InputMapMap = IMap<string, InputMap>;
@@ -195,12 +197,12 @@ export const convertKujiraOrderBookToOrderBook = (
 };
 
 export const convertArrayOfKujiraOrdersToMapOfOrders = (
-  market: Market,
-  orders: KujiraOrder[] | KujiraOrderBook | any[],
+  orders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
+  market?: Market,
   ownerAddress?: string,
   status?: OrderStatus
-): IMap<string, Order> => {
-  const result = IMap<string, Order>().asMutable();
+): IMap<OrderExchangeOrderId, Order> => {
+  const result = IMap<OrderExchangeOrderId, Order>().asMutable();
 
   for (const order of orders) {
     result.set(
@@ -403,8 +405,10 @@ export const convertToPostSettleFundsResponse = (
   return input;
 };
 
-export const convertNetworkToKujiraNetwork = (input: string): NETWORK => {
-  return input.toLowerCase() as NETWORK;
+export const convertNetworkToKujiraNetwork = (
+  input: string
+): keyof typeof contracts => {
+  return input.toLowerCase() as keyof typeof contracts;
 };
 
 export const convertOrderSideToKujiraSide = (

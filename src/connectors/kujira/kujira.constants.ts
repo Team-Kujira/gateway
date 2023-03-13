@@ -30,6 +30,7 @@ export const constants = {
       limit: configManager.get('kujira.orders.filled.limit') || 1000,
     },
     create: {
+      fee: configManager.get('kujira.orders.create.fee') || 'auto',
       maxPerTransaction:
         configManager.get('kujira.orders.create.maxPerTransaction') || 8,
     },
