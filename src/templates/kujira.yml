@@ -38,3 +38,13 @@ transactions:
     createOrders: true
     cancelOrders: true
     settleFunds: true
+retry:
+  all:
+    maxNumberOfRetries: 3 # 0 means no retries
+    delayBetweenRetries: 200 # in milliseconds, 0 means no delay
+timeout:
+  all: 60000 # in milliseconds, 0 means no timeout.
+parallel:
+  all:
+    batchSize: 100 # 0 means no batching, group all
+    delayBetweenBatches: 200 # in milliseconds, 0 means no delay

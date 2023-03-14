@@ -125,8 +125,47 @@
 					}
         }
       }
+    },
+    "retry": {
+      "type": "object",
+      "required": ["all"],
+      "properties": {
+        "all": {
+          "type": "object",
+          "required": ["maxNumberOfRetries", "delayBetweenRetries"],
+          "properties": {
+            "maxNumberOfRetries": { "type": "integer" },
+            "delayBetweenRetries": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "timeout": {
+      "type": "object",
+      "required": ["all"],
+      "properties": {
+        "all": { "type": "integer" }
+      }
+    },
+    "parallel": {
+      "type": "object",
+      "required": ["all"],
+      "properties": {
+        "all": {
+          "type": "object",
+          "required": ["batchSize", "delayBetweenBatches"],
+          "properties": {
+            "batchSize": { "type": "integer" },
+            "delayBetweenBatches": {
+              "type": "integer"
+            }
+          }
+        }
+      }
     }
-	},
+  },
   "required": [
     "prefix",
     "accountNumber",
@@ -136,7 +175,10 @@
 		"orders",
     "markets",
     "tickers",
-		"transactions"
+		"transactions",
+    "retry",
+    "timeout",
+    "parallel"
   ],
   "additionalProperties": false
 }
