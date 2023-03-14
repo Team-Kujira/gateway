@@ -6,44 +6,24 @@ export const constants = {
   retry: {
     all: {
       maxNumberOfRetries:
-        configManager.get('solana.retry.all.maxNumberOfRetries') || 0, // 0 means no retries
+        configManager.get('cosmos.retry.all.maxNumberOfRetries') || 0, // 0 means no retries
       delayBetweenRetries:
-        configManager.get('solana.retry.all.delayBetweenRetries') || 0, // 0 means no delay (milliseconds)
+        configManager.get('cosmos.retry.all.delayBetweenRetries') || 0, // 0 means no delay (milliseconds)
     },
   },
   timeout: {
-    all: configManager.get('solana.timeout.all') || 0, // 0 means no timeout (milliseconds)
+    all: configManager.get('cosmos.timeout.all') || 0, // 0 means no timeout (milliseconds)
   },
   parallel: {
     all: {
-      batchSize: configManager.get('solana.parallel.all.batchSize') || 0, // 0 means no batching (group all)
+      batchSize: configManager.get('cosmos.parallel.all.batchSize') || 0, // 0 means no batching (group all)
       delayBetweenBatches:
-        configManager.get('solana.parallel.all.delayBetweenBatches') || 0, // 0 means no delay (milliseconds)
+        configManager.get('cosmos.parallel.all.delayBetweenBatches') || 0, // 0 means no delay (milliseconds)
     },
   },
   cache: {
     marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
     markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
-  },
-  orders: {
-    filled: {
-      limit: configManager.get('kujira.orders.filled.limit') || 1000,
-    },
-    create: {
-      fee: configManager.get('kujira.orders.create.fee') || 'auto',
-      maxPerTransaction:
-        configManager.get('kujira.orders.create.maxPerTransaction') || 8,
-    },
-    cancel: {
-      maxPerTransaction:
-        configManager.get('kujira.orders.cancel.maxPerTransaction') || 25,
-    },
-  },
-  events: {
-    limit: {
-      consumeEvents: configManager.get('kujira.events.limit.consumeEvents'),
-      matchOrders: configManager.get('kujira.events.limit.matchOrders'),
-    },
   },
   prefix: configManager.get('kujira.prefix') || 'kujira',
   accountNumber: configManager.get('kujira.accountNumber') || 0,
@@ -51,6 +31,20 @@ export const constants = {
   orderBook: {
     offset: configManager.get('kujira.orderBook.offset') || 0,
     limit: configManager.get('kujira.orderBook.limit') || 100,
+  },
+  orders: {
+    create: {
+      fee: configManager.get('kujira.orders.create.fee') || 'auto',
+      maxPerTransaction:
+        configManager.get('kujira.orders.create.maxPerTransaction') || 8,
+    },
+    filled: {
+      limit: configManager.get('kujira.orders.filled.limit') || 1000,
+    },
+    cancel: {
+      maxPerTransaction:
+        configManager.get('kujira.orders.cancel.maxPerTransaction') || 25,
+    },
   },
 };
 
