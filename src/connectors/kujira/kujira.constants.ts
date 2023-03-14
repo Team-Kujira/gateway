@@ -6,19 +6,19 @@ export const constants = {
   retry: {
     all: {
       maxNumberOfRetries:
-        configManager.get('cosmos.retry.all.maxNumberOfRetries') || 0, // 0 means no retries
+        configManager.get('kujira.retry.all.maxNumberOfRetries') || 0, // 0 means no retries
       delayBetweenRetries:
-        configManager.get('cosmos.retry.all.delayBetweenRetries') || 0, // 0 means no delay (milliseconds)
+        configManager.get('kujira.retry.all.delayBetweenRetries') || 0, // 0 means no delay (milliseconds)
     },
   },
   timeout: {
-    all: configManager.get('cosmos.timeout.all') || 0, // 0 means no timeout (milliseconds)
+    all: configManager.get('kujira.timeout.all') || 0, // 0 means no timeout (milliseconds)
   },
   parallel: {
     all: {
-      batchSize: configManager.get('cosmos.parallel.all.batchSize') || 0, // 0 means no batching (group all)
+      batchSize: configManager.get('kujira.parallel.all.batchSize') || 0, // 0 means no batching (group all)
       delayBetweenBatches:
-        configManager.get('cosmos.parallel.all.delayBetweenBatches') || 0, // 0 means no delay (milliseconds)
+        configManager.get('kujira.parallel.all.delayBetweenBatches') || 0, // 0 means no delay (milliseconds)
     },
   },
   cache: {
