@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "prefix": {
+      "type": "string"
+    },
+    "accountNumber": {
+      "type": "integer"
+    },
+    "gasPrice": {
+      "type": "string"
+    },
+    "orderBook": {
+      "type": "object",
+      "required": [
+        "offset",
+        "limit"
+      ],
+      "properties": {
+        "offset": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        }
+      }
+    },
+    "cache": {
+      "type": "object",
+      "required": ["marketsData", "markets"],
+      "properties": {
+        "marketsInformation": {
+          "type": "integer"
+        },
+        "markets": {
+          "type": "integer"
+        }
+      }
+    },
+		"orders": {
+      "type": "object",
+      "required": ["create", "filled", "cancel"],
+      "properties": {
+        "create": {
+          "type": "object",
+					"required": ["fee", "maxPerTransaction"],
+					"properties": {
+            "free": {
+              "type": "string"
+            },
+						"maxPerTransaction": {
+							"type": "integer"
+						}
+					}
+        },
+        "filled": {
+          "type": "object",
+					"required": ["limit"],
+					"properties": {
+						"limit": {
+							"type": "integer"
+						}
+					}
+        },
+        "cancel": {
+          "type": "object",
+					"required": ["maxPerTransaction"],
+					"properties": {
+						"maxPerTransaction": {
+							"type": "integer"
+						}
+					}
+        }
+      }
+    },
+    "markets": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string" },
+        "whitelist": {
+          "type": ["array", "null"]
+        },
+        "blacklist": {
+          "type": ["array", "null"]
+        }
+      }
+    },
+    "tickers": {
+      "type": "object",
+      "required": ["sources"],
+      "properties": {
+        "sources": {
+          "type": "object",
+          "patternProperties": {
+            "^..+$": {
+              "type": ["object", "null"],
+              "properties": {
+                "url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+		"transactions": {
+      "type": "object",
+      "required": ["merge"],
+      "properties": {
+        "merge": {
+          "type": "object",
+					"required": ["createOrders", "cancelOrders", "settleFunds"],
+					"properties": {
+						"createOrders": { "type": "boolean" },
+						"cancelOrders": { "type": "boolean" },
+						"settleFunds": { "type": "boolean" }
+					}
+        }
+      }
+    }
+	},
+  "required": [
+    "prefix",
+    "accountNumber",
+    "gasPrice",
+    "orderBook",
+		"cache",
+		"orders",
+    "markets",
+    "tickers",
+		"transactions"
+  ],
+  "additionalProperties": false
+}

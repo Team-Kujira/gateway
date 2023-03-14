@@ -1,0 +1,40 @@
+prefix: 'kujira'
+accountNumber: 0
+gasPrice: '0.00125ukuji'
+orderBook:
+  offset: 0
+  limit: 100
+cache:
+  marketsData: 3600 # in seconds
+  markets: 3600 # in seconds
+orders:
+  create:
+    fee: 'auto'
+    maxPerTransaction: 8
+  filled:
+    limit: 1000
+  cancel:
+    maxPerTransaction: 25
+markets:
+  url: # empty means using the default
+#  url: /root/gateway/conf/connectors/kujira/contracts.json
+#  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json
+  whitelist:
+    - KUJI/DEMO
+    - KUJI/USK
+    - DEMO/USK
+  blacklist:
+tickers:
+  sources:
+    orderBookSimpleAveragePrice:
+    orderBookWeightedAveragePrice:
+    orderBookVolumeWeightedAveragePrice:
+    lastFilledOrder:
+    nomics:
+      url: https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&interval=1m&market=${marketAddress}
+#      url: https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&currency=<tokenAddress>&interval=1m&limit=1&start=0&status=active
+transactions:
+  merge:
+    createOrders: true
+    cancelOrders: true
+    settleFunds: true
