@@ -1,157 +1,86 @@
 import { NetworkSelectionRequest } from '../services/common-interfaces';
-import {
-  CancelOrderRequest,
-  CancelOrdersRequest,
-  CancelOrdersResponse,
-  CreateOrdersRequest,
-  CreateOrdersResponse,
-  GetFilledOrderRequest,
-  GetFilledOrdersRequest,
-  GetFilledOrdersResponse,
-  GetMarketsRequest,
-  GetMarketsResponse,
-  GetOpenOrderRequest,
-  GetOpenOrdersRequest,
-  GetOpenOrdersResponse,
-  GetOrderBooksRequest,
-  GetOrderBooksResponse,
-  GetOrderRequest,
-  GetOrdersRequest,
-  GetOrdersResponse,
-  GetTickersRequest,
-  GetTickersResponse,
-  MaxNumberOfFilledOrders,
-  OrderMarketId,
-  OrderOwnerAddress,
-  OrderReplaceIfExists,
-  SettleFundsRequest,
-  SettleFundsResponse,
-} from './clob.types';
+import { OrderType, Side } from '../amm/amm.requests';
+import { Orderbook, SpotMarket } from '@injectivelabs/sdk-ts';
 
-//
-// GET /clob/markets
-//
+export interface ClobMarketsRequest extends NetworkSelectionRequest {
+  market?: string;
+}
 
-export type CLOBGetMarketsRequest = NetworkSelectionRequest & GetMarketsRequest;
+export interface CLOBMarkets {
+  [key: string]: SpotMarket;
+}
+export interface ClobMarketResponse {
+  network: string;
+  timestamp: number;
+  latency: number;
+  markets: CLOBMarkets;
+}
 
-export type CLOBGetMarketsResponse = GetMarketsResponse;
+export type ClobTickerRequest = ClobMarketsRequest;
 
-//
-// GET /clob/orderBooks
-//
+export type ClobTickerResponse = ClobMarketResponse;
 
-export type CLOBGetOrderBooksRequest = NetworkSelectionRequest &
-  GetOrderBooksRequest;
+export interface ClobOrderbookRequest extends ClobMarketsRequest {
+  market: string;
+}
 
-export type CLOBGetOrderBooksResponse = GetOrderBooksResponse;
+export interface ClobOrderbookResponse {
+  network: string;
+  timestamp: number;
+  latency: number;
+  orderbook: Orderbook;
+}
 
-//
-// GET /clob/tickers
-//
+export interface ClobGetOrderRequest extends ClobOrderbookRequest {
+  address: string;
+  orderId: string;
+}
 
-export type CLOBGetTickersRequest = NetworkSelectionRequest & GetTickersRequest;
+export interface ClobGetOrderResponse {
+  network: string;
+  timestamp: number;
+  latency: number;
+  orders:
+    | [
+        {
+          [key: string]: string;
+        }
+      ]
+    | [];
+}
 
-export type CLOBGetTickersResponse = GetTickersResponse;
+export interface CreateOrderParam {
+  price: string;
+  amount: string;
+  orderType: OrderType;
+  side: Side;
+  market: string;
+}
 
-//
-// GET /clob/orders
-//
+export interface ClobPostOrderRequest
+  extends NetworkSelectionRequest,
+    CreateOrderParam {
+  address: string;
+}
 
-export type CLOBGetOrdersRequest = NetworkSelectionRequest &
-  (
-    | {
-        marketId?: OrderMarketId;
-        marketIds?: OrderMarketId[];
-        ownerAddress?: OrderOwnerAddress;
-      }
-    | { order: GetOrderRequest }
-    | {
-        orders: GetOrdersRequest[];
-      }
-  ) & {
-    maxNumberOfFilledOrders?: MaxNumberOfFilledOrders;
-  };
+export interface ClobDeleteOrderRequestExtract {
+  market: string;
+  orderId: string;
+}
 
-export type CLOBGetOrdersResponse = GetOrdersResponse;
+export interface ClobBatchUpdateRequest extends NetworkSelectionRequest {
+  address: string;
+  createOrderParams?: CreateOrderParam[];
+  cancelOrderParams?: ClobDeleteOrderRequestExtract[];
+}
 
-//
-// POST /clob/orders
-//
+export interface ClobPostOrderResponse {
+  network: string;
+  timestamp: number;
+  latency: number;
+  txHash: string;
+}
 
-export type CLOBCreateOrdersRequest = NetworkSelectionRequest &
-  (
-    | { order: CreateOrdersRequest }
-    | {
-        orders: CreateOrdersRequest[];
-      }
-  ) & { replaceIfExists?: OrderReplaceIfExists };
+export type ClobDeleteOrderRequest = ClobGetOrderRequest;
 
-export type CLOBCreateOrdersResponse = CreateOrdersResponse;
-
-//
-// DELETE /clob/orders
-//
-
-export type CLOBCancelOrdersRequest = NetworkSelectionRequest &
-  (
-    | {
-        marketId: OrderMarketId;
-        marketIds?: OrderMarketId[];
-        ownerAddress: OrderOwnerAddress;
-      }
-    | { order: CancelOrderRequest }
-    | {
-        orders: CancelOrdersRequest[];
-      }
-  );
-
-export type CLOBCancelOrdersResponse = CancelOrdersResponse;
-
-//
-// GET /clob/orders/open
-//
-
-export type CLOBGetOpenOrdersRequest = NetworkSelectionRequest &
-  (
-    | {
-        marketId?: OrderMarketId;
-        marketIds?: OrderMarketId[];
-        ownerAddress?: OrderOwnerAddress;
-      }
-    | { order: GetOpenOrderRequest }
-    | {
-        orders: GetOpenOrdersRequest[];
-      }
-  );
-
-export type CLOBGetOpenOrdersResponse = GetOpenOrdersResponse;
-
-//
-// GET /clob/orders/filled
-//
-
-export type CLOBGetFilledOrdersRequest = NetworkSelectionRequest &
-  (
-    | {
-        marketId: OrderMarketId;
-        marketIds?: OrderMarketId[];
-        ownerAddress?: OrderOwnerAddress;
-      }
-    | { order: GetFilledOrderRequest }
-    | {
-        orders: GetFilledOrdersRequest[];
-      }
-  ) & {
-    maxNumberOfFilledOrders?: MaxNumberOfFilledOrders;
-  };
-
-export type CLOBGetFilledOrdersResponse = GetFilledOrdersResponse;
-
-//
-// POST /clob/settleFunds
-//
-
-export type CLOBPostSettleFundsRequest = NetworkSelectionRequest &
-  SettleFundsRequest;
-
-export type CLOBPostSettleFundsResponse = SettleFundsResponse;
+export type ClobDeleteOrderResponse = ClobPostOrderResponse;
