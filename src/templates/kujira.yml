@@ -1,3 +1,4 @@
+network: 'mainnet'
 prefix: 'kujira'
 accountNumber: 0
 gasPrice: '0.00125ukuji'
@@ -20,9 +21,9 @@ markets:
 #  url: /root/gateway/conf/connectors/kujira/contracts.json
 #  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json
   whitelist:
-    - KUJI/DEMO
-    - KUJI/USK
-    - DEMO/USK
+    - 'KUJI/DEMO'
+    - 'KUJI/USK'
+    - 'DEMO/USK'
   blacklist:
 tickers:
   sources:

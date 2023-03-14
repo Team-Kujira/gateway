@@ -1,4 +1,16 @@
 import {
+  IMap,
+  Market,
+  MarketId,
+  MarketNotFoundError,
+  Order,
+  OrderBook,
+  OrderExchangeOrderId,
+  OrderNotFoundError,
+  OrderSide,
+  SettleFund,
+  Ticker,
+  TickerNotFoundError,
   BasicKujiraMarket,
   CancelAllOrdersOptions,
   CancelOrderOptions,
@@ -21,20 +33,6 @@ import {
   SettleSeveralFundsOptions,
   TickerSource,
 } from './kujira.types';
-import {
-  IMap,
-  Market,
-  MarketId,
-  MarketNotFoundError,
-  Order,
-  OrderBook,
-  OrderExchangeOrderId,
-  OrderNotFoundError,
-  OrderSide,
-  SettleFund,
-  Ticker,
-  TickerNotFoundError,
-} from '../../clob/clob.types';
 import { KujiraConfig } from './kujira.config';
 import { CosmosConfig } from '../../chains/cosmos/cosmos.config';
 import { Cosmos } from '../../chains/cosmos/cosmos';
@@ -63,6 +61,7 @@ import {
   convertNetworkToKujiraNetwork,
   convertToTicker,
 } from './kujira.convertors';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
@@ -79,8 +78,8 @@ import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { JsonObject } from '@cosmjs/cosmwasm-stargate';
 import { StdFee } from '@cosmjs/amino';
 import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
-import { response } from 'express';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
   markets: new CacheContainer(new MemoryStorage()),
@@ -108,6 +107,8 @@ export class Kujira {
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private readonly cosmosConfig: CosmosConfig.Config;
 
   /**
@@ -122,54 +123,72 @@ export class Kujira {
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private accounts: readonly AccountData[];
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private account: AccountData;
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private directSecp256k1HdWallet: DirectSecp256k1HdWallet;
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private httpBatchClient: HttpBatchClient;
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private tendermint34Client: Tendermint34Client;
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private kujiraQueryClient: KujiraQueryClient;
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private signingStargateClient: SigningStargateClient;
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private signingCosmWasmClient: SigningCosmWasmClient;
 
   /**
    *
    * @private
    */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private cosmos: Cosmos;
 
   /**
@@ -234,15 +253,14 @@ export class Kujira {
 
       const rpcEndpoint: string = this.config.rpcEndpoint;
 
-      // TODO this needs to come from the wallet!!!
-      const mnemonic: string = this.config.mnemonic;
+      const mnemonic: string = await this.getMnemonic();
 
-      const prefix: string = this.config.prefix || constants.prefix;
+      const prefix: string = this.config.prefix || this.config.prefix;
 
       const accountNumber: number =
-        this.config.accountNumber || constants.accountNumber;
+        this.config.accountNumber || this.config.accountNumber;
 
-      const gasPrice: string = this.config.gasPrice || constants.gasPrice;
+      const gasPrice: string = this.config.gasPrice || this.config.gasPrice;
 
       // signer
       this.directSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(
@@ -348,6 +366,11 @@ export class Kujira {
     }
 
     return marketsData;
+  }
+
+  private async getMnemonic(): Promise<string> {
+    // TODO this needs to come from the wallet!!!
+    throw new Error('Not implemented.');
   }
 
   private async kujiraQueryClientWasmQueryContractSmart(
@@ -473,8 +496,8 @@ export class Kujira {
       market.connectorMarket.address,
       {
         book: {
-          offset: constants.orderBook.offset,
-          limit: constants.orderBook.limit,
+          offset: this.config.orderBook.offset,
+          limit: this.config.orderBook.limit,
         },
       }
     );

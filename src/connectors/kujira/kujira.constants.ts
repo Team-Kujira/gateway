@@ -25,27 +25,6 @@ export const constants = {
     marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
     markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
   },
-  prefix: configManager.get('kujira.prefix') || 'kujira',
-  accountNumber: configManager.get('kujira.accountNumber') || 0,
-  gasPrice: configManager.get('kujira.gasPrice') || '0.00125ukuji',
-  orderBook: {
-    offset: configManager.get('kujira.orderBook.offset') || 0,
-    limit: configManager.get('kujira.orderBook.limit') || 100,
-  },
-  orders: {
-    create: {
-      fee: configManager.get('kujira.orders.create.fee') || 'auto',
-      maxPerTransaction:
-        configManager.get('kujira.orders.create.maxPerTransaction') || 8,
-    },
-    filled: {
-      limit: configManager.get('kujira.orders.filled.limit') || 1000,
-    },
-    cancel: {
-      maxPerTransaction:
-        configManager.get('kujira.orders.cancel.maxPerTransaction') || 25,
-    },
-  },
 };
 
 export default constants;

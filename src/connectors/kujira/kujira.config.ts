@@ -5,16 +5,16 @@ const configManager = ConfigManagerV2.getInstance();
 
 export namespace KujiraConfig {
   export interface Config {
-    gasPrice: string;
-    accountNumber: number;
+    tradingTypes: Array<string>;
     prefix: string;
-    mnemonic: string;
+    accountNumber: number;
+    gasPrice: string;
     rpcEndpoint: string;
     availableNetworks: Array<AvailableNetworks>;
-    tradingTypes: Array<string>;
     markets: MarketsConfig;
     tickers: TickersConfig;
     transactions: TransactionsConfig;
+    orderBook: OrderBookConfig;
   }
 
   export interface MarketsConfig {
@@ -39,8 +39,16 @@ export namespace KujiraConfig {
     };
   }
 
+  export interface OrderBookConfig {
+    offset: number;
+    limit: number;
+  }
+
   export const config: Config = {
     tradingTypes: ['CLOB_COSMOS_KUJIRA'],
+    prefix: configManager.get('kujira.prefix') || 'kujira',
+    accountNumber: configManager.get('kujira.accountNumber') || 0,
+    gasPrice: configManager.get('kujira.gasPrice') || '0.00125ukuji',
     markets: {
       url: configManager.get(`kujira.markets.url`),
       blacklist: configManager.get(`kujira.markets.blacklist`),
@@ -62,10 +70,15 @@ export namespace KujiraConfig {
         settleFunds: configManager.get(`kujira.transactions.merge.settleFunds`),
       },
     },
+    orderBook: {
+      offset: configManager.get(`kujira.orderBook.offset`) || 0,
+      limit: configManager.get(`kujira.orderBook.limit`) || 100,
+    },
+    rpcEndpoint: '', // TODO fix!!!
     availableNetworks: [
       {
-        chain: 'cosmos',
-        networks: Object.keys(configManager.get(`cosmos.networks`)),
+        chain: 'kujira',
+        networks: [], // TODO fix!!!
       },
     ],
   };
