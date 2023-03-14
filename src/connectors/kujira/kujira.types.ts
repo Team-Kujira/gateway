@@ -10,12 +10,13 @@ import {
   OrderType,
 } from '../../clob/clob.types';
 import { fin } from 'kujira.js';
-import { JsonObject } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteResult, JsonObject } from '@cosmjs/cosmwasm-stargate';
 
 export type BasicKujiraMarket = fin.Pair;
 export type KujiraOrder = any;
 export type KujiraOrderBook = JsonObject;
 export type KujiraOrderParams = any;
+export type KujiraSettleFund = ExecuteResult;
 
 export enum TickerSource {
   NOMICS = 'nomics',

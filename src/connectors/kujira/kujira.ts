@@ -59,6 +59,7 @@ import {
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
   convertKujiraOrderToOrder,
+  convertKujiraSettleFundToSettleFund,
   convertNetworkToKujiraNetwork,
   convertToTicker,
 } from './kujira.convertors';
@@ -66,13 +67,19 @@ import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
-import { DirectSecp256k1HdWallet, EncodeObject } from '@cosmjs/proto-signing';
+import {
+  Coin,
+  DirectSecp256k1HdWallet,
+  EncodeObject,
+} from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { JsonObject } from '@cosmjs/cosmwasm-stargate';
 import { StdFee } from '@cosmjs/amino';
 import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
+import { response } from 'express';
 
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
@@ -364,6 +371,24 @@ export class Kujira {
       this.signingStargateClient,
       this.signingStargateClient.signAndBroadcast,
       [signerAddress, messages, fee, memo]
+    );
+  }
+
+  private async kujiraFinClientWithdrawOrders(
+    finClient: fin.FinClient,
+    {
+      orderIdxs,
+    }: {
+      orderIdxs?: string[];
+    },
+    fee: number | StdFee | 'auto' = 'auto',
+    memo?: string,
+    funds?: readonly Coin[]
+  ): Promise<ExecuteResult> {
+    return await runWithRetryAndTimeout<Promise<ExecuteResult>>(
+      finClient,
+      finClient.withdrawOrders,
+      [orderIdxs, fee, memo, funds]
     );
   }
 
@@ -811,6 +836,9 @@ export class Kujira {
   ): Promise<IMap<OrderExchangeOrderId, Order>> {
     const market = await this.getMarket({ id: options.marketId });
 
+    // TODO check if using index 0 would work for all!!!
+    const denom: Denom = market.connectorMarket.denoms[0];
+
     const message = msg.wasm.msgExecuteContract({
       sender: this.account.address,
       contract: market.id,
@@ -821,7 +849,7 @@ export class Kujira {
           },
         })
       ),
-      funds: coins(amount, denom.reference),
+      funds: coins(0, denom.reference),
     });
 
     const messages: readonly EncodeObject[] = [message];
@@ -852,7 +880,26 @@ export class Kujira {
    * @param options
    */
   async settleFunds(options: SettleFundsOptions): Promise<SettleFund> {
-    // TODO implement!!!
+    const market = await this.getMarket({ id: options.marketId });
+
+    const finClient = new fin.FinClient(
+      this.signingCosmWasmClient,
+      this.account.address,
+      market.id
+    );
+
+    const filledOrdersIds = (await this.getOrders({}))
+      .valueSeq()
+      .map((order) =>
+        getNotNullOrThrowError<OrderExchangeOrderId>(order.exchangeOrderId)
+      )
+      .toArray();
+
+    const result = await this.kujiraFinClientWithdrawOrders(finClient, {
+      orderIdxs: filledOrdersIds,
+    });
+
+    return convertKujiraSettleFundToSettleFund(result);
   }
 
   /**

@@ -444,3 +444,9 @@ export const convertKujiraTypeToOrderType = (
   if (input == 'postOnly') return OrderType.POST_ONLY;
   throw new Error(`Invalid order type: ${input}`);
 };
+
+export const convertKujiraSettleFundToSettleFund = (
+  input: KujiraSettleFund
+): SettleFund => {
+  throw new Error('Not implemented');
+};
