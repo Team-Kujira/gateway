@@ -19,7 +19,7 @@ import {
   Settlement,
   Ticker,
   TransactionSignatures,
-} from './kujira.types'
+} from './kujira.types';
 import {
   ClobBatchUpdateRequest,
   ClobDeleteOrderRequest,
@@ -36,11 +36,13 @@ import {
   ClobTickerRequest,
   ClobTickerResponse,
   CreateOrderParam,
-} from '../../clob/clob.requests'
-import {KujiraConfig} from './kujira.config'
-import {fin} from 'kujira.js'
-import {DeliverTxResponse} from '@cosmjs/stargate/build/stargateclient'
-import contracts from 'kujira.js/src/resources/contracts.json'
+} from '../../clob/clob.requests';
+import { KujiraConfig } from './kujira.config';
+import { fin } from 'kujira.js';
+import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
+import contracts from 'kujira.js/src/resources/contracts.json';
+import { SpotMarket } from '@injectivelabs/sdk-ts';
+import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exchange';
 
 const config = KujiraConfig.config;
 
@@ -124,29 +126,62 @@ export const convertToClobMarketResponse = (
     network: config.network,
     timestamp: Date.now(),
     latency: 0,
-    markets:,
+    markets: {
+      market: {
+        marketId: response.id,
+        marketStatus: 'active',
+        ticker: undefined,
+        baseDenom: undefined,
+        quoteDenom: undefined,
+        makerFeeRate: undefined,
+        quoteToken: undefined,
+        baseToken: undefined,
+        takerFeeRate: undefined,
+        serviceProviderFee: undefined,
+        minPriceTickSize: undefined,
+        minQuantityTickSize: undefined,
+      } as unknown as SpotMarket,
+    },
   } as ClobMarketResponse;
 };
 
 export const convertToClobOrderbookResponse = (
-  response: OrderBook
+  _response: OrderBook
 ): ClobOrderbookResponse => {
   return {
-    network: ,
-    timestamp: ,
-    latency: ,
-    orderbook: ,
+    network: config.network,
+    timestamp: Date.now(),
+    latency: 0,
+    orderbook: {
+      buys: [] as PriceLevel[],
+      sells: [] as PriceLevel[],
+    },
   } as ClobOrderbookResponse;
 };
 
 export const convertToClobTickerResponse = (
-  response: Ticker
+  _response: Ticker
 ): ClobTickerResponse => {
   return {
-    network: ,
-    timestamp: ,
-    latency: ,
-    markets: ,
+    network: config.network,
+    timestamp: Date.now(),
+    latency: 0,
+    markets: {
+      market: {
+        marketId: undefined,
+        marketStatus: undefined,
+        ticker: undefined,
+        baseDenom: undefined,
+        quoteDenom: undefined,
+        makerFeeRate: undefined,
+        quoteToken: undefined,
+        baseToken: undefined,
+        takerFeeRate: undefined,
+        serviceProviderFee: undefined,
+        minPriceTickSize: undefined,
+        minQuantityTickSize: undefined,
+      } as unknown as SpotMarket,
+    },
   } as ClobTickerResponse;
 };
 
@@ -154,21 +189,21 @@ export const convertToClobPostOrderResponse = (
   response: Order
 ): ClobPostOrderResponse => {
   return {
-    network: ,
-    timestamp: ,
-    latency: ,
-    txHash: ,
+    network: config.network,
+    timestamp: Date.now(),
+    latency: 0,
+    txHash: response.signatures?.creation,
   } as ClobPostOrderResponse;
 };
 
 export const convertToClobGetOrderResponse = (
-  response: Order
+  _response: Order
 ): ClobGetOrderResponse => {
   return {
-    network: ,
-    timestamp: ,
-    latency: ,
-    orders: ,
+    network: config.network,
+    timestamp: Date.now(),
+    latency: 0,
+    orders: [],
   } as ClobGetOrderResponse;
 };
 
@@ -176,10 +211,10 @@ export const convertToClobDeleteOrderResponse = (
   response: Order
 ): ClobDeleteOrderResponse => {
   return {
-    network: ,
-    timestamp: ,
-    latency: ,
-    txHash: ,
+    network: config.network,
+    timestamp: Date.now(),
+    latency: 0,
+    txHash: response.signatures?.cancellation,
   } as ClobDeleteOrderResponse;
 };
 
@@ -195,8 +230,8 @@ export const convertKujiraOrderBookToOrderBook = (
 };
 
 export const convertKujiraOrdersToMapOfOrders = (
-  _market?: Market,
   _orders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
+  _market?: Market,
   _ownerAddress?: string,
   _status?: OrderStatus
 ): IMap<OrderId, Order> => {
