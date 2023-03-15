@@ -1,6 +1,6 @@
 import { Cosmosish } from '../../services/common-interfaces';
 import { CosmosBase } from './cosmos-base';
-import { getCosmosConfig } from './cosmos.config';
+import { config } from './cosmos.config';
 import { logger } from '../../services/logger';
 
 export class Cosmos extends CosmosBase implements Cosmosish {
@@ -13,7 +13,6 @@ export class Cosmos extends CosmosBase implements Cosmosish {
   private _metricTimer;
 
   private constructor(network: string) {
-    const config = getCosmosConfig('cosmos');
     super(
       'cosmos',
       config.network.rpcURL,
