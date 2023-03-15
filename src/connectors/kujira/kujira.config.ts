@@ -5,6 +5,7 @@ const configManager = ConfigManagerV2.getInstance();
 export namespace KujiraConfig {
   export const config = {
     tradingTypes: ['CLOB_COSMOS_KUJIRA'],
+    network: configManager.get('kujira.network') || 'kujira',
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
     gasPrice: configManager.get('kujira.gasPrice') || '0.00125ukuji',

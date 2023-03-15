@@ -22,7 +22,7 @@ export type BasicKujiraMarket = fin.Pair;
 export type KujiraOrder = any;
 export type KujiraOrderBook = JsonObject;
 export type KujiraOrderParams = any;
-export type KujiraSettleFund = ExecuteResult;
+export type KujiraSettlement = ExecuteResult;
 
 export type Address = string;
 export type OwnerAddress = Address;
@@ -52,7 +52,7 @@ export type TickerTimestamp = Timestamp;
 export type TransactionSignature = string;
 
 export type OrderId = string;
-export type OrderExchangeOrderId = string;
+export type OrderClientId = string;
 export type OrderMarketName = MarketName;
 export type OrderMarketId = MarketId;
 export type OrderOwnerAddress = OwnerAddress;
@@ -64,20 +64,12 @@ export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionSignatures = TransactionSignatures;
 export type OrderReplaceIfExists = boolean;
 
-export type SettleFund = TransactionSignature;
+export type Settlement = TransactionSignature;
 
 export type FeeMaker = Fee;
 export type FeeTaker = Fee;
 
 export type MaxNumberOfFilledOrders = number;
-
-export type ClobPostOrderRequest = ClobPostOrderRequest;
-export const ClobPostOrderRequest = ClobPostOrderRequest;
-
-// Needed for type comparisons if the definitions are not changed.
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export const ClobDeleteOrderRequest = ClobDeleteOrderRequest;
 
 //
 //  Enums
@@ -130,8 +122,8 @@ export interface Market {
 
 export interface OrderBook {
   market: Market;
-  bids: IMap<OrderId, Order>;
-  asks: IMap<OrderId, Order>;
+  bids: IMap<OrderClientId, Order>;
+  asks: IMap<OrderClientId, Order>;
   bestBid?: Order;
   bestAsk?: Order;
   connectorOrderBook: ConnectorOrderBook;
@@ -144,8 +136,8 @@ export interface Ticker {
 }
 
 export interface Order {
-  id?: OrderId; // Client custom id
-  exchangeOrderId?: OrderExchangeOrderId;
+  id?: OrderId;
+  clientId?: OrderClientId; // Client custom id
   marketName: OrderMarketName;
   marketId: OrderMarketId;
   ownerAddress?: OrderOwnerAddress;
@@ -164,10 +156,10 @@ export interface Order {
 export interface TransactionSignatures {
   creation?: TransactionSignature;
   cancellation?: TransactionSignature;
-  fundsSettlement?: TransactionSignature;
+  settlement?: TransactionSignature;
   creations?: TransactionSignature[];
   cancellations?: TransactionSignature[];
-  fundsSettlements?: TransactionSignature[];
+  settlements?: TransactionSignature[];
 }
 
 export interface MarketFee {
@@ -187,7 +179,11 @@ export class TickerNotFoundError extends CLOBishError {}
 
 export class OrderNotFoundError extends CLOBishError {}
 
-export class FundsSettlementError extends CLOBishError {}
+export class SettlementError extends CLOBishError {}
+
+//
+//  Main methods options
+//
 
 export interface GetMarketOptions {
   id?: MarketId;
@@ -223,7 +219,7 @@ export interface GetTickersOptions {
 export interface GetAllTickerOptions extends GetTickersOptions {}
 
 export interface GetOrderOptions {
-  exchangeOrderId: OrderExchangeOrderId;
+  id: OrderId;
   marketId?: MarketId;
   marketIds?: MarketId[];
   ownerAddress?: OrderOwnerAddress;
@@ -232,7 +228,7 @@ export interface GetOrderOptions {
 }
 
 export interface GetOrdersOptions {
-  exchangeOrderIds?: OrderExchangeOrderId[];
+  ids?: OrderId[];
   marketId?: MarketId;
   marketIds?: MarketId[];
   ownerAddress?: OrderOwnerAddress;
@@ -258,13 +254,13 @@ export interface PlaceOrdersOptions {
 }
 
 export interface CancelOrderOptions {
-  exchangeOrderId: OrderExchangeOrderId;
+  id: OrderId;
   ownerAddress: OrderOwnerAddress;
   marketId: MarketId;
 }
 
 export interface CancelOrdersOptions {
-  exchangeOrderIds: OrderExchangeOrderId[];
+  ids: OrderId[];
   marketId: MarketId;
   ownerAddresses?: OrderOwnerAddress[];
 }
@@ -276,15 +272,226 @@ export interface CancelAllOrdersOptions extends CancelOrdersOptions {
   ownerAddresses?: OrderOwnerAddress[];
 }
 
-export interface SettleFundsOptions {
+export interface SettlementOptions {
   marketId?: MarketId;
   ownerAddresses: OrderOwnerAddress[];
 }
 
-export interface SettleSeveralFundsOptions {
+export interface SettlementsOptions {
   marketIds?: MarketId[];
   ownerAddresses: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SettleAllFundsOptions extends SettleSeveralFundsOptions {}
+export interface SettlementsAllOptions extends SettlementsOptions {}
+
+//
+// Requests subtypes
+//
+
+export type GetMarketsRequest = { id: MarketId } | { ids: MarketId[] };
+
+export interface GetMarketResponse {
+  id: MarketId;
+  name: MarketName;
+  minimumOrderSize: MarketMinimumOrderSize;
+  tickSize: MarketTickSize;
+  minimumBaseIncrement?: MarketMinimumBaseIncrement;
+  fee: MarketFee;
+  programId: MarketProgramId;
+  deprecated: MarketDeprecation;
+}
+
+export type GetMarketsResponse =
+  | GetMarketResponse
+  | IMap<MarketId, GetMarketResponse>;
+
+export type GetOrderBooksRequest =
+  | { marketId: MarketId }
+  | { marketIds: MarketId[] };
+
+export interface GetOrderBookResponse {
+  market: GetMarketResponse;
+  bids: Map<OrderClientId, GetOrderResponse>;
+  asks: Map<OrderClientId, GetOrderResponse>;
+}
+
+export type GetOrderBooksResponse =
+  | GetOrderBookResponse
+  | IMap<MarketId, GetOrderBookResponse>;
+
+export type GetTickersRequest =
+  | { marketId: MarketId }
+  | { marketIds: MarketId[] };
+
+export interface GetTickerResponse {
+  price: TickerPrice;
+  timestamp: TickerTimestamp;
+}
+
+export type GetTickersResponse =
+  | GetTickerResponse
+  | IMap<MarketId, GetTickerResponse>;
+
+export interface GetOrdersRequest {
+  id?: OrderId;
+  ids?: OrderId[];
+  clientId?: OrderClientId;
+  clientIds?: OrderClientId[];
+  marketId?: OrderMarketId;
+  ownerAddress: OrderOwnerAddress;
+  maxNumberOfFilledOrders?: MaxNumberOfFilledOrders;
+}
+
+export interface GetOrderResponse {
+  id?: OrderId;
+  clientId?: OrderClientId;
+  marketId: MarketId;
+  marketName: MarketName;
+  ownerAddress?: OrderOwnerAddress;
+  price: OrderPrice;
+  amount: OrderAmount;
+  side: OrderSide;
+  status?: OrderStatus;
+  type?: OrderType;
+  fee?: Fee;
+  fillingTimestamp?: OrderFillingTimestamp;
+}
+
+export type GetOrdersResponse =
+  | GetOrderResponse
+  | IMap<OrderClientId, GetOrderResponse>
+  | IMap<MarketId, IMap<OrderClientId, GetOrderResponse>>;
+
+export interface CreateOrdersRequest {
+  id?: OrderId;
+  marketId: OrderMarketId;
+  ownerAddress: OrderOwnerAddress;
+  payerAddress?: OrderPayerAddress;
+  side: OrderSide;
+  price: OrderPrice;
+  amount: OrderAmount;
+  type?: OrderType;
+  replaceIfExists?: OrderReplaceIfExists;
+}
+
+export interface CreateOrderResponse {
+  id?: OrderId;
+  clientId?: OrderClientId;
+  marketId: OrderMarketId;
+  ownerAddress?: OrderOwnerAddress;
+  price: OrderPrice;
+  amount: OrderAmount;
+  side: OrderSide;
+  status?: OrderStatus;
+  type?: OrderType;
+  fee?: OrderFee;
+  signature?: TransactionSignature;
+}
+
+export type CreateOrdersResponse =
+  | CreateOrderResponse
+  | IMap<OrderClientId, CreateOrderResponse>
+  | IMap<MarketId, IMap<OrderClientId, CreateOrderResponse>>;
+
+export interface CancelOrdersRequest {
+  id?: OrderId;
+  ids?: OrderId[];
+  clientId?: OrderClientId;
+  clientIds?: OrderClientId[];
+  marketId: MarketId;
+  ownerAddress: OrderOwnerAddress;
+}
+
+export interface CancelOrderResponse {
+  id?: OrderId;
+  clientId?: OrderClientId;
+  marketId: OrderMarketId;
+  ownerAddress: OrderOwnerAddress;
+  price: OrderPrice;
+  amount: OrderAmount;
+  side: OrderSide;
+  status?: OrderStatus;
+  type?: OrderType;
+  fee?: OrderFee;
+  signatures?: TransactionSignatures;
+}
+
+export type CancelOrdersResponse =
+  | CancelOrderResponse
+  | IMap<OrderClientId, CancelOrderResponse>
+  | IMap<MarketId, IMap<OrderClientId, CancelOrderResponse>>;
+
+export interface GetOpenOrderRequest {
+  id?: OrderId;
+  clientId?: OrderClientId;
+  marketId?: OrderMarketId;
+  ownerAddress: OrderOwnerAddress;
+}
+
+export interface GetOpenOrdersRequest {
+  ids?: OrderId[];
+  clientIds?: OrderClientId[];
+  marketId?: OrderMarketId;
+  ownerAddress: OrderOwnerAddress;
+}
+
+export interface GetOpenOrderResponse {
+  id?: OrderId;
+  clientId?: OrderClientId;
+  marketId: OrderMarketId;
+  ownerAddress?: OrderOwnerAddress;
+  price: OrderPrice;
+  amount: OrderAmount;
+  side: OrderSide;
+  status?: OrderStatus;
+  type?: OrderType;
+  fee?: OrderFee;
+  signatures?: OrderTransactionSignatures;
+}
+
+export type GetOpenOrdersResponse =
+  | GetOpenOrderResponse
+  | IMap<OrderClientId, GetOpenOrderResponse>
+  | IMap<MarketId, IMap<OrderClientId, GetOpenOrderResponse>>;
+
+export interface GetFilledOrdersRequest {
+  id?: OrderId;
+  ids?: OrderId[];
+  clientId?: OrderClientId;
+  clientIds?: OrderClientId[];
+  marketId?: OrderClientId;
+  ownerAddress?: OrderOwnerAddress;
+  maxNumberOfFilledOrders?: MaxNumberOfFilledOrders;
+}
+
+export interface GetFilledOrderResponse {
+  id?: OrderId;
+  clientId?: OrderClientId;
+  marketId: OrderMarketId;
+  ownerAddress?: OrderOwnerAddress;
+  price: OrderPrice;
+  amount: OrderAmount;
+  side: OrderSide;
+  status?: OrderStatus;
+  type?: OrderType;
+  fee?: OrderFee;
+  fillingTimestamp?: OrderFillingTimestamp;
+  signatures?: OrderTransactionSignatures;
+}
+
+export type GetFilledOrdersResponse =
+  | GetFilledOrderResponse
+  | IMap<OrderClientId, GetFilledOrderResponse>
+  | IMap<MarketId, IMap<OrderClientId, GetFilledOrderResponse>>;
+
+export type PostSettlementRequest =
+  | { ownerAddress: OwnerAddress }
+  | { marketId: MarketId; ownerAddress: OwnerAddress }
+  | { marketIds: MarketId[]; ownerAddress: OwnerAddress };
+
+export type PostSettlementResponse = TransactionSignature[];
+
+export type PostSettlementsResponse =
+  | PostSettlementResponse
+  | IMap<MarketId, PostSettlementResponse>;
