@@ -98,7 +98,7 @@ export enum OrderType {
 
 export enum TickerSource {
   ORDER_BOOK_SAP = 'orderBookSimpleAveragePrice',
-  ORDER_BOOK_WAP = 'orderBookWeightedAverage',
+  ORDER_BOOK_WAP = 'orderBookWeightedAveragePrice',
   ORDER_BOOK_VWAP = 'orderBookVolumeWeightedAveragePrice',
   LAST_FILLED_ORDER = 'lastFilledOrder',
   NOMICS = 'nomics',
@@ -186,7 +186,7 @@ export interface GetMarketOptions {
 }
 
 export interface GetMarketsOptions {
-  ids?: [MarketId];
+  ids?: MarketId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -197,7 +197,7 @@ export interface GetOrderBookOptions {
 }
 
 export interface GetOrderBooksOptions {
-  marketIds?: [MarketId];
+  marketIds?: MarketId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -208,7 +208,7 @@ export interface GetTickerOptions {
 }
 
 export interface GetTickersOptions {
-  marketIds?: [MarketId];
+  marketIds?: MarketId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -217,20 +217,20 @@ export interface GetAllTickerOptions extends GetTickersOptions {}
 export interface GetOrderOptions {
   exchangeOrderId: OrderExchangeOrderId;
   marketId?: MarketId;
-  marketIds?: [MarketId];
+  marketIds?: MarketId[];
   ownerAddress?: OrderOwnerAddress;
   status?: OrderStatus;
-  statuses?: [OrderStatus];
+  statuses?: OrderStatus[];
 }
 
 export interface GetOrdersOptions {
-  exchangeOrderIds?: [OrderExchangeOrderId];
+  exchangeOrderIds?: OrderExchangeOrderId[];
   marketId?: MarketId;
-  marketIds?: [MarketId];
+  marketIds?: MarketId[];
   ownerAddress?: OrderOwnerAddress;
-  ownerAddresses?: [OrderOwnerAddress];
+  ownerAddresses?: OrderOwnerAddress[];
   status?: OrderStatus;
-  statuses?: [OrderStatus];
+  statuses?: OrderStatus[];
 }
 
 export interface PlaceOrderOptions {
@@ -246,7 +246,7 @@ export interface PlaceOrderOptions {
 
 export interface PlaceOrdersOptions {
   waitUntilIncludedInBlock?: boolean;
-  orders: [PlaceOrderOptions];
+  orders: PlaceOrderOptions[];
 }
 
 export interface CancelOrderOptions {
@@ -256,9 +256,9 @@ export interface CancelOrderOptions {
 }
 
 export interface CancelOrdersOptions {
-  exchangeOrderIds?: [OrderExchangeOrderId];
+  exchangeOrderIds?: OrderExchangeOrderId[];
   marketId: MarketId;
-  ownerAddresses: [OrderOwnerAddress];
+  ownerAddresses: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -266,12 +266,12 @@ export interface CancelAllOrdersOptions extends CancelOrdersOptions {}
 
 export interface SettleFundsOptions {
   marketId?: MarketId;
-  ownerAddresses: [OrderOwnerAddress];
+  ownerAddresses: OrderOwnerAddress[];
 }
 
 export interface SettleSeveralFundsOptions {
-  marketIds?: [MarketId];
-  ownerAddresses: [OrderOwnerAddress];
+  marketIds?: MarketId[];
+  ownerAddresses: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
