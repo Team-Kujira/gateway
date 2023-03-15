@@ -256,13 +256,17 @@ export interface CancelOrderOptions {
 }
 
 export interface CancelOrdersOptions {
-  exchangeOrderIds?: OrderExchangeOrderId[];
+  exchangeOrderIds: OrderExchangeOrderId[];
   marketId: MarketId;
-  ownerAddresses: OrderOwnerAddress[];
+  ownerAddresses?: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CancelAllOrdersOptions extends CancelOrdersOptions {}
+export interface CancelAllOrdersOptions extends CancelOrdersOptions {
+  marketId: MarketId;
+  marketIds: MarketId[];
+  ownerAddresses?: OrderOwnerAddress[];
+}
 
 export interface SettleFundsOptions {
   marketId?: MarketId;

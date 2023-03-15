@@ -22,6 +22,7 @@ import {
   OrderBook,
   OrderExchangeOrderId,
   OrderNotFoundError,
+  OrderOwnerAddress,
   OrderSide,
   OrderStatus,
   PlaceOrderOptions,
@@ -913,7 +914,30 @@ export class Kujira {
   async cancelAllOrders(
     options?: CancelAllOrdersOptions
   ): Promise<IMap<OrderExchangeOrderId, Order>> {
-    // TODO implement!!!
+    const marketIds: MarketId[] = options?.marketId
+      ? [options?.marketId]
+      : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+
+    const cancelledOrders = IMap<OrderExchangeOrderId, Order>().asMutable();
+
+    for (const marketId of marketIds) {
+      const openOrdersIds = (await this.getOrders({ status: OrderStatus.OPEN }))
+        .valueSeq()
+        .map((order) =>
+          getNotNullOrThrowError<OrderExchangeOrderId>(order.exchangeOrderId)
+        )
+        .toArray();
+
+      cancelledOrders.merge(
+        await this.cancelOrders({
+          exchangeOrderIds: openOrdersIds,
+          marketId,
+          ownerAddresses: options?.ownerAddresses,
+        })
+      );
+    }
+
+    return cancelledOrders;
   }
 
   /**
@@ -929,7 +953,9 @@ export class Kujira {
       market.id
     );
 
-    const filledOrdersIds = (await this.getOrders({}))
+    const filledOrdersIds = (
+      await this.getOrders({ status: OrderStatus.FILLED })
+    )
       .valueSeq()
       .map((order) =>
         getNotNullOrThrowError<OrderExchangeOrderId>(order.exchangeOrderId)
@@ -950,7 +976,35 @@ export class Kujira {
   async settleSeveralFunds(
     options: SettleSeveralFundsOptions
   ): Promise<IMap<MarketId, SettleFund>> {
-    // TODO implement!!!
+    if (!options.marketIds)
+      throw new MarketNotFoundError(`No market informed.`);
+
+    const fundsSettlements = IMap<MarketId, SettleFund>().asMutable();
+
+    interface HelperSettleFundsOptions {
+      marketId: MarketId;
+      ownerAddresses: OrderOwnerAddress[];
+    }
+
+    const settleFunds = async (
+      options: HelperSettleFundsOptions
+    ): Promise<void> => {
+      const fundSettlement = await this.settleFunds({
+        marketId: options.marketId,
+        ownerAddresses: options.ownerAddresses,
+      });
+
+      fundsSettlements.set(options.marketId, fundSettlement);
+    };
+
+    await promiseAllInBatches<HelperSettleFundsOptions, void>(
+      settleFunds,
+      options.marketIds.map((id) => {
+        return { marketId: id, ownerAddresses: options.ownerAddresses };
+      })
+    );
+
+    return fundsSettlements;
   }
 
   /**
@@ -960,6 +1014,11 @@ export class Kujira {
   async settleAllFunds(
     options?: SettleAllFundsOptions
   ): Promise<IMap<MarketId, SettleFund>> {
-    // TODO implement!!!
+    const marketIds = (await this.getAllMarkets()).keySeq().toArray();
+
+    return await this.settleSeveralFunds({
+      marketIds,
+      ownerAddresses: options?.ownerAddresses || [this.account.address],
+    });
   }
 }
