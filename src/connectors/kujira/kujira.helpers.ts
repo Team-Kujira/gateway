@@ -1,4 +1,6 @@
-import { default as constants } from './kujira.constants';
+import { KujiraConfig } from './kujira.config';
+
+const config = KujiraConfig.config;
 
 /**
  *
@@ -36,8 +38,8 @@ export const sleep = (milliseconds: number) =>
 export const promiseAllInBatches = async <I, O>(
   task: (item: I) => Promise<O>,
   items: any[],
-  batchSize: number = constants.parallel.all.batchSize,
-  delayBetweenBatches: number = constants.parallel.all.delayBetweenBatches
+  batchSize: number = config.parallel.all.batchSize,
+  delayBetweenBatches: number = config.parallel.all.delayBetweenBatches
 ): Promise<O[]> => {
   let position = 0;
   let results: any[] = [];
@@ -77,9 +79,9 @@ export const runWithRetryAndTimeout = async <R>(
   targetObject: any,
   targetFunction: (...args: any[]) => R,
   targetParameters: any,
-  maxNumberOfRetries: number = constants.retry.all.maxNumberOfRetries,
-  delayBetweenRetries: number = constants.retry.all.delayBetweenRetries,
-  timeout: number = constants.timeout.all,
+  maxNumberOfRetries: number = config.retry.all.maxNumberOfRetries,
+  delayBetweenRetries: number = config.retry.all.delayBetweenRetries,
+  timeout: number = config.timeout.all,
   timeoutMessage: string = 'Timeout exceeded.'
 ): Promise<R> => {
   const errors = [];
