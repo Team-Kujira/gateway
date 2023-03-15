@@ -27,9 +27,9 @@ import {
   OrderStatus,
   PlaceOrderOptions,
   PlaceOrdersOptions,
-  SettlementsAllOptions,
   Settlement,
   SettlementOptions,
+  SettlementsAllOptions,
   SettlementsOptions,
   Ticker,
   TickerNotFoundError,
@@ -54,9 +54,9 @@ import {
 import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
-  convertKujiraOrdersToMapOfOrders,
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
+  convertKujiraOrdersToMapOfOrders,
   convertKujiraOrderToOrder,
   convertKujiraSettlementToSettlement,
   convertNetworkToKujiraNetwork,
@@ -746,7 +746,7 @@ export class Kujira {
         }
       );
 
-      orders = convertKujiraOrdersToMapOfOrders(market, results);
+      return convertKujiraOrdersToMapOfOrders(market, results);
     } else {
       const marketIds =
         options.marketIds || (await this.getAllMarkets()).keySeq().toArray();
@@ -848,9 +848,7 @@ export class Kujira {
       config.orders.create.fee
     );
 
-    const orders = convertKujiraOrdersToMapOfOrders(results);
-
-    return orders;
+    return convertKujiraOrdersToMapOfOrders(results);
   }
 
   /**
@@ -900,9 +898,7 @@ export class Kujira {
       config.orders.create.fee
     );
 
-    const orders = convertKujiraOrdersToMapOfOrders(results);
-
-    return orders;
+    return convertKujiraOrdersToMapOfOrders(results);
   }
 
   /**
