@@ -1,50 +1,9 @@
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
-import { AvailableNetworks } from '../../services/config-manager-types';
 
 const configManager = ConfigManagerV2.getInstance();
 
 export namespace KujiraConfig {
-  export interface Config {
-    tradingTypes: Array<string>;
-    prefix: string;
-    accountNumber: number;
-    gasPrice: string;
-    rpcEndpoint: string;
-    availableNetworks: Array<AvailableNetworks>;
-    markets: MarketsConfig;
-    tickers: TickersConfig;
-    transactions: TransactionsConfig;
-    orderBook: OrderBookConfig;
-  }
-
-  export interface MarketsConfig {
-    url: string;
-    blacklist: string[];
-    whiteList: string[];
-  }
-
-  export interface TickersConfig {
-    sources: Map<string, SourcesConfig>;
-  }
-
-  export interface SourcesConfig {
-    url: string;
-  }
-
-  export interface TransactionsConfig {
-    merge: {
-      createOrders: boolean;
-      cancelOrders: boolean;
-      settleFunds: boolean;
-    };
-  }
-
-  export interface OrderBookConfig {
-    offset: number;
-    limit: number;
-  }
-
-  export const config: Config = {
+  export const config = {
     tradingTypes: ['CLOB_COSMOS_KUJIRA'],
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
@@ -55,9 +14,25 @@ export namespace KujiraConfig {
       whiteList: configManager.get(`kujira.markets.whitelist`),
     },
     tickers: {
-      sources: new Map(
+      sources: new Map<string, { url: string }>(
         Object.entries(configManager.get(`kujira.tickers.sources`))
       ),
+    },
+    orders: {
+      create: {
+        fee: configManager.get(`kujira.orders.create.fee`),
+        maxPerTransaction: configManager.get(
+          `kujira.orders.create.maxPerTransaction`
+        ),
+      },
+      filled: {
+        limit: configManager.get(`kujira.orders.filled.limit`),
+      },
+      cancel: {
+        maxPerTransaction: configManager.get(
+          `kujira.orders.cancel.maxPerTransaction`
+        ),
+      },
     },
     transactions: {
       merge: {
@@ -81,5 +56,27 @@ export namespace KujiraConfig {
         networks: [], // TODO fix!!!
       },
     ],
+    retry: {
+      all: {
+        maxNumberOfRetries:
+          configManager.get('kujira.retry.all.maxNumberOfRetries') || 0, // 0 means no retries
+        delayBetweenRetries:
+          configManager.get('kujira.retry.all.delayBetweenRetries') || 0, // 0 means no delay (milliseconds)
+      },
+    },
+    timeout: {
+      all: configManager.get('kujira.timeout.all') || 0, // 0 means no timeout (milliseconds)
+    },
+    parallel: {
+      all: {
+        batchSize: configManager.get('kujira.parallel.all.batchSize') || 0, // 0 means no batching (group all)
+        delayBetweenBatches:
+          configManager.get('kujira.parallel.all.delayBetweenBatches') || 0, // 0 means no delay (milliseconds)
+      },
+    },
+    cache: {
+      marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
+      markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
+    },
   };
 }
