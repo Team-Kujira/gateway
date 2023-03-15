@@ -71,6 +71,14 @@ export type FeeTaker = Fee;
 
 export type MaxNumberOfFilledOrders = number;
 
+export type ClobPostOrderRequest = ClobPostOrderRequest;
+export const ClobPostOrderRequest = ClobPostOrderRequest;
+
+// Needed for type comparisons if the definitions are not changed.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+export const ClobDeleteOrderRequest = ClobDeleteOrderRequest;
+
 //
 //  Enums
 //
