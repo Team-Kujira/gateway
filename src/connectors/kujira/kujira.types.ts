@@ -73,6 +73,11 @@ export type Settlement = TransactionSignature;
 export type FeeMaker = Fee;
 export type FeeTaker = Fee;
 
+export type EstimatedFeesToken = string;
+export type EstimatedFeesPrice = Price;
+export type EstimateFeesLimit = FloatingNumber;
+export type EstimateFeesCost = FloatingNumber;
+
 export type MaxNumberOfFilledOrders = number;
 
 //
@@ -177,6 +182,13 @@ export interface TransactionSignatures {
 export interface MarketFee {
   maker: FeeMaker;
   taker: FeeTaker;
+}
+
+export interface EstimatedFees {
+  token: EstimatedFeesToken;
+  price: EstimatedFeesPrice;
+  limit: EstimateFeesLimit;
+  cost: EstimateFeesCost;
 }
 
 //
@@ -296,6 +308,18 @@ export interface SettlementsOptions {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SettlementsAllOptions extends SettlementsOptions {}
+
+export interface GetMarketEstimatedFeesOptions {
+  marketId: MarketId;
+}
+
+export interface GetMarketsEstimatedFeesOptions {
+  marketIds: MarketId[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllMarketsEstimatedFeesOptions
+  extends GetMarketsEstimatedFeesOptions {}
 
 //
 // Requests subtypes
@@ -507,3 +531,14 @@ export type PostSettlementResponse = TransactionSignature[];
 export type PostSettlementsResponse =
   | PostSettlementResponse
   | IMap<MarketId, PostSettlementResponse>;
+
+//
+// Extensions
+//
+
+export interface EstimatedGaResponse {
+  gasPrice: number;
+  gasPriceToken: string;
+  gasLimit: number;
+  gasCost: number;
+}

@@ -1,6 +1,10 @@
 import {
   CancelOrderOptions,
+  CancelOrdersOptions,
   CreateOrdersRequest,
+  EstimatedFees,
+  EstimatedGaResponse,
+  GetMarketEstimatedFeesOptions,
   GetMarketOptions,
   GetOrderBookOptions,
   GetOrderOptions,
@@ -10,6 +14,7 @@ import {
   KujiraOrderBook,
   KujiraSettlement,
   Market,
+  MarketId,
   Order,
   OrderBook,
   OrderId,
@@ -45,6 +50,7 @@ import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import { SpotMarket } from '@injectivelabs/sdk-ts';
 import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exchange';
+import { getNotNullOrThrowError } from './kujira.helpers';
 
 const config = KujiraConfig.config;
 
@@ -134,6 +140,24 @@ export const convertClobBatchUpdateRequestToPlaceOrdersOptions = (
   } as PlaceOrdersOptions;
 };
 
+export const convertClobBatchUpdateRequestToDeleteOrdersOptions = (
+  request: ClobBatchUpdateRequest
+): CancelOrdersOptions => {
+  const marketId = convertClobDeleteOrderRequestToCancelOrderOptions(
+    getNotNullOrThrowError<ClobDeleteOrderRequestExtract[]>(
+      request.cancelOrderParams
+    )[0]
+  ).marketId;
+
+  return {
+    ids: request.cancelOrderParams?.map((order) => {
+      return convertClobDeleteOrderRequestToCancelOrderOptions(order).id;
+    }),
+    marketId: marketId,
+    ownerAddress: request.address,
+  } as CancelOrdersOptions;
+};
+
 export const convertClobDeleteOrderRequestToCancelOrderOptions = (
   request: ClobDeleteOrderRequest | ClobDeleteOrderRequestExtract
 ): CancelOrderOptions => {
@@ -142,6 +166,17 @@ export const convertClobDeleteOrderRequestToCancelOrderOptions = (
     ownerAddress: 'address' in request ? request.address : undefined,
     marketId: request.market,
   } as CancelOrderOptions;
+};
+
+export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
+  _gasPrice: number,
+  _gasPriceToken: string,
+  _gasLimit: number,
+  _gasCost: number
+): GetMarketEstimatedFeesOptions => {
+  return {
+    marketId: undefined as unknown as MarketId,
+  } as GetMarketEstimatedFeesOptions;
 };
 
 export const convertToClobMarketResponse = (
@@ -241,6 +276,17 @@ export const convertToClobDeleteOrderResponse = (
     latency: 0,
     txHash: response.signatures?.cancellation,
   } as ClobDeleteOrderResponse;
+};
+
+export const convertToEstimatedFeesResponse = (
+  _response: EstimatedFees
+): EstimatedGaResponse => {
+  return {
+    gasPrice: undefined as unknown as number,
+    gasPriceToken: undefined as unknown as string,
+    gasLimit: undefined as unknown as number,
+    gasCost: undefined as unknown as number,
+  } as EstimatedGaResponse;
 };
 
 export const convertKujiraMarketToMarket = (_market: fin.Pair): Market => {

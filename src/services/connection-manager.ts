@@ -32,8 +32,10 @@ import { Defira } from '../connectors/defira/defira';
 import { Near } from '../chains/near/near';
 import { Ref } from '../connectors/ref/ref';
 import { Xsswap } from '../connectors/xsswap/xsswap';
+import { KujiraMiddleware as Kujira } from '../connectors/kujira/kujira.middlewares';
+import { Cosmos } from '../chains/cosmos/cosmos';
 
-export type ChainUnion = Ethereumish | Nearish | Injective | Xdcish;
+export type ChainUnion = Ethereumish | Nearish | Injective | Xdcish | Cosmos;
 
 export type Chain<T> = T extends Ethereumish
   ? Ethereumish
@@ -43,6 +45,8 @@ export type Chain<T> = T extends Ethereumish
   ? Xdcish
   : T extends Injective
   ? Injective
+  : T extends Cosmos
+  ? Cosmos
   : never;
 
 export async function getChain<T>(
@@ -63,6 +67,7 @@ export async function getChain<T>(
   else if (chain === 'cronos') chainInstance = Cronos.getInstance(network);
   else if (chain === 'injective')
     chainInstance = Injective.getInstance(network);
+  else if (chain === 'cosmos') chainInstance = Cosmos.getInstance(network);
   else throw new Error('unsupported chain');
 
   if (!chainInstance.ready()) {
@@ -77,7 +82,8 @@ type ConnectorUnion =
   | UniswapLPish
   | Perpish
   | RefAMMish
-  | InjectiveCLOB;
+  | InjectiveCLOB
+  | Kujira;
 
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
@@ -89,6 +95,8 @@ export type Connector<T> = T extends Uniswapish
   ? RefAMMish
   : T extends InjectiveCLOB
   ? InjectiveCLOB
+  : T extends Kujira
+  ? Kujira
   : never;
 
 export async function getConnector<T>(
@@ -137,6 +145,8 @@ export async function getConnector<T>(
     connectorInstance = Xsswap.getInstance(chain, network);
   } else if (chain === 'injective' && connector === 'injective') {
     connectorInstance = InjectiveCLOB.getInstance(chain, network);
+  } else if (chain === 'cosmos' && connector === 'kujira') {
+    connectorInstance = await Kujira.getInstance(chain, network);
   } else {
     throw new Error('unsupported chain or connector');
   }

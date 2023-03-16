@@ -3,10 +3,14 @@ import {
   CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
+  EstimatedFees,
+  GetAllMarketsEstimatedFeesOptions,
   GetAllMarketsOptions,
   GetAllOrderBookOptions,
   GetAllTickerOptions,
+  GetMarketEstimatedFeesOptions,
   GetMarketOptions,
+  GetMarketsEstimatedFeesOptions,
   GetMarketsOptions,
   GetOrderBookOptions,
   GetOrderBooksOptions,
@@ -86,8 +90,6 @@ const caches = {
 };
 
 const config = KujiraConfig.config;
-
-export type Kujiraish = Kujira;
 
 /**
  *
@@ -189,12 +191,6 @@ export class Kujira {
 
   /**
    *
-   * @private
-   */
-  private isReady: boolean = false;
-
-  /**
-   *
    */
   chain: string;
 
@@ -207,6 +203,11 @@ export class Kujira {
    *
    */
   readonly connector: string = 'kujira';
+
+  /**
+   *
+   */
+  isReady: boolean = false;
 
   /**
    * Get the Kujira instance for the given chain and network.
@@ -315,12 +316,6 @@ export class Kujira {
       this.isReady = true;
       this.isInitializing = false;
     }
-  }
-
-  /**
-   */
-  ready(): boolean {
-    return this.isReady;
   }
 
   @Cache(caches.markets, { ttl: config.cache.marketsData })
@@ -1010,5 +1005,42 @@ export class Kujira {
       marketIds,
       ownerAddresses: options?.ownerAddresses || [this.account.address],
     });
+  }
+
+  async getMarketEstimatedFees(
+    _options: GetMarketEstimatedFeesOptions
+  ): Promise<EstimatedFees> {
+    throw new Error('Not implemented.');
+  }
+
+  async getMarketsEstimatedFees(
+    options: GetMarketsEstimatedFeesOptions
+  ): Promise<IMap<MarketId, EstimatedFees>> {
+    if (!options.marketIds)
+      throw new MarketNotFoundError(`No market informed.`);
+
+    const marketsFees = IMap<string, EstimatedFees>().asMutable();
+
+    const getMarketEstimatedFees = async (marketId: string): Promise<void> => {
+      const marketFees = await this.getMarketEstimatedFees({ marketId });
+
+      marketsFees.set(marketId, marketFees);
+    };
+
+    await promiseAllInBatches(getMarketEstimatedFees, options.marketIds);
+
+    return marketsFees;
+  }
+
+  /**
+   *
+   * @param _options
+   */
+  async getAlltMarketsEstimatedFees(
+    _options: GetAllMarketsEstimatedFeesOptions
+  ): Promise<IMap<MarketId, EstimatedFees>> {
+    const marketIds = (await this.getAllMarkets()).keySeq().toArray();
+
+    return await this.getMarketsEstimatedFees({ marketIds });
   }
 }
