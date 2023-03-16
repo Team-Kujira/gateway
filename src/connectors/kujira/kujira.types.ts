@@ -38,6 +38,10 @@ export type ConnectorTicker = any;
 export type ConnectorOrderBook = any;
 export type ConnectorOrder = any;
 
+export type TokenId = Address;
+export type TokenName = string;
+export type TokenSymbol = string;
+
 export type MarketName = string;
 export type MarketId = Address;
 export type MarketProgramId = Address;
@@ -108,9 +112,17 @@ export enum TickerSource {
 //  Interfaces
 //
 
+export interface Token {
+  id: TokenId;
+  name: TokenName;
+  symbol: TokenSymbol;
+}
+
 export interface Market {
   id: MarketId;
   name: MarketName;
+  baseToken: Token;
+  quoteToken: Token;
   minimumOrderSize: MarketMinimumOrderSize;
   tickSize: MarketTickSize;
   minimumBaseIncrement?: MarketMinimumBaseIncrement;
