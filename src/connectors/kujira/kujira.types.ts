@@ -122,8 +122,8 @@ export interface Market {
 
 export interface OrderBook {
   market: Market;
-  bids: IMap<OrderClientId, Order>;
-  asks: IMap<OrderClientId, Order>;
+  bids: IMap<OrderId, Order>;
+  asks: IMap<OrderId, Order>;
   bestBid?: Order;
   bestAsk?: Order;
   connectorOrderBook: ConnectorOrderBook;
