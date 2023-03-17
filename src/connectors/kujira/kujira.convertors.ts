@@ -20,6 +20,7 @@ import {
   OrderId,
   OrderSide,
   OrderStatus,
+  OrderType as KujiraOrderType,
   PlaceOrderOptions,
   PlaceOrdersOptions,
   Settlement,
@@ -43,7 +44,7 @@ import {
   ClobTickerResponse,
   CreateOrderParam,
 } from '../../clob/clob.requests';
-import { Side } from '../../amm/amm.requests';
+import { Side, OrderType as ClobOrderType } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
 import { fin } from 'kujira.js';
 import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
@@ -98,12 +99,21 @@ export const convertKujiraOrderSideToClobSide = (request: OrderSide): Side => {
   }
 };
 
+export const convertClobOrderTypeToKujiraOrderType = (
+  request: ClobOrderType
+): KujiraOrderType => {
+  if (request == 'LIMIT') {
+    return KujiraOrderType.LIMIT;
+  } else if (request == 'LIMIT_MAKER') {
+    return KujiraOrderType.POST_ONLY;
+  } else {
+    throw new Error('Error in conversion between order type');
+  }
+};
+
 export const convertClobPostOrderRequestToPlaceOrderOptions = (
   request: ClobPostOrderRequest | CreateOrderParam
 ): PlaceOrderOptions => {
-  if (request.orderType == 'LIMIT_MAKER') {
-    request.orderType = 'LIMIT'; // TODO, choose a better conversion than this workaround. !!!
-  }
   return {
     waitUntilIncludedInBlock: false,
     marketId: request.market,
@@ -111,7 +121,7 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     side: convertClobSideToKujiraOrderSide(request.side),
     price: Number.parseFloat(request.price),
     amount: Number.parseFloat(request.amount),
-    type: request.orderType,
+    type: convertClobOrderTypeToKujiraOrderType(request.orderType),
     payerAddress: 'address' in request ? request.address : undefined, // TODO, is the payer always the owner? !!!
   } as PlaceOrderOptions;
 };
