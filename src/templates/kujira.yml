@@ -1,7 +1,9 @@
 network: 'mainnet'
 prefix: 'kujira'
 accountNumber: 0
-gasPrice: '0.00125ukuji'
+gasPrice: 0.00125
+gasPriceSuffix: 'ukuji'
+gasLimitEstimate: 0.009147
 orderBook:
   offset: 0
   limit: 100

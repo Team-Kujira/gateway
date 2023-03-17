@@ -12,7 +12,13 @@
       "type": "integer"
     },
     "gasPrice": {
+      "type": "number"
+    },
+    "gasPriceSuffix": {
       "type": "string"
+    },
+    "gasLimitEstimate": {
+      "type": "number"
     },
     "orderBook": {
       "type": "object",
