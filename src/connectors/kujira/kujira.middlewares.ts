@@ -148,14 +148,14 @@ export class KujiraMiddleware {
     }
   }
 
-  public async estimateGas(
+  public estimateGas(
     gasPrice: number,
     gasPriceToken: string,
     gasLimit: number,
     gasCost: number
-  ): Promise<EstimatedGaResponse> {
+  ): EstimatedGaResponse {
     return convertToEstimatedFeesResponse(
-      await this.kujira.getMarketEstimatedFees(
+      this.kujira.getEstimatedFees(
         convertEstimateGasRequestToGetMarketEstimatedFeesOptions(
           gasPrice,
           gasPriceToken,

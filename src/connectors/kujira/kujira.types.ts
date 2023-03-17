@@ -309,17 +309,8 @@ export interface SettlementsOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SettlementsAllOptions extends SettlementsOptions {}
 
-export interface GetMarketEstimatedFeesOptions {
-  marketId: MarketId;
-}
-
-export interface GetMarketsEstimatedFeesOptions {
-  marketIds: MarketId[];
-}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetAllMarketsEstimatedFeesOptions
-  extends GetMarketsEstimatedFeesOptions {}
+export interface GetEstimatedFeesOptions {}
 
 //
 // Requests subtypes

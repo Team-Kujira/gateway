@@ -4,7 +4,7 @@ import {
   CreateOrdersRequest,
   EstimatedFees,
   EstimatedGaResponse,
-  GetMarketEstimatedFeesOptions,
+  GetEstimatedFeesOptions,
   GetMarketOptions,
   GetOrderBookOptions,
   GetOrderOptions,
@@ -173,10 +173,10 @@ export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
   _gasPriceToken: string,
   _gasLimit: number,
   _gasCost: number
-): GetMarketEstimatedFeesOptions => {
+): GetEstimatedFeesOptions => {
   return {
     marketId: undefined as unknown as MarketId,
-  } as GetMarketEstimatedFeesOptions;
+  } as GetEstimatedFeesOptions;
 };
 
 export const convertToClobMarketResponse = (

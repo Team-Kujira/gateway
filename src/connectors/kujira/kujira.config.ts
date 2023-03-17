@@ -8,7 +8,10 @@ export namespace KujiraConfig {
     network: configManager.get('kujira.network') || 'kujira',
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
-    gasPrice: configManager.get('kujira.gasPrice') || '0.00125ukuji',
+    nativeToken: 'KUJI',
+    gasPrice: configManager.get('kujira.gasPrice') || 0.00125,
+    gasPriceSuffix: configManager.get('kujira.gasPrice') || 'ukuji',
+    gasLimitEstimate: configManager.get('kujira.gasLimitEstimate') || 0.009147,
     markets: {
       url: configManager.get(`kujira.markets.url`),
       blacklist: configManager.get(`kujira.markets.blacklist`),

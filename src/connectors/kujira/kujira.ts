@@ -4,13 +4,11 @@ import {
   CancelOrderOptions,
   CancelOrdersOptions,
   EstimatedFees,
-  GetAllMarketsEstimatedFeesOptions,
   GetAllMarketsOptions,
   GetAllOrderBookOptions,
   GetAllTickerOptions,
-  GetMarketEstimatedFeesOptions,
+  GetEstimatedFeesOptions,
   GetMarketOptions,
-  GetMarketsEstimatedFeesOptions,
   GetMarketsOptions,
   GetOrderBookOptions,
   GetOrderBooksOptions,
@@ -251,12 +249,11 @@ export class Kujira {
 
       const mnemonic: string = await this.getMnemonic();
 
-      const prefix: string = config.prefix || config.prefix;
+      const prefix: string = config.prefix;
 
-      const accountNumber: number =
-        config.accountNumber || config.accountNumber;
+      const accountNumber: number = config.accountNumber;
 
-      const gasPrice: string = config.gasPrice || config.gasPrice;
+      const gasPrice: string = `${config.gasPrice}${config.gasPriceSuffix}`;
 
       // signer
       this.directSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(
@@ -558,12 +555,10 @@ export class Kujira {
         } else if (source === TickerSource.ORDER_BOOK_WAP) {
           // const orderBook = await this.getOrderBook({ marketId: market.id });
 
-          // TODO Calculate mid price from the best bid and ask!!!
           throw Error('Not implemented.');
         } else if (source === TickerSource.ORDER_BOOK_VWAP) {
           // const orderBook = await this.getOrderBook({ marketId: market.id });
 
-          // TODO Calculate mid price from the best bid and ask!!!
           throw Error('Not implemented.');
         } else if (source === TickerSource.LAST_FILLED_ORDER) {
           const filledOrders = await this.getOrders({
@@ -1007,40 +1002,12 @@ export class Kujira {
     });
   }
 
-  async getMarketEstimatedFees(
-    _options: GetMarketEstimatedFeesOptions
-  ): Promise<EstimatedFees> {
-    throw new Error('Not implemented.');
-  }
-
-  async getMarketsEstimatedFees(
-    options: GetMarketsEstimatedFeesOptions
-  ): Promise<IMap<MarketId, EstimatedFees>> {
-    if (!options.marketIds)
-      throw new MarketNotFoundError(`No market informed.`);
-
-    const marketsFees = IMap<string, EstimatedFees>().asMutable();
-
-    const getMarketEstimatedFees = async (marketId: string): Promise<void> => {
-      const marketFees = await this.getMarketEstimatedFees({ marketId });
-
-      marketsFees.set(marketId, marketFees);
-    };
-
-    await promiseAllInBatches(getMarketEstimatedFees, options.marketIds);
-
-    return marketsFees;
-  }
-
-  /**
-   *
-   * @param _options
-   */
-  async getAlltMarketsEstimatedFees(
-    _options: GetAllMarketsEstimatedFeesOptions
-  ): Promise<IMap<MarketId, EstimatedFees>> {
-    const marketIds = (await this.getAllMarkets()).keySeq().toArray();
-
-    return await this.getMarketsEstimatedFees({ marketIds });
+  getEstimatedFees(_options: GetEstimatedFeesOptions): EstimatedFees {
+    return {
+      token: config.nativeToken,
+      price: config.gasPrice,
+      limit: config.gasLimitEstimate,
+      cost: config.gasPrice * config.gasLimitEstimate,
+    } as EstimatedFees;
   }
 }
