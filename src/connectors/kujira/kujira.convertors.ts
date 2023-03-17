@@ -78,7 +78,7 @@ export const convertClobTickerRequestToGetTickerOptions = (
   } as GetTickerOptions;
 };
 
-export const convertSideToKujiraOrderSide = (request: Side): OrderSide => {
+export const convertClobSideToKujiraOrderSide = (request: Side): OrderSide => {
   if (request == 'BUY') {
     return OrderSide.BUY;
   } else if (request == 'SELL') {
@@ -88,7 +88,7 @@ export const convertSideToKujiraOrderSide = (request: Side): OrderSide => {
   }
 };
 
-export const convertKujiraOrderSideToSide = (request: OrderSide): Side => {
+export const convertKujiraOrderSideToClobSide = (request: OrderSide): Side => {
   if (request == OrderSide.BUY) {
     return 'BUY';
   } else if (request == OrderSide.SELL) {
@@ -108,7 +108,7 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     waitUntilIncludedInBlock: false,
     marketId: request.market,
     ownerAddress: 'address' in request ? request.address : undefined,
-    side: convertSideToKujiraOrderSide(request.side),
+    side: convertClobSideToKujiraOrderSide(request.side),
     price: Number.parseFloat(request.price),
     amount: Number.parseFloat(request.amount),
     type: request.orderType,
@@ -164,7 +164,7 @@ export const convertClobDeleteOrderRequestToCancelOrderOptions = (
   return {
     id: request.orderId,
     ownerAddress: 'address' in request ? request.address : undefined,
-    marketId: request.market,
+    marketId: 'market' in request ? request.market : undefined,
   } as CancelOrderOptions;
 };
 
