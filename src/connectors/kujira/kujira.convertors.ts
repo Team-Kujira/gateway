@@ -52,6 +52,13 @@ import contracts from 'kujira.js/src/resources/contracts.json';
 import { SpotMarket } from '@injectivelabs/sdk-ts';
 import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exchange';
 import { getNotNullOrThrowError } from './kujira.helpers';
+import {
+  Cw20TokenMeta,
+  Cw20TokenMetaWithSource, Erc20TokenMeta,
+  IbcTokenMeta,
+  SplTokenMeta,
+  TokenType
+} from "@injectivelabs/token-metadata/dist/types";
 
 const config = KujiraConfig.config;
 
@@ -204,12 +211,36 @@ export const convertToClobMarketResponse = (
         baseDenom: undefined,
         quoteDenom: undefined,
         makerFeeRate: undefined,
-        quoteToken: undefined,
-        baseToken: undefined,
-        takerFeeRate: undefined,
-        serviceProviderFee: undefined,
-        minPriceTickSize: undefined,
-        minQuantityTickSize: undefined,
+        quoteToken: {
+          name: response.quoteToken.name, //string;
+          logo: undefined, //string;
+          symbol: response.quoteToken.symbol, //string;
+          decimals: undefined, //number;
+          tokenType: undefined, //TokenType?;
+          coinGeckoId: undefined, //string;
+          ibc: undefined, //IbcTokenMeta?;
+          spl: undefined, //SplTokenMeta?;
+          cw20: undefined, //Cw20TokenMeta?;
+          cw20s: undefined, //Cw20TokenMetaWithSource[]?;
+          erc20: undefined, //Erc20TokenMeta?;
+        },
+        baseToken: {
+          name: response.baseToken.name, //string;
+          logo: undefined, //string;
+          symbol: response.baseToken.symbol, //string;
+          decimals: undefined, //number;
+          tokenType: undefined, //TokenType?;
+          coinGeckoId: undefined, //string;
+          ibc: undefined, //IbcTokenMeta?;
+          spl: undefined, //SplTokenMeta?;
+          cw20: undefined, //Cw20TokenMeta?;
+          cw20s: undefined, //Cw20TokenMetaWithSource[]?;
+          erc20: undefined, //Erc20TokenMeta?;
+        },
+        takerFeeRate: response.fee.maker, // TODO what is the differrence between maker to taker? !!!
+        serviceProviderFee: undefined, // TODO resolve this one as well !!!
+        minPriceTickSize: response.minimumOrderSize,
+        minQuantityTickSize: response.minimumBaseIncrement,
       } as unknown as SpotMarket,
     },
   } as ClobMarketResponse;
