@@ -54,11 +54,12 @@ import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exch
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   Cw20TokenMeta,
-  Cw20TokenMetaWithSource, Erc20TokenMeta,
+  Cw20TokenMetaWithSource,
+  Erc20TokenMeta,
   IbcTokenMeta,
   SplTokenMeta,
-  TokenType
-} from "@injectivelabs/token-metadata/dist/types";
+  TokenType,
+} from '@injectivelabs/token-metadata/dist/types';
 
 const config = KujiraConfig.config;
 
@@ -246,16 +247,36 @@ export const convertToClobMarketResponse = (
   } as ClobMarketResponse;
 };
 
+export const convertKujiraOrdertoClobPriceLevel = (
+  response: Order
+): PriceLevel => {
+  return {
+    price: response.price,
+    quantity: response.amount,
+    timestamp: undefined,
+  } as unknown as PriceLevel;
+};
+
 export const convertToClobOrderbookResponse = (
-  _response: OrderBook
+  response: OrderBook
 ): ClobOrderbookResponse => {
   return {
     network: config.network,
     timestamp: Date.now(),
     latency: 0,
     orderbook: {
-      buys: [] as PriceLevel[],
-      sells: [] as PriceLevel[],
+      buys: response.bids
+        .valueSeq()
+        .map((obj) => {
+          return convertKujiraOrdertoClobPriceLevel(obj);
+        })
+        .toArray() as PriceLevel[],
+      sells: response.asks
+        .valueSeq()
+        .map((obj) => {
+          return convertKujiraOrdertoClobPriceLevel(obj);
+        })
+        .toArray() as PriceLevel[],
     },
   } as ClobOrderbookResponse;
 };
