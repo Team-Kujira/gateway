@@ -52,14 +52,6 @@ import contracts from 'kujira.js/src/resources/contracts.json';
 import { SpotMarket } from '@injectivelabs/sdk-ts';
 import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exchange';
 import { getNotNullOrThrowError } from './kujira.helpers';
-import {
-  Cw20TokenMeta,
-  Cw20TokenMetaWithSource,
-  Erc20TokenMeta,
-  IbcTokenMeta,
-  SplTokenMeta,
-  TokenType,
-} from '@injectivelabs/token-metadata/dist/types';
 
 const config = KujiraConfig.config;
 
