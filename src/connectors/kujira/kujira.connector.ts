@@ -21,6 +21,8 @@ import {
   convertClobTickerRequestToGetTickerOptions,
   convertEstimateGasRequestToGetMarketEstimatedFeesOptions,
   convertToClobDeleteOrderResponse,
+  convertToClobDeleteOrderResponseForCancellation,
+  convertToClobDeleteOrderResponseForCreation,
   convertToClobGetOrderResponse,
   convertToClobMarketResponse,
   convertToClobOrderbookResponse,
@@ -39,7 +41,7 @@ const caches = {
   instances: new CacheContainer(new MemoryStorage()),
 };
 
-export class KujiraConnectorMiddleware {
+export class KujiraConnector {
   chain: string;
 
   network: string;
@@ -57,8 +59,8 @@ export class KujiraConnectorMiddleware {
   static async getInstance(
     chain: string,
     network: string
-  ): Promise<KujiraMiddleware> {
-    return new KujiraMiddleware(chain, network);
+  ): Promise<KujiraConnector> {
+    return new KujiraConnector(chain, network);
   }
 
   async init() {
@@ -132,13 +134,13 @@ export class KujiraConnectorMiddleware {
     req: ClobBatchUpdateRequest
   ): Promise<{ txHash: string }> {
     if (req.createOrderParams) {
-      return convertToClobDeleteOrderResponse(
+      return convertToClobDeleteOrderResponseForCreation(
         await this.kujira.placeOrders(
           convertClobBatchUpdateRequestToPlaceOrdersOptions(req)
         )
       );
     } else if (req.cancelOrderParams) {
-      return convertToClobDeleteOrderResponse(
+      return convertToClobDeleteOrderResponseForCancellation(
         await this.kujira.cancelOrders(
           convertClobBatchUpdateRequestToDeleteOrdersOptions(req)
         )

@@ -2,8 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Request, Response, Router } from 'express';
 import { asyncHandler } from '../../services/error-handler';
-import { balances, poll } from './kujira.controllers';
-import { KujiraChainMiddleware } from './kujira';
+import { KujiraChainMiddleware } from './kujira.chain.middlewares';
 import {
   BalancesRequest,
   BalancesResponse,
@@ -27,13 +26,15 @@ export namespace KujiraRoutes {
         res: Response<BalancesResponse, {}>
       ) => {
         validateBalanceRequest(req.body);
-        const kujira = await getChain(
-          <string>req.body.chain,
-          <string>req.body.network
+
+        const kujira = await getChain<KujiraChainMiddleware>(
+          req.body.chain,
+          req.body.network
         );
-        res
-          .status(200)
-          .json(await balances(<KujiraChainMiddleware>kujira, req.body));
+
+        const result = await kujira.balances(req.body);
+
+        res.status(200).json(result);
       }
     )
   );
@@ -46,13 +47,15 @@ export namespace KujiraRoutes {
         res: Response<PollResponse, {}>
       ) => {
         validatePollRequest(req.body);
-        const kujira = await getChain(
-          <string>req.body.chain,
-          <string>req.body.network
+
+        const kujira = await getChain<KujiraChainMiddleware>(
+          req.body.chain,
+          req.body.network
         );
-        res
-          .status(200)
-          .json(await poll(<KujiraChainMiddleware>kujira, req.body));
+
+        const result = await kujira.poll(req.body);
+
+        res.status(200).json(result);
       }
     )
   );

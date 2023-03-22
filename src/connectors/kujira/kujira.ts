@@ -1,12 +1,17 @@
 import {
+  Balance,
+  Balances,
   BasicKujiraMarket,
   CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
   EstimatedFees,
+  GetAllBalancesOptions,
   GetAllMarketsOptions,
   GetAllOrderBookOptions,
   GetAllTickerOptions,
+  GetBalanceOptions,
+  GetBalancesOptions,
   GetEstimatedFeesOptions,
   GetMarketOptions,
   GetMarketsOptions,
@@ -16,6 +21,8 @@ import {
   GetOrdersOptions,
   GetTickerOptions,
   GetTickersOptions,
+  GetTransactionOptions,
+  GetTransactionsOptions,
   IMap,
   Market,
   MarketId,
@@ -36,6 +43,9 @@ import {
   Ticker,
   TickerNotFoundError,
   TickerSource,
+  TokenId,
+  Transaction,
+  TransactionSignature,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { config as cosmosConfig } from '../../chains/cosmos/cosmos.config';
@@ -80,6 +90,7 @@ import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { StdFee } from '@cosmjs/amino';
 import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
+import { BigNumber } from 'ethers';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -541,10 +552,9 @@ export class Kujira {
           const bestBid = orderBook.bestBid;
           const bestAsk = orderBook.bestAsk;
 
-          const simpleAveragePrice =
-            (getNotNullOrThrowError<Order>(bestBid).price +
-              getNotNullOrThrowError<Order>(bestAsk).price) /
-            2;
+          const simpleAveragePrice = getNotNullOrThrowError<Order>(bestBid)
+            .price.add(getNotNullOrThrowError<Order>(bestAsk).price)
+            .div(BigNumber.from(2));
 
           const result = {
             price: simpleAveragePrice,
@@ -645,6 +655,70 @@ export class Kujira {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
     return await this.getTickers({ marketIds });
+  }
+
+  async getBalance(options: GetBalanceOptions): Promise<Balance> {
+    const balances = await this.getBalances({ tokenIds: [options.tokenId] });
+
+    if (balances.tokens.has(options.tokenId)) {
+      return getNotNullOrThrowError<Promise<Balance>>(
+        await balances.tokens.get(options.tokenId)
+      );
+    }
+
+    throw new Error(`Token "${options.tokenId}" not found.`);
+  }
+
+  async getBalances(options: GetBalancesOptions): Promise<Balances> {
+    const allBalances = await this.getAllBalances({});
+
+    const balances: Balances = {
+      tokens: IMap<TokenId, Balance>().asMutable(),
+      total: {
+        free: BigNumber.from(0),
+        lockedInOrders: BigNumber.from(0),
+        unsettled: BigNumber.from(0),
+      },
+    };
+
+    for (const [tokenId, balance] of allBalances.tokens) {
+      if (options.tokenIds.includes(tokenId)) {
+        balances.tokens.set(tokenId, balance);
+
+        balances.total.free = balances.total.free.add(balance.free);
+        balances.total.lockedInOrders = balances.total.lockedInOrders.add(
+          balance.lockedInOrders
+        );
+        balances.total.unsettled = balances.total.unsettled.add(
+          balance.unsettled
+        );
+      } else {
+        throw new Error(`Token "${tokenId}" not found.`);
+      }
+    }
+
+    return balances;
+  }
+
+  /**
+   *
+   * @param _options
+   */
+  async getAllBalances(_options: GetAllBalancesOptions): Promise<Balances> {
+    // TODO Implement this method!!!
+
+    // const balances: Balances = {
+    //   tokens: IMap<TokenId, Balance>().asMutable(),
+    //   total: {
+    //     free: BigNumber.from(0),
+    //     lockedInOrders: BigNumber.from(0),
+    //     unsettled: BigNumber.from(0),
+    //   },
+    // };
+
+    // return balances;
+
+    throw new Error('Not implemented.');
   }
 
   /**
@@ -824,7 +898,7 @@ export class Kujira {
             submit_order: { price: candidate.price },
           })
         ),
-        funds: coins(candidate.amount, denom.reference),
+        funds: coins(candidate.amount.toString(), denom.reference),
       });
 
       candidateMessages.push(message);
@@ -1002,12 +1076,46 @@ export class Kujira {
     });
   }
 
+  async getTransaction(_options: GetTransactionOptions): Promise<Transaction> {
+    // TODO implement method!!!
+    // return convertKujiraTransactionToTransaction(transaction);
+
+    throw new Error('Not implemented.');
+  }
+
+  /**
+   *
+   * @param options
+   */
+  async getTransactions(
+    options: GetTransactionsOptions
+  ): Promise<IMap<TransactionSignature, Transaction>> {
+    const transactions = IMap<TransactionSignature, Transaction>().asMutable();
+
+    const getTransaction = async (
+      options: GetTransactionOptions
+    ): Promise<void> => {
+      const transaction = await this.getTransaction(options);
+
+      transactions.set(transaction.signature, transaction);
+    };
+
+    await promiseAllInBatches<GetTransactionOptions, void>(
+      getTransaction,
+      options.signatures.map((signature) => {
+        return { signature };
+      })
+    );
+
+    return transactions;
+  }
+
   getEstimatedFees(_options: GetEstimatedFeesOptions): EstimatedFees {
     return {
       token: config.nativeToken,
       price: config.gasPrice,
       limit: config.gasLimitEstimate,
-      cost: config.gasPrice * config.gasLimitEstimate,
+      cost: config.gasPrice.mul(config.gasLimitEstimate),
     } as EstimatedFees;
   }
 }

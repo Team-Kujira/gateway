@@ -1,14 +1,17 @@
 import {
+  Balances,
   CancelOrderOptions,
   CancelOrdersOptions,
   CreateOrdersRequest,
   EstimatedFees,
   EstimatedGaResponse,
+  GetAllBalancesOptions,
   GetEstimatedFeesOptions,
   GetMarketOptions,
   GetOrderBookOptions,
   GetOrderOptions,
   GetTickerOptions,
+  GetTransactionOptions,
   IMap,
   KujiraOrder,
   KujiraOrderBook,
@@ -25,33 +28,38 @@ import {
   PlaceOrdersOptions,
   Settlement,
   Ticker,
+  Transaction,
   TransactionSignatures,
 } from './kujira.types';
 import {
   ClobBatchUpdateRequest,
   ClobDeleteOrderRequest,
   ClobDeleteOrderRequestExtract,
-  ClobDeleteOrderResponse,
   ClobGetOrderRequest,
   ClobGetOrderResponse,
   ClobMarketResponse,
   ClobMarketsRequest,
   ClobOrderbookRequest,
-  ClobOrderbookResponse,
   ClobPostOrderRequest,
   ClobPostOrderResponse,
   ClobTickerRequest,
   ClobTickerResponse,
   CreateOrderParam,
 } from '../../clob/clob.requests';
-import { Side, OrderType as ClobOrderType } from '../../amm/amm.requests';
+import { OrderType as ClobOrderType, Side } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
 import { fin } from 'kujira.js';
 import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import { SpotMarket } from '@injectivelabs/sdk-ts';
+import { Orderbook, SpotMarket } from '@injectivelabs/sdk-ts';
 import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exchange';
 import { getNotNullOrThrowError } from './kujira.helpers';
+import {
+  BalancesRequest,
+  BalancesResponse,
+  PollRequest,
+  PollResponse,
+} from '../../chains/kujira/kujira.requests';
 
 const config = KujiraConfig.config;
 
@@ -178,6 +186,22 @@ export const convertClobDeleteOrderRequestToCancelOrderOptions = (
   } as CancelOrderOptions;
 };
 
+export const convertBalanceRequestToGetAllBalancesOptions = (
+  request: BalancesRequest
+): GetAllBalancesOptions => {
+  return {
+    ownerAddress: request.address,
+  } as GetAllBalancesOptions;
+};
+
+export const convertPollRequestToGetTransactionOptions = (
+  request: PollRequest
+): GetTransactionOptions => {
+  return {
+    id: request.txHash,
+  } as GetTransactionOptions;
+};
+
 export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
   _gasPrice: number,
   _gasPriceToken: string,
@@ -251,26 +275,21 @@ export const convertKujiraOrdertoClobPriceLevel = (
 
 export const convertToClobOrderbookResponse = (
   response: OrderBook
-): ClobOrderbookResponse => {
+): Orderbook => {
   return {
-    network: config.network,
-    timestamp: Date.now(),
-    latency: 0,
-    orderbook: {
-      buys: response.bids
-        .valueSeq()
-        .map((obj) => {
-          return convertKujiraOrdertoClobPriceLevel(obj);
-        })
-        .toArray() as PriceLevel[],
-      sells: response.asks
-        .valueSeq()
-        .map((obj) => {
-          return convertKujiraOrdertoClobPriceLevel(obj);
-        })
-        .toArray() as PriceLevel[],
-    },
-  } as ClobOrderbookResponse;
+    buys: response.bids
+      .valueSeq()
+      .map((obj) => {
+        return convertKujiraOrdertoClobPriceLevel(obj);
+      })
+      .toArray() as PriceLevel[],
+    sells: response.asks
+      .valueSeq()
+      .map((obj) => {
+        return convertKujiraOrdertoClobPriceLevel(obj);
+      })
+      .toArray() as PriceLevel[],
+  } as Orderbook;
 };
 
 export const convertToClobTickerResponse = (
@@ -323,13 +342,47 @@ export const convertToClobGetOrderResponse = (
 
 export const convertToClobDeleteOrderResponse = (
   response: Order
-): ClobDeleteOrderResponse => {
+): { txHash: string } => {
   return {
-    network: config.network,
-    timestamp: Date.now(),
-    latency: 0,
-    txHash: response.signatures?.cancellation,
-  } as ClobDeleteOrderResponse;
+    txHash: getNotNullOrThrowError<string>(
+      response.signatures?.cancellation ||
+        response.signatures?.cancellations?.values().next().value
+    ),
+  };
+};
+
+export const convertToClobDeleteOrderResponseForCreation = (
+  response: IMap<OrderId, Order>
+): { txHash: string } => {
+  return {
+    txHash: getNotNullOrThrowError<string>(
+      response.values().next().value.signatures?.creation ||
+        response.values().next().value.signatures?.creations.values().next()
+          .value
+    ),
+  };
+};
+
+export const convertToClobDeleteOrderResponseForCancellation = (
+  response: IMap<OrderId, Order>
+): { txHash: string } => {
+  return {
+    txHash: getNotNullOrThrowError<string>(
+      response.values().next().value.signatures?.cancellation ||
+        response.values().next().value.signatures?.cancellations.values().next()
+          .value
+    ),
+  };
+};
+
+export const convertToBalancesResponse = (
+  response: Balances
+): BalancesResponse => {
+  return {} as BalancesResponse;
+};
+
+export const convertToPollResponse = (response: Transaction): PollResponse => {
+  return {} as PollResponse;
 };
 
 export const convertToEstimatedFeesResponse = (

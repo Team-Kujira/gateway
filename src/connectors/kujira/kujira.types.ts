@@ -2,6 +2,7 @@ import { fin } from 'kujira.js';
 import { ExecuteResult, JsonObject } from '@cosmjs/cosmwasm-stargate';
 
 import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
+import { BigNumber } from 'ethers';
 
 //
 //  Types and Constants
@@ -27,7 +28,7 @@ export type KujiraSettlement = ExecuteResult;
 export type Address = string;
 export type OwnerAddress = Address;
 export type PayerAddress = Address;
-export type FloatingNumber = number;
+export type FloatingNumber = BigNumber;
 export type Price = FloatingNumber;
 export type Amount = FloatingNumber;
 export type Fee = FloatingNumber;
@@ -152,6 +153,18 @@ export interface Ticker {
   ticker: ConnectorTicker;
 }
 
+export interface Balance {
+  token?: Token;
+  free: Amount;
+  lockedInOrders: Amount;
+  unsettled: Amount;
+}
+
+export interface Balances {
+  tokens: IMap<TokenId, Balance>;
+  total: Balance;
+}
+
 export interface Order {
   id?: OrderId;
   clientId?: OrderClientId; // Client custom id
@@ -189,6 +202,10 @@ export interface EstimatedFees {
   price: EstimatedFeesPrice;
   limit: EstimateFeesLimit;
   cost: EstimateFeesCost;
+}
+
+export interface Transaction {
+  signature: TransactionSignature;
 }
 
 //
@@ -241,6 +258,25 @@ export interface GetTickersOptions {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllTickerOptions extends GetTickersOptions {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetBalanceOptions {
+  tokenId: TokenId;
+
+  ownerAddress?: OwnerAddress;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetBalancesOptions {
+  tokenIds: TokenId[];
+
+  ownerAddress?: OwnerAddress;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllBalancesOptions {
+  ownerAddress?: OwnerAddress;
+}
 
 export interface GetOrderOptions {
   id: OrderId;
@@ -308,6 +344,16 @@ export interface SettlementsOptions {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SettlementsAllOptions extends SettlementsOptions {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTransactionOptions {
+  signature: TransactionSignature;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTransactionsOptions {
+  signatures: TransactionSignature[];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetEstimatedFeesOptions {}
