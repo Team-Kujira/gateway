@@ -11,6 +11,7 @@ import { Harmony } from '../chains/harmony/harmony';
 import { Polygon } from '../chains/polygon/polygon';
 import { Injective } from '../chains/injective/injective';
 import { Xdc } from '../chains/xdc/xdc';
+import { KujiraChainMiddleware as Kujira } from '../chains/kujira/kujira.chain.middlewares';
 import {
   HttpException,
   UNKNOWN_CHAIN_ERROR_CODE,
@@ -51,6 +52,8 @@ export async function getStatus(
       connections.push(await Cronos.getInstance(req.network as string));
     } else if (req.chain === 'injective') {
       connections.push(Injective.getInstance(req.network as string));
+    } else if (req.chain === 'kujira') {
+      connections.push(await Kujira.getInstance(req.network as string));
     } else {
       throw new HttpException(
         500,
@@ -101,6 +104,11 @@ export async function getStatus(
     connections = connections.concat(
       injectiveConnections ? Object.values(injectiveConnections) : []
     );
+
+    const kujiraConnections = Kujira.getConnectedInstances();
+    connections = connections.concat(
+      kujiraConnections ? Object.values(kujiraConnections) : []
+    );
   }
 
   for (const connection of connections) {
@@ -130,7 +138,7 @@ export async function getStatus(
 }
 
 export async function getTokens(req: TokensRequest): Promise<TokensResponse> {
-  let connection: EthereumBase | Nearish | Injective | Xdcish;
+  let connection: EthereumBase | Nearish | Injective | Xdcish | Kujira;
   let tokens: TokenInfo[] = [];
 
   if (req.chain && req.network) {
@@ -152,6 +160,8 @@ export async function getTokens(req: TokensRequest): Promise<TokensResponse> {
       connection = await Cronos.getInstance(req.network);
     } else if (req.chain === 'injective') {
       connection = Injective.getInstance(req.network);
+    } else if (req.chain === 'kujira') {
+      connection = await Kujira.getInstance(req.network);
     } else {
       throw new HttpException(
         500,

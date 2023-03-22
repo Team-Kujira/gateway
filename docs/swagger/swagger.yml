@@ -33,6 +33,8 @@ tags:
     description: 'Interact with the Near blockchain'
   - name: 'injective'
     description: 'Interact with the Injective blockchain'
+  - name: 'kujira'
+    description: 'Interact with the Kujira blockchain'
 
 schemes:
   - 'http'

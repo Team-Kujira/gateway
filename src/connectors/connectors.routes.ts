@@ -18,6 +18,7 @@ import { PancakeSwapConfig } from './pancakeswap/pancakeswap.config';
 import { InjectiveCLOBConfig } from './injective/injective.clob.config';
 import { XsswapConfig } from './xsswap/xsswap.config';
 import { ConnectorsResponse } from './connectors.request';
+import { KujiraConfig } from './kujira/kujira.config';
 
 export namespace ConnectorsRoutes {
   export const router = Router();
@@ -113,6 +114,15 @@ export namespace ConnectorsRoutes {
             name: 'xsswap',
             trading_type: XsswapConfig.config.tradingTypes,
             available_networks: XsswapConfig.config.availableNetworks,
+          },
+          {
+            name: 'kujira',
+            trading_type: KujiraConfig.config.tradingTypes,
+            available_networks: InjectiveCLOBConfig.config.availableNetworks,
+            additional_add_wallet_prompts: {
+              accountId:
+                'Enter your kujira sub account id wallet key (input 0 if unsure) >>> ',
+            },
           },
         ],
       });

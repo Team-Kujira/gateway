@@ -99,3 +99,7 @@ configurations:
   $namespace xsswap:
     configurationPath: xsswap.yml
     schemaPath: xsswap-schema.json
+
+  $namespace kujira:
+    configurationPath: kujira.yml
+    schemaPath: kujira-schema.json

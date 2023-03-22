@@ -16,6 +16,9 @@ export const invalidNearPrivateKeyError: string =
 export const invalidCosmosPrivateKeyError: string =
   'The privateKey param is not a valid Cosmos private key.';
 
+export const invalidKujiraPrivateKeyError: string =
+  'The privateKey param is not a valid Kujira private key.';
+
 // test if a string matches the shape of an Ethereum private key
 export const isEthPrivateKey = (str: string): boolean => {
   return /^(0x|xdc)?[a-fA-F0-9]{64}$/.test(str);
@@ -35,6 +38,10 @@ export const isCosmosPrivateKey = (str: string): boolean => {
   } catch {
     return false;
   }
+};
+
+export const isKujiraPrivateKey = (str: string): boolean => {
+  return /^(0x|xdc)?[a-fA-F0-9]{64}$/.test(str);
 };
 
 // given a request, look for a key called privateKey that is an Ethereum private key
@@ -82,7 +89,6 @@ export const validatePrivateKey: Validator = mkSelectingValidator(
       invalidEthPrivateKeyError,
       (val) => typeof val === 'string' && isEthPrivateKey(val)
     ),
-
     injective: mkValidator(
       'privateKey',
       invalidEthPrivateKeyError,
@@ -93,11 +99,16 @@ export const validatePrivateKey: Validator = mkSelectingValidator(
       invalidEthPrivateKeyError,
       (val) => typeof val === 'string' && isEthPrivateKey(val)
     ),
+    kujira: mkValidator(
+      'privateKey',
+      invalidKujiraPrivateKeyError,
+      (val) => typeof val === 'string' && isKujiraPrivateKey(val)
+    ),
   }
 );
 
 export const invalidChainError: string =
-  'chain must be "ethereum", "avalanche", "near", "harmony", "cosmos", "binance-smart-chain" or "injective"';
+  'chain must be "ethereum", "avalanche", "near", "harmony", "cosmos", "binance-smart-chain", "injective", or "kujira"';
 
 export const invalidNetworkError: string =
   'expected a string for the network key';
@@ -120,7 +131,8 @@ export const validateChain: Validator = mkValidator(
       val === 'cronos' ||
       val === 'cosmos' ||
       val === 'binance-smart-chain' ||
-      val === 'injective')
+      val === 'injective' ||
+      val === 'kujira')
 );
 
 export const validateNetwork: Validator = mkValidator(

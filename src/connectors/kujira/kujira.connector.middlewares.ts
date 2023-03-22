@@ -39,7 +39,7 @@ const caches = {
   instances: new CacheContainer(new MemoryStorage()),
 };
 
-export class KujiraMiddleware {
+export class KujiraConnectorMiddleware {
   chain: string;
 
   network: string;

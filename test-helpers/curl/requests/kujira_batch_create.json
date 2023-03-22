@@ -1,0 +1,22 @@
+{
+  "chain": "kujira",
+  "network": "mainnet",
+  "connector": "kujira",
+  "address": "$KUJIRA_SUBACCOUNTID",
+  "createOrderParams": [
+    {
+      "price": "2",
+      "amount": "0.10",
+      "side": "SELL",
+      "orderType": "LIMIT",
+      "market": "KUJI-DEMO"
+    },
+    {
+      "price": "3",
+      "amount": "0.10",
+      "side": "SELL",
+      "orderType": "LIMIT",
+      "market": "KUJI-DEMO"
+    }
+  ]
+}

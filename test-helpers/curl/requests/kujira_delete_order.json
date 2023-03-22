@@ -1,0 +1,8 @@
+{
+  "chain": "kujira",
+  "network": "mainnet",
+  "connector": "kujira",
+  "address": "$KUJIRA_SUBACCOUNTID",
+  "market": "KUJI-DEMO",
+  "orderId": "0xf6f81a37796bd06a797484467302e4d6f72832409545e2e01feb86dd8b22e4b2"
+}

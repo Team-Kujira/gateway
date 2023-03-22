@@ -32,10 +32,17 @@ import { Defira } from '../connectors/defira/defira';
 import { Near } from '../chains/near/near';
 import { Ref } from '../connectors/ref/ref';
 import { Xsswap } from '../connectors/xsswap/xsswap';
-import { KujiraMiddleware as Kujira } from '../connectors/kujira/kujira.middlewares';
+import { KujiraChainMiddleware as KujiraChain } from '../chains/kujira/kujira.chain.middlewares';
+import { KujiraConnectorMiddleware as KujiraConnector } from '../connectors/kujira/kujira.connector.middlewares';
 import { Cosmos } from '../chains/cosmos/cosmos';
 
-export type ChainUnion = Ethereumish | Nearish | Injective | Xdcish | Cosmos;
+export type ChainUnion =
+  | Ethereumish
+  | Nearish
+  | Injective
+  | Xdcish
+  | Cosmos
+  | KujiraChain;
 
 export type Chain<T> = T extends Ethereumish
   ? Ethereumish
@@ -47,6 +54,8 @@ export type Chain<T> = T extends Ethereumish
   ? Injective
   : T extends Cosmos
   ? Cosmos
+  : T extends KujiraChain
+  ? KujiraChain
   : never;
 
 export async function getChain<T>(
@@ -68,6 +77,8 @@ export async function getChain<T>(
   else if (chain === 'injective')
     chainInstance = Injective.getInstance(network);
   else if (chain === 'cosmos') chainInstance = Cosmos.getInstance(network);
+  else if (chain === 'kujira')
+    chainInstance = await KujiraChain.getInstance(network);
   else throw new Error('unsupported chain');
 
   if (!chainInstance.ready()) {
@@ -83,7 +94,7 @@ type ConnectorUnion =
   | Perpish
   | RefAMMish
   | InjectiveCLOB
-  | Kujira;
+  | KujiraConnector;
 
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
@@ -95,8 +106,8 @@ export type Connector<T> = T extends Uniswapish
   ? RefAMMish
   : T extends InjectiveCLOB
   ? InjectiveCLOB
-  : T extends Kujira
-  ? Kujira
+  : T extends KujiraConnector
+  ? KujiraConnector
   : never;
 
 export async function getConnector<T>(
@@ -145,8 +156,8 @@ export async function getConnector<T>(
     connectorInstance = Xsswap.getInstance(chain, network);
   } else if (chain === 'injective' && connector === 'injective') {
     connectorInstance = InjectiveCLOB.getInstance(chain, network);
-  } else if (chain === 'cosmos' && connector === 'kujira') {
-    connectorInstance = await Kujira.getInstance(chain, network);
+  } else if (chain === 'kujira' && connector === 'kujira') {
+    connectorInstance = await KujiraConnector.getInstance(chain, network);
   } else {
     throw new Error('unsupported chain or connector');
   }

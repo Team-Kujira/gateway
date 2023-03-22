@@ -4,6 +4,8 @@ import { gatewayApp } from '../../src/app';
 import { Injective } from '../../src/chains/injective/injective';
 import { InjectiveCLOB } from '../../src/connectors/injective/injective';
 
+// TODO Add Kujira tests!!!
+
 let inj: Injective;
 let injCLOB: InjectiveCLOB;
 

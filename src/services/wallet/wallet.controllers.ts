@@ -8,6 +8,7 @@ import { Xdc } from '../../chains/xdc/xdc';
 import { Cosmos } from '../../chains/cosmos/cosmos';
 import { Harmony } from '../../chains/harmony/harmony';
 import { Injective } from '../../chains/injective/injective';
+import { KujiraChainMiddleware as Kujira } from '../../chains/kujira/kujira.chain.middlewares';
 
 import {
   AddWalletRequest,
@@ -51,7 +52,7 @@ export async function addWallet(
   if (!passphrase) {
     throw new Error('There is no passphrase');
   }
-  let connection: EthereumBase | Near | Cosmos | Injective | Xdc;
+  let connection: EthereumBase | Near | Cosmos | Injective | Xdc | Kujira;
   let address: string | undefined;
   let encryptedPrivateKey: string | undefined;
 
@@ -81,6 +82,8 @@ export async function addWallet(
     connection = Xdc.getInstance(req.network);
   } else if (req.chain === 'injective') {
     connection = Injective.getInstance(req.network);
+  } else if (req.chain === 'kujira') {
+    connection = await Kujira.getInstance(req.network);
   } else {
     throw new HttpException(
       500,
@@ -140,6 +143,21 @@ export async function addWallet(
         );
       } else {
         throw new Error('Injective wallet requires a subaccount id');
+      }
+    } else if (connection instanceof Kujira) {
+      const kujiraAddress = connection.getWalletFromPrivateKey(
+        req.privateKey
+      ).address;
+      const subaccountId = req.accountId;
+      if (subaccountId !== undefined) {
+        address = kujiraAddress + subaccountId.toString(16).padStart(24, '0');
+
+        encryptedPrivateKey = await connection.encrypt(
+          req.privateKey,
+          passphrase
+        );
+      } else {
+        throw new Error('Kujira wallet requires a sub-account id.');
       }
     }
 
