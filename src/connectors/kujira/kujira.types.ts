@@ -92,10 +92,10 @@ export enum OrderSide {
 
 export enum OrderStatus {
   OPEN = 'OPEN',
-  CANCELLED = 'CANCELLED', // TODO Fix remaining references!!!
+  CANCELLED = 'CANCELLED',
   FILLED = 'FILLED',
   CREATION_PENDING = 'CREATION_PENDING',
-  CANCELLATION_PENDING = 'CANCELLATION_PENDING', // TODO Fix remaining references!!!
+  CANCELLATION_PENDING = 'CANCELLATION_PENDING',
   UNKNOWN = 'UNKNOWN',
 }
 

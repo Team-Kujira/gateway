@@ -62,6 +62,7 @@ import {
   KujiraQueryClient,
   msg,
   registry,
+  RPCS,
 } from 'kujira.js';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
@@ -246,6 +247,17 @@ export class Kujira {
     this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
   }
 
+  private async getRPCEndpoint(): Promise<string> {
+    let rpcEndpoint = config.rpcEndpoint;
+
+    // TODO implement a mechanism to get the RPC with the lowest latency!!!
+    if (!rpcEndpoint) {
+      rpcEndpoint = RPCS[this.kujiraNetwork][0];
+    }
+
+    return rpcEndpoint;
+  }
+
   /**
    * Initialize the Kujira instance.
    */
@@ -256,7 +268,7 @@ export class Kujira {
       this.cosmos = await Cosmos.getInstance(this.network);
       await this.cosmos.init();
 
-      const rpcEndpoint: string = config.rpcEndpoint;
+      const rpcEndpoint: string = await this.getRPCEndpoint();
 
       const mnemonic: string = await this.getMnemonic();
 

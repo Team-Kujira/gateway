@@ -1,4 +1,5 @@
 network: 'mainnet'
+rpcEndpoint: # Empty means using the default for the chosen network
 prefix: 'kujira'
 accountNumber: 0
 gasPrice: 0.00125

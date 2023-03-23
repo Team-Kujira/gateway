@@ -131,7 +131,7 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     price: BigNumber.from(request.price),
     amount: BigNumber.from(request.amount),
     type: convertClobOrderTypeToKujiraOrderType(request.orderType),
-    payerAddress: 'address' in request ? request.address : undefined, // TODO, is the payer always the owner? !!!
+    payerAddress: undefined,
   } as PlaceOrderOptions;
 };
 

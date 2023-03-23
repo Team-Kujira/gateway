@@ -1,12 +1,14 @@
 import { BigNumber } from 'ethers';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
+import { LOCALNET, MAINNET, TESTNET } from 'kujira.js';
 
 const configManager = ConfigManagerV2.getInstance();
 
 export namespace KujiraConfig {
   export const config = {
     tradingTypes: ['CLOB_COSMOS_KUJIRA'],
-    network: configManager.get('kujira.network') || 'kujira',
+    network: configManager.get('kujira.network') || 'mainnet',
+    rpcEndpoint: configManager.get(`kujira.rpcEndpoint`),
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
     nativeToken: 'KUJI',
@@ -56,11 +58,10 @@ export namespace KujiraConfig {
       offset: configManager.get(`kujira.orderBook.offset`) || 0,
       limit: configManager.get(`kujira.orderBook.limit`) || 100,
     },
-    rpcEndpoint: '', // TODO fix!!!
     availableNetworks: [
       {
         chain: 'kujira',
-        networks: [], // TODO fix!!!
+        networks: [MAINNET, TESTNET, LOCALNET],
       },
     ],
     retry: {
