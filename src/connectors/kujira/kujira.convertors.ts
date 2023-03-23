@@ -136,8 +136,8 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     price: BigNumber.from(request.price),
     amount: BigNumber.from(request.amount),
     type: convertClobOrderTypeToKujiraOrderType(request.orderType),
-    payerAddress: undefined,
-  } as PlaceOrderOptions;
+    payerAddress: 'address' in request ? request.address : undefined, // TODO, is the payer always the owner? !!!
+  } as unknown as PlaceOrderOptions;
 };
 
 export const convertClobGetOrderRequestToGetOrderOptions = (
@@ -235,30 +235,30 @@ export const convertToClobMarketResponse = (
         quoteDenom: undefined,
         makerFeeRate: undefined,
         quoteToken: {
-          name: response.quoteToken.name, //string;
-          logo: undefined, //string;
-          symbol: response.quoteToken.symbol, //string;
-          decimals: undefined, //number;
-          tokenType: undefined, //TokenType?;
-          coinGeckoId: undefined, //string;
-          ibc: undefined, //IbcTokenMeta?;
-          spl: undefined, //SplTokenMeta?;
-          cw20: undefined, //Cw20TokenMeta?;
-          cw20s: undefined, //Cw20TokenMetaWithSource[]?;
-          erc20: undefined, //Erc20TokenMeta?;
+          name: response.quoteToken.name,
+          logo: undefined,
+          symbol: response.quoteToken.symbol,
+          decimals: undefined,
+          tokenType: undefined,
+          coinGeckoId: undefined,
+          ibc: undefined,
+          spl: undefined,
+          cw20: undefined,
+          cw20s: undefined,
+          erc20: undefined,
         },
         baseToken: {
-          name: response.baseToken.name, //string;
-          logo: undefined, //string;
-          symbol: response.baseToken.symbol, //string;
-          decimals: undefined, //number;
-          tokenType: undefined, //TokenType?;
-          coinGeckoId: undefined, //string;
-          ibc: undefined, //IbcTokenMeta?;
-          spl: undefined, //SplTokenMeta?;
-          cw20: undefined, //Cw20TokenMeta?;
-          cw20s: undefined, //Cw20TokenMetaWithSource[]?;
-          erc20: undefined, //Erc20TokenMeta?;
+          name: response.baseToken.name,
+          logo: undefined,
+          symbol: response.baseToken.symbol,
+          decimals: undefined,
+          tokenType: undefined,
+          coinGeckoId: undefined,
+          ibc: undefined,
+          spl: undefined,
+          cw20: undefined,
+          cw20s: undefined,
+          erc20: undefined,
         },
         takerFeeRate: response.fee.maker, // TODO what is the differrence between maker to taker? !!!
         serviceProviderFee: undefined, // TODO resolve this one as well !!!
@@ -275,7 +275,7 @@ export const convertKujiraOrdertoClobPriceLevel = (
   return {
     price: response.price,
     quantity: response.amount,
-    timestamp: undefined,
+    timestamp: Date.now(), // TODO verify if this is the correct way to convert the timestamp !!!
   } as unknown as PriceLevel;
 };
 
@@ -336,14 +336,36 @@ export const convertToClobPostOrderResponse = (
 };
 
 export const convertToClobGetOrderResponse = (
-  _response: Order
+  // TODO verify the injective output to ensure the return data !!!
+  response: Order
 ): ClobGetOrderResponse => {
   return {
     network: config.network,
     timestamp: Date.now(),
     latency: 0,
-    orders: [],
-  } as ClobGetOrderResponse;
+    orders: [
+      {
+        orderHash: response.signatures?.creation?.toString(),
+        marketId: response.marketId,
+        active: undefined,
+        subaccountId: response.ownerAddress,
+        executionType: response.type?.toLowerCase(),
+        orderType: convertKujiraOrderSideToClobSide(
+          response.side
+        ).toLowerCase(),
+        price: response.price.toString(),
+        triggerPrice: undefined,
+        quantity: response.amount.toString(),
+        filledQuantity: undefined,
+        state: response.status?.toLowerCase(),
+        createdAt: response.fillingTimestamp?.toString(),
+        updatedAt: undefined, //TODO there is no mention to update into order type !!!
+        direction: convertKujiraOrderSideToClobSide(
+          response.side
+        ).toLowerCase(),
+      },
+    ],
+  } as unknown as ClobGetOrderResponse;
 };
 
 export const convertToClobDeleteOrderResponse = (
@@ -402,6 +424,7 @@ export const convertToPollResponse = (
 };
 
 export const convertToEstimatedFeesResponse = (
+  // TODO both types are kujira types, verify if this is correct !!!
   _response: EstimatedFees
 ): EstimatedGaResponse => {
   return {
