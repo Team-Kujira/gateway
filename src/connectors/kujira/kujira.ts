@@ -2,6 +2,7 @@ import {
   Balance,
   Balances,
   BasicKujiraMarket,
+  BlockNumber,
   CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
@@ -12,6 +13,7 @@ import {
   GetAllTickerOptions,
   GetBalanceOptions,
   GetBalancesOptions,
+  GetCurrentBlockOptions,
   GetEstimatedFeesOptions,
   GetMarketOptions,
   GetMarketsOptions,
@@ -67,11 +69,13 @@ import {
 import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
+  convertKujiraBalancesToBalances,
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
   convertKujiraOrdersToMapOfOrders,
   convertKujiraOrderToOrder,
   convertKujiraSettlementToSettlement,
+  convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
   convertToTicker,
 } from './kujira.convertors';
@@ -79,7 +83,12 @@ import {
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
-import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate';
+import {
+  coins,
+  GasPrice,
+  SigningStargateClient,
+  StargateClient,
+} from '@cosmjs/stargate';
 import { ExecuteResult, JsonObject } from '@cosmjs/cosmwasm-stargate';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 import {
@@ -90,7 +99,10 @@ import {
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { StdFee } from '@cosmjs/amino';
-import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
+import {
+  DeliverTxResponse,
+  IndexedTx,
+} from '@cosmjs/stargate/build/stargateclient';
 import { BigNumber } from 'ethers';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -181,6 +193,14 @@ export class Kujira {
    */
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
+  private stargateClient: StargateClient;
+
+  /**
+   *
+   * @private
+   */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   private signingStargateClient: SigningStargateClient;
 
   /**
@@ -197,7 +217,7 @@ export class Kujira {
    */
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  private cosmos: Cosmos;
+  private kujiraChain: Cosmos;
 
   /**
    *
@@ -265,9 +285,6 @@ export class Kujira {
     if (!this.isReady && !this.isInitializing) {
       this.isInitializing = true;
 
-      this.cosmos = await Cosmos.getInstance(this.network);
-      await this.cosmos.init();
-
       const rpcEndpoint: string = await this.getRPCEndpoint();
 
       const mnemonic: string = await this.getMnemonic();
@@ -310,6 +327,8 @@ export class Kujira {
       this.kujiraQueryClient = kujiraQueryClient({
         client: this.tendermint34Client,
       });
+
+      this.stargateClient = await StargateClient.connect(rpcEndpoint);
 
       this.signingStargateClient =
         await SigningStargateClient.connectWithSigner(
@@ -404,6 +423,39 @@ export class Kujira {
       this.signingStargateClient,
       this.signingStargateClient.signAndBroadcast,
       [signerAddress, messages, fee, memo]
+    );
+  }
+
+  private async kujiraStargateClientGetHeight(): Promise<number> {
+    return await runWithRetryAndTimeout<Promise<number>>(
+      this.stargateClient,
+      this.stargateClient.getHeight,
+      []
+    );
+  }
+
+  /**
+   *
+   * @param id
+   * @private
+   */
+  private async kujiraStargateClientGetTx(
+    id: string
+  ): Promise<IndexedTx | null> {
+    return await runWithRetryAndTimeout<Promise<IndexedTx | null>>(
+      this.stargateClient,
+      this.stargateClient.getTx,
+      [id]
+    );
+  }
+
+  private async kujiraStargateClientGetAllBalances(
+    address: string
+  ): Promise<readonly Coin[]> {
+    return await runWithRetryAndTimeout<Promise<readonly Coin[]>>(
+      this.stargateClient,
+      this.stargateClient.getAllBalances,
+      [address]
     );
   }
 
@@ -716,21 +768,12 @@ export class Kujira {
    *
    * @param _options
    */
-  async getAllBalances(_options: GetAllBalancesOptions): Promise<Balances> {
-    // TODO Implement this method!!!
+  async getAllBalances(options: GetAllBalancesOptions): Promise<Balances> {
+    const kujiraBalances = await this.kujiraStargateClientGetAllBalances(
+      options.ownerAddress || this.account.address
+    );
 
-    // const balances: Balances = {
-    //   tokens: IMap<TokenId, Balance>().asMutable(),
-    //   total: {
-    //     free: BigNumber.from(0),
-    //     lockedInOrders: BigNumber.from(0),
-    //     unsettled: BigNumber.from(0),
-    //   },
-    // };
-
-    // return balances;
-
-    throw new Error('Not implemented.');
+    return convertKujiraBalancesToBalances(kujiraBalances);
   }
 
   /**
@@ -1088,11 +1131,16 @@ export class Kujira {
     });
   }
 
-  async getTransaction(_options: GetTransactionOptions): Promise<Transaction> {
-    // TODO implement method!!!
-    // return convertKujiraTransactionToTransaction(transaction);
+  async getCurrentBlock(
+    _options: GetCurrentBlockOptions
+  ): Promise<BlockNumber> {
+    return await this.kujiraStargateClientGetHeight();
+  }
 
-    throw new Error('Not implemented.');
+  async getTransaction(options: GetTransactionOptions): Promise<Transaction> {
+    return convertKujiraTransactionToTransaction(
+      await this.kujiraStargateClientGetTx(options.signature)
+    );
   }
 
   /**

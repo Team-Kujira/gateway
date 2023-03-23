@@ -88,7 +88,8 @@ export class KujiraChain {
     return convertToPollResponse(
       await this.kujira.getTransaction(
         convertPollRequestToGetTransactionOptions(body)
-      )
+      ),
+      await this.kujira.getCurrentBlock({})
     );
   }
 }

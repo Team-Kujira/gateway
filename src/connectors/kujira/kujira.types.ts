@@ -33,6 +33,7 @@ export type Price = FloatingNumber;
 export type Amount = FloatingNumber;
 export type Fee = FloatingNumber;
 export type Timestamp = number;
+export type BlockNumber = number;
 
 export type ConnectorMarket = any;
 export type ConnectorTicker = any;
@@ -344,6 +345,9 @@ export interface SettlementsOptions {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SettlementsAllOptions extends SettlementsOptions {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetCurrentBlockOptions {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTransactionOptions {

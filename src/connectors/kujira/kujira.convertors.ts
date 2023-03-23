@@ -1,5 +1,6 @@
 import {
   Balances,
+  BlockNumber,
   CancelOrderOptions,
   CancelOrdersOptions,
   CreateOrdersRequest,
@@ -49,7 +50,10 @@ import {
 import { OrderType as ClobOrderType, Side } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
 import { fin } from 'kujira.js';
-import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
+import {
+  DeliverTxResponse,
+  IndexedTx,
+} from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import { Orderbook, SpotMarket } from '@injectivelabs/sdk-ts';
 import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exchange';
@@ -61,6 +65,7 @@ import {
   PollResponse,
 } from '../../chains/kujira/kujira.requests';
 import { BigNumber } from 'ethers';
+import { Coin } from '@cosmjs/proto-signing';
 
 const config = KujiraConfig.config;
 
@@ -382,8 +387,18 @@ export const convertToBalancesResponse = (
   return {} as BalancesResponse;
 };
 
-export const convertToPollResponse = (_response: Transaction): PollResponse => {
-  return {} as PollResponse;
+export const convertToPollResponse = (
+  _transaction: Transaction,
+  _currentBlockNumber: BlockNumber
+): PollResponse => {
+  return {
+    // blockNumber: undefined,
+    // hash: undefined,
+    // gasWanted: undefined,
+    // gasLimit: undefined,
+    // gasUsed: undefined,
+    // sequences: undefined,
+  } as PollResponse;
 };
 
 export const convertToEstimatedFeesResponse = (
@@ -426,6 +441,18 @@ export const convertToTicker = (input: any): Ticker => {
     timestamp: timestamp,
     ticker: input,
   };
+};
+
+export const convertKujiraBalancesToBalances = (
+  _balances: readonly Coin[]
+): Balances => {
+  throw new Error('Not implemented');
+};
+
+export const convertKujiraTransactionToTransaction = (
+  _input: IndexedTx | null
+): Transaction => {
+  throw new Error('Not implemented');
 };
 
 export const convertKujiraOrderToOrder = (
