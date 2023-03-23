@@ -6,6 +6,8 @@ import {
   CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
+  EncryptWalletOptions,
+  EncryptWalletOptions,
   EstimatedFees,
   GetAllBalancesOptions,
   GetAllMarketsOptions,
@@ -29,6 +31,7 @@ import {
   Market,
   MarketId,
   MarketNotFoundError,
+  Mnemonic,
   Order,
   OrderBook,
   OrderId,
@@ -278,6 +281,30 @@ export class Kujira {
     return rpcEndpoint;
   }
 
+  private async getDirectSecp256k1HdWallet(
+    mnemonic: Mnemonic,
+    prefix: string,
+    accountNumber: number
+  ): Promise<DirectSecp256k1HdWallet> {
+    this.directSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(
+      mnemonic,
+      {
+        prefix: prefix,
+        hdPaths: [
+          [
+            Slip10RawIndex.hardened(44),
+            Slip10RawIndex.hardened(118),
+            Slip10RawIndex.hardened(0),
+            Slip10RawIndex.normal(0),
+            Slip10RawIndex.normal(accountNumber),
+          ],
+        ],
+      }
+    );
+
+    return this.directSecp256k1HdWallet;
+  }
+
   /**
    * Initialize the Kujira instance.
    */
@@ -296,20 +323,10 @@ export class Kujira {
       const gasPrice: string = `${config.gasPrice}${config.gasPriceSuffix}`;
 
       // signer
-      this.directSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(
+      this.directSecp256k1HdWallet = await this.getDirectSecp256k1HdWallet(
         mnemonic,
-        {
-          prefix: prefix,
-          hdPaths: [
-            [
-              Slip10RawIndex.hardened(44),
-              Slip10RawIndex.hardened(118),
-              Slip10RawIndex.hardened(0),
-              Slip10RawIndex.normal(0),
-              Slip10RawIndex.normal(accountNumber),
-            ],
-          ],
-        }
+        prefix,
+        accountNumber
       );
 
       this.accounts = await this.directSecp256k1HdWallet.getAccounts();
@@ -1177,5 +1194,19 @@ export class Kujira {
       limit: config.gasLimitEstimate,
       cost: config.gasPrice.mul(config.gasLimitEstimate),
     } as EstimatedFees;
+  }
+
+  /**
+   *
+   * @param options
+   */
+  async encryptWallet(options: EncryptWalletOptions): Promise<string> {
+    const directSecp256k1HdWallet = await this.getDirectSecp256k1HdWallet(
+      options.mnemonic,
+      options.prefix || config.prefix,
+      options.acountNumber || config.accountNumber
+    );
+
+    return directSecp256k1HdWallet.serialize(options.password);
   }
 }

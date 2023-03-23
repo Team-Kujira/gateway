@@ -70,10 +70,8 @@ export class KujiraChain {
     throw Error('Not implemented');
   }
 
-  async encrypt(_privateKey: string, _password: string): Promise<string> {
-    // TODO implement method!!!
-
-    throw Error('Not implemented');
+  async encrypt(mnemonic: string, password: string): Promise<string> {
+    return await this.kujira.encryptWallet({ mnemonic, password });
   }
 
   async balances(body: BalancesRequest): Promise<BalancesResponse> {

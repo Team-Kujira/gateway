@@ -23,8 +23,8 @@
     "test:scripts": "jest -i --verbose ./test-scripts/*.test.ts"
   },
   "dependencies": {
-    "@cosmjs/proto-signing": "^0.29.5",
-    "@cosmjs/stargate": "^0.29.5",
+    "@cosmjs/proto-signing": "^0.30.1",
+    "@cosmjs/stargate": "^0.30.1",
     "@crocswap/sdk": "^2.4.5",
     "@ethersproject/abstract-provider": "5.7.0",
     "@ethersproject/address": "5.7.0",
@@ -77,6 +77,8 @@
     "js-yaml": "^4.1.0",
     "kujira.js": "https://github.com/Team-Kujira/kujira.js",
     "level": "^8.0.0",
+    "libsodium-wrappers": "^0.7.11",
+    "libsodium-wrappers-sumo": "^0.7.11",
     "lodash": "^4.17.21",
     "lru-cache": "^7.14.1",
     "mathjs": "^10.5.0",

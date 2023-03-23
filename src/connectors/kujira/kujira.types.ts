@@ -82,6 +82,9 @@ export type EstimateFeesCost = FloatingNumber;
 
 export type MaxNumberOfFilledOrders = number;
 
+export type Mnemonic = string;
+export type Password = string;
+
 //
 //  Enums
 //
@@ -361,6 +364,16 @@ export interface GetTransactionsOptions {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetEstimatedFeesOptions {}
+
+export interface EncryptWalletOptions {
+  mnemonic: Mnemonic;
+
+  prefix?: string;
+
+  acountNumber?: number;
+
+  password: Password;
+}
 
 //
 // Requests subtypes
