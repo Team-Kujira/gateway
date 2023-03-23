@@ -32,8 +32,8 @@ import { Defira } from '../connectors/defira/defira';
 import { Near } from '../chains/near/near';
 import { Ref } from '../connectors/ref/ref';
 import { Xsswap } from '../connectors/xsswap/xsswap';
-import { KujiraChainMiddleware as KujiraChain } from '../chains/kujira/kujira.chain.middlewares';
-import { KujiraConnectorMiddleware as KujiraConnector } from '../connectors/kujira/kujira.connector.middlewares';
+import { KujiraChain } from '../chains/kujira/kujira.chain';
+import { KujiraConnector } from '../connectors/kujira/kujira.connector';
 import { Cosmos } from '../chains/cosmos/cosmos';
 
 export type ChainUnion =

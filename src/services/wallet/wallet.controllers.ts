@@ -8,7 +8,7 @@ import { Xdc } from '../../chains/xdc/xdc';
 import { Cosmos } from '../../chains/cosmos/cosmos';
 import { Harmony } from '../../chains/harmony/harmony';
 import { Injective } from '../../chains/injective/injective';
-import { KujiraChainMiddleware as Kujira } from '../../chains/kujira/kujira.chain.middlewares';
+import { KujiraChain as Kujira } from '../../chains/kujira/kujira.chain';
 
 import {
   AddWalletRequest,

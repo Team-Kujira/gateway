@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Request, Response, Router } from 'express';
 import { asyncHandler } from '../../services/error-handler';
-import { KujiraChainMiddleware } from './kujira.chain.middlewares';
+import { KujiraChain } from './kujira.chain';
 import {
   BalancesRequest,
   BalancesResponse,
@@ -27,7 +27,7 @@ export namespace KujiraRoutes {
       ) => {
         validateBalanceRequest(req.body);
 
-        const kujira = await getChain<KujiraChainMiddleware>(
+        const kujira = await getChain<KujiraChain>(
           req.body.chain,
           req.body.network
         );
@@ -48,7 +48,7 @@ export namespace KujiraRoutes {
       ) => {
         validatePollRequest(req.body);
 
-        const kujira = await getChain<KujiraChainMiddleware>(
+        const kujira = await getChain<KujiraChain>(
           req.body.chain,
           req.body.network
         );
