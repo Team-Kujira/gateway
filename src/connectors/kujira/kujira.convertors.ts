@@ -60,6 +60,7 @@ import {
   PollRequest,
   PollResponse,
 } from '../../chains/kujira/kujira.requests';
+import { BigNumber } from 'ethers';
 
 const config = KujiraConfig.config;
 
@@ -127,8 +128,8 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     marketId: request.market,
     ownerAddress: 'address' in request ? request.address : undefined,
     side: convertClobSideToKujiraOrderSide(request.side),
-    price: Number.parseFloat(request.price),
-    amount: Number.parseFloat(request.amount),
+    price: BigNumber.from(request.price),
+    amount: BigNumber.from(request.amount),
     type: convertClobOrderTypeToKujiraOrderType(request.orderType),
     payerAddress: 'address' in request ? request.address : undefined, // TODO, is the payer always the owner? !!!
   } as PlaceOrderOptions;
@@ -198,7 +199,7 @@ export const convertPollRequestToGetTransactionOptions = (
   request: PollRequest
 ): GetTransactionOptions => {
   return {
-    id: request.txHash,
+    signature: request.txHash,
   } as GetTransactionOptions;
 };
 
@@ -376,12 +377,12 @@ export const convertToClobDeleteOrderResponseForCancellation = (
 };
 
 export const convertToBalancesResponse = (
-  response: Balances
+  _response: Balances
 ): BalancesResponse => {
   return {} as BalancesResponse;
 };
 
-export const convertToPollResponse = (response: Transaction): PollResponse => {
+export const convertToPollResponse = (_response: Transaction): PollResponse => {
   return {} as PollResponse;
 };
 
@@ -417,7 +418,7 @@ export const convertKujiraOrdersToMapOfOrders = (
 };
 
 export const convertToTicker = (input: any): Ticker => {
-  const price = parseFloat(input.price);
+  const price = BigNumber.from(input.price);
   const timestamp = new Date(input.last_updated).getTime();
 
   return {
