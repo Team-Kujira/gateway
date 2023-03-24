@@ -13,8 +13,8 @@ import { KujiraChain as Kujira } from '../../chains/kujira/kujira.chain';
 import {
   AddWalletRequest,
   AddWalletResponse,
-  RemoveWalletRequest,
   GetWalletResponse,
+  RemoveWalletRequest,
   WalletSignRequest,
   WalletSignResponse,
 } from './wallet.requests';
@@ -22,10 +22,10 @@ import {
 import { ConfigManagerCertPassphrase } from '../config-manager-cert-passphrase';
 
 import {
-  ERROR_RETRIEVING_WALLET_ADDRESS_ERROR_CODE,
-  ERROR_RETRIEVING_WALLET_ADDRESS_ERROR_MESSAGE,
   ACCOUNT_NOT_SPECIFIED_CODE,
   ACCOUNT_NOT_SPECIFIED_ERROR_MESSAGE,
+  ERROR_RETRIEVING_WALLET_ADDRESS_ERROR_CODE,
+  ERROR_RETRIEVING_WALLET_ADDRESS_ERROR_MESSAGE,
   HttpException,
   UNKNOWN_CHAIN_ERROR_CODE,
   UNKNOWN_KNOWN_CHAIN_ERROR_MESSAGE,
@@ -149,19 +149,18 @@ export async function addWallet(
         throw new Error('Injective wallet requires a subaccount id');
       }
     } else if (connection instanceof Kujira) {
-      const kujiraAddress = connection.getWalletFromPrivateKey(
-        req.privateKey
-      ).address;
-      const subaccountId = req.accountId;
-      if (subaccountId !== undefined) {
-        address = kujiraAddress + subaccountId.toString(16).padStart(24, '0');
+      const mnemonic = req.privateKey;
+      const accountNumber = req.accountId;
+      address = await connection.getWalletPublicKey(mnemonic, accountNumber);
 
+      if (accountNumber) {
         encryptedPrivateKey = await connection.encrypt(
-          req.privateKey,
-          passphrase
+          mnemonic,
+          accountNumber,
+          address
         );
       } else {
-        throw new Error('Kujira wallet requires a sub-account id.');
+        throw new Error('Kujira wallet requires an account number.');
       }
     }
 

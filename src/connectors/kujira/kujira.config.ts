@@ -83,6 +83,7 @@ export namespace KujiraConfig {
       },
     },
     cache: {
+      tokensData: configManager.get('kujira.cache.tokensData') || 3600, // in seconds
       marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
       markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
     },

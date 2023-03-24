@@ -14,8 +14,9 @@ import {
   convertToBalancesResponse,
   convertToPollResponse,
 } from '../../connectors/kujira/kujira.convertors';
-import { TokenInfo } from '../../services/base';
-import { Wallet } from 'ethers';
+import { getNotNullOrThrowError } from '../../connectors/kujira/kujira.helpers';
+import { KujiraConfig } from '../../connectors/kujira/kujira.config';
+import { Address } from '../../connectors/kujira/kujira.types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -46,32 +47,47 @@ export class KujiraChain {
     await this.kujira.init();
   }
 
-  public static getConnectedInstances(): {
+  public static async getConnectedInstances(): Promise<{
     [name: string]: KujiraChain;
-  } {
-    // TODO implement method!!!
-
-    throw Error('Not implemented');
+  }> {
+    return {
+      mainnet: getNotNullOrThrowError<KujiraChain>(
+        await caches.instances.getItem('mainnet')
+      ),
+    };
   }
 
   ready(): boolean {
     return this.kujira.isReady;
   }
 
-  getTokenForSymbol(_symbol: string): TokenInfo | null {
-    // TODO implement method!!!
-
-    throw Error('Not implemented');
+  async getWalletPublicKey(
+    mnemonic: string,
+    accountNumber: number | undefined
+  ): Promise<Address> {
+    return (
+      await (
+        await this.kujira.getDirectSecp256k1HdWallet(
+          mnemonic,
+          KujiraConfig.config.prefix,
+          accountNumber || KujiraConfig.config.accountNumber
+        )
+      ).getAccounts()
+    )[0].address;
   }
 
-  getWalletFromPrivateKey(_privateKey: string): Wallet {
-    // TODO implement method!!!
-
-    throw Error('Not implemented');
-  }
-
-  async encrypt(mnemonic: string, password: string): Promise<string> {
-    return await this.kujira.encryptWallet({ mnemonic, password });
+  async encrypt(
+    mnemonic: string,
+    accountNumber: number,
+    publicKey: string
+  ): Promise<string> {
+    return await this.kujira.encryptWallet({
+      wallet: {
+        mnemonic,
+        accountNumber,
+        publicKey,
+      },
+    });
   }
 
   async balances(body: BalancesRequest): Promise<BalancesResponse> {

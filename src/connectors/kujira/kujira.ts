@@ -2,17 +2,19 @@ import {
   Balance,
   Balances,
   BasicKujiraMarket,
+  BasicWallet,
   BlockNumber,
   CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
-  EncryptWalletOptions,
+  DecryptWalletOptions,
   EncryptWalletOptions,
   EstimatedFees,
   GetAllBalancesOptions,
   GetAllMarketsOptions,
   GetAllOrderBookOptions,
   GetAllTickerOptions,
+  GetAllTokensOptions,
   GetBalanceOptions,
   GetBalancesOptions,
   GetCurrentBlockOptions,
@@ -25,6 +27,8 @@ import {
   GetOrdersOptions,
   GetTickerOptions,
   GetTickersOptions,
+  GetTokenOptions,
+  GetTokensOptions,
   GetTransactionOptions,
   GetTransactionsOptions,
   IMap,
@@ -48,13 +52,14 @@ import {
   Ticker,
   TickerNotFoundError,
   TickerSource,
+  Token,
   TokenId,
+  TokenNotFoundError,
   Transaction,
   TransactionSignature,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
-import { config as cosmosConfig } from '../../chains/cosmos/cosmos.config';
-import { Cosmos } from '../../chains/cosmos/cosmos';
+import { Slip10RawIndex } from '@cosmjs/crypto';
 import {
   getNotNullOrThrowError,
   promiseAllInBatches,
@@ -78,6 +83,7 @@ import {
   convertKujiraOrdersToMapOfOrders,
   convertKujiraOrderToOrder,
   convertKujiraSettlementToSettlement,
+  convertKujiraTokenToToken,
   convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
   convertToTicker,
@@ -93,13 +99,15 @@ import {
   StargateClient,
 } from '@cosmjs/stargate';
 import { ExecuteResult, JsonObject } from '@cosmjs/cosmwasm-stargate';
-import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
+import {
+  SigningCosmWasmClient,
+  SigningCosmWasmClientOptions,
+} from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 import {
   Coin,
   DirectSecp256k1HdWallet,
   EncodeObject,
 } from '@cosmjs/proto-signing';
-import { Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { StdFee } from '@cosmjs/amino';
 import {
@@ -107,10 +115,18 @@ import {
   IndexedTx,
 } from '@cosmjs/stargate/build/stargateclient';
 import { BigNumber } from 'ethers';
+import { fromBase64, toBase64 } from '@cosmjs/encoding';
+import { walletPath } from '../../services/base';
+import fse from 'fs-extra';
+import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
+import { EncryptedPrivateKey } from '../../chains/cosmos/cosmos-base';
+import { address } from 'hardhat/internal/core/config/config-validation';
+import { SigningStargateClientOptions } from '@cosmjs/stargate/build/signingstargateclient';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
+  tokens: new CacheContainer(new MemoryStorage()),
   markets: new CacheContainer(new MemoryStorage()),
 };
 
@@ -125,14 +141,6 @@ export class Kujira {
    * @private
    */
   private isInitializing: boolean = false;
-
-  /**
-   *
-   * @private
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private readonly cosmosConfig;
 
   /**
    * The correct type for this property would be kujira.js/NETWORK
@@ -216,14 +224,6 @@ export class Kujira {
 
   /**
    *
-   * @private
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private kujiraChain: Cosmos;
-
-  /**
-   *
    */
   chain: string;
 
@@ -265,8 +265,6 @@ export class Kujira {
     this.chain = chain;
     this.network = network;
 
-    this.cosmosConfig = cosmosConfig;
-
     this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
   }
 
@@ -281,7 +279,7 @@ export class Kujira {
     return rpcEndpoint;
   }
 
-  private async getDirectSecp256k1HdWallet(
+  async getDirectSecp256k1HdWallet(
     mnemonic: Mnemonic,
     prefix: string,
     accountNumber: number
@@ -314,11 +312,14 @@ export class Kujira {
 
       const rpcEndpoint: string = await this.getRPCEndpoint();
 
-      const mnemonic: string = await this.getMnemonic();
+      const basicWallet = await this.getStoredBasicWallet();
+
+      const mnemonic: string = basicWallet.mnemonic;
 
       const prefix: string = config.prefix;
 
-      const accountNumber: number = config.accountNumber;
+      const accountNumber: number =
+        basicWallet.accountNumber || config.accountNumber;
 
       const gasPrice: string = `${config.gasPrice}${config.gasPriceSuffix}`;
 
@@ -354,7 +355,7 @@ export class Kujira {
           {
             registry,
             gasPrice: GasPrice.fromString(gasPrice),
-          }
+          } as SigningStargateClientOptions
         );
 
       this.signingCosmWasmClient =
@@ -364,7 +365,7 @@ export class Kujira {
           {
             registry,
             gasPrice: GasPrice.fromString(gasPrice),
-          }
+          } as SigningCosmWasmClientOptions
         );
 
       await this.getAllMarkets();
@@ -372,6 +373,38 @@ export class Kujira {
       this.isReady = true;
       this.isInitializing = false;
     }
+  }
+
+  async getToken(options: GetTokenOptions): Promise<Token> {
+    if (!options.id) throw new TokenNotFoundError(`No token informed.`);
+
+    return convertKujiraTokenToToken(Denom.from(options.id));
+  }
+
+  /**
+   *
+   * @param options
+   */
+  async getTokens(options: GetTokensOptions): Promise<IMap<TokenId, Token>> {
+    if (!options.ids) throw new TokenNotFoundError(`No token informed.`);
+
+    const tokens = IMap<TokenId, Token>().asMutable();
+
+    const getToken = async (id: TokenId): Promise<void> => {
+      const token = await this.getToken({ id });
+
+      tokens.set(id, token);
+    };
+
+    await promiseAllInBatches(getToken, options.ids);
+
+    return tokens;
+  }
+
+  async getAllTokens(
+    _options: GetAllTokensOptions
+  ): Promise<IMap<TokenId, Token>> {
+    throw new Error('Not implemented!');
   }
 
   @Cache(caches.markets, { ttl: config.cache.marketsData })
@@ -414,9 +447,8 @@ export class Kujira {
     return marketsData;
   }
 
-  private async getMnemonic(): Promise<string> {
-    // TODO this needs to come from the wallet!!!
-    throw new Error('Not implemented.');
+  private async getStoredBasicWallet(): Promise<BasicWallet> {
+    return await this.decryptWallet({});
   }
 
   private async kujiraQueryClientWasmQueryContractSmart(
@@ -520,7 +552,7 @@ export class Kujira {
   ): Promise<IMap<MarketId, Market>> {
     if (!options.ids) throw new MarketNotFoundError(`No market informed.`);
 
-    const markets = IMap<string, Market>().asMutable();
+    const markets = IMap<MarketId, Market>().asMutable();
 
     const getMarket = async (id: MarketId): Promise<void> => {
       const market = await this.getMarket({ id });
@@ -1201,12 +1233,118 @@ export class Kujira {
    * @param options
    */
   async encryptWallet(options: EncryptWalletOptions): Promise<string> {
-    const directSecp256k1HdWallet = await this.getDirectSecp256k1HdWallet(
-      options.mnemonic,
-      options.prefix || config.prefix,
-      options.acountNumber || config.accountNumber
+    const passphrase = ConfigManagerCertPassphrase.readPassphrase();
+    if (!passphrase) {
+      throw new Error('missing passphrase');
+    }
+
+    const iv = crypto.getRandomValues(new Uint8Array(16));
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(passphrase),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+    const keyAlgorithm = {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 500000,
+      hash: 'SHA-256',
+    };
+    const key = await crypto.subtle.deriveKey(
+      keyAlgorithm,
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+    const cipherAlgorithm = {
+      name: 'AES-GCM',
+      iv: iv,
+    };
+    const enc = new TextEncoder();
+    const ciphertext: Uint8Array = (await crypto.subtle.encrypt(
+      cipherAlgorithm,
+      key,
+      enc.encode(JSON.stringify(options.wallet))
+    )) as Uint8Array;
+
+    return JSON.stringify(
+      {
+        keyAlgorithm,
+        cipherAlgorithm,
+        ciphertext: new Uint8Array(ciphertext),
+      },
+      (key, value) => {
+        switch (key) {
+          case 'ciphertext':
+          case 'salt':
+          case 'iv':
+            return toBase64(Uint8Array.from(Object.values(value)));
+          default:
+            return value;
+        }
+      }
+    );
+  }
+
+  /**
+   *
+   * @param _options
+   */
+  async decryptWallet(_options: DecryptWalletOptions): Promise<BasicWallet> {
+    const path = `${walletPath}/${this.chain}`;
+
+    const encryptedPrivateKey: EncryptedPrivateKey = JSON.parse(
+      await fse.readFile(`${path}/${address}.json`, 'utf8'),
+      (key, value) => {
+        switch (key) {
+          case 'ciphertext':
+          case 'salt':
+          case 'iv':
+            return fromBase64(value);
+          default:
+            return value;
+        }
+      }
     );
 
-    return directSecp256k1HdWallet.serialize(options.password);
+    const passphrase = ConfigManagerCertPassphrase.readPassphrase();
+    if (!passphrase) {
+      throw new Error('missing passphrase');
+    }
+
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(passphrase),
+      'PBKDF2',
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+    const keyAlgorithm = {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 500000,
+      hash: 'SHA-256',
+    };
+    const key = await crypto.subtle.deriveKey(
+      keyAlgorithm,
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+    const decrypted = await crypto.subtle.decrypt(
+      encryptedPrivateKey.cipherAlgorithm,
+      key,
+      encryptedPrivateKey.ciphertext
+    );
+    const dec = new TextDecoder();
+    dec.decode(decrypted);
+
+    return JSON.parse(dec.decode(decrypted));
   }
 }

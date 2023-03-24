@@ -29,6 +29,7 @@ import {
   PlaceOrdersOptions,
   Settlement,
   Ticker,
+  Token,
   Transaction,
   TransactionSignatures,
 } from './kujira.types';
@@ -49,14 +50,13 @@ import {
 } from '../../clob/clob.requests';
 import { OrderType as ClobOrderType, Side } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
-import { fin } from 'kujira.js';
+import { Denom, fin } from 'kujira.js';
 import {
   DeliverTxResponse,
   IndexedTx,
 } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import { Orderbook, SpotMarket } from '@injectivelabs/sdk-ts';
-import { PriceLevel } from '@injectivelabs/sdk-ts/dist/client/indexer/types/exchange';
+import { Orderbook, PriceLevel, SpotMarket } from '@injectivelabs/sdk-ts';
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   BalancesRequest,
@@ -433,6 +433,10 @@ export const convertToEstimatedFeesResponse = (
     gasLimit: undefined as unknown as number,
     gasCost: undefined as unknown as number,
   } as EstimatedGaResponse;
+};
+
+export const convertKujiraTokenToToken = (_token: Denom): Token => {
+  throw Error('Not implemented');
 };
 
 export const convertKujiraMarketToMarket = (_market: fin.Pair): Market => {

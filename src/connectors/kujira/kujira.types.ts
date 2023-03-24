@@ -28,10 +28,10 @@ export type KujiraSettlement = ExecuteResult;
 export type Address = string;
 export type OwnerAddress = Address;
 export type PayerAddress = Address;
-export type FloatingNumber = number;
-export type Price = FloatingNumber;
-export type Amount = FloatingNumber;
-export type Fee = FloatingNumber;
+// export type FloatingNumber = number;
+export type Price = BigNumber;
+export type Amount = BigNumber;
+export type Fee = BigNumber;
 export type Timestamp = number;
 export type BlockNumber = number;
 
@@ -48,11 +48,11 @@ export type MarketName = string;
 export type MarketId = Address;
 export type MarketProgramId = Address;
 export type MarketDeprecation = boolean;
-export type MarketMinimumOrderSize = FloatingNumber;
-export type MarketTickSize = FloatingNumber;
-export type MarketMinimumBaseIncrement = FloatingNumber;
+export type MarketMinimumOrderSize = BigNumber;
+export type MarketTickSize = BigNumber;
+export type MarketMinimumBaseIncrement = BigNumber;
 
-export type TickerPrice = FloatingNumber;
+export type TickerPrice = Price;
 export type TickerTimestamp = Timestamp;
 
 export type TransactionSignature = string;
@@ -77,13 +77,14 @@ export type FeeTaker = Fee;
 
 export type EstimatedFeesToken = string;
 export type EstimatedFeesPrice = Price;
-export type EstimateFeesLimit = FloatingNumber;
-export type EstimateFeesCost = FloatingNumber;
+export type EstimateFeesLimit = BigNumber;
+export type EstimateFeesCost = BigNumber;
 
 export type MaxNumberOfFilledOrders = number;
 
 export type Mnemonic = string;
 export type Password = string;
+export type AccountNumber = number;
 
 //
 //  Enums
@@ -212,11 +213,21 @@ export interface Transaction {
   signature: TransactionSignature;
 }
 
+export interface BasicWallet {
+  mnemonic: Mnemonic;
+
+  accountNumber: AccountNumber;
+
+  publicKey: Address;
+}
+
 //
 //  Errors
 //
 
 export class CLOBishError extends Error {}
+
+export class TokenNotFoundError extends CLOBishError {}
 
 export class MarketNotFoundError extends CLOBishError {}
 
@@ -229,6 +240,17 @@ export class SettlementError extends CLOBishError {}
 //
 //  Main methods options
 //
+
+export interface GetTokenOptions {
+  id?: TokenId;
+}
+
+export interface GetTokensOptions {
+  ids?: TokenId[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllTokensOptions {}
 
 export interface GetMarketOptions {
   id?: MarketId;
@@ -366,14 +388,11 @@ export interface GetTransactionsOptions {
 export interface GetEstimatedFeesOptions {}
 
 export interface EncryptWalletOptions {
-  mnemonic: Mnemonic;
-
-  prefix?: string;
-
-  acountNumber?: number;
-
-  password: Password;
+  wallet: BasicWallet;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DecryptWalletOptions {}
 
 //
 // Requests subtypes
