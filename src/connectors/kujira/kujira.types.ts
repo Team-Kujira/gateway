@@ -243,6 +243,7 @@ export class SettlementError extends CLOBishError {}
 
 export interface GetTokenOptions {
   id?: TokenId;
+  symbol?: TokenSymbol;
 }
 
 export interface GetTokensOptions {
