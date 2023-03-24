@@ -68,8 +68,8 @@ import {
 import {
   Denom,
   fin,
-  kujiraQueryClient,
   KujiraQueryClient,
+  kujiraQueryClient,
   msg,
   registry,
   RPCS,
@@ -99,10 +99,7 @@ import {
   StargateClient,
 } from '@cosmjs/stargate';
 import { ExecuteResult, JsonObject } from '@cosmjs/cosmwasm-stargate';
-import {
-  SigningCosmWasmClient,
-  SigningCosmWasmClientOptions,
-} from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 import {
   Coin,
   DirectSecp256k1HdWallet,
@@ -121,7 +118,6 @@ import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import { EncryptedPrivateKey } from '../../chains/cosmos/cosmos-base';
 import { address } from 'hardhat/internal/core/config/config-validation';
-import { SigningStargateClientOptions } from '@cosmjs/stargate/build/signingstargateclient';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -290,10 +286,20 @@ export class Kujira {
         prefix: prefix,
         hdPaths: [
           [
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             Slip10RawIndex.hardened(44),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             Slip10RawIndex.hardened(118),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             Slip10RawIndex.hardened(0),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             Slip10RawIndex.normal(0),
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             Slip10RawIndex.normal(accountNumber),
           ],
         ],
@@ -353,9 +359,11 @@ export class Kujira {
           rpcEndpoint,
           this.directSecp256k1HdWallet,
           {
-            registry,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            registry: registry,
             gasPrice: GasPrice.fromString(gasPrice),
-          } as SigningStargateClientOptions
+          }
         );
 
       this.signingCosmWasmClient =
@@ -363,9 +371,11 @@ export class Kujira {
           rpcEndpoint,
           this.directSecp256k1HdWallet,
           {
-            registry,
+            registry: registry,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             gasPrice: GasPrice.fromString(gasPrice),
-          } as SigningCosmWasmClientOptions
+          }
         );
 
       await this.getAllMarkets();
