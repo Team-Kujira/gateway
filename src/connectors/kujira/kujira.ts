@@ -798,6 +798,7 @@ export class Kujira {
     const balances: Balances = {
       tokens: IMap<TokenId, Balance>().asMutable(),
       total: {
+        token: 'total',
         free: BigNumber.from(0),
         lockedInOrders: BigNumber.from(0),
         unsettled: BigNumber.from(0),
@@ -1198,7 +1199,9 @@ export class Kujira {
 
   async getTransaction(options: GetTransactionOptions): Promise<Transaction> {
     return convertKujiraTransactionToTransaction(
-      await this.kujiraStargateClientGetTx(options.signature)
+      getNotNullOrThrowError<IndexedTx>(
+        await this.kujiraStargateClientGetTx(options.signature)
+      )
     );
   }
 
