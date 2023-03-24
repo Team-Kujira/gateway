@@ -43,6 +43,7 @@ export type ConnectorOrder = any;
 export type TokenId = Address;
 export type TokenName = string;
 export type TokenSymbol = string;
+export type TokenDecimals = number;
 
 export type MarketName = string;
 export type MarketId = Address;
@@ -70,7 +71,9 @@ export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionSignatures = TransactionSignatures;
 export type OrderReplaceIfExists = boolean;
 
-export type Settlement = TransactionSignature;
+export type Settlement = {
+  signature: TransactionSignature;
+};
 
 export type FeeMaker = Fee;
 export type FeeTaker = Fee;
@@ -127,6 +130,8 @@ export interface Token {
   id: TokenId;
   name: TokenName;
   symbol: TokenSymbol;
+
+  decimals: TokenDecimals;
 }
 
 export interface Market {
@@ -159,7 +164,7 @@ export interface Ticker {
 }
 
 export interface Balance {
-  token?: Token;
+  token: Token | 'total';
   free: Amount;
   lockedInOrders: Amount;
   unsettled: Amount;
@@ -171,7 +176,7 @@ export interface Balances {
 }
 
 export interface Order {
-  id?: OrderId;
+  id: OrderId;
   clientId?: OrderClientId; // Client custom id
   marketName: OrderMarketName;
   marketId: OrderMarketId;
@@ -211,6 +216,10 @@ export interface EstimatedFees {
 
 export interface Transaction {
   signature: TransactionSignature;
+  blockNumber: number;
+  gasUsed: number;
+  gasWanted: number;
+  code: number;
 }
 
 export interface BasicWallet {

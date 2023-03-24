@@ -1,4 +1,5 @@
 import {
+  Balance,
   Balances,
   BlockNumber,
   CancelOrderOptions,
@@ -18,7 +19,6 @@ import {
   KujiraOrderBook,
   KujiraSettlement,
   Market,
-  MarketId,
   Order,
   OrderBook,
   OrderId,
@@ -30,6 +30,7 @@ import {
   Settlement,
   Ticker,
   Token,
+  TokenId,
   Transaction,
   TransactionSignatures,
 } from './kujira.types';
@@ -40,17 +41,16 @@ import {
   ClobGetOrderRequest,
   ClobGetOrderResponse,
   ClobMarketResponse,
+  CLOBMarkets,
   ClobMarketsRequest,
   ClobOrderbookRequest,
   ClobPostOrderRequest,
-  ClobPostOrderResponse,
   ClobTickerRequest,
-  ClobTickerResponse,
   CreateOrderParam,
 } from '../../clob/clob.requests';
 import { OrderType as ClobOrderType, Side } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
-import { Denom, fin } from 'kujira.js';
+import { Denom, fin, LOCALNET, MAINNET, TESTNET } from 'kujira.js';
 import {
   DeliverTxResponse,
   IndexedTx,
@@ -214,11 +214,10 @@ export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
   _gasLimit: number,
   _gasCost: number
 ): GetEstimatedFeesOptions => {
-  return {
-    marketId: undefined as unknown as MarketId,
-  } as GetEstimatedFeesOptions;
+  return {} as GetEstimatedFeesOptions;
 };
 
+// TODO fix!!!
 export const convertToClobMarketResponse = (
   response: Market
 ): ClobMarketResponse => {
@@ -269,7 +268,8 @@ export const convertToClobMarketResponse = (
   } as ClobMarketResponse;
 };
 
-export const convertKujiraOrdertoClobPriceLevel = (
+// TODO fix!!!
+export const convertKujiraOrderToClobPriceLevel = (
   response: Order
 ): PriceLevel => {
   return {
@@ -286,25 +286,23 @@ export const convertToClobOrderbookResponse = (
     buys: response.bids
       .valueSeq()
       .map((obj) => {
-        return convertKujiraOrdertoClobPriceLevel(obj);
+        return convertKujiraOrderToClobPriceLevel(obj);
       })
       .toArray() as PriceLevel[],
     sells: response.asks
       .valueSeq()
       .map((obj) => {
-        return convertKujiraOrdertoClobPriceLevel(obj);
+        return convertKujiraOrderToClobPriceLevel(obj);
       })
       .toArray() as PriceLevel[],
   } as Orderbook;
 };
 
+// TODO fix!!!
 export const convertToClobTickerResponse = (
   _response: Ticker
-): ClobTickerResponse => {
+): { markets: CLOBMarkets } => {
   return {
-    network: config.network,
-    timestamp: Date.now(),
-    latency: 0,
     markets: {
       market: {
         marketId: undefined,
@@ -321,20 +319,18 @@ export const convertToClobTickerResponse = (
         minQuantityTickSize: undefined,
       } as unknown as SpotMarket,
     },
-  } as ClobTickerResponse;
+  } as { markets: CLOBMarkets };
 };
 
 export const convertToClobPostOrderResponse = (
   response: Order
-): ClobPostOrderResponse => {
+): { txHash: string } => {
   return {
-    network: config.network,
-    timestamp: Date.now(),
-    latency: 0,
     txHash: response.signatures?.creation,
-  } as ClobPostOrderResponse;
+  } as { txHash: string };
 };
 
+// TODO fix!!!
 export const convertToClobGetOrderResponse = (
   // TODO verify the injective output to ensure the return data !!!
   response: Order
@@ -403,65 +399,112 @@ export const convertToClobDeleteOrderResponseForCancellation = (
   };
 };
 
+// TODO fix!!!
 export const convertToBalancesResponse = (
   _response: Balances
 ): BalancesResponse => {
-  return {} as BalancesResponse;
+  return {
+    injectiveAddress: undefined,
+    balances: undefined,
+    subaccounts: undefined,
+  } as unknown as BalancesResponse;
 };
 
+// TODO fix!!!
 export const convertToPollResponse = (
   _transaction: Transaction,
   _currentBlockNumber: BlockNumber
 ): PollResponse => {
   return {
-    // blockNumber: undefined,
-    // hash: undefined,
-    // gasWanted: undefined,
-    // gasLimit: undefined,
-    // gasUsed: undefined,
-    // sequences: undefined,
-  } as PollResponse;
+    blockNumber: undefined,
+    hash: undefined,
+    gasWanted: undefined,
+    gasLimit: undefined,
+    gasUsed: undefined,
+    sequences: undefined,
+  } as unknown as PollResponse;
 };
 
+// TODO fix!!!
 export const convertToEstimatedFeesResponse = (
   // TODO both types are kujira types, verify if this is correct !!!
   _response: EstimatedFees
 ): EstimatedGaResponse => {
   return {
-    gasPrice: undefined as unknown as number,
-    gasPriceToken: undefined as unknown as string,
-    gasLimit: undefined as unknown as number,
-    gasCost: undefined as unknown as number,
-  } as EstimatedGaResponse;
+    gasPrice: undefined,
+    gasPriceToken: undefined,
+    gasLimit: undefined,
+    gasCost: undefined,
+  } as unknown as EstimatedGaResponse;
 };
 
-export const convertKujiraTokenToToken = (_token: Denom): Token => {
-  throw Error('Not implemented');
+export const convertKujiraTokenToToken = (token: Denom): Token => {
+  return {
+    id: token.reference,
+    name: token.symbol,
+    symbol: token.symbol,
+    decimals: token.decimals,
+  };
 };
 
+// TODO fix!!!
 export const convertKujiraMarketToMarket = (_market: fin.Pair): Market => {
-  throw Error('Not implemented');
+  return {
+    id: undefined,
+    name: undefined,
+    baseToken: undefined,
+    quoteToken: undefined,
+    minimumOrderSize: undefined,
+    tickSize: undefined,
+    minimumBaseIncrement: undefined,
+    fee: undefined,
+    programId: undefined,
+    deprecated: undefined,
+    connectorMarket: undefined,
+  } as unknown as Market;
 };
 
+// TODO fix!!!
 export const convertKujiraOrderBookToOrderBook = (
-  _market: Market,
-  _kujiraOrderBook: KujiraOrderBook
+  market: Market,
+  kujiraOrderBook: KujiraOrderBook
 ): OrderBook => {
-  throw Error('Not implemented');
+  return {
+    market: market,
+    bids: undefined,
+    asks: undefined,
+    bestBid: undefined,
+    bestAsk: undefined,
+    connectorOrderBook: kujiraOrderBook,
+  } as unknown as OrderBook;
 };
 
 export const convertKujiraOrdersToMapOfOrders = (
-  _orders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
-  _market?: Market,
-  _ownerAddress?: string,
-  _status?: OrderStatus
+  kujiraOrders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
+  market?: Market,
+  ownerAddress?: string,
+  status?: OrderStatus
 ): IMap<OrderId, Order> => {
-  throw new Error('Not implemented');
+  const output = IMap<OrderId, Order>().asMutable();
+
+  for (const kujiraOrder of kujiraOrders) {
+    const order = convertKujiraOrderToOrder(
+      kujiraOrder,
+      market,
+      ownerAddress,
+      status
+    );
+
+    output.set(order.id, order);
+  }
+
+  return output;
 };
 
+// TODO create an interface for the input type!!!
 export const convertToTicker = (input: any): Ticker => {
   const price = BigNumber.from(input.price);
-  const timestamp = new Date(input.last_updated).getTime();
+  const timestamp = new Date().getTime(); // TODO check if there's a timestamp available!!!
 
   return {
     price: price,
@@ -471,36 +514,99 @@ export const convertToTicker = (input: any): Ticker => {
 };
 
 export const convertKujiraBalancesToBalances = (
-  _balances: readonly Coin[]
+  balances: readonly Coin[]
 ): Balances => {
-  throw new Error('Not implemented');
+  const output: Balances = {
+    tokens: IMap<TokenId, Balance>().asMutable(),
+    total: {
+      token: 'total',
+      free: BigNumber.from(0),
+      lockedInOrders: BigNumber.from(0),
+      unsettled: BigNumber.from(0),
+    },
+  };
+
+  for (const balance of balances) {
+    const token = convertKujiraTokenToToken(Denom.from(balance.denom));
+    const amount = BigNumber.from(balance.amount);
+    output.tokens.set(token.id, {
+      token: token,
+      free: amount,
+      lockedInOrders: BigNumber.from(0),
+      unsettled: BigNumber.from(0),
+    });
+
+    output.total.free = output.total.free.add(amount);
+    output.total.lockedInOrders = output.total.lockedInOrders.add(amount);
+    output.total.unsettled = output.total.unsettled.add(amount);
+  }
+
+  return output;
 };
 
 export const convertKujiraTransactionToTransaction = (
-  _input: IndexedTx | null
+  input: IndexedTx
 ): Transaction => {
-  throw new Error('Not implemented');
+  return {
+    signature: input.hash,
+    blockNumber: input.height,
+    gasUsed: input.gasUsed,
+    gasWanted: input.gasWanted,
+    code: input.code,
+  };
 };
 
+// TODO fix!!!
 export const convertKujiraOrderToOrder = (
-  _market: Market,
-  _kujiraOrder?: KujiraOrder, // | Record<string, unknown>,
-  _candidateOrder?: CreateOrdersRequest,
+  _kujiraOrder: KujiraOrder,
+  _market?: Market,
   _ownerAddress?: string,
   _status?: OrderStatus,
-  _signatures?: TransactionSignatures
+  _signatures?: TransactionSignatures,
+  _candidateOrder?: CreateOrdersRequest
 ): Order => {
-  throw new Error('Not implemented');
+  return {
+    id: undefined,
+    clientId: undefined,
+    marketName: undefined,
+    marketId: undefined,
+    ownerAddress: undefined,
+    payerAddress: undefined,
+    price: undefined,
+    amount: undefined,
+    side: undefined,
+    status: undefined,
+    type: undefined,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
+    connectorOrder: undefined,
+  } as unknown as Order;
 };
 
 export const convertKujiraSettlementToSettlement = (
-  _input: KujiraSettlement
+  input: KujiraSettlement
 ): Settlement => {
-  throw new Error('Not implemented');
+  return {
+    signature: input.transactionHash,
+  };
 };
 
 export const convertNetworkToKujiraNetwork = (
   input: string
 ): keyof typeof contracts => {
-  return input.toLowerCase() as keyof typeof contracts;
+  input = input.toLowerCase();
+  let output: keyof typeof contracts;
+
+  if (input == MAINNET) {
+    output = MAINNET;
+  } else if (input == TESTNET) {
+    output = MAINNET;
+  } else if (input == LOCALNET) {
+    output = MAINNET;
+  } else {
+    throw new Error(`Unrecognized network: ${input}`);
+  }
+
+  return output;
 };
