@@ -17,6 +17,7 @@ import { VVSConnector } from '../connectors/vvs/vvs';
 import { InjectiveCLOB } from '../connectors/injective/injective';
 import { Injective } from '../chains/injective/injective';
 import {
+  CLOBish,
   Ethereumish,
   Nearish,
   Perpish,
@@ -32,6 +33,7 @@ import { Defira } from '../connectors/defira/defira';
 import { Near } from '../chains/near/near';
 import { Ref } from '../connectors/ref/ref';
 import { Xsswap } from '../connectors/xsswap/xsswap';
+import { DexalotCLOB } from '../connectors/dexalot/dexalot';
 import { KujiraChain } from '../chains/kujira/kujira.chain';
 import { KujiraConnector } from '../connectors/kujira/kujira.connector';
 import { Cosmos } from '../chains/cosmos/cosmos';
@@ -88,12 +90,12 @@ export async function getChain<T>(
   return chainInstance as Chain<T>;
 }
 
-type ConnectorUnion =
+export type ConnectorUnion =
   | Uniswapish
   | UniswapLPish
   | Perpish
   | RefAMMish
-  | InjectiveCLOB
+  | CLOBish;
   | KujiraConnector;
 
 export type Connector<T> = T extends Uniswapish
@@ -104,8 +106,8 @@ export type Connector<T> = T extends Uniswapish
   ? Perpish
   : T extends RefAMMish
   ? RefAMMish
-  : T extends InjectiveCLOB
-  ? InjectiveCLOB
+  : T extends CLOBish
+  ? CLOBish
   : T extends KujiraConnector
   ? KujiraConnector
   : never;
@@ -156,6 +158,8 @@ export async function getConnector<T>(
     connectorInstance = Xsswap.getInstance(chain, network);
   } else if (chain === 'injective' && connector === 'injective') {
     connectorInstance = InjectiveCLOB.getInstance(chain, network);
+  } else if (chain === 'avalanche' && connector === 'dexalot') {
+    connectorInstance = DexalotCLOB.getInstance(network);
   } else if (chain === 'kujira' && connector === 'kujira') {
     connectorInstance = await KujiraConnector.getInstance(chain, network);
   } else {
