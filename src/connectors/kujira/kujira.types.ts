@@ -1,8 +1,8 @@
 import { fin } from 'kujira.js';
-import { ExecuteResult, JsonObject } from '@cosmjs/cosmwasm-stargate';
+import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
 import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
-import { BigNumber } from 'ethers';
+import { BigNumber } from 'bignumber.js';
 
 //
 //  Types and Constants
@@ -129,7 +129,7 @@ export enum TickerSource {
 export interface KujiraOrderBookItem {
   quote_price: string;
   offer_denom: {
-    native: string
+    native: string;
   };
   total_offer_amount: string;
 }
@@ -137,7 +137,7 @@ export interface KujiraOrderBookItem {
 export interface KujiraOrderBook {
   base: KujiraOrderBookItem[];
   quote: KujiraOrderBookItem[];
-};
+}
 
 export interface Token {
   id: TokenId;

@@ -112,7 +112,7 @@ import {
   DeliverTxResponse,
   IndexedTx,
 } from '@cosmjs/stargate/build/stargateclient';
-import { BigNumber } from 'ethers';
+import { BigNumber } from 'bignumber.js';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { walletPath } from '../../services/base';
 import fse from 'fs-extra';
@@ -687,8 +687,8 @@ export class Kujira {
           const bestAsk = orderBook.bestAsk;
 
           const simpleAveragePrice = getNotNullOrThrowError<Order>(bestBid)
-            .price.add(getNotNullOrThrowError<Order>(bestAsk).price)
-            .div(BigNumber.from(2));
+            .price.plus(getNotNullOrThrowError<Order>(bestAsk).price)
+            .div(BigNumber(2));
 
           const result = {
             price: simpleAveragePrice,
@@ -810,9 +810,9 @@ export class Kujira {
       tokens: IMap<TokenId, Balance>().asMutable(),
       total: {
         token: 'total',
-        free: BigNumber.from(0),
-        lockedInOrders: BigNumber.from(0),
-        unsettled: BigNumber.from(0),
+        free: BigNumber(0),
+        lockedInOrders: BigNumber(0),
+        unsettled: BigNumber(0),
       },
     };
 
@@ -820,11 +820,11 @@ export class Kujira {
       if (options.tokenIds.includes(tokenId)) {
         balances.tokens.set(tokenId, balance);
 
-        balances.total.free = balances.total.free.add(balance.free);
-        balances.total.lockedInOrders = balances.total.lockedInOrders.add(
+        balances.total.free = balances.total.free.plus(balance.free);
+        balances.total.lockedInOrders = balances.total.lockedInOrders.plus(
           balance.lockedInOrders
         );
-        balances.total.unsettled = balances.total.unsettled.add(
+        balances.total.unsettled = balances.total.unsettled.plus(
           balance.unsettled
         );
       } else {
@@ -936,7 +936,7 @@ export class Kujira {
         }
       );
 
-      return convertKujiraOrdersToMapOfOrders(market, results);
+      return convertKujiraOrdersToMapOfOrders(results, market);
     } else {
       const marketIds =
         options.marketIds || (await this.getAllMarkets()).keySeq().toArray();
@@ -1248,7 +1248,7 @@ export class Kujira {
       token: config.nativeToken,
       price: config.gasPrice,
       limit: config.gasLimitEstimate,
-      cost: config.gasPrice.mul(config.gasLimitEstimate),
+      cost: config.gasPrice.multipliedBy(config.gasLimitEstimate),
     } as EstimatedFees;
   }
 

@@ -50,7 +50,7 @@ import {
 } from '../../clob/clob.requests';
 import { OrderType as ClobOrderType, Side } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
-import { Denom, fin, LOCALNET, MAINNET, TESTNET } from 'kujira.js';
+import { Denom, fin, MAINNET, TESTNET } from 'kujira.js';
 import {
   DeliverTxResponse,
   IndexedTx,
@@ -64,7 +64,7 @@ import {
   PollRequest,
   PollResponse,
 } from '../../chains/kujira/kujira.requests';
-import { BigNumber } from 'ethers';
+import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
 
 const config = KujiraConfig.config;
@@ -133,8 +133,8 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     marketId: request.market,
     ownerAddress: 'address' in request ? request.address : undefined,
     side: convertClobSideToKujiraOrderSide(request.side),
-    price: BigNumber.from(request.price),
-    amount: BigNumber.from(request.amount),
+    price: BigNumber(request.price),
+    amount: BigNumber(request.amount),
     type: convertClobOrderTypeToKujiraOrderType(request.orderType),
     payerAddress: 'address' in request ? request.address : undefined, // TODO, is the payer always the owner? !!!
   } as unknown as PlaceOrderOptions;
@@ -502,30 +502,30 @@ export const convertKujiraOrderBookToOrderBook = (
 };
 
 export const convertKujiraOrdersToMapOfOrders = (
-  kujiraOrders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
-  market?: Market,
-  ownerAddress?: string,
-  status?: OrderStatus
+  _kujiraOrders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
+  _market?: Market,
+  _ownerAddress?: string,
+  _status?: OrderStatus
 ): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
 
-  for (const kujiraOrder of kujiraOrders) {
-    const order = convertKujiraOrderToOrder(
-      kujiraOrder,
-      market,
-      ownerAddress,
-      status
-    );
-
-    output.set(order.id, order);
-  }
+  // for (const kujiraOrder of kujiraOrders) {
+  //   const order = convertKujiraOrderToOrder(
+  //     kujiraOrder,
+  //     market,
+  //     ownerAddress,
+  //     status
+  //   );
+  //
+  // output.set(order.id, order);
+  // }
 
   return output;
 };
 
 // TODO create an interface for the input type!!!
 export const convertToTicker = (input: any): Ticker => {
-  const price = BigNumber.from(input.price);
+  const price = BigNumber(input.price);
   const timestamp = new Date().getTime(); // TODO check if there's a timestamp available!!!
 
   return {
@@ -542,25 +542,25 @@ export const convertKujiraBalancesToBalances = (
     tokens: IMap<TokenId, Balance>().asMutable(),
     total: {
       token: 'total',
-      free: BigNumber.from(0),
-      lockedInOrders: BigNumber.from(0),
-      unsettled: BigNumber.from(0),
+      free: BigNumber(0),
+      lockedInOrders: BigNumber(0),
+      unsettled: BigNumber(0),
     },
   };
 
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
-    const amount = BigNumber.from(balance.amount);
+    const amount = BigNumber(balance.amount);
     output.tokens.set(token.id, {
       token: token,
       free: amount,
-      lockedInOrders: BigNumber.from(0),
-      unsettled: BigNumber.from(0),
+      lockedInOrders: BigNumber(0),
+      unsettled: BigNumber(0),
     });
 
-    output.total.free = output.total.free.add(amount);
-    output.total.lockedInOrders = output.total.lockedInOrders.add(amount);
-    output.total.unsettled = output.total.unsettled.add(amount);
+    output.total.free = output.total.free.plus(amount);
+    output.total.lockedInOrders = output.total.lockedInOrders.plus(amount);
+    output.total.unsettled = output.total.unsettled.plus(amount);
   }
 
   return output;
@@ -620,12 +620,10 @@ export const convertNetworkToKujiraNetwork = (
   input = input.toLowerCase();
   let output: keyof typeof contracts;
 
-  if (input == MAINNET) {
+  if (input.toLowerCase() == 'mainnet') {
     output = MAINNET;
-  } else if (input == TESTNET) {
-    output = MAINNET;
-  } else if (input == LOCALNET) {
-    output = MAINNET;
+  } else if (input.toLowerCase() == 'testnet') {
+    output = TESTNET;
   } else {
     throw new Error(`Unrecognized network: ${input}`);
   }

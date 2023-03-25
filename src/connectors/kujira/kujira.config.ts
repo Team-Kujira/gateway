@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { BigNumber } from 'bignumber.js';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 import { LOCALNET, MAINNET, TESTNET } from 'kujira.js';
 
@@ -13,9 +13,9 @@ export namespace KujiraConfig {
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
     nativeToken: 'KUJI',
-    gasPrice: BigNumber.from(configManager.get('kujira.gasPrice') || 0.00125),
+    gasPrice: BigNumber(configManager.get('kujira.gasPrice') || 0.00125),
     gasPriceSuffix: configManager.get('kujira.gasPrice') || 'ukuji',
-    gasLimitEstimate: BigNumber.from(
+    gasLimitEstimate: BigNumber(
       configManager.get('kujira.gasLimitEstimate') || 0.009147
     ),
     markets: {
