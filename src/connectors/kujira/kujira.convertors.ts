@@ -496,8 +496,8 @@ export const convertKujiraOrderBookToOrderBook = (
   const asks = IMap<OrderId, Order>().asMutable();
   let bestBid: Order | undefined;
   let bestAsk: Order | undefined;
-  let bestBidPrice = BigNumber.from(kujiraOrderBook.quote[0].quote_price);
-  let bestAskPrice = BigNumber.from(kujiraOrderBook.base[0].quote_price);
+  let bestBidPrice = BigNumber(kujiraOrderBook.quote[0].quote_price);
+  let bestAskPrice = BigNumber(kujiraOrderBook.base[0].quote_price);
 
   kujiraOrderBook.base.forEach((kujiraOrder) => {
     const order = {
@@ -507,8 +507,8 @@ export const convertKujiraOrderBookToOrderBook = (
       marketId: market.id, //OrderMarketId;
       ownerAddress: undefined, //OrderOwnerAddress?;
       payerAddress: undefined, //OrderPayerAddress?;
-      price: BigNumber.from(kujiraOrder.quote_price),
-      amount: BigNumber.from(kujiraOrder.total_offer_amount),
+      price: BigNumber(kujiraOrder.quote_price),
+      amount: BigNumber(kujiraOrder.total_offer_amount),
       side: OrderSide.SELL,
       status: OrderStatus.OPEN,
       type: OrderType.LIMIT,
@@ -541,8 +541,8 @@ export const convertKujiraOrderBookToOrderBook = (
       marketId: market.id, //OrderMarketId;
       ownerAddress: undefined, //OrderOwnerAddress?;
       payerAddress: undefined, //OrderPayerAddress?;
-      price: BigNumber.from(kujiraOrder.quote_price),
-      amount: BigNumber.from(kujiraOrder.total_offer_amount),
+      price: BigNumber(kujiraOrder.quote_price),
+      amount: BigNumber(kujiraOrder.total_offer_amount),
       side: OrderSide.BUY,
       status: OrderStatus.OPEN,
       type: OrderType.LIMIT,
