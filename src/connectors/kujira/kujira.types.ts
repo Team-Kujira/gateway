@@ -189,7 +189,7 @@ export interface Balances {
 }
 
 export interface Order {
-  id: OrderId;
+  id?: OrderId;
   clientId?: OrderClientId; // Client custom id
   marketName: OrderMarketName;
   marketId: OrderMarketId;

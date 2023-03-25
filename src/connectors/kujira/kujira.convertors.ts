@@ -4,6 +4,7 @@ import {
   BlockNumber,
   CancelOrderOptions,
   CancelOrdersOptions,
+  ConnectorOrder,
   CreateOrdersRequest,
   EstimatedFees,
   EstimatedGaResponse,
@@ -17,13 +18,25 @@ import {
   IMap,
   KujiraOrder,
   KujiraOrderBook,
+  KujiraOrderBookItem,
   KujiraSettlement,
   Market,
   Order,
+  OrderAmount,
   OrderBook,
+  OrderClientId,
+  OrderFee,
+  OrderFillingTimestamp,
   OrderId,
+  OrderMarketId,
+  OrderMarketName,
+  OrderOwnerAddress,
+  OrderPayerAddress,
+  OrderPrice,
   OrderSide,
   OrderStatus,
+  OrderTransactionSignatures,
+  OrderType,
   OrderType as KujiraOrderType,
   PlaceOrderOptions,
   PlaceOrdersOptions,
@@ -491,14 +504,87 @@ export const convertKujiraOrderBookToOrderBook = (
   market: Market,
   kujiraOrderBook: KujiraOrderBook
 ): OrderBook => {
+  const bids = IMap<OrderId, Order>().asMutable();
+  const asks = IMap<OrderId, Order>().asMutable();
+  let bestBid: Order | undefined;
+  let bestAsk: Order | undefined;
+  let bestBidPrice = BigNumber.from(kujiraOrderBook.quote[0].quote_price);
+  let bestAskPrice = BigNumber.from(kujiraOrderBook.base[0].quote_price);
+
+  kujiraOrderBook.base.forEach((kujiraOrder) => {
+    const order = {
+      id: undefined, //OrderId;
+      clientId: undefined, //OrderClientId?; // Client custom id
+      marketName: market.name, //OrderMarketName;
+      marketId: market.id, //OrderMarketId;
+      ownerAddress: undefined, //OrderOwnerAddress?;
+      payerAddress: undefined, //OrderPayerAddress?;
+      price: BigNumber.from(kujiraOrder.quote_price),
+      amount: BigNumber.from(kujiraOrder.total_offer_amount),
+      side: OrderSide.SELL,
+      status: OrderStatus.OPEN,
+      type: OrderType.LIMIT,
+      fee: undefined,
+      fillingTimestamp: undefined,
+      signatures: undefined, //OrderTransactionSignatures?;
+      connectorOrder: undefined, //ConnectorOrder?;
+    } as Order;
+
+    if (bestAsk) {
+      if (order.price.lt(bestAskPrice)) {
+        bestAsk = order;
+        bestAskPrice = order.price;
+      }
+      bestAsk = order;
+      bestAskPrice = order.price;
+    } else {
+      bestAsk = order;
+      bestAskPrice = order.price;
+    }
+
+    asks.set('None', order);
+  });
+
+  kujiraOrderBook.quote.forEach((kujiraOrder) => {
+    const order = {
+      id: undefined, //OrderId;
+      clientId: undefined, //OrderClientId?; // Client custom id
+      marketName: market.name, //OrderMarketName;
+      marketId: market.id, //OrderMarketId;
+      ownerAddress: undefined, //OrderOwnerAddress?;
+      payerAddress: undefined, //OrderPayerAddress?;
+      price: BigNumber.from(kujiraOrder.quote_price),
+      amount: BigNumber.from(kujiraOrder.total_offer_amount),
+      side: OrderSide.BUY,
+      status: OrderStatus.OPEN,
+      type: OrderType.LIMIT,
+      fee: undefined,
+      fillingTimestamp: undefined,
+      signatures: undefined, //OrderTransactionSignatures?;
+      connectorOrder: undefined, //ConnectorOrder?;
+    } as Order;
+
+    if (bestBid) {
+      if (order.price.gt(bestBidPrice)) {
+        bestBid = order;
+        bestBidPrice = order.price;
+      }
+    } else {
+      bestBid = order;
+      bestBidPrice = order.price;
+    }
+
+    bids.set('None', order);
+  });
+
   return {
     market: market,
-    bids: undefined,
-    asks: undefined,
-    bestBid: undefined,
-    bestAsk: undefined,
+    bids: bids,
+    asks: asks,
+    bestBid: bestBid,
+    bestAsk: bestAsk,
     connectorOrderBook: kujiraOrderBook,
-  } as unknown as OrderBook;
+  } as OrderBook;
 };
 
 export const convertKujiraOrdersToMapOfOrders = (
