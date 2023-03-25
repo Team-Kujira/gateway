@@ -43,6 +43,7 @@ import {
   OrderOwnerAddress,
   OrderSide,
   OrderStatus,
+  OwnerAddress,
   PlaceOrderOptions,
   PlaceOrdersOptions,
   Settlement,
@@ -239,6 +240,14 @@ export class Kujira {
   isReady: boolean = false;
 
   /**
+   *
+   *
+   */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  accountAddress: OwnerAddress;
+
+  /**
    * Get the Kujira instance for the given chain and network.
    * It's cached forever.
    *
@@ -339,6 +348,8 @@ export class Kujira {
       this.accounts = await this.directSecp256k1HdWallet.getAccounts();
 
       this.account = this.accounts[0];
+
+      this.accountAddress = this.account.address;
 
       this.httpBatchClient = new HttpBatchClient(rpcEndpoint, {
         dispatchInterval: 2000,
