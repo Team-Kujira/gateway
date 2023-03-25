@@ -5,6 +5,12 @@
     "network": {
       "type": "string"
     },
+    "rpcEndpoint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "prefix": {
       "type": "string"
     },
@@ -87,7 +93,12 @@
       "type": "object",
       "required": ["url"],
       "properties": {
-        "url": { "type": "string" },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "whitelist": {
           "type": ["array", "null"]
         },
