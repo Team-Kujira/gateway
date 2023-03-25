@@ -144,8 +144,8 @@ beforeAll(async () => {
 
   for (const [order, marketAddress] of Object.entries(marketsAddresses)) {
     const pair = getNotNullOrThrowError<fin.Pair>(
-      fin.PAIRS.find(
-        (it) => it.address == marketAddress && it.chainID == network
+      Object.values(fin.PAIRS[network]).find(
+        (it) => it.address == marketAddress
       )
     );
 
@@ -346,7 +346,7 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
+        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
       );
 
       logResponse(response);
@@ -616,7 +616,7 @@ describe('Kujira Full Flow', () => {
       const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
+        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
       );
 
       let denom: Denom;
@@ -764,7 +764,7 @@ describe('Kujira Full Flow', () => {
       const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
+        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
       );
 
       let denom: Denom;
@@ -1294,7 +1294,7 @@ describe('Kujira Full Flow', () => {
       const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
+        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
       );
 
       const finClient = new fin.FinClient(

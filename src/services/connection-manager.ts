@@ -95,7 +95,7 @@ export type ConnectorUnion =
   | UniswapLPish
   | Perpish
   | RefAMMish
-  | CLOBish;
+  | CLOBish
   | KujiraConnector;
 
 export type Connector<T> = T extends Uniswapish

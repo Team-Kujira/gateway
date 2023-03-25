@@ -1,0 +1,201 @@
+{
+  "code": 0,
+  "height": 10844244,
+  "txIndex": 0,
+  "events": [
+    {
+      "type": "coin_spent",
+      "attributes": [
+        {
+          "key": "spender",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"
+        },
+        {
+          "key": "amount",
+          "value": "279ukuji"
+        }
+      ]
+    },
+    {
+      "type": "coin_received",
+      "attributes": [
+        {
+          "key": "receiver",
+          "value": "kujira17xpfvakm2amg962yls6f84z3kell8c5lp3pcxh"
+        },
+        {
+          "key": "amount",
+          "value": "279ukuji"
+        }
+      ]
+    },
+    {
+      "type": "transfer",
+      "attributes": [
+        {
+          "key": "recipient",
+          "value": "kujira17xpfvakm2amg962yls6f84z3kell8c5lp3pcxh"
+        },
+        {
+          "key": "sender",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"
+        },
+        {
+          "key": "amount",
+          "value": "279ukuji"
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "attributes": [
+        {
+          "key": "sender",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"
+        }
+      ]
+    },
+    {
+      "type": "tx",
+      "attributes": [
+        {
+          "key": "fee",
+          "value": "279ukuji"
+        },
+        {
+          "key": "fee_payer",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"
+        }
+      ]
+    },
+    {
+      "type": "tx",
+      "attributes": [
+        {
+          "key": "acc_seq",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7/56"
+        }
+      ]
+    },
+    {
+      "type": "tx",
+      "attributes": [
+        {
+          "key": "signature",
+          "value": "GGjFVTw1OvZFPvEul5w+56oCbJeX9I5JMhDBEKE+RzN9kJWI5+UBU7T365Difw4/SJoOANykLukBRW8b3K6Z3w=="
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "attributes": [
+        {
+          "key": "action",
+          "value": "/cosmwasm.wasm.v1.MsgExecuteContract"
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "attributes": [
+        {
+          "key": "module",
+          "value": "wasm"
+        },
+        {
+          "key": "sender",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"
+        }
+      ]
+    },
+    {
+      "type": "coin_spent",
+      "attributes": [
+        {
+          "key": "spender",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"
+        },
+        {
+          "key": "amount",
+          "value": "10factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+        }
+      ]
+    },
+    {
+      "type": "coin_received",
+      "attributes": [
+        {
+          "key": "receiver",
+          "value": "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+        },
+        {
+          "key": "amount",
+          "value": "10factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+        }
+      ]
+    },
+    {
+      "type": "transfer",
+      "attributes": [
+        {
+          "key": "recipient",
+          "value": "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+        },
+        {
+          "key": "sender",
+          "value": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"
+        },
+        {
+          "key": "amount",
+          "value": "10factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+        }
+      ]
+    },
+    {
+      "type": "execute",
+      "attributes": [
+        {
+          "key": "_contract_address",
+          "value": "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+        }
+      ]
+    },
+    {
+      "type": "wasm",
+      "attributes": [
+        {
+          "key": "_contract_address",
+          "value": "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+        },
+        {
+          "key": "action",
+          "value": "submit_order"
+        },
+        {
+          "key": "market",
+          "value": "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+        },
+        {
+          "key": "order_idx",
+          "value": "87424"
+        },
+        {
+          "key": "quote_price",
+          "value": "0.001"
+        },
+        {
+          "key": "offer_amount",
+          "value": "10"
+        },
+        {
+          "key": "offer_denom",
+          "value": "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+        }
+      ]
+    }
+  ],
+  "rawLog": "[{\"msg_index\":0,\"events\":[{\"type\":\"coin_received\",\"attributes\":[{\"key\":\"receiver\",\"value\":\"kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh\"},{\"key\":\"amount\",\"value\":\"10factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo\"}]},{\"type\":\"coin_spent\",\"attributes\":[{\"key\":\"spender\",\"value\":\"kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7\"},{\"key\":\"amount\",\"value\":\"10factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo\"}]},{\"type\":\"execute\",\"attributes\":[{\"key\":\"_contract_address\",\"value\":\"kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh\"}]},{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/cosmwasm.wasm.v1.MsgExecuteContract\"},{\"key\":\"module\",\"value\":\"wasm\"},{\"key\":\"sender\",\"value\":\"kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7\"}]},{\"type\":\"transfer\",\"attributes\":[{\"key\":\"recipient\",\"value\":\"kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh\"},{\"key\":\"sender\",\"value\":\"kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7\"},{\"key\":\"amount\",\"value\":\"10factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo\"}]},{\"type\":\"wasm\",\"attributes\":[{\"key\":\"_contract_address\",\"value\":\"kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh\"},{\"key\":\"action\",\"value\":\"submit_order\"},{\"key\":\"market\",\"value\":\"kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh\"},{\"key\":\"order_idx\",\"value\":\"87424\"},{\"key\":\"quote_price\",\"value\":\"0.001\"},{\"key\":\"offer_amount\",\"value\":\"10\"},{\"key\":\"offer_denom\",\"value\":\"factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo\"}]}]}]",
+  "transactionHash": "3DC3D4A9A420E52ADD8FC5B2440444B7E310B6BABFDECA0424CDE895AAB31D44",
+  "gasUsed": 189685,
+  "gasWanted": 222492
+}
