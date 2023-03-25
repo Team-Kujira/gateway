@@ -21,7 +21,7 @@ export const ISet = ImmutableSet;
 
 export type BasicKujiraMarket = fin.Pair;
 export type KujiraOrder = any;
-export type KujiraOrderBook = JsonObject;
+
 export type KujiraOrderParams = any;
 export type KujiraSettlement = ExecuteResult;
 
@@ -125,6 +125,19 @@ export enum TickerSource {
 //
 //  Interfaces
 //
+
+export interface KujiraOrderBookItem {
+  quote_price: string;
+  offer_denom: {
+    native: string
+  };
+  total_offer_amount: string;
+}
+
+export interface KujiraOrderBook {
+  base: KujiraOrderBookItem[];
+  quote: KujiraOrderBookItem[];
+};
 
 export interface Token {
   id: TokenId;

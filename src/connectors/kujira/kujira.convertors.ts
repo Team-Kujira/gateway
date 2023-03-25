@@ -300,26 +300,48 @@ export const convertToClobOrderbookResponse = (
 
 // TODO fix!!!
 export const convertToClobTickerResponse = (
-  _response: Ticker
+  response: Ticker
 ): { markets: CLOBMarkets } => {
-  return {
-    markets: {
-      market: {
-        marketId: undefined,
-        marketStatus: undefined,
-        ticker: undefined,
-        baseDenom: undefined,
-        quoteDenom: undefined,
-        makerFeeRate: undefined,
-        quoteToken: undefined,
-        baseToken: undefined,
-        takerFeeRate: undefined,
-        serviceProviderFee: undefined,
-        minPriceTickSize: undefined,
-        minQuantityTickSize: undefined,
-      } as unknown as SpotMarket,
+  const resp: CLOBMarkets = {};
+  resp[response.ticker.toString()] = {
+    marketId: undefined,
+    marketStatus: undefined,
+    ticker: undefined,
+    baseDenom: undefined,
+    quoteDenom: undefined,
+    makerFeeRate: undefined,
+    quoteToken: {
+      name: undefined,
+      logo: undefined,
+      symbol: undefined,
+      decimals: undefined,
+      tokenType: undefined,
+      coinGeckoId: undefined,
+      ibc: undefined,
+      spl: undefined,
+      cw20: undefined,
+      cw20s: undefined,
+      erc20: undefined,
     },
-  } as { markets: CLOBMarkets };
+    baseToken: {
+      name: undefined,
+      logo: undefined,
+      symbol: undefined,
+      decimals: undefined,
+      tokenType: undefined,
+      coinGeckoId: undefined,
+      ibc: undefined,
+      spl: undefined,
+      cw20: undefined,
+      cw20s: undefined,
+      erc20: undefined,
+    },
+    takerFeeRate: undefined,
+    serviceProviderFee: undefined,
+    minPriceTickSize: undefined,
+    minQuantityTickSize: undefined,
+  } as unknown as SpotMarket;
+  return { markets: resp };
 };
 
 export const convertToClobPostOrderResponse = (
