@@ -89,6 +89,24 @@
         }
       }
     },
+    "tokens": {
+      "type": "object",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "allowed": {
+          "type": ["array", "null"]
+        },
+        "disallowed": {
+          "type": ["array", "null"]
+        }
+      }
+    },
     "markets": {
       "type": "object",
       "required": ["url"],
@@ -99,10 +117,10 @@
             "null"
           ]
         },
-        "whitelist": {
+        "allowed": {
           "type": ["array", "null"]
         },
-        "blacklist": {
+        "disallowed": {
           "type": ["array", "null"]
         }
       }

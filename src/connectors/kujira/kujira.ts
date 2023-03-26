@@ -2,6 +2,7 @@ import {
   Balance,
   Balances,
   BasicKujiraMarket,
+  BasicKujiraToken,
   BasicWallet,
   BlockNumber,
   CancelAllOrdersOptions,
@@ -396,58 +397,57 @@ export class Kujira {
     }
   }
 
-  async getToken(options: GetTokenOptions): Promise<Token> {
-    if (!options.id) throw new TokenNotFoundError(`No token informed.`);
+  @Cache(caches.tokens, { ttl: config.cache.tokensData })
+  async kujiraGetBasicTokens(): Promise<IMap<TokenId, BasicKujiraToken>> {
+    const tokensURL = config.tokens.url;
 
-    return convertKujiraTokenToToken(Denom.from(options.id));
-  }
+    const basicTokens: IMap<TokenId, BasicKujiraToken> = IMap<
+      TokenId,
+      BasicKujiraToken
+    >().asMutable();
 
-  /**
-   *
-   * @param options
-   */
-  async getTokens(options: GetTokensOptions): Promise<IMap<TokenId, Token>> {
-    if (!options.ids) throw new TokenNotFoundError(`No token informed.`);
+    if (tokensURL.startsWith('https')) {
+      const rawBasicTokens = (
+        await runWithRetryAndTimeout<any>(axios, axios.get, [tokensURL])
+      ).data;
 
-    const tokens = IMap<TokenId, Token>().asMutable();
+      Object.keys(rawBasicTokens).map((key: string) => {
+        const basicToken = Denom.from(key);
 
-    const getToken = async (id: TokenId): Promise<void> => {
-      const token = await this.getToken({ id });
+        basicTokens.set(basicToken.reference, basicToken);
+      });
+    } else {
+      // kujira.js/src/resources/tokens.json
+      const rawBasicTokens = require(tokensURL);
 
-      tokens.set(id, token);
-    };
+      Object.keys(rawBasicTokens).map((key: string) => {
+        const basicToken = Denom.from(key);
 
-    await promiseAllInBatches(getToken, options.ids);
+        basicTokens.set(basicToken.reference, basicToken);
+      });
+    }
 
-    return tokens;
-  }
-
-  async getAllTokens(
-    _options: GetAllTokensOptions
-  ): Promise<IMap<TokenId, Token>> {
-    throw new Error('Not implemented!');
+    return basicTokens;
   }
 
   @Cache(caches.markets, { ttl: config.cache.marketsData })
-  async kujiraGetMarketsData(): Promise<IMap<MarketId, BasicKujiraMarket>> {
-    const marketsURL =
-      config.markets.url ||
-      'https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json';
+  async kujiraGetBasicMarkets(): Promise<IMap<MarketId, BasicKujiraMarket>> {
+    const marketsURL = config.markets.url;
 
-    let marketsData: IMap<MarketId, BasicKujiraMarket>;
+    let basicMarkets: IMap<MarketId, BasicKujiraMarket>;
 
     try {
       if (marketsURL.startsWith('https')) {
-        const contracts = (
+        const rawBasicMarkets = (
           await runWithRetryAndTimeout<any>(axios, axios.get, [marketsURL])
         ).data;
 
-        const data = contracts[this.kujiraNetwork].fin.reduce(
+        const data = rawBasicMarkets[this.kujiraNetwork].fin.reduce(
           fin.compile(this.kujiraNetwork),
           {}
         );
 
-        marketsData = IMap<MarketId, BasicKujiraMarket>(data).asMutable();
+        basicMarkets = IMap<MarketId, BasicKujiraMarket>(data).asMutable();
       } else {
         // kujira.js/src/resources/contracts.json
         const contracts = require(marketsURL);
@@ -457,15 +457,15 @@ export class Kujira {
           {}
         );
 
-        marketsData = IMap<MarketId, BasicKujiraMarket>(data).asMutable();
+        basicMarkets = IMap<MarketId, BasicKujiraMarket>(data).asMutable();
       }
     } catch (exception) {
-      marketsData = IMap<MarketId, BasicKujiraMarket>(
+      basicMarkets = IMap<MarketId, BasicKujiraMarket>(
         fin.PAIRS[this.kujiraNetwork]
       );
     }
 
-    return marketsData;
+    return basicMarkets;
   }
 
   private async getStoredBasicWallet(): Promise<BasicWallet> {
@@ -551,6 +551,52 @@ export class Kujira {
    *
    * @param options
    */
+  async getToken(options: GetTokenOptions): Promise<Token> {
+    if (!options.id) throw new TokenNotFoundError(`No token informed.`);
+
+    // TODO Consider the id (aka reference) and the symbol!!!
+    return convertKujiraTokenToToken(Denom.from(options.id));
+  }
+
+  /**
+   *
+   * @param options
+   */
+  async getTokens(options: GetTokensOptions): Promise<IMap<TokenId, Token>> {
+    if (!options.ids) throw new TokenNotFoundError(`No token informed.`);
+
+    const tokens = IMap<TokenId, Token>().asMutable();
+
+    const getToken = async (id: TokenId): Promise<void> => {
+      const token = await this.getToken({ id });
+
+      tokens.set(id, token);
+    };
+
+    await promiseAllInBatches(getToken, options.ids);
+
+    return tokens;
+  }
+
+  /**
+   *
+   * @param _options
+   */
+  async getAllTokens(
+    _options: GetAllTokensOptions
+  ): Promise<IMap<TokenId, Token>> {
+    const tokenIds = (await this.kujiraGetBasicTokens())
+      .valueSeq()
+      .map((token) => token.reference)
+      .toArray();
+
+    return await this.getTokens({ ids: tokenIds });
+  }
+
+  /**
+   *
+   * @param options
+   */
   async getMarket(options: GetMarketOptions): Promise<Market> {
     if (!options.id) throw new MarketNotFoundError(`No market informed.`);
 
@@ -596,8 +642,9 @@ export class Kujira {
     const allMarkets = IMap<MarketId, Market>().asMutable();
 
     let marketsData: IMap<MarketId, BasicKujiraMarket> =
-      await this.kujiraGetMarketsData();
+      await this.kujiraGetBasicMarkets();
 
+    // TODO Consider the market contract address and the market name too (base/quote)!!!
     marketsData = marketsData.filter(
       (item) =>
         (config.markets.blacklist?.length

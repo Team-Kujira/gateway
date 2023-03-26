@@ -1,4 +1,4 @@
-import { fin } from 'kujira.js';
+import { Denom, fin } from 'kujira.js';
 import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
 import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
@@ -19,6 +19,7 @@ export const IMap = ImmutableMap;
 export type ISet<V> = ImmutableSet<V>;
 export const ISet = ImmutableSet;
 
+export type BasicKujiraToken = Denom;
 export type BasicKujiraMarket = fin.Pair;
 export type KujiraOrder = any;
 
@@ -152,8 +153,20 @@ export interface Market {
   name: MarketName;
   baseToken: Token;
   quoteToken: Token;
+
+  /**
+   *
+   */
   minimumOrderSize: MarketMinimumOrderSize;
+
+  /**
+   *
+   */
   tickSize: MarketTickSize;
+
+  /**
+   *
+   */
   minimumBaseIncrement?: MarketMinimumBaseIncrement;
   fee: MarketFee;
   programId?: MarketProgramId;
@@ -270,6 +283,8 @@ export interface GetTokenOptions {
 
 export interface GetTokensOptions {
   ids?: TokenId[];
+
+  symbols?: TokenSymbol[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

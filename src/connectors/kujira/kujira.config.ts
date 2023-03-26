@@ -18,8 +18,17 @@ export namespace KujiraConfig {
     gasLimitEstimate: BigNumber(
       configManager.get('kujira.gasLimitEstimate') || 0.009147
     ),
+    tokens: {
+      url:
+        configManager.get(`kujira.tokens.url`) ||
+        'https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/tokens.json',
+      blacklist: configManager.get(`kujira.tokens.blacklist`),
+      whiteList: configManager.get(`kujira.tokens.whitelist`),
+    },
     markets: {
-      url: configManager.get(`kujira.markets.url`),
+      url:
+        configManager.get(`kujira.markets.url`) ||
+        'https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json',
       blacklist: configManager.get(`kujira.markets.blacklist`),
       whiteList: configManager.get(`kujira.markets.whitelist`),
     },

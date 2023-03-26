@@ -29,9 +29,9 @@ let kujira: Kujira;
 const config = KujiraConfig.config;
 
 const tokenIds = {
-  1: KUJI.symbol, // KUJI
-  2: USK_TESTNET.symbol, // USK
-  3: DEMO.symbol, // DEMO
+  1: KUJI.reference, // KUJI
+  2: USK_TESTNET.reference, // USK
+  3: DEMO.reference, // DEMO
 };
 
 const networkPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];

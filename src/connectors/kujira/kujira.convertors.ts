@@ -471,20 +471,33 @@ export const convertKujiraTokenToToken = (token: Denom): Token => {
 };
 
 // TODO fix!!!
-export const convertKujiraMarketToMarket = (_market: fin.Pair): Market => {
+export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
+  const baseToken = convertKujiraTokenToToken(market.denoms[0]);
+  const quoteToken = convertKujiraTokenToToken(market.denoms[1]);
+
+  const tickSize = BigNumber(
+    Math.pow(
+      10,
+      -1 *
+        ('decimal_places' in market.precision
+          ? market.precision?.decimal_places
+          : market.precision.significant_figures)
+    )
+  );
+
   return {
-    id: undefined,
-    name: undefined,
-    baseToken: undefined,
-    quoteToken: undefined,
-    minimumOrderSize: undefined,
-    tickSize: undefined,
-    minimumBaseIncrement: undefined,
-    fee: undefined,
+    id: market.address,
+    name: `${baseToken.symbol}/${quoteToken.symbol}`,
+    baseToken: baseToken,
+    quoteToken: quoteToken,
+    minimumOrderSize: tickSize, // TODO check correct value!!!
+    tickSize: tickSize, // TODO check correct value!!!
+    minimumBaseIncrement: tickSize, // TODO check correct value!!!
+    fee: { taker: BigNumber(0), maker: BigNumber(0) }, // TODO check correct value!!!
     programId: undefined,
-    deprecated: undefined,
-    connectorMarket: undefined,
-  } as unknown as Market;
+    deprecated: false,
+    connectorMarket: market,
+  } as Market;
 };
 
 // TODO fix!!!
