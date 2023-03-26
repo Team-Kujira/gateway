@@ -509,6 +509,7 @@ export const convertKujiraOrderBookToOrderBook = (
   const asks = IMap<OrderId, Order>().asMutable();
   let bestBid: Order | undefined;
   let bestAsk: Order | undefined;
+  // TODO this is causing error when the orderbook is empty!!!
   let bestBidPrice = BigNumber(kujiraOrderBook.quote[0].quote_price);
   let bestAskPrice = BigNumber(kujiraOrderBook.base[0].quote_price);
 

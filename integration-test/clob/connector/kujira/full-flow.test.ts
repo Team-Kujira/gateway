@@ -456,7 +456,7 @@ describe('Kujira Full Flow', () => {
     market 2: token1/token3
     market 3: token2/token3
 
-    get the available wallet balances from the tokens 1, 2, and 3
+    Get the wallet balances from the tokens 1, 2, and 3
 
     create a buy order 1 for market 1
 
@@ -548,7 +548,7 @@ describe('Kujira Full Flow', () => {
     get all open orders and check that there are no open orders
     */
 
-    it('Get the available wallet balances from the tokens 1, 2, and 3', async () => {
+    it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
       };
