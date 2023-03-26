@@ -122,8 +122,7 @@ import { walletPath } from '../../services/base';
 import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import { EncryptedPrivateKey } from '../../chains/cosmos/cosmos-base';
-
-const crypto = require('crypto').webcrypto;
+import * as crypto from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -1358,9 +1357,9 @@ export class Kujira {
       throw new Error('missing passphrase');
     }
 
-    const iv = crypto.getRandomValues(new Uint8Array(16));
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const keyMaterial = await crypto.subtle.importKey(
+    const iv = crypto.webcrypto.getRandomValues(new Uint8Array(16));
+    const salt = crypto.webcrypto.getRandomValues(new Uint8Array(16));
+    const keyMaterial = await crypto.webcrypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(passphrase),
       'PBKDF2',
@@ -1373,7 +1372,7 @@ export class Kujira {
       iterations: 500000,
       hash: 'SHA-256',
     };
-    const key = await crypto.subtle.deriveKey(
+    const key = await crypto.webcrypto.subtle.deriveKey(
       keyAlgorithm,
       keyMaterial,
       { name: 'AES-GCM', length: 256 },
@@ -1385,7 +1384,7 @@ export class Kujira {
       iv: iv,
     };
     const enc = new TextEncoder();
-    const ciphertext: Uint8Array = (await crypto.subtle.encrypt(
+    const ciphertext: Uint8Array = (await crypto.webcrypto.subtle.encrypt(
       cipherAlgorithm,
       key,
       enc.encode(JSON.stringify(options.wallet))
@@ -1436,8 +1435,8 @@ export class Kujira {
       throw new Error('missing passphrase');
     }
 
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const keyMaterial = await crypto.subtle.importKey(
+    const salt = crypto.webcrypto.getRandomValues(new Uint8Array(16));
+    const keyMaterial = await crypto.webcrypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(passphrase),
       'PBKDF2',
@@ -1450,14 +1449,14 @@ export class Kujira {
       iterations: 500000,
       hash: 'SHA-256',
     };
-    const key = await crypto.subtle.deriveKey(
+    const key = await crypto.webcrypto.subtle.deriveKey(
       keyAlgorithm,
       keyMaterial,
       { name: 'AES-GCM', length: 256 },
       true,
       ['encrypt', 'decrypt']
     );
-    const decrypted = await crypto.subtle.decrypt(
+    const decrypted = await crypto.webcrypto.subtle.decrypt(
       encryptedPrivateKey.cipherAlgorithm,
       key,
       encryptedPrivateKey.ciphertext
