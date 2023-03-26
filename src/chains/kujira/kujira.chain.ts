@@ -65,15 +65,10 @@ export class KujiraChain {
     mnemonic: string,
     accountNumber: number | undefined
   ): Promise<Address> {
-    return (
-      await (
-        await this.kujira.getDirectSecp256k1HdWallet(
-          mnemonic,
-          KujiraConfig.config.prefix,
-          accountNumber || KujiraConfig.config.accountNumber
-        )
-      ).getAccounts()
-    )[0].address;
+    return await this.kujira.getWalletPublicKey({
+      mnemonic: mnemonic,
+      accountNumber: accountNumber || KujiraConfig.config.accountNumber,
+    });
   }
 
   async encrypt(

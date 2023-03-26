@@ -13,6 +13,8 @@ import {
   OwnerAddress,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
+import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
+import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -70,9 +72,27 @@ const getOrders = (ordinals: number[]): Record<any, any>[] => {
 let ownerAddress: OwnerAddress;
 
 beforeAll(async () => {
+  const mnemonic: string = getNotNullOrThrowError<string>(
+    process.env.TEST_KUJIRA_MNEMONIC
+  );
+
+  const accountNumber: number = getNotNullOrThrowError<number>(
+    Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || config.accountNumber
+  );
+
+  await addWallet({
+    chain: config.chain,
+    network: config.network,
+    privateKey: mnemonic,
+    address: undefined,
+    accountId: accountNumber,
+  } as AddWalletRequest);
+
   kujira = await Kujira.getInstance(config.chain, config.network);
 
-  ownerAddress = kujira.accountAddress;
+  await kujira.init();
+
+  ownerAddress = kujira.getWalletsPublicKeys()[0];
 
   orders.set(1, {
     id: null,

@@ -1,4 +1,5 @@
 import {
+  Address,
   Balance,
   Balances,
   BasicKujiraMarket,
@@ -32,7 +33,10 @@ import {
   GetTokensOptions,
   GetTransactionOptions,
   GetTransactionsOptions,
+  GetWalletArtifactsOptions,
+  GetWalletPublicKeyOptions,
   IMap,
+  KujiraWalletArtifacts,
   Market,
   MarketId,
   MarketNotFoundError,
@@ -93,7 +97,6 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
-import { AccountData } from '@cosmjs/proto-signing/build/signer';
 import {
   coins,
   GasPrice,
@@ -119,7 +122,6 @@ import { walletPath } from '../../services/base';
 import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import { EncryptedPrivateKey } from '../../chains/cosmos/cosmos-base';
-import { address } from 'hardhat/internal/core/config/config-validation';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -154,23 +156,7 @@ export class Kujira {
    */
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  private accounts: readonly AccountData[];
-
-  /**
-   *
-   * @private
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private account: AccountData;
-
-  /**
-   *
-   * @private
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private directSecp256k1HdWallet: DirectSecp256k1HdWallet;
+  private accounts: IMap<OwnerAddress, KujiraAccountArtifacts>;
 
   /**
    *
@@ -206,22 +192,6 @@ export class Kujira {
 
   /**
    *
-   * @private
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private signingStargateClient: SigningStargateClient;
-
-  /**
-   *
-   * @private
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private signingCosmWasmClient: SigningCosmWasmClient;
-
-  /**
-   *
    */
   chain: string;
 
@@ -239,14 +209,6 @@ export class Kujira {
    *
    */
   isReady: boolean = false;
-
-  /**
-   *
-   *
-   */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  accountAddress: OwnerAddress;
 
   /**
    * Get the Kujira instance for the given chain and network.
@@ -290,33 +252,28 @@ export class Kujira {
     prefix: string,
     accountNumber: number
   ): Promise<DirectSecp256k1HdWallet> {
-    this.directSecp256k1HdWallet = await DirectSecp256k1HdWallet.fromMnemonic(
-      mnemonic,
-      {
-        prefix: prefix,
-        hdPaths: [
-          [
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            Slip10RawIndex.hardened(44),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            Slip10RawIndex.hardened(118),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            Slip10RawIndex.hardened(0),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            Slip10RawIndex.normal(0),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            Slip10RawIndex.normal(accountNumber),
-          ],
+    return await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {
+      prefix: prefix,
+      hdPaths: [
+        [
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          Slip10RawIndex.hardened(44),
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          Slip10RawIndex.hardened(118),
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          Slip10RawIndex.hardened(0),
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          Slip10RawIndex.normal(0),
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          Slip10RawIndex.normal(accountNumber),
         ],
-      }
-    );
-
-    return this.directSecp256k1HdWallet;
+      ],
+    });
   }
 
   /**
@@ -327,30 +284,6 @@ export class Kujira {
       this.isInitializing = true;
 
       const rpcEndpoint: string = await this.getRPCEndpoint();
-
-      const basicWallet = await this.getStoredBasicWallet();
-
-      const mnemonic: string = basicWallet.mnemonic;
-
-      const prefix: string = config.prefix;
-
-      const accountNumber: number =
-        basicWallet.accountNumber || config.accountNumber;
-
-      const gasPrice: string = `${config.gasPrice}${config.gasPriceSuffix}`;
-
-      // signer
-      this.directSecp256k1HdWallet = await this.getDirectSecp256k1HdWallet(
-        mnemonic,
-        prefix,
-        accountNumber
-      );
-
-      this.accounts = await this.directSecp256k1HdWallet.getAccounts();
-
-      this.account = this.accounts[0];
-
-      this.accountAddress = this.account.address;
 
       this.httpBatchClient = new HttpBatchClient(rpcEndpoint, {
         dispatchInterval: 2000,
@@ -365,30 +298,6 @@ export class Kujira {
       });
 
       this.stargateClient = await StargateClient.connect(rpcEndpoint);
-
-      this.signingStargateClient =
-        await SigningStargateClient.connectWithSigner(
-          rpcEndpoint,
-          this.directSecp256k1HdWallet,
-          {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            registry: registry,
-            gasPrice: GasPrice.fromString(gasPrice),
-          }
-        );
-
-      this.signingCosmWasmClient =
-        await SigningCosmWasmClient.connectWithSigner(
-          rpcEndpoint,
-          this.directSecp256k1HdWallet,
-          {
-            registry: registry,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            gasPrice: GasPrice.fromString(gasPrice),
-          }
-        );
 
       await this.getAllMarkets();
 
@@ -468,8 +377,80 @@ export class Kujira {
     return basicMarkets;
   }
 
-  private async getStoredBasicWallet(): Promise<BasicWallet> {
-    return await this.decryptWallet({});
+  getWalletsPublicKeys(): Address[] {
+    return this.accounts.keySeq().toArray();
+  }
+
+  private async getWalletArtifacts(
+    options: GetWalletArtifactsOptions
+  ): Promise<KujiraWalletArtifacts> {
+    if (this.accounts.has(options.ownerAddress)) {
+      return this.accounts.get(options.ownerAddress);
+    }
+
+    const basicWallet = await this.decryptWallet({
+      accountAddress: options.ownerAddress,
+    });
+
+    const rpcEndpoint = await this.getRPCEndpoint();
+
+    const prefix: string = config.prefix;
+
+    const gasPrice: string = `${config.gasPrice}${config.gasPriceSuffix}`;
+
+    const mnemonic: string = basicWallet.mnemonic;
+
+    const accountNumber: number =
+      basicWallet.accountNumber || config.accountNumber;
+
+    // signer
+    const directSecp256k1HdWallet = await this.getDirectSecp256k1HdWallet(
+      mnemonic,
+      prefix,
+      accountNumber
+    );
+
+    const accounts = await directSecp256k1HdWallet.getAccounts();
+
+    const account = accounts[0];
+
+    const publicKey = account.address;
+
+    const signingStargateClient = await SigningStargateClient.connectWithSigner(
+      rpcEndpoint,
+      directSecp256k1HdWallet,
+      {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        registry: registry,
+        gasPrice: GasPrice.fromString(gasPrice),
+      }
+    );
+
+    const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(
+      rpcEndpoint,
+      directSecp256k1HdWallet,
+      {
+        registry: registry,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        gasPrice: GasPrice.fromString(gasPrice),
+      }
+    );
+
+    const walletArtifacts: KujiraWalletArtifacts = {
+      publicKey: publicKey,
+      accountData: account,
+      accountNumber: accountNumber,
+      directSecp256k1HdWallet: directSecp256k1HdWallet,
+      signingStargateClient: signingStargateClient,
+      signingCosmWasmClient: signingCosmWasmClient,
+      finClients: IMap<MarketId, fin.FinClient>().asMutable(),
+    };
+
+    this.accounts.set(publicKey, walletArtifacts);
+
+    return walletArtifacts;
   }
 
   private async kujiraQueryClientWasmQueryContractSmart(
@@ -484,14 +465,15 @@ export class Kujira {
   }
 
   private async kujiraSigningStargateClientSignAndBroadcast(
+    signingStargateClient: SigningStargateClient,
     signerAddress: string,
     messages: readonly EncodeObject[],
     fee: StdFee | 'auto' | number,
     memo?: string
   ): Promise<DeliverTxResponse> {
     return await runWithRetryAndTimeout<Promise<JsonObject>>(
-      this.signingStargateClient,
-      this.signingStargateClient.signAndBroadcast,
+      signingStargateClient,
+      signingStargateClient.signAndBroadcast,
       [signerAddress, messages, fee, memo]
     );
   }
@@ -744,38 +726,16 @@ export class Kujira {
 
           return convertToTicker(result);
         } else if (source === TickerSource.ORDER_BOOK_WAP) {
-          // const orderBook = await this.getOrderBook({ marketId: market.id });
-
           throw Error('Not implemented.');
         } else if (source === TickerSource.ORDER_BOOK_VWAP) {
-          // const orderBook = await this.getOrderBook({ marketId: market.id });
-
           throw Error('Not implemented.');
         } else if (source === TickerSource.LAST_FILLED_ORDER) {
-          const filledOrders = await this.getOrders({
-            status: OrderStatus.FILLED,
-            marketId: market.id,
-          });
-
-          if (filledOrders.size) {
-            const lastFilledOrder = filledOrders.values().next().value;
-
-            const result = {
-              price: lastFilledOrder.price,
-              timestamp: Date.now(),
-            };
-
-            return convertToTicker(result);
-          } else {
-            throw new TickerNotFoundError(
-              `Ticker data is currently not available for market "${market.id}".`
-            );
-          }
+          throw Error('Not implemented.');
         } else if (source === TickerSource.NOMICS) {
-          const finalUrl = (
-            configuration.url ||
-            'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=kujira_dex&interval=1m&market=${marketAddress}'
-          ).replace('${marketAddress}', market.connectorMarket.address);
+          const finalUrl = configuration.url.replace(
+            '${marketAddress}',
+            market.connectorMarket.address
+          );
 
           const result: { price: any; last_updated_at: any } = (
             await runWithRetryAndTimeout(
@@ -839,7 +799,10 @@ export class Kujira {
   }
 
   async getBalance(options: GetBalanceOptions): Promise<Balance> {
-    const balances = await this.getBalances({ tokenIds: [options.tokenId] });
+    const balances = await this.getBalances({
+      ownerAddress: options.ownerAddress,
+      tokenIds: [options.tokenId],
+    });
 
     if (balances.tokens.has(options.tokenId)) {
       return getNotNullOrThrowError<Promise<Balance>>(
@@ -851,7 +814,9 @@ export class Kujira {
   }
 
   async getBalances(options: GetBalancesOptions): Promise<Balances> {
-    const allBalances = await this.getAllBalances({});
+    const allBalances = await this.getAllBalances({
+      ownerAddress: options.ownerAddress,
+    });
 
     const balances: Balances = {
       tokens: IMap<TokenId, Balance>().asMutable(),
@@ -884,11 +849,11 @@ export class Kujira {
 
   /**
    *
-   * @param _options
+   * @param options
    */
   async getAllBalances(options: GetAllBalancesOptions): Promise<Balances> {
     const kujiraBalances = await this.kujiraStargateClientGetAllBalances(
-      options.ownerAddress || this.account.address
+      options.ownerAddress
     );
 
     return convertKujiraBalancesToBalances(kujiraBalances);
@@ -967,66 +932,63 @@ export class Kujira {
    *
    * @param options
    */
-  async getOrders(options: GetOrdersOptions): Promise<IMap<OrderId, Order>> {
-    let orders: IMap<OrderId, Order>;
+  async getOrders(
+    options: GetOrdersOptions
+  ): Promise<IMap<OwnerAddress, IMap<OrderId, Order>>> {
+    const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
-    if (options.marketId) {
-      const market = await this.getMarket({ id: options.marketId });
+    for (const ownerAddress of options.ownerAddresses) {
+      let orders: IMap<OrderId, Order>;
 
-      const results = await this.kujiraQueryClientWasmQueryContractSmart(
-        market.connectorMarket.address,
-        {
-          orders_by_user: {
-            address: this.account.address,
-            limit: config.orders.filled.limit,
-          },
+      if (options.marketId) {
+        const market = await this.getMarket({ id: options.marketId });
+
+        const results = await this.kujiraQueryClientWasmQueryContractSmart(
+          market.connectorMarket.address,
+          {
+            orders_by_user: {
+              address: ownerAddress,
+              limit: config.orders.filled.limit,
+            },
+          }
+        );
+
+        orders = convertKujiraOrdersToMapOfOrders(results, market);
+      } else {
+        const marketIds =
+          options.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+
+        orders = IMap<OrderId, Order>().asMutable();
+
+        const getOrders = async (marketId: string): Promise<void> => {
+          const marketOrders = await this.getOrders({
+            ...options,
+            marketId,
+          });
+
+          orders.merge(marketOrders);
+        };
+
+        await promiseAllInBatches(getOrders, marketIds);
+      }
+
+      orders.filter((order) => {
+        if (options.status && order.status !== options.status) {
+          return false;
+        } else if (
+          options.statuses &&
+          !options.statuses.includes(getNotNullOrThrowError(order.status))
+        ) {
+          return false;
         }
-      );
 
-      return convertKujiraOrdersToMapOfOrders(results, market);
-    } else {
-      const marketIds =
-        options.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+        return true;
+      });
 
-      orders = IMap<OrderId, Order>().asMutable();
-
-      const getOrders = async (marketId: string): Promise<void> => {
-        const marketOrders = await this.getOrders({
-          ...options,
-          marketId,
-        });
-
-        orders.merge(marketOrders);
-      };
-
-      await promiseAllInBatches(getOrders, marketIds);
+      output.set(ownerAddress, orders);
     }
 
-    orders.filter((order) => {
-      if (options.status && order.status !== options.status) {
-        return false;
-      } else if (
-        options.statuses &&
-        !options.statuses.includes(getNotNullOrThrowError(order.status))
-      ) {
-        return false;
-      }
-
-      if (options.ownerAddress && order.ownerAddress !== options.ownerAddress) {
-        return false;
-      } else if (
-        options.ownerAddresses &&
-        !options.ownerAddresses.includes(
-          getNotNullOrThrowError(order.ownerAddress)
-        )
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-
-    return orders;
+    return output;
   }
 
   /**
@@ -1049,6 +1011,10 @@ export class Kujira {
   async placeOrders(
     options: PlaceOrdersOptions
   ): Promise<IMap<OrderId, Order>> {
+    const ownerAddress =
+      options.ownerAddress ||
+      getNotNullOrThrowError<OrderOwnerAddress>(options.orders[0].ownerAddress);
+
     const candidateMessages: EncodeObject[] = [];
 
     for (const candidate of options.orders) {
@@ -1064,7 +1030,7 @@ export class Kujira {
       }
 
       const message = msg.wasm.msgExecuteContract({
-        sender: candidate.ownerAddress || this.account.address,
+        sender: candidate.ownerAddress || ownerAddress,
         contract: market.id,
         msg: Buffer.from(
           JSON.stringify({
@@ -1079,8 +1045,13 @@ export class Kujira {
 
     const messages: readonly EncodeObject[] = candidateMessages;
 
+    const walletArtifacts = await this.getWalletArtifacts({
+      ownerAddress,
+    });
+
     const results = await this.kujiraSigningStargateClientSignAndBroadcast(
-      this.account.address,
+      walletArtifacts.signingStargateClient,
+      ownerAddress,
       messages,
       config.orders.create.fee
     );
@@ -1093,12 +1064,14 @@ export class Kujira {
    * @param options
    */
   async cancelOrder(options: CancelOrderOptions): Promise<Order> {
-    return (
-      await this.cancelOrders({
-        ids: [options.id],
-        ownerAddresses: [options.ownerAddress],
-        marketId: options.marketId,
-      })
+    return getNotNullOrThrowError<IMap<OrderId, Order>>(
+      (
+        await this.cancelOrders({
+          ids: [options.id],
+          ownerAddresses: [options.ownerAddress],
+          marketId: options.marketId,
+        })
+      ).first()
     ).first();
   }
 
@@ -1108,34 +1081,45 @@ export class Kujira {
    */
   async cancelOrders(
     options: CancelOrdersOptions
-  ): Promise<IMap<OrderId, Order>> {
+  ): Promise<IMap<OwnerAddress, IMap<OrderId, Order>>> {
     const market = await this.getMarket({ id: options.marketId });
 
-    // TODO check if using index 0 would work for all!!!
-    const denom: Denom = market.connectorMarket.denoms[0];
+    const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
-    const message = msg.wasm.msgExecuteContract({
-      sender: this.account.address,
-      contract: market.id,
-      msg: Buffer.from(
-        JSON.stringify({
-          retract_orders: {
-            order_idxs: options.ids,
-          },
-        })
-      ),
-      funds: coins(0, denom.reference),
-    });
+    for (const ownerAddress of options.ownerAddresses) {
+      // TODO check if using index 0 would work for all!!!
+      const denom: Denom = market.connectorMarket.denoms[0];
 
-    const messages: readonly EncodeObject[] = [message];
+      const message = msg.wasm.msgExecuteContract({
+        sender: ownerAddress,
+        contract: market.id,
+        msg: Buffer.from(
+          JSON.stringify({
+            retract_orders: {
+              order_idxs: options.ids,
+            },
+          })
+        ),
+        funds: coins(0, denom.reference),
+      });
 
-    const results = await this.kujiraSigningStargateClientSignAndBroadcast(
-      this.account.address,
-      messages,
-      config.orders.create.fee
-    );
+      const messages: readonly EncodeObject[] = [message];
 
-    return convertKujiraOrdersToMapOfOrders(results);
+      const walletArtifacts = await this.getWalletArtifacts({
+        ownerAddress,
+      });
+
+      const results = await this.kujiraSigningStargateClientSignAndBroadcast(
+        walletArtifacts.signingStargateClient,
+        ownerAddress,
+        messages,
+        config.orders.create.fee
+      );
+
+      output.set(ownerAddress, convertKujiraOrdersToMapOfOrders(results));
+    }
+
+    return output;
   }
 
   /**
@@ -1143,57 +1127,97 @@ export class Kujira {
    * @param options
    */
   async cancelAllOrders(
-    options?: CancelAllOrdersOptions
-  ): Promise<IMap<OrderId, Order>> {
-    const marketIds: MarketId[] = options?.marketId
-      ? [options?.marketId]
-      : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+    options: CancelAllOrdersOptions
+  ): Promise<IMap<OwnerAddress, IMap<OrderId, Order>>> {
+    const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
-    const cancelledOrders = IMap<OrderId, Order>().asMutable();
+    for (const ownerAddress of options.ownerAddresses) {
+      const marketIds: MarketId[] = options?.marketId
+        ? [options?.marketId]
+        : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
 
-    for (const marketId of marketIds) {
-      const openOrdersIds = (await this.getOrders({ status: OrderStatus.OPEN }))
-        .valueSeq()
-        .map((order) => getNotNullOrThrowError<OrderId>(order.id))
-        .toArray();
+      const cancelledOrders = IMap<OrderId, Order>().asMutable();
 
-      cancelledOrders.merge(
-        await this.cancelOrders({
-          ids: openOrdersIds,
-          marketId,
-          ownerAddresses: options?.ownerAddresses,
-        })
-      );
+      for (const marketId of marketIds) {
+        const openOrdersIds = getNotNullOrThrowError<IMap<OrderId, Order>>(
+          (
+            await this.getOrders({
+              ownerAddresses: [ownerAddress],
+              status: OrderStatus.OPEN,
+            })
+          ).first()
+        )
+          .valueSeq()
+          .map((order) => getNotNullOrThrowError<OrderId>(order.id))
+          .toArray();
+
+        cancelledOrders.merge(
+          await this.cancelOrders({
+            ids: openOrdersIds,
+            marketId,
+            ownerAddresses: options.ownerAddresses,
+          })
+        );
+      }
+
+      output.set(ownerAddress, cancelledOrders);
     }
 
-    return cancelledOrders;
+    return output;
   }
 
   /**
    *
    * @param options
    */
-  async settleMarketFunds(options: SettlementOptions): Promise<Settlement> {
+  async settleMarketFunds(
+    options: SettlementOptions
+  ): Promise<IMap<OwnerAddress, Settlement>> {
     const market = await this.getMarket({ id: options.marketId });
 
-    const finClient = new fin.FinClient(
-      this.signingCosmWasmClient,
-      this.account.address,
-      market.id
-    );
+    const output = IMap<OwnerAddress, Settlement>().asMutable();
 
-    const filledOrdersIds = (
-      await this.getOrders({ status: OrderStatus.FILLED })
-    )
-      .valueSeq()
-      .map((order) => getNotNullOrThrowError<OrderId>(order.id))
-      .toArray();
+    for (const ownerAddress of options.ownerAddresses) {
+      const walletArtifacts = await this.getWalletArtifacts({
+        ownerAddress,
+      });
 
-    const result = await this.kujiraFinClientWithdrawOrders(finClient, {
-      orderIdxs: filledOrdersIds,
-    });
+      let finClient: fin.FinClient;
 
-    return convertKujiraSettlementToSettlement(result);
+      if (walletArtifacts.finClients.has(ownerAddress)) {
+        finClient = getNotNullOrThrowError<fin.FinClient>(
+          walletArtifacts.finClients.get(ownerAddress)
+        );
+      } else {
+        finClient = new fin.FinClient(
+          walletArtifacts.signingCosmWasmClient,
+          ownerAddress,
+          market.id
+        );
+
+        walletArtifacts.finClients.set(ownerAddress, finClient);
+      }
+
+      const filledOrdersIds = getNotNullOrThrowError<IMap<OrderId, Order>>(
+        (
+          await this.getOrders({
+            ownerAddresses: [ownerAddress],
+            status: OrderStatus.FILLED,
+          })
+        ).get(ownerAddress)
+      )
+        .valueSeq()
+        .map((order) => getNotNullOrThrowError<OrderId>(order.id))
+        .toArray();
+
+      const result = await this.kujiraFinClientWithdrawOrders(finClient, {
+        orderIdxs: filledOrdersIds,
+      });
+
+      output.set(ownerAddress, convertKujiraSettlementToSettlement(result));
+    }
+
+    return output;
   }
 
   /**
@@ -1202,11 +1226,14 @@ export class Kujira {
    */
   async settleMarketsFunds(
     options: SettlementsOptions
-  ): Promise<IMap<MarketId, Settlement>> {
+  ): Promise<IMap<MarketId, IMap<OwnerAddress, Settlement>>> {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
-    const settlements = IMap<MarketId, Settlement>().asMutable();
+    const settlements = IMap<
+      MarketId,
+      IMap<OwnerAddress, Settlement>
+    >().asMutable();
 
     interface HelperSettleFundsOptions {
       marketId: MarketId;
@@ -1239,13 +1266,13 @@ export class Kujira {
    * @param options
    */
   async settleAllMarketsFunds(
-    options?: SettlementsAllOptions
-  ): Promise<IMap<MarketId, Settlement>> {
+    options: SettlementsAllOptions
+  ): Promise<IMap<MarketId, IMap<OwnerAddress, Settlement>>> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
     return await this.settleMarketsFunds({
       marketIds,
-      ownerAddresses: options?.ownerAddresses || [this.account.address],
+      ownerAddresses: options.ownerAddresses,
     });
   }
 
@@ -1297,6 +1324,24 @@ export class Kujira {
       limit: config.gasLimitEstimate,
       cost: config.gasPrice.multipliedBy(config.gasLimitEstimate),
     } as EstimatedFees;
+  }
+
+  /**
+   *
+   * @param options
+   */
+  async getWalletPublicKey(
+    options: GetWalletPublicKeyOptions
+  ): Promise<Address> {
+    return (
+      await (
+        await this.getDirectSecp256k1HdWallet(
+          options.mnemonic,
+          KujiraConfig.config.prefix,
+          options.accountNumber || KujiraConfig.config.accountNumber
+        )
+      ).getAccounts()
+    )[0].address;
   }
 
   /**
@@ -1363,13 +1408,13 @@ export class Kujira {
 
   /**
    *
-   * @param _options
+   * @param options
    */
-  async decryptWallet(_options: DecryptWalletOptions): Promise<BasicWallet> {
+  async decryptWallet(options: DecryptWalletOptions): Promise<BasicWallet> {
     const path = `${walletPath}/${this.chain}`;
 
     const encryptedPrivateKey: EncryptedPrivateKey = JSON.parse(
-      await fse.readFile(`${path}/${address}.json`, 'utf8'),
+      await fse.readFile(`${path}/${options.accountAddress}.json`, 'utf8'),
       (key, value) => {
         switch (key) {
           case 'ciphertext':

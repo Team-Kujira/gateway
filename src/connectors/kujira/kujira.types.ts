@@ -3,6 +3,10 @@ import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
 import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import { BigNumber } from 'bignumber.js';
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { AccountData } from '@cosmjs/proto-signing/build/signer';
+import { SigningStargateClient } from '@cosmjs/stargate';
+import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 
 //
 //  Types and Constants
@@ -256,6 +260,22 @@ export interface BasicWallet {
   publicKey: Address;
 }
 
+export interface KujiraWalletArtifacts {
+  publicKey: Address;
+
+  accountData: AccountData;
+
+  accountNumber: AccountNumber;
+
+  directSecp256k1HdWallet: DirectSecp256k1HdWallet;
+
+  signingStargateClient: SigningStargateClient;
+
+  signingCosmWasmClient: SigningCosmWasmClient;
+
+  finClients: IMap<MarketId, fin.FinClient>;
+}
+
 //
 //  Errors
 //
@@ -323,23 +343,27 @@ export interface GetTickersOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllTickerOptions extends GetTickersOptions {}
 
+export interface GetWalletArtifactsOptions {
+  ownerAddress: OwnerAddress;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalanceOptions {
   tokenId: TokenId;
 
-  ownerAddress?: OwnerAddress;
+  ownerAddress: OwnerAddress;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalancesOptions {
   tokenIds: TokenId[];
 
-  ownerAddress?: OwnerAddress;
+  ownerAddress: OwnerAddress;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllBalancesOptions {
-  ownerAddress?: OwnerAddress;
+  ownerAddress: OwnerAddress;
 }
 
 export interface GetOrderOptions {
@@ -355,8 +379,7 @@ export interface GetOrdersOptions {
   ids?: OrderId[];
   marketId?: MarketId;
   marketIds?: MarketId[];
-  ownerAddress?: OrderOwnerAddress;
-  ownerAddresses?: OrderOwnerAddress[];
+  ownerAddresses: OrderOwnerAddress[];
   status?: OrderStatus;
   statuses?: OrderStatus[];
 }
@@ -373,6 +396,7 @@ export interface PlaceOrderOptions {
 }
 
 export interface PlaceOrdersOptions {
+  ownerAddress?: OrderOwnerAddress;
   waitUntilIncludedInBlock?: boolean;
   orders: PlaceOrderOptions[];
 }
@@ -386,14 +410,14 @@ export interface CancelOrderOptions {
 export interface CancelOrdersOptions {
   ids: OrderId[];
   marketId: MarketId;
-  ownerAddresses?: OrderOwnerAddress[];
+  ownerAddresses: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CancelAllOrdersOptions extends CancelOrdersOptions {
-  marketId: MarketId;
-  marketIds: MarketId[];
-  ownerAddresses?: OrderOwnerAddress[];
+export interface CancelAllOrdersOptions {
+  marketId?: MarketId;
+  marketIds?: MarketId[];
+  ownerAddresses: OrderOwnerAddress[];
 }
 
 export interface SettlementOptions {
@@ -425,12 +449,19 @@ export interface GetTransactionsOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetEstimatedFeesOptions {}
 
+export interface GetWalletPublicKeyOptions {
+  mnemonic: Mnemonic;
+  accountNumber: AccountNumber;
+}
+
 export interface EncryptWalletOptions {
   wallet: BasicWallet;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DecryptWalletOptions {}
+export interface DecryptWalletOptions {
+  accountAddress: OwnerAddress;
+}
 
 //
 // Requests subtypes

@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
 import { LOCALNET, MAINNET, TESTNET } from 'kujira.js';
+import { getNotNullOrThrowError } from './kujira.helpers';
 
 const configManager = ConfigManagerV2.getInstance();
 
@@ -98,4 +99,12 @@ export namespace KujiraConfig {
       markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
     },
   };
+}
+
+if (KujiraConfig.config.tickers.sources.has('nomics')) {
+  getNotNullOrThrowError<any>(
+    KujiraConfig.config.tickers.sources.get('nomics')
+  ).url =
+    KujiraConfig.config.tickers.sources.get('nomics')?.url ||
+    'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=kujira_dex&interval=1m&market=${marketAddress}';
 }
