@@ -153,7 +153,7 @@ export async function addWallet(
       const accountNumber = req.accountId;
       address = await connection.getWalletPublicKey(mnemonic, accountNumber);
 
-      if (accountNumber) {
+      if (accountNumber !== undefined) {
         encryptedPrivateKey = await connection.encrypt(
           mnemonic,
           accountNumber,

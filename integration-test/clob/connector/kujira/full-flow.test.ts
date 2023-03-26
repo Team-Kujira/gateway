@@ -80,19 +80,19 @@ beforeAll(async () => {
     Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || config.accountNumber
   );
 
-  await addWallet({
-    chain: config.chain,
-    network: config.network,
-    privateKey: mnemonic,
-    address: undefined,
-    accountId: accountNumber,
-  } as AddWalletRequest);
+  ownerAddress = (
+    await addWallet({
+      chain: config.chain,
+      network: config.network,
+      privateKey: mnemonic,
+      address: undefined,
+      accountId: accountNumber,
+    } as AddWalletRequest)
+  ).address;
 
   kujira = await Kujira.getInstance(config.chain, config.network);
 
   await kujira.init();
-
-  ownerAddress = kujira.getWalletsPublicKeys()[0];
 
   orders.set(1, {
     id: null,

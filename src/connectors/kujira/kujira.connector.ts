@@ -141,9 +141,11 @@ export class KujiraConnector {
       );
     } else if (req.cancelOrderParams) {
       return convertToClobDeleteOrderResponseForCancellation(
-        await this.kujira.cancelOrders(
-          convertClobBatchUpdateRequestToDeleteOrdersOptions(req)
-        )
+        (
+          await this.kujira.cancelOrders(
+            convertClobBatchUpdateRequestToDeleteOrdersOptions(req)
+          )
+        ).first()
       );
     } else {
       throw new Error('Invalid batch update request');

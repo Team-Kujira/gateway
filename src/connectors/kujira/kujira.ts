@@ -123,6 +123,8 @@ import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import { EncryptedPrivateKey } from '../../chains/cosmos/cosmos-base';
 
+const crypto = require('crypto').webcrypto;
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
   instances: new CacheContainer(new MemoryStorage()),
@@ -154,9 +156,7 @@ export class Kujira {
    *
    * @private
    */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  private accounts: IMap<OwnerAddress, KujiraAccountArtifacts>;
+  private accounts: IMap<OwnerAddress, KujiraWalletArtifacts>;
 
   /**
    *
@@ -234,6 +234,8 @@ export class Kujira {
     this.network = network;
 
     this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
+
+    this.accounts = IMap<OwnerAddress, KujiraWalletArtifacts>().asMutable();
   }
 
   private async getRPCEndpoint(): Promise<string> {
@@ -385,7 +387,9 @@ export class Kujira {
     options: GetWalletArtifactsOptions
   ): Promise<KujiraWalletArtifacts> {
     if (this.accounts.has(options.ownerAddress)) {
-      return this.accounts.get(options.ownerAddress);
+      return getNotNullOrThrowError<KujiraWalletArtifacts>(
+        this.accounts.get(options.ownerAddress)
+      );
     }
 
     const basicWallet = await this.decryptWallet({

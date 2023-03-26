@@ -1,7 +1,5 @@
 import { KujiraConfig } from './kujira.config';
 
-const config = KujiraConfig.config;
-
 /**
  *
  * @param value
@@ -38,8 +36,9 @@ export const sleep = (milliseconds: number) =>
 export const promiseAllInBatches = async <I, O>(
   task: (item: I) => Promise<O>,
   items: any[],
-  batchSize: number = config.parallel.all.batchSize,
-  delayBetweenBatches: number = config.parallel.all.delayBetweenBatches
+  batchSize: number = KujiraConfig.config.parallel.all.batchSize,
+  delayBetweenBatches: number = KujiraConfig.config.parallel.all
+    .delayBetweenBatches
 ): Promise<O[]> => {
   let position = 0;
   let results: any[] = [];
@@ -79,9 +78,10 @@ export const runWithRetryAndTimeout = async <R>(
   targetObject: any,
   targetFunction: (...args: any[]) => R,
   targetParameters: any,
-  maxNumberOfRetries: number = config.retry.all.maxNumberOfRetries,
-  delayBetweenRetries: number = config.retry.all.delayBetweenRetries,
-  timeout: number = config.timeout.all,
+  maxNumberOfRetries: number = KujiraConfig.config.retry.all.maxNumberOfRetries,
+  delayBetweenRetries: number = KujiraConfig.config.retry.all
+    .delayBetweenRetries,
+  timeout: number = KujiraConfig.config.timeout.all,
   timeoutMessage: string = 'Timeout exceeded.'
 ): Promise<R> => {
   const errors = [];

@@ -58,7 +58,7 @@ export class KujiraChain {
   }
 
   ready(): boolean {
-    return this.kujira.isReady;
+    return this.kujira ? this.kujira.isReady : false;
   }
 
   async getWalletPublicKey(

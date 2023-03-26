@@ -179,7 +179,7 @@ export const convertClobBatchUpdateRequestToDeleteOrdersOptions = (
       return convertClobDeleteOrderRequestToCancelOrderOptions(order).id;
     }),
     marketId: marketId,
-    ownerAddress: request.address,
+    ownerAddresses: [request.address],
   } as CancelOrdersOptions;
 };
 
