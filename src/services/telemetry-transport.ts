@@ -76,7 +76,7 @@ export class TelemetryTransport extends winston.transports.Http {
     this.processData(data);
 
     if (callback) {
-      setImmediate(callback);
+      setImmediate(callback as any);
     }
   }
 

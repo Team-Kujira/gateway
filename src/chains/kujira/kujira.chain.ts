@@ -12,11 +12,13 @@ import {
   convertBalanceRequestToGetAllBalancesOptions,
   convertPollRequestToGetTransactionOptions,
   convertToBalancesResponse,
+  convertToGetTokensResponse,
   convertToPollResponse,
 } from '../../connectors/kujira/kujira.convertors';
 import { getNotNullOrThrowError } from '../../connectors/kujira/kujira.helpers';
 import { KujiraConfig } from '../../connectors/kujira/kujira.config';
 import { Address } from '../../connectors/kujira/kujira.types';
+import { TokenInfo } from '../ethereum/ethereum-base';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -100,5 +102,9 @@ export class KujiraChain {
       ),
       await this.kujira.getCurrentBlock({})
     );
+  }
+
+  async getTokenForSymbol(symbol: string): Promise<TokenInfo> {
+    return convertToGetTokensResponse(await this.kujira.getToken({ symbol }));
   }
 }

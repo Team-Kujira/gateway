@@ -67,6 +67,7 @@ import {
 } from '../../chains/kujira/kujira.requests';
 import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
+import { TokenInfo } from '../../chains/ethereum/ethereum-base';
 
 const config = KujiraConfig.config;
 
@@ -446,6 +447,17 @@ export const convertToPollResponse = (
     gasUsed: undefined,
     sequences: undefined,
   } as unknown as PollResponse;
+};
+
+// TODO fix!!!
+export const convertToGetTokensResponse = (_tokens: Token): TokenInfo => {
+  return {
+    chainId: undefined,
+    address: undefined,
+    name: undefined,
+    symbol: undefined,
+    decimals: undefined,
+  } as unknown as TokenInfo;
 };
 
 // TODO fix!!!

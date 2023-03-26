@@ -11,7 +11,7 @@ import { Harmony } from '../chains/harmony/harmony';
 import { Polygon } from '../chains/polygon/polygon';
 import { Injective } from '../chains/injective/injective';
 import { Xdc } from '../chains/xdc/xdc';
-import { KujiraChainMiddleware as Kujira } from '../chains/kujira/kujira.chain.middlewares';
+import { KujiraChain as Kujira } from '../chains/kujira/kujira.chain';
 import {
   HttpException,
   UNKNOWN_CHAIN_ERROR_CODE,
