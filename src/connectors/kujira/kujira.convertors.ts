@@ -41,7 +41,6 @@ import {
   ClobDeleteOrderRequestExtract,
   ClobGetOrderRequest,
   ClobGetOrderResponse,
-  ClobMarketResponse,
   CLOBMarkets,
   ClobMarketsRequest,
   ClobOrderbookRequest,
@@ -57,7 +56,7 @@ import {
   IndexedTx,
 } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import { Orderbook, PriceLevel, SpotMarket } from '@injectivelabs/sdk-ts';
+import { Orderbook, PriceLevel } from '@injectivelabs/sdk-ts';
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   BalancesRequest,
@@ -139,7 +138,7 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     amount: BigNumber(request.amount),
     type: convertClobOrderTypeToKujiraOrderType(request.orderType),
     payerAddress: 'address' in request ? request.address : undefined, // TODO, is the payer always the owner? !!!
-  } as unknown as PlaceOrderOptions;
+  } as PlaceOrderOptions;
 };
 
 export const convertClobGetOrderRequestToGetOrderOptions = (
@@ -222,52 +221,48 @@ export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
 // TODO fix!!!
 export const convertToClobMarketResponse = (
   response: Market
-): ClobMarketResponse => {
-  return {
-    network: config.network,
-    timestamp: Date.now(),
-    latency: 0,
-    markets: {
-      market: {
-        marketId: response.id,
-        marketStatus: 'active',
-        ticker: undefined,
-        baseDenom: undefined,
-        quoteDenom: undefined,
-        makerFeeRate: undefined,
-        quoteToken: {
-          name: response.quoteToken.name,
-          logo: undefined,
-          symbol: response.quoteToken.symbol,
-          decimals: undefined,
-          tokenType: undefined,
-          coinGeckoId: undefined,
-          ibc: undefined,
-          spl: undefined,
-          cw20: undefined,
-          cw20s: undefined,
-          erc20: undefined,
-        },
-        baseToken: {
-          name: response.baseToken.name,
-          logo: undefined,
-          symbol: response.baseToken.symbol,
-          decimals: undefined,
-          tokenType: undefined,
-          coinGeckoId: undefined,
-          ibc: undefined,
-          spl: undefined,
-          cw20: undefined,
-          cw20s: undefined,
-          erc20: undefined,
-        },
-        takerFeeRate: response.fee.maker, // TODO what is the differrence between maker to taker? !!!
-        serviceProviderFee: undefined, // TODO resolve this one as well !!!
-        minPriceTickSize: response.minimumOrderSize,
-        minQuantityTickSize: response.minimumBaseIncrement,
-      } as unknown as SpotMarket,
+): { markets: CLOBMarkets } => {
+  const resp: CLOBMarkets = {};
+  resp[response.name] = {
+    marketId: response.id,
+    marketStatus: 'active',
+    ticker: undefined,
+    baseDenom: undefined,
+    quoteDenom: undefined,
+    makerFeeRate: undefined,
+    quoteToken: {
+      name: response.quoteToken.name,
+      logo: undefined,
+      symbol: response.quoteToken.symbol,
+      decimals: undefined,
+      tokenType: undefined,
+      coinGeckoId: undefined,
+      ibc: undefined,
+      spl: undefined,
+      cw20: undefined,
+      cw20s: undefined,
+      erc20: undefined,
     },
-  } as ClobMarketResponse;
+    baseToken: {
+      name: response.baseToken.name,
+      logo: undefined,
+      symbol: response.baseToken.symbol,
+      decimals: undefined,
+      tokenType: undefined,
+      coinGeckoId: undefined,
+      ibc: undefined,
+      spl: undefined,
+      cw20: undefined,
+      cw20s: undefined,
+      erc20: undefined,
+    },
+    takerFeeRate: response.fee.maker, // TODO what is the differrence between maker to taker? !!!
+    serviceProviderFee: undefined, // TODO resolve this one as well !!!
+    minPriceTickSize: response.minimumOrderSize,
+    minQuantityTickSize: response.minimumBaseIncrement,
+  } as CLOBMarkets;
+
+  return { markets: resp };
 };
 
 // TODO fix!!!
@@ -308,7 +303,7 @@ export const convertToClobTickerResponse = (
   resp[response.ticker.toString()] = {
     marketId: undefined,
     marketStatus: undefined,
-    ticker: undefined,
+    ticker: response.ticker.toString(),
     baseDenom: undefined,
     quoteDenom: undefined,
     makerFeeRate: undefined,
@@ -342,7 +337,7 @@ export const convertToClobTickerResponse = (
     serviceProviderFee: undefined,
     minPriceTickSize: undefined,
     minQuantityTickSize: undefined,
-  } as unknown as SpotMarket;
+  } as CLOBMarkets;
   return { markets: resp };
 };
 
