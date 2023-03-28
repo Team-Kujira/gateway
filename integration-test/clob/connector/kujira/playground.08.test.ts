@@ -6,5 +6,7 @@ jest.setTimeout(30 * 60 * 1000);
 it('Kujira Playground', async () => {
   const response = await require('./responses/create-several-orders.json');
 
-  console.log(convertKujiraEventsToMapOfEvents(response.events));
+  console.log(
+    JSON.stringify(convertKujiraEventsToMapOfEvents(response.events), null, 2)
+  );
 });

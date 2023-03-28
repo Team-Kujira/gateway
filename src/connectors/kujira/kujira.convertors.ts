@@ -15,6 +15,7 @@ import {
   GetTickerOptions,
   GetTransactionOptions,
   IMap,
+  KujiraEvent,
   KujiraOrder,
   KujiraOrderBook,
   KujiraSettlement,
@@ -34,8 +35,6 @@ import {
   TokenId,
   Transaction,
   TransactionSignatures,
-  KujiraEvent,
-  KujiraEventAttribute,
 } from './kujira.types';
 import {
   ClobBatchUpdateRequest,
@@ -815,28 +814,40 @@ export const convertKujiraEventsToMapOfEvents = (
   events: KujiraEvent[]
 ): IMap<OrderId, IMap<string, any>> => {
   const output = IMap<string, any>().asMutable();
+  const flattenedEvents = [];
 
-  const orderIds: string[] = events
-    .filter((event) => event.type == 'wasm')
-    .flatMap((event) => event.attributes as KujiraEventAttribute[])
-    .filter((attribute) => attribute.key == 'order_idx')
-    .map((attribute) => {
-      output.set(attribute.value, IMap<string, any>().asMutable());
-
-      return attribute.value;
-    });
-
-  let orderIdIndex = 0;
   for (const event of events) {
     for (const attribute of event.attributes) {
-      output
-        .get(orderIds[orderIdIndex])
-        ?.set([event.type, attribute.key], attribute.value);
-
-      if (attribute.key == 'order_idx') {
-        orderIdIndex++;
-      }
+      flattenedEvents.push([event.type, attribute.key, attribute.value]);
     }
+  }
+
+  flattenedEvents.sort((a, b) => {
+    return (
+      a[0].localeCompare(b[0]) ||
+      a[1].localeCompare(b[1]) ||
+      a[2].localeCompare(b[2])
+    );
+  });
+
+  const orderIds: OrderId[] = flattenedEvents
+    .filter((item) => item[0] == 'wasm' && item[1] == 'order_idx')
+    .map((item) => {
+      output.set(item[2], IMap<string, any>().asMutable());
+      return item[2];
+    });
+
+  const numberOfEventsPerOrder = events.length / orderIds.length;
+
+  let orderIdIndex = 0;
+  for (const event of flattenedEvents) {
+    if (orderIdIndex % numberOfEventsPerOrder == 0) {
+      orderIdIndex = 0;
+    }
+
+    output.get(orderIds[orderIdIndex])?.set([event[0], event[1]], event[2]);
+
+    orderIdIndex++;
   }
 
   return output;
