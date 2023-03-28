@@ -25,7 +25,6 @@ export const ISet = ImmutableSet;
 
 export type BasicKujiraToken = Denom;
 export type BasicKujiraMarket = fin.Pair;
-export type KujiraOrder = any;
 
 export type KujiraOrderParams = any;
 export type KujiraSettlement = ExecuteResult;
@@ -141,7 +140,7 @@ export interface KujiraEvents {
   ];
 }
 
-export interface KujiraCreateOrderResponse {
+export interface KujiraOrder {
   code: number;
   height: number;
   txIndex: number;
