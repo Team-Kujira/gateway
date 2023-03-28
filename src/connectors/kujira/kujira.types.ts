@@ -130,7 +130,7 @@ export enum TickerSource {
 //  Interfaces
 //
 
-export interface KujiraEvents {
+export interface KujiraEvent {
   type: string;
   attributes: [
     {
@@ -144,7 +144,7 @@ export interface KujiraOrder {
   code: number;
   height: number;
   txIndex: number;
-  events: KujiraEvents[];
+  events: KujiraEvent[];
   rawLog: string;
   transactionHash: string;
   gasUsed: number;

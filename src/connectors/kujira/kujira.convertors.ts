@@ -15,7 +15,7 @@ import {
   GetTickerOptions,
   GetTransactionOptions,
   IMap,
-  KujiraEvents,
+  KujiraEvent,
   KujiraOrder,
   KujiraOrderBook,
   KujiraSettlement,
@@ -810,8 +810,8 @@ export const convertNetworkToKujiraNetwork = (
   return output;
 };
 
-export const convertKujiraEvents = (
-  events: KujiraEvents[]
+export const convertKujiraEventsToMapOfEvents = (
+  events: KujiraEvent[]
 ): IMap<string, any> => {
   const output = IMap<string, any>().asMutable();
 

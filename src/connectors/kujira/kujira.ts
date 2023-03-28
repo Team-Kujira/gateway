@@ -36,6 +36,7 @@ import {
   GetWalletArtifactsOptions,
   GetWalletPublicKeyOptions,
   IMap,
+  KujiraEvent,
   KujiraWalletArtifacts,
   Market,
   MarketId,
@@ -88,6 +89,7 @@ import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
   convertKujiraBalancesToBalances,
+  convertKujiraEventsToMapOfEvents,
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
   convertKujiraOrdersToMapOfOrders,
@@ -990,7 +992,10 @@ export class Kujira {
           }
         );
 
-        orders = convertKujiraOrdersToMapOfOrders(results, market);
+        orders = convertKujiraOrdersToMapOfOrders({
+          kujiraOrders: results,
+          market,
+        });
       } else {
         const marketIds =
           options.marketIds || (await this.getAllMarkets()).keySeq().toArray();
@@ -1093,7 +1098,10 @@ export class Kujira {
       config.orders.create.fee
     );
 
-    return convertKujiraOrdersToMapOfOrders(results);
+    return convertKujiraOrdersToMapOfOrders({
+      kujiraOrders: results,
+      events: convertKujiraEventsToMapOfEvents(results.events as KujiraEvent[]),
+    });
   }
 
   /**
@@ -1153,7 +1161,15 @@ export class Kujira {
         config.orders.create.fee
       );
 
-      output.set(ownerAddress, convertKujiraOrdersToMapOfOrders(results));
+      output.set(
+        ownerAddress,
+        convertKujiraOrdersToMapOfOrders({
+          kujiraOrders: results,
+          events: convertKujiraEventsToMapOfEvents(
+            results.events as KujiraEvent[]
+          ),
+        })
+      );
     }
 
     return output;
