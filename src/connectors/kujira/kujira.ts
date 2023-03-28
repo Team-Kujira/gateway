@@ -36,7 +36,6 @@ import {
   GetWalletArtifactsOptions,
   GetWalletPublicKeyOptions,
   IMap,
-  KujiraEvent,
   KujiraWalletArtifacts,
   Market,
   MarketId,
@@ -64,6 +63,8 @@ import {
   TokenNotFoundError,
   Transaction,
   TransactionSignature,
+  KujiraEvent,
+  KujiraOrder,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -118,10 +119,7 @@ import {
 } from '@cosmjs/proto-signing';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { StdFee } from '@cosmjs/amino';
-import {
-  DeliverTxResponse,
-  IndexedTx,
-} from '@cosmjs/stargate/build/stargateclient';
+import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import { BigNumber } from 'bignumber.js';
 import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { walletPath } from '../../services/base';
@@ -479,7 +477,7 @@ export class Kujira {
     messages: readonly EncodeObject[],
     fee: StdFee | 'auto' | number,
     memo?: string
-  ): Promise<DeliverTxResponse> {
+  ): Promise<KujiraOrder> {
     return await runWithRetryAndTimeout<Promise<JsonObject>>(
       signingStargateClient,
       signingStargateClient.signAndBroadcast,

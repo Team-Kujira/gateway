@@ -7,11 +7,18 @@ import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
+import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
+import {
+  Event, Attribute
+} from '@cosmjs/stargate/build/events';
 
 //
 //  Types and Constants
 //
 
+export type KujiraOrder = DeliverTxResponse;
+export type KujiraEvent = Event;
+export type KujiraEventAttribute = Attribute;
 export type FunctionType<Arguments, Return> = (...args: Arguments[]) => Return;
 
 export type AsyncFunctionType<Arguments, Return> = (
@@ -129,27 +136,6 @@ export enum TickerSource {
 //
 //  Interfaces
 //
-
-export interface KujiraEvent {
-  type: string;
-  attributes: KujiraEventAttribute[];
-}
-
-export interface KujiraEventAttribute {
-  key: string;
-  value: string;
-}
-
-export interface KujiraOrder {
-  code: number;
-  height: number;
-  txIndex: number;
-  events: KujiraEvent[];
-  rawLog: string;
-  transactionHash: string;
-  gasUsed: number;
-  gasWanted: number;
-}
 
 export interface KujiraOrderBookItem {
   quote_price: string;

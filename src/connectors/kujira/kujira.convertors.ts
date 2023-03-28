@@ -15,8 +15,6 @@ import {
   GetTickerOptions,
   GetTransactionOptions,
   IMap,
-  KujiraEvent,
-  KujiraEventAttribute,
   KujiraOrder,
   KujiraOrderBook,
   KujiraSettlement,
@@ -36,6 +34,8 @@ import {
   TokenId,
   Transaction,
   TransactionSignatures,
+  KujiraEvent,
+  KujiraEventAttribute,
 } from './kujira.types';
 import {
   ClobBatchUpdateRequest,
@@ -61,10 +61,7 @@ import {
   USK,
   USK_TESTNET,
 } from 'kujira.js';
-import {
-  DeliverTxResponse,
-  IndexedTx,
-} from '@cosmjs/stargate/build/stargateclient';
+import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import { Orderbook, PriceLevel, SpotOrderHistory } from '@injectivelabs/sdk-ts';
 import { getNotNullOrThrowError } from './kujira.helpers';
@@ -606,7 +603,7 @@ export const convertKujiraOrderBookToOrderBook = (
 };
 
 export const convertKujiraOrdersToMapOfOrders = (options: {
-  kujiraOrders: KujiraOrder | KujiraOrderBook | DeliverTxResponse | any[];
+  kujiraOrders: KujiraOrder | KujiraOrderBook;
   market?: Market;
   ownerAddress?: string;
   status?: OrderStatus;
@@ -625,7 +622,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         marketName: options.market?.name,
         marketId: options.market?.id,
         ownerAddress: events.getIn(['transfer', 'sender']),
-        payerAddress: events.getIn(['transfer', 'sender']),
+        payerAddress: events.getIn(['tx', 'fee_payer']),
         price: events.getIn(['wasm', 'quote_price']),
         amount: events.getIn(['wasm', 'offer_amount']),
         // side: OrderSide.BUY,
@@ -633,20 +630,21 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         // type: OrderType.LIMIT,
         fee: events.getIn(['tx', 'fee']),
         // fillingTimestamp: undefined,
-        // signatures: undefined,
+        signatures: {
+          creation: events.getIn(['tx', 'signature']),
+        } as TransactionSignatures,
         // connectorOrder: undefined,
       } as Order;
 
       output.set(key, order);
     }
-  }
-  /*} else if ((<KujiraOrderBook>options.kujiraOrders)) {
-    kujiraOrders.quote.forEach((kujiraOrder) => {
+  } else if ((<KujiraOrderBook>options.kujiraOrders).base) {
+    (<KujiraOrderBook>options.kujiraOrders).quote.forEach((kujiraOrder) => {
       const order = {
         id: undefined,
         clientId: undefined,
-        marketName: market?.name,
-        marketId: market?.id,
+        marketName: options.market?.name,
+        marketId: options.market?.id,
         ownerAddress: undefined,
         payerAddress: undefined,
         price: BigNumber(kujiraOrder.quote_price),
@@ -662,32 +660,29 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 
       output.set('None', order);
     });
+  }
 
-    kujiraOrders.base.forEach((kujiraOrder) => {
-      const order = {
-        id: undefined,
-        clientId: undefined,
-        marketName: market?.name,
-        marketId: market?.id,
-        ownerAddress: undefined,
-        payerAddress: undefined,
-        price: BigNumber(kujiraOrder.quote_price),
-        amount: BigNumber(kujiraOrder.total_offer_amount),
-        side: OrderSide.BUY,
-        status: OrderStatus.OPEN,
-        type: OrderType.LIMIT,
-        // fee: undefined,
-        // fillingTimestamp: undefined,
-        // signatures: undefined,
-        // connectorOrder: undefined,
-      } as Order;
+  (<KujiraOrderBook>options.kujiraOrders).base.forEach((kujiraOrder) => {
+    const order = {
+      id: undefined,
+      clientId: undefined,
+      marketName: options.market?.name,
+      marketId: options.market?.id,
+      ownerAddress: undefined,
+      payerAddress: undefined,
+      price: BigNumber(kujiraOrder.quote_price),
+      amount: BigNumber(kujiraOrder.total_offer_amount),
+      side: OrderSide.BUY,
+      status: OrderStatus.OPEN,
+      type: OrderType.LIMIT,
+      // fee: undefined,
+      // fillingTimestamp: undefined,
+      // signatures: undefined,
+      // connectorOrder: undefined,
+    } as Order;
 
-      output.set('None', order);
-    });
-  } else if (typeof kujiraOrders === 'DeliverTxResponse') {
-    a
-  } else if (typeof kujiraOrders === 'Array') {
-  }*/
+    output.set('None', order);
+  });
   return output;
 };
 
