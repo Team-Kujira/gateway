@@ -76,9 +76,13 @@ import {
   fin,
   KujiraQueryClient,
   kujiraQueryClient,
+  MAINNET,
   msg,
+  NETWORKS,
   registry,
   RPCS,
+  USK,
+  USK_TESTNET,
 } from 'kujira.js';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
@@ -567,6 +571,7 @@ export class Kujira {
    *
    * @param _options
    */
+  @Cache(caches.tokens, { ttl: config.cache.tokens })
   async getAllTokens(
     _options: GetAllTokensOptions
   ): Promise<IMap<TokenId, Token>> {
@@ -632,11 +637,11 @@ export class Kujira {
     // TODO Consider the market contract address and the market name too (base/quote)!!!
     marketsData = marketsData.filter(
       (item) =>
-        (config.markets.blacklist?.length
-          ? !config.markets.blacklist.includes(item.address)
+        (config.markets.disallowed?.length
+          ? !config.markets.disallowed.includes(item.address)
           : true) &&
-        (config.markets.whiteList?.length
-          ? config.markets.whiteList.includes(item.address)
+        (config.markets.allowed?.length
+          ? config.markets.allowed.includes(item.address)
           : true)
     );
 
@@ -718,16 +723,22 @@ export class Kujira {
           const bestBid = orderBook.bestBid;
           const bestAsk = orderBook.bestAsk;
 
-          const simpleAveragePrice = getNotNullOrThrowError<Order>(bestBid)
-            .price.plus(getNotNullOrThrowError<Order>(bestAsk).price)
-            .div(BigNumber(2));
+          let simpleAveragePrice: BigNumber;
+
+          if (bestBid && bestAsk) {
+            simpleAveragePrice = getNotNullOrThrowError<Order>(bestBid)
+              .price.plus(getNotNullOrThrowError<Order>(bestAsk).price)
+              .div(BigNumber(2));
+          } else {
+            simpleAveragePrice = BigNumber('NaN');
+          }
 
           const result = {
             price: simpleAveragePrice,
             timestamp: Date.now(),
           };
 
-          return convertToTicker(result);
+          return convertToTicker(result, market);
         } else if (source === TickerSource.ORDER_BOOK_WAP) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.ORDER_BOOK_VWAP) {
@@ -750,7 +761,7 @@ export class Kujira {
             )
           ).data.items[0];
 
-          return convertToTicker(result);
+          return convertToTicker(result, market);
         } else {
           throw new TickerNotFoundError(
             `Ticker source (${source}) not supported, check your kujira configuration file.`
@@ -808,8 +819,8 @@ export class Kujira {
     });
 
     if (balances.tokens.has(options.tokenId)) {
-      return getNotNullOrThrowError<Promise<Balance>>(
-        await balances.tokens.get(options.tokenId)
+      return getNotNullOrThrowError<Balance>(
+        balances.tokens.get(options.tokenId)
       );
     }
 
@@ -842,8 +853,6 @@ export class Kujira {
         balances.total.unsettled = balances.total.unsettled.plus(
           balance.unsettled
         );
-      } else {
-        throw new Error(`Token "${tokenId}" not found.`);
       }
     }
 
@@ -859,7 +868,32 @@ export class Kujira {
       options.ownerAddress
     );
 
-    return convertKujiraBalancesToBalances(kujiraBalances);
+    let tickers: IMap<MarketId, Ticker>;
+
+    try {
+      const tokenIds = kujiraBalances.map((token: Coin) => token.denom);
+
+      const uskToken =
+        config.network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
+          ? convertKujiraTokenToToken(USK)
+          : convertKujiraTokenToToken(USK_TESTNET);
+
+      const marketIds = (await this.getAllMarkets())
+        .valueSeq()
+        .filter(
+          (market) =>
+            tokenIds.includes(market.baseToken.id) &&
+            market.quoteToken.id == uskToken.id
+        )
+        .map((market) => market.id)
+        .toArray();
+
+      tickers = await this.getAllTickers({ marketIds });
+    } catch (exception) {
+      tickers = IMap<string, Ticker>().asMutable();
+    }
+
+    return convertKujiraBalancesToBalances(kujiraBalances, tickers);
   }
 
   /**

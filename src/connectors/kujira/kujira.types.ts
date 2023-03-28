@@ -188,6 +188,7 @@ export interface OrderBook {
 }
 
 export interface Ticker {
+  market: Market;
   price: TickerPrice;
   timestamp: TickerTimestamp;
   ticker: ConnectorTicker;
@@ -195,6 +196,7 @@ export interface Ticker {
 
 export interface Balance {
   token: Token | 'total';
+  ticker?: Ticker;
   free: Amount;
   lockedInOrders: Amount;
   unsettled: Amount;

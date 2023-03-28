@@ -50,7 +50,15 @@ import {
 } from '../../clob/clob.requests';
 import { OrderType as ClobOrderType, Side } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
-import { Denom, fin, MAINNET, TESTNET } from 'kujira.js';
+import {
+  Denom,
+  fin,
+  MAINNET,
+  NETWORKS,
+  TESTNET,
+  USK,
+  USK_TESTNET,
+} from 'kujira.js';
 import {
   DeliverTxResponse,
   IndexedTx,
@@ -516,9 +524,8 @@ export const convertKujiraOrderBookToOrderBook = (
   const asks = IMap<OrderId, Order>().asMutable();
   let bestBid: Order | undefined;
   let bestAsk: Order | undefined;
-  // TODO this is causing error when the orderbook is empty!!!
-  let bestBidPrice = BigNumber(kujiraOrderBook.quote[0].quote_price);
-  let bestAskPrice = BigNumber(kujiraOrderBook.base[0].quote_price);
+  let bestBidPrice = BigNumber('-Infinity');
+  let bestAskPrice = BigNumber('Infinity');
 
   kujiraOrderBook.base.forEach((kujiraOrder) => {
     const order = {
@@ -619,11 +626,12 @@ export const convertKujiraOrdersToMapOfOrders = (
 };
 
 // TODO create an interface for the input type!!!
-export const convertToTicker = (input: any): Ticker => {
+export const convertToTicker = (input: any, market: Market): Ticker => {
   const price = BigNumber(input.price);
-  const timestamp = new Date().getTime(); // TODO check if there's a timestamp available!!!
+  const timestamp = Date.now(); // TODO check if there's a timestamp available!!!
 
   return {
+    market: market,
     price: price,
     timestamp: timestamp,
     ticker: input,
@@ -631,12 +639,18 @@ export const convertToTicker = (input: any): Ticker => {
 };
 
 export const convertKujiraBalancesToBalances = (
-  balances: readonly Coin[]
+  balances: readonly Coin[],
+  tickers: IMap<TokenId, Ticker>
 ): Balances => {
+  const uskToken =
+    config.network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
+      ? convertKujiraTokenToToken(USK)
+      : convertKujiraTokenToToken(USK_TESTNET);
+
   const output: Balances = {
     tokens: IMap<TokenId, Balance>().asMutable(),
     total: {
-      token: 'total',
+      token: uskToken,
       free: BigNumber(0),
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
@@ -645,17 +659,27 @@ export const convertKujiraBalancesToBalances = (
 
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
+    const ticker = tickers
+      .valueSeq()
+      .filter((ticker) => ticker.market.baseToken.id == token.id)
+      .first();
     const amount = BigNumber(balance.amount);
+    const price = token == uskToken ? 1 : ticker?.price || 0;
     output.tokens.set(token.id, {
       token: token,
+      ticker: ticker,
       free: amount,
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
     });
 
-    output.total.free = output.total.free.plus(amount);
-    output.total.lockedInOrders = output.total.lockedInOrders.plus(amount);
-    output.total.unsettled = output.total.unsettled.plus(amount);
+    output.total.free = output.total.free.plus(amount.multipliedBy(price));
+    output.total.lockedInOrders = output.total.lockedInOrders.plus(
+      amount.multipliedBy(price)
+    );
+    output.total.unsettled = output.total.unsettled.plus(
+      amount.multipliedBy(price)
+    );
   }
 
   return output;

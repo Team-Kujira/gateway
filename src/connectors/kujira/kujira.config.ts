@@ -23,15 +23,15 @@ export namespace KujiraConfig {
       url:
         configManager.get(`kujira.tokens.url`) ||
         'https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/tokens.json',
-      blacklist: configManager.get(`kujira.tokens.blacklist`),
-      whiteList: configManager.get(`kujira.tokens.whitelist`),
+      disallowed: configManager.get(`kujira.tokens.disallowed`),
+      allowed: configManager.get(`kujira.tokens.allowed`),
     },
     markets: {
       url:
         configManager.get(`kujira.markets.url`) ||
         'https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json',
-      blacklist: configManager.get(`kujira.markets.blacklist`),
-      whiteList: configManager.get(`kujira.markets.whitelist`),
+      disallowed: configManager.get(`kujira.markets.disallowed`),
+      allowed: configManager.get(`kujira.markets.allowed`),
     },
     tickers: {
       sources: new Map<string, { url: string }>(
@@ -97,6 +97,7 @@ export namespace KujiraConfig {
       tokensData: configManager.get('kujira.cache.tokensData') || 3600, // in seconds
       marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
       markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
+      tokens: configManager.get('kujira.cache.markets') || 3600, // in seconds
     },
   };
 }

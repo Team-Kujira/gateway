@@ -416,6 +416,7 @@ describe('Kujira Full Flow', () => {
     it('Get balance of token 1', async () => {
       request = {
         tokenId: tokenIds[1],
+        ownerAddress: ownerAddress,
       };
 
       logRequest(request);
@@ -428,6 +429,7 @@ describe('Kujira Full Flow', () => {
     it('Get balances of tokens 2 and 3', async () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
+        ownerAddress: ownerAddress,
       };
 
       logRequest(request);
@@ -438,7 +440,9 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all balances', async () => {
-      request = {};
+      request = {
+        ownerAddress: ownerAddress,
+      };
 
       logRequest(request);
 
