@@ -837,11 +837,9 @@ export const convertKujiraEventsToMapOfEvents = (
       return item[2];
     });
 
-  const numberOfEventsPerOrder = events.length / orderIds.length;
-
   let orderIdIndex = 0;
   for (const event of flattenedEvents) {
-    if (orderIdIndex % numberOfEventsPerOrder == 0) {
+    if (orderIdIndex % orderIds.length == 0) {
       orderIdIndex = 0;
     }
 
