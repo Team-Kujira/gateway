@@ -25,7 +25,6 @@ export const ISet = ImmutableSet;
 
 export type BasicKujiraToken = Denom;
 export type BasicKujiraMarket = fin.Pair;
-export type KujiraOrder = any;
 
 export type KujiraOrderParams = any;
 export type KujiraSettlement = ExecuteResult;
@@ -130,6 +129,27 @@ export enum TickerSource {
 //
 //  Interfaces
 //
+
+export interface KujiraEvents {
+  type: string;
+  attributes: [
+    {
+      key: string;
+      value: string;
+    }
+  ];
+}
+
+export interface KujiraOrder {
+  code: number;
+  height: number;
+  txIndex: number;
+  events: KujiraEvents[];
+  rawLog: string;
+  transactionHash: string;
+  gasUsed: number;
+  gasWanted: number;
+}
 
 export interface KujiraOrderBookItem {
   quote_price: string;
