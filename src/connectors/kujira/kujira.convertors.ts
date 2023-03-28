@@ -604,25 +604,84 @@ export const convertKujiraOrderBookToOrderBook = (
   } as OrderBook;
 };
 
-export const convertKujiraOrdersToMapOfOrders = (
-  _kujiraOrders: KujiraOrder | KujiraOrderBook | DeliverTxResponse | any[],
-  _market?: Market,
-  _ownerAddress?: string,
-  _status?: OrderStatus
-): IMap<OrderId, Order> => {
+export const convertKujiraOrdersToMapOfOrders = (options: {
+  kujiraOrders: KujiraOrder | KujiraOrderBook | DeliverTxResponse | any[];
+  market?: Market;
+  ownerAddress?: string;
+  status?: OrderStatus;
+  events?: IMap<string, any>;
+}): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
 
-  // for (const kujiraOrder of kujiraOrders) {
-  //   const order = convertKujiraOrderToOrder(
-  //     kujiraOrder,
-  //     market,
-  //     ownerAddress,
-  //     status
-  //   );
-  //
-  // output.set(order.id, order);
-  // }
+  if ((<KujiraOrder>options.kujiraOrders).events) {
+    const order = {
+      id: options.events?.getIn(['wasm', 'order_idx']),
+      clientId: undefined, //OrderClientId?; // Client custom id
+      marketName: options.market?.name, //OrderMarketName;
+      marketId: options.market?.id, //OrderMarketId;
+      ownerAddress: options.events?.getIn(['transfer', 'sender']),
+      payerAddress: options.events?.getIn(['transfer', 'sender']),
+      price: options.events?.getIn(['wasm', 'quote_price']),
+      amount: options.events?.getIn(['transfer', 'amount']),
+      // side: OrderSide.BUY,
+      // status: OrderStatus.OPEN,
+      // type: OrderType.LIMIT,
+      // fee: undefined,
+      // fillingTimestamp: undefined,
+      // signatures: undefined,
+      // connectorOrder: undefined,
+    } as Order;
 
+    output.set('None', order);
+  }
+  /*} else if ((<KujiraOrderBook>options.kujiraOrders)) {
+    kujiraOrders.quote.forEach((kujiraOrder) => {
+      const order = {
+        id: undefined,
+        clientId: undefined,
+        marketName: market?.name,
+        marketId: market?.id,
+        ownerAddress: undefined,
+        payerAddress: undefined,
+        price: BigNumber(kujiraOrder.quote_price),
+        amount: BigNumber(kujiraOrder.total_offer_amount),
+        side: OrderSide.SELL,
+        status: OrderStatus.OPEN,
+        type: OrderType.LIMIT,
+        fee: undefined,
+        fillingTimestamp: undefined,
+        signatures: undefined,
+        connectorOrder: undefined,
+      } as Order;
+
+      output.set('None', order);
+    });
+
+    kujiraOrders.base.forEach((kujiraOrder) => {
+      const order = {
+        id: undefined,
+        clientId: undefined,
+        marketName: market?.name,
+        marketId: market?.id,
+        ownerAddress: undefined,
+        payerAddress: undefined,
+        price: BigNumber(kujiraOrder.quote_price),
+        amount: BigNumber(kujiraOrder.total_offer_amount),
+        side: OrderSide.BUY,
+        status: OrderStatus.OPEN,
+        type: OrderType.LIMIT,
+        // fee: undefined,
+        // fillingTimestamp: undefined,
+        // signatures: undefined,
+        // connectorOrder: undefined,
+      } as Order;
+
+      output.set('None', order);
+    });
+  } else if (typeof kujiraOrders === 'DeliverTxResponse') {
+    a
+  } else if (typeof kujiraOrders === 'Array') {
+  }*/
   return output;
 };
 
