@@ -131,6 +131,27 @@ export enum TickerSource {
 //  Interfaces
 //
 
+export interface KujiraEvents {
+  type: string;
+  attributes: [
+    {
+      key: string;
+      value: string;
+    }
+  ];
+}
+
+export interface KujiraCreateOrderResponse {
+  code: number;
+  height: number;
+  txIndex: number;
+  events: KujiraEvents[];
+  rawLog: string;
+  transactionHash: string;
+  gasUsed: number;
+  gasWanted: number;
+}
+
 export interface KujiraOrderBookItem {
   quote_price: string;
   offer_denom: {

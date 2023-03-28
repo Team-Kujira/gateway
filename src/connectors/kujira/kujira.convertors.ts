@@ -64,7 +64,7 @@ import {
   IndexedTx,
 } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import { Orderbook, PriceLevel } from '@injectivelabs/sdk-ts';
+import {Orderbook, PriceLevel, SpotOrderHistory} from '@injectivelabs/sdk-ts';
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   BalancesRequest,
@@ -278,10 +278,10 @@ export const convertKujiraOrderToClobPriceLevel = (
   response: Order
 ): PriceLevel => {
   return {
-    price: response.price,
-    quantity: response.amount,
+    price: response.price.toString(),
+    quantity: response.amount.toString(),
     timestamp: Date.now(), // TODO verify if this is the correct way to convert the timestamp !!!
-  } as unknown as PriceLevel;
+  } as PriceLevel;
 };
 
 export const convertToClobOrderbookResponse = (
@@ -370,25 +370,25 @@ export const convertToClobGetOrderResponse = (
       {
         orderHash: response.signatures?.creation?.toString(),
         marketId: response.marketId,
-        active: undefined,
+        // active: true,
         subaccountId: response.ownerAddress,
         executionType: response.type?.toLowerCase(),
         orderType: convertKujiraOrderSideToClobSide(
           response.side
         ).toLowerCase(),
         price: response.price.toString(),
-        triggerPrice: undefined,
+        // triggerPrice: 'None',
         quantity: response.amount.toString(),
-        filledQuantity: undefined,
+        // filledQuantity: 'None',
         state: response.status?.toLowerCase(),
-        createdAt: response.fillingTimestamp?.toString(),
-        updatedAt: undefined, //TODO there is no mention to update into order type !!!
+        // createdAt: response.fillingTimestamp,
+        // updatedAt: response.fillingTimestamp, //TODO there is no mention to update into order type !!!
         direction: convertKujiraOrderSideToClobSide(
           response.side
         ).toLowerCase(),
       },
-    ],
-  } as unknown as ClobGetOrderResponse;
+    ] as SpotOrderHistory[],
+  } as ClobGetOrderResponse;
 };
 
 export const convertToClobDeleteOrderResponse = (
@@ -604,12 +604,14 @@ export const convertKujiraOrderBookToOrderBook = (
 };
 
 export const convertKujiraOrdersToMapOfOrders = (
-  _kujiraOrders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
-  _market?: Market,
-  _ownerAddress?: string,
-  _status?: OrderStatus
+  kujiraOrders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
+  market?: Market,
+  ownerAddress?: string,
+  status?: OrderStatus
 ): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
+
+
 
   // for (const kujiraOrder of kujiraOrders) {
   //   const order = convertKujiraOrderToOrder(
