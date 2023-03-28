@@ -15,6 +15,7 @@ import {
   GetTickerOptions,
   GetTransactionOptions,
   IMap,
+  KujiraEvents,
   KujiraOrder,
   KujiraOrderBook,
   KujiraSettlement,
@@ -750,14 +751,16 @@ export const convertNetworkToKujiraNetwork = (
   return output;
 };
 
-// export const convertKujiraEvents = (events: any[]): IMap<string, any> => {
-//   const output = IMap<string, any>().asMutable();
-//
-//   for (const event of events) {
-//     const key = [``];
-//     const value = undefined;
-//     output.setIn(key, value);
-//   }
-//
-//   return output;
-// };
+export const convertKujiraEvents = (
+  events: KujiraEvents[]
+): IMap<string, any> => {
+  const output = IMap<string, any>().asMutable();
+
+  for (const event of events) {
+    for (const attribute of event.attributes) {
+      output.setIn(attribute.key, attribute.value);
+    }
+  }
+
+  return output;
+};
