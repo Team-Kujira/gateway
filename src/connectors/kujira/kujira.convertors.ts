@@ -64,7 +64,7 @@ import {
   IndexedTx,
 } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import {Orderbook, PriceLevel, SpotOrderHistory} from '@injectivelabs/sdk-ts';
+import { Orderbook, PriceLevel, SpotOrderHistory } from '@injectivelabs/sdk-ts';
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   BalancesRequest,
@@ -604,14 +604,12 @@ export const convertKujiraOrderBookToOrderBook = (
 };
 
 export const convertKujiraOrdersToMapOfOrders = (
-  kujiraOrders: KujiraOrder[] | KujiraOrderBook | DeliverTxResponse | any[],
-  market?: Market,
-  ownerAddress?: string,
-  status?: OrderStatus
+  _kujiraOrders: KujiraOrder | KujiraOrderBook | DeliverTxResponse | any[],
+  _market?: Market,
+  _ownerAddress?: string,
+  _status?: OrderStatus
 ): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
-
-
 
   // for (const kujiraOrder of kujiraOrders) {
   //   const order = convertKujiraOrderToOrder(
