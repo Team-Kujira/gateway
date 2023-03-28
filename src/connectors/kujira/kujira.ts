@@ -1097,7 +1097,7 @@ export class Kujira {
     );
 
     return convertKujiraOrdersToMapOfOrders({
-      kujiraOrders: results,
+      kujiraOrders: results as KujiraOrder,
       events: convertKujiraEventsToMapOfEvents(results.events as KujiraEvent[]),
     });
   }
