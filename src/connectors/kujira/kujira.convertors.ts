@@ -565,12 +565,12 @@ export const convertKujiraOrderBookToOrderBook = (
 
   kujiraOrderBook.quote.forEach((kujiraOrder) => {
     const order = {
-      id: undefined, //OrderId;
-      clientId: undefined, //OrderClientId?; // Client custom id
-      marketName: market.name, //OrderMarketName;
-      marketId: market.id, //OrderMarketId;
-      ownerAddress: undefined, //OrderOwnerAddress?;
-      payerAddress: undefined, //OrderPayerAddress?;
+      id: undefined,
+      clientId: undefined,
+      marketName: market.name,
+      marketId: market.id,
+      ownerAddress: undefined,
+      payerAddress: undefined,
       price: BigNumber(kujiraOrder.quote_price),
       amount: BigNumber(kujiraOrder.total_offer_amount),
       side: OrderSide.BUY,
@@ -578,8 +578,8 @@ export const convertKujiraOrderBookToOrderBook = (
       type: OrderType.LIMIT,
       fee: undefined,
       fillingTimestamp: undefined,
-      signatures: undefined, //OrderTransactionSignatures?;
-      connectorOrder: undefined, //ConnectorOrder?;
+      signatures: undefined,
+      connectorOrder: undefined,
     } as Order;
 
     if (bestBid) {
@@ -610,30 +610,35 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
   market?: Market;
   ownerAddress?: string;
   status?: OrderStatus;
-  events?: IMap<string, any>;
+  events?: IMap<OrderId, IMap<string, any>>;
 }): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
 
   if ((<KujiraOrder>options.kujiraOrders).events) {
-    const order = {
-      id: options.events?.getIn(['wasm', 'order_idx']),
-      clientId: undefined, //OrderClientId?; // Client custom id
-      marketName: options.market?.name, //OrderMarketName;
-      marketId: options.market?.id, //OrderMarketId;
-      ownerAddress: options.events?.getIn(['transfer', 'sender']),
-      payerAddress: options.events?.getIn(['transfer', 'sender']),
-      price: options.events?.getIn(['wasm', 'quote_price']),
-      amount: options.events?.getIn(['transfer', 'amount']),
-      // side: OrderSide.BUY,
-      // status: OrderStatus.OPEN,
-      // type: OrderType.LIMIT,
-      // fee: undefined,
-      // fillingTimestamp: undefined,
-      // signatures: undefined,
-      // connectorOrder: undefined,
-    } as Order;
+    for (const item of getNotNullOrThrowError<IMap<OrderId, IMap<string, any>>>(
+      options.events
+    ).entries()) {
+      const [key, events] = item;
+      const order = {
+        id: events.getIn(['wasm', 'order_idx']),
+        clientId: undefined,
+        marketName: options.market?.name,
+        marketId: options.market?.id,
+        ownerAddress: events.getIn(['transfer', 'sender']),
+        payerAddress: events.getIn(['transfer', 'sender']),
+        price: events.getIn(['wasm', 'quote_price']),
+        amount: events.getIn(['wasm', 'offer_amount']),
+        // side: OrderSide.BUY,
+        // status: OrderStatus.OPEN,
+        // type: OrderType.LIMIT,
+        fee: events.getIn(['tx', 'fee']),
+        // fillingTimestamp: undefined,
+        // signatures: undefined,
+        // connectorOrder: undefined,
+      } as Order;
 
-    output.set('None', order);
+      output.set(key, order);
+    }
   }
   /*} else if ((<KujiraOrderBook>options.kujiraOrders)) {
     kujiraOrders.quote.forEach((kujiraOrder) => {
