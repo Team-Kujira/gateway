@@ -132,12 +132,12 @@ export enum TickerSource {
 
 export interface KujiraEvent {
   type: string;
-  attributes: [
-    {
-      key: string;
-      value: any;
-    }
-  ];
+  attributes: KujiraEventAttribute[];
+}
+
+export interface KujiraEventAttribute {
+  key: string;
+  value: string;
 }
 
 export interface KujiraOrder {

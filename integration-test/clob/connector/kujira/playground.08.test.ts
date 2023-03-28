@@ -4,8 +4,7 @@ import { convertKujiraEventsToMapOfEvents } from '../../../../src/connectors/kuj
 jest.setTimeout(30 * 60 * 1000);
 
 it('Kujira Playground', async () => {
-  const response =
-    await require('./responses/create-a-buy-order-1-for-market-1.json');
+  const response = await require('./responses/create-several-orders.json');
 
-  console.log(convertKujiraEventsToMapOfEvents(response));
+  console.log(convertKujiraEventsToMapOfEvents(response.events));
 });

@@ -16,6 +16,7 @@ import {
   GetTransactionOptions,
   IMap,
   KujiraEvent,
+  KujiraEventAttribute,
   KujiraOrder,
   KujiraOrderBook,
   KujiraSettlement,
@@ -812,12 +813,29 @@ export const convertNetworkToKujiraNetwork = (
 
 export const convertKujiraEventsToMapOfEvents = (
   events: KujiraEvent[]
-): IMap<string, any> => {
+): IMap<OrderId, IMap<string, any>> => {
   const output = IMap<string, any>().asMutable();
 
+  const orderIds: string[] = events
+    .filter((event) => event.type == 'wasm')
+    .flatMap((event) => event.attributes as KujiraEventAttribute[])
+    .filter((attribute) => attribute.key == 'order_idx')
+    .map((attribute) => {
+      output.set(attribute.value, IMap<string, any>().asMutable());
+
+      return attribute.value;
+    });
+
+  let orderIdIndex = 0;
   for (const event of events) {
     for (const attribute of event.attributes) {
-      output.setIn(attribute.key, attribute.value);
+      output
+        .get(orderIds[orderIdIndex])
+        ?.set([event.type, attribute.key], attribute.value);
+
+      if (attribute.key == 'order_idx') {
+        orderIdIndex++;
+      }
     }
   }
 
