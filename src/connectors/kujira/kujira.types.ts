@@ -135,7 +135,7 @@ export interface KujiraEvents {
   attributes: [
     {
       key: string;
-      value: string;
+      value: any;
     }
   ];
 }

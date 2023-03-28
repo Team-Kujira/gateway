@@ -919,7 +919,7 @@ export class Kujira {
         );
       }
 
-      const order = convertKujiraOrderToOrder(market, result);
+      const order = convertKujiraOrderToOrder(result, market);
 
       if (options.status && order.status !== options.status) {
         throw new OrderNotFoundError(
