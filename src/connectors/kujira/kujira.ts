@@ -1068,13 +1068,13 @@ export class Kujira {
 
       const message = msg.wasm.msgExecuteContract({
         sender: candidate.ownerAddress || ownerAddress,
-        contract: market.id,
+        contract: market.connectorMarket.address,
         msg: Buffer.from(
           JSON.stringify({
-            submit_order: { price: candidate.price },
+            submit_order: { price: candidate.price.toString() },
           })
         ),
-        funds: coins(candidate.amount.toString(), denom.reference),
+        funds: coins(Number(candidate.amount), denom.reference),
       });
 
       candidateMessages.push(message);
@@ -1424,7 +1424,7 @@ export class Kujira {
       enc.encode(JSON.stringify(options.wallet))
     )) as Uint8Array;
 
-    return JSON.stringify(
+    const encryptedString = JSON.stringify(
       {
         keyAlgorithm,
         cipherAlgorithm,
@@ -1441,6 +1441,8 @@ export class Kujira {
         }
       }
     );
+
+    return encryptedString;
   }
 
   /**
@@ -1469,22 +1471,16 @@ export class Kujira {
       throw new Error('missing passphrase');
     }
 
-    const salt = crypto.webcrypto.getRandomValues(new Uint8Array(16));
+    const enc = new TextEncoder();
     const keyMaterial = await crypto.webcrypto.subtle.importKey(
       'raw',
-      new TextEncoder().encode(passphrase),
+      enc.encode(passphrase),
       'PBKDF2',
       false,
       ['deriveBits', 'deriveKey']
     );
-    const keyAlgorithm = {
-      name: 'PBKDF2',
-      salt: salt,
-      iterations: 500000,
-      hash: 'SHA-256',
-    };
     const key = await crypto.webcrypto.subtle.deriveKey(
-      keyAlgorithm,
+      encryptedPrivateKey.keyAlgorithm,
       keyMaterial,
       { name: 'AES-GCM', length: 256 },
       true,
@@ -1496,8 +1492,8 @@ export class Kujira {
       encryptedPrivateKey.ciphertext
     );
     const dec = new TextDecoder();
-    dec.decode(decrypted);
+    const decryptedString = dec.decode(decrypted);
 
-    return JSON.parse(dec.decode(decrypted));
+    return JSON.parse(decryptedString);
   }
 }

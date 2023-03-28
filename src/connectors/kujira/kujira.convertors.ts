@@ -749,3 +749,15 @@ export const convertNetworkToKujiraNetwork = (
 
   return output;
 };
+
+// export const convertKujiraEvents = (events: any[]): IMap<string, any> => {
+//   const output = IMap<string, any>().asMutable();
+//
+//   for (const event of events) {
+//     const key = [``];
+//     const value = undefined;
+//     output.setIn(key, value);
+//   }
+//
+//   return output;
+// };

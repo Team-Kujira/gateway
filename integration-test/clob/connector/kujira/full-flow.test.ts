@@ -555,6 +555,7 @@ describe('Kujira Full Flow', () => {
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
+        ownerAddress: ownerAddress,
       };
 
       logRequest(request);
@@ -581,6 +582,7 @@ describe('Kujira Full Flow', () => {
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
+        ownerAddress: ownerAddress,
       };
 
       logRequest(request);
@@ -619,6 +621,7 @@ describe('Kujira Full Flow', () => {
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
+        ownerAddress: ownerAddress,
       };
 
       logRequest(request);
@@ -662,6 +665,7 @@ describe('Kujira Full Flow', () => {
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
+        ownerAddress: ownerAddress,
       };
 
       logRequest(request);
@@ -710,6 +714,7 @@ describe('Kujira Full Flow', () => {
     it('Check the wallet balances from the tokens 1 and 2', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
+        ownerAddress: ownerAddress,
       };
 
       logRequest(request);
@@ -754,7 +759,9 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      request = {};
+      request = {
+        ownerAddress: ownerAddress,
+      };
 
       logRequest(request);
 
@@ -794,7 +801,9 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
-      request = {};
+      request = {
+        ownerAddress: ownerAddress,
+      };
 
       logRequest(request);
 
@@ -844,7 +853,9 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      request = {};
+      request = {
+        ownerAddress: ownerAddress,
+      };
 
       logRequest(request);
 
@@ -904,7 +915,9 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the wallet balances from the tokens 2 and 3', async () => {
-      request = {};
+      request = {
+        ownerAddress: ownerAddress,
+      };
 
       logRequest(request);
 
@@ -974,7 +987,9 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the wallet balances from the tokens 2 and 3', async () => {
-      request = {};
+      request = {
+        ownerAddress: ownerAddress,
+      };
 
       logRequest(request);
 
