@@ -9,6 +9,7 @@ import {
 import {
   IMap,
   Order,
+  OrderClientId,
   OrderStatus,
   OwnerAddress,
 } from '../../../../src/connectors/kujira/kujira.types';
@@ -50,23 +51,27 @@ const marketIds = {
   ].address, // DEMO/USK
 };
 
-const orders: IMap<number, Record<any, any>> = IMap<
-  number,
+const orders: IMap<OrderClientId, Record<any, any>> = IMap<
+  OrderClientId,
   Record<any, any>
 >().asMutable();
 
-const getOrder = (ordinal: number): Record<any, any> => {
-  return getOrders([ordinal])[0];
+const getOrder = (ordinal: OrderClientId): Record<any, any> => {
+  return getOrders([ordinal]).first();
 };
 
-const getOrders = (ordinals: number[]): Record<any, any>[] => {
-  const ordersArray: Record<any, any>[] = [];
+const getOrders = (
+  ordinals: OrderClientId[]
+): IMap<OrderClientId, Record<any, any>> => {
+  const output = IMap<OrderClientId, Record<any, any>>().asMutable();
   for (const ordinal of ordinals) {
-    ordersArray.push(
+    output.set(
+      ordinal,
       getNotNullOrThrowError<Record<any, any>>(orders.get(ordinal))
     );
   }
-  return ordersArray;
+
+  return output;
 };
 
 let ownerAddress: OwnerAddress;
@@ -94,9 +99,9 @@ beforeAll(async () => {
 
   await kujira.init();
 
-  orders.set(1, {
+  orders.set('1', {
     id: null,
-    clientId: 1,
+    clientId: '1',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'BUY',
@@ -109,9 +114,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(2, {
+  orders.set('2', {
     id: null,
-    clientId: 2,
+    clientId: '2',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'SELL',
@@ -124,7 +129,7 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(3, {
+  orders.set('3', {
     id: null,
     clientId: 3,
     ownerAddress: ownerAddress,
@@ -139,9 +144,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(4, {
+  orders.set('4', {
     id: null,
-    clientId: 4,
+    clientId: '4',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'SELL',
@@ -154,9 +159,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(5, {
+  orders.set('5', {
     id: null,
-    clientId: 5,
+    clientId: '5',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'BUY',
@@ -169,9 +174,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(6, {
+  orders.set('6', {
     id: null,
-    clientId: 6,
+    clientId: '6',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'SELL',
@@ -184,9 +189,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(7, {
+  orders.set('7', {
     id: null,
-    clientId: 7,
+    clientId: '7',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'BUY',
@@ -199,9 +204,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(8, {
+  orders.set('8', {
     id: null,
-    clientId: 8,
+    clientId: '8',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'SELL',
@@ -214,9 +219,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(9, {
+  orders.set('9', {
     id: null,
-    clientId: 9,
+    clientId: '9',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'BUY',
@@ -229,9 +234,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(10, {
+  orders.set('10', {
     id: null,
-    clientId: 10,
+    clientId: '10',
     ownerAddress: ownerAddress,
     marketId: marketIds[1],
     side: 'BUY',
@@ -244,9 +249,9 @@ beforeAll(async () => {
     fee: null,
   });
 
-  orders.set(11, {
+  orders.set('11', {
     id: null,
-    clientId: 11,
+    clientId: '11',
     ownerAddress: ownerAddress,
     marketId: marketIds[2],
     side: 'SELL',
@@ -566,7 +571,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create a buy order 1 for market 1', async () => {
-      const candidate = getOrder(1);
+      const candidate = getOrder('1');
 
       request = { ...candidate };
 
@@ -593,7 +598,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open order 1', async () => {
-      const id = getOrder(1).id;
+      const id = getOrder('1').id;
 
       request = { id, status: OrderStatus.OPEN };
 
@@ -605,7 +610,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create a sell order 2 for market 2', async () => {
-      const candidate = getOrder(2);
+      const candidate = getOrder('2');
 
       request = { ...candidate };
 
@@ -632,7 +637,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open order 2', async () => {
-      const id = getOrder(2).id;
+      const id = getOrder('2').id;
 
       request = { id, status: OrderStatus.OPEN };
 
@@ -644,10 +649,13 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create 7 orders at once', async () => {
-      const candidates = getOrders([3, 4, 5, 6, 7, 8, 9]);
+      const candidates = getOrders(['3', '4', '5', '6', '7', '8', '9']);
 
       request = {
-        orders: candidates.map((candidate) => ({ ...candidate })),
+        orders: candidates
+          .valueSeq()
+          .map((candidate) => ({ ...candidate }))
+          .toArray(),
       };
 
       logRequest(request);
@@ -655,8 +663,11 @@ describe('Kujira Full Flow', () => {
       response = await kujira.placeOrders(request);
 
       response.valueSeq().map((order: Order) => {
-        candidates[getNotNullOrThrowError<number>(order.clientId)].id =
-          order.id;
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
+        const candidateOrder = getNotNullOrThrowError<Order>(
+          candidates.get(clientId)
+        );
+        candidateOrder.id = order.id;
       });
 
       logResponse(response);
@@ -676,7 +687,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open orders 6 and 7', async () => {
-      const ids = getOrders([6, 7]).map((order) => order.id);
+      const ids = getOrders(['6', '7']).map((order) => order.id);
 
       request = { ids, status: OrderStatus.OPEN };
 
@@ -700,7 +711,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Cancel the order 1', async () => {
-      const id = getOrder(1).id;
+      const id = getOrder('1').id;
 
       request = { id };
 
@@ -725,7 +736,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it("Check that it's not possible to get the cancelled order 1", async () => {
-      const id = getOrder(1).id;
+      const id = getOrder('1').id;
 
       request = { id };
 
