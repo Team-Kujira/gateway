@@ -7,10 +7,25 @@ import {
   logResponse as helperLogResponse,
 } from '../../../helpers';
 import {
+  CancelOrderOptions,
   CancelOrdersOptions,
+  GetAllBalancesOptions,
+  GetAllMarketsOptions,
+  GetAllOrderBookOptions,
+  GetAllTickerOptions,
+  GetAllTokensOptions,
+  GetBalanceOptions,
   GetBalancesOptions,
+  GetMarketOptions,
+  GetMarketsOptions,
+  GetOrderBookOptions,
+  GetOrderBooksOptions,
   GetOrderOptions,
   GetOrdersOptions,
+  GetTickerOptions,
+  GetTickersOptions,
+  GetTokenOptions,
+  GetTokensOptions,
   IMap,
   Order,
   OrderClientId,
@@ -283,7 +298,7 @@ describe('Kujira Full Flow', () => {
     it('Get token 1', async () => {
       request = {
         id: tokenIds[1],
-      };
+      } as GetTokenOptions;
 
       logRequest(request);
 
@@ -295,7 +310,7 @@ describe('Kujira Full Flow', () => {
     it('Get tokens 2 and 3', async () => {
       request = {
         ids: [tokenIds[2], tokenIds[3]],
-      };
+      } as GetTokensOptions;
 
       logRequest(request);
 
@@ -305,7 +320,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all tokens', async () => {
-      request = {};
+      request = {} as GetAllTokensOptions;
 
       logRequest(request);
 
@@ -319,7 +334,7 @@ describe('Kujira Full Flow', () => {
     it('Get market 1', async () => {
       request = {
         id: marketIds[1],
-      };
+      } as GetMarketOptions;
 
       logRequest(request);
 
@@ -331,7 +346,7 @@ describe('Kujira Full Flow', () => {
     it('Get markets 2 and 3', async () => {
       request = {
         ids: [marketIds[2], marketIds[3]],
-      };
+      } as GetMarketsOptions;
 
       logRequest(request);
 
@@ -341,7 +356,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all markets', async () => {
-      request = {};
+      request = {} as GetAllMarketsOptions;
 
       logRequest(request);
 
@@ -355,7 +370,7 @@ describe('Kujira Full Flow', () => {
     it('Get order book from market 1', async () => {
       request = {
         marketId: marketIds[1],
-      };
+      } as GetOrderBookOptions;
 
       logRequest(request);
 
@@ -367,7 +382,7 @@ describe('Kujira Full Flow', () => {
     it('Get order books from the markets 2 and 3', async () => {
       request = {
         marketIds: [marketIds[2], marketIds[3]],
-      };
+      } as GetOrderBooksOptions;
 
       logRequest(request);
 
@@ -377,7 +392,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all order books', async () => {
-      request = {};
+      request = {} as GetAllOrderBookOptions;
 
       logRequest(request);
 
@@ -391,7 +406,7 @@ describe('Kujira Full Flow', () => {
     it('Get ticker from market 1', async () => {
       request = {
         marketId: marketIds[1],
-      };
+      } as GetTickerOptions;
 
       logRequest(request);
 
@@ -403,7 +418,7 @@ describe('Kujira Full Flow', () => {
     it('Get tickers from markets 2 and 3', async () => {
       request = {
         marketIds: [marketIds[2], marketIds[3]],
-      };
+      } as GetTickersOptions;
 
       logRequest(request);
 
@@ -413,7 +428,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all tickers', async () => {
-      request = {};
+      request = {} as GetAllTickerOptions;
 
       logRequest(request);
 
@@ -428,7 +443,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenId: tokenIds[1],
         ownerAddress: ownerAddress,
-      };
+      } as GetBalanceOptions;
 
       logRequest(request);
 
@@ -441,7 +456,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      };
+      } as GetBalancesOptions;
 
       logRequest(request);
 
@@ -453,7 +468,7 @@ describe('Kujira Full Flow', () => {
     it('Get all balances', async () => {
       request = {
         ownerAddress: ownerAddress,
-      };
+      } as GetAllBalancesOptions;
 
       logRequest(request);
 
@@ -719,8 +734,6 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      logRequest(request);
-
       response = await kujira.getOrders(request);
 
       logResponse(response);
@@ -729,11 +742,11 @@ describe('Kujira Full Flow', () => {
     it('Cancel the order 1', async () => {
       const id = getOrder('1').id;
 
-      request = { id } as GetOrderOptions;
+      request = { id } as CancelOrderOptions;
 
       logRequest(request);
 
-      response = await kujira.getOrder(request);
+      response = await kujira.cancelOrder(request);
 
       logResponse(response);
     });

@@ -9,6 +9,7 @@ import {
   CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
+  ConvertOrderType,
   DecryptWalletOptions,
   EncryptWalletOptions,
   EstimatedFees,
@@ -36,6 +37,8 @@ import {
   GetWalletArtifactsOptions,
   GetWalletPublicKeyOptions,
   IMap,
+  KujiraEvent,
+  KujiraOrder,
   KujiraWalletArtifacts,
   Market,
   MarketId,
@@ -63,8 +66,6 @@ import {
   TokenNotFoundError,
   Transaction,
   TransactionSignature,
-  KujiraEvent,
-  KujiraOrder,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -980,7 +981,7 @@ export class Kujira {
       if (options.marketId) {
         const market = await this.getMarket({ id: options.marketId });
 
-        const results = await this.kujiraQueryClientWasmQueryContractSmart(
+        const response = await this.kujiraQueryClientWasmQueryContractSmart(
           market.connectorMarket.address,
           {
             orders_by_user: {
@@ -990,9 +991,14 @@ export class Kujira {
           }
         );
 
+        // TODO fix definition!!!
+        const bundles = IMap<string, any>().asMutable();
+        bundles.setIn([1, 'response'], response);
+        bundles.setIn([1, 'market'], market);
+
         orders = convertKujiraOrdersToMapOfOrders({
-          kujiraOrders: results,
-          market,
+          type: ConvertOrderType.GET_ORDERS,
+          bundles,
         });
       } else {
         const marketIds =
@@ -1057,8 +1063,13 @@ export class Kujira {
 
     const candidateMessages: EncodeObject[] = [];
 
+    const bundles = IMap<string, any>().asMutable();
+    let bundleIndex = 0;
     for (const candidate of options.orders) {
+      bundles.setIn(['orders', bundleIndex, 'ownerAddress'], ownerAddress);
+
       const market = await this.getMarket({ id: candidate.marketId });
+      bundles.setIn(['orders', bundleIndex, 'market'], market);
 
       let denom: Denom;
       if (candidate.side == OrderSide.BUY) {
@@ -1070,7 +1081,7 @@ export class Kujira {
       }
 
       const message = msg.wasm.msgExecuteContract({
-        sender: candidate.ownerAddress || ownerAddress,
+        sender: ownerAddress, // We use the same owner address for all orders.
         contract: market.connectorMarket.address,
         msg: Buffer.from(
           JSON.stringify({
@@ -1081,6 +1092,8 @@ export class Kujira {
       });
 
       candidateMessages.push(message);
+
+      bundleIndex++;
     }
 
     const messages: readonly EncodeObject[] = candidateMessages;
@@ -1089,16 +1102,32 @@ export class Kujira {
       ownerAddress,
     });
 
-    const results = await this.kujiraSigningStargateClientSignAndBroadcast(
+    const response = await this.kujiraSigningStargateClientSignAndBroadcast(
       walletArtifacts.signingStargateClient,
       ownerAddress,
       messages,
       config.orders.create.fee
     );
 
+    bundles.setIn(['common', 'response'], response);
+    bundles.setIn(['common', 'status'], OrderStatus.OPEN);
+
+    const mapOfEvents = convertKujiraEventsToMapOfEvents(
+      response.events as KujiraEvent[]
+    );
+
+    bundleIndex = 0;
+    for (const events of mapOfEvents.values()) {
+      for (const [key, value] of events.entries()) {
+        bundles.setIn(['orders', bundleIndex, 'events', ...key], value);
+      }
+
+      bundleIndex++;
+    }
+
     return convertKujiraOrdersToMapOfOrders({
-      kujiraOrders: results as KujiraOrder,
-      events: convertKujiraEventsToMapOfEvents(results.events as KujiraEvent[]),
+      type: ConvertOrderType.PLACE_ORDERS,
+      bundles: bundles,
     });
   }
 
@@ -1152,20 +1181,28 @@ export class Kujira {
         ownerAddress,
       });
 
-      const results = await this.kujiraSigningStargateClientSignAndBroadcast(
+      const response = await this.kujiraSigningStargateClientSignAndBroadcast(
         walletArtifacts.signingStargateClient,
         ownerAddress,
         messages,
         config.orders.create.fee
       );
 
+      const events = convertKujiraEventsToMapOfEvents(
+        response.events as KujiraEvent[]
+      );
+
+      // TODO fix definitions!!!
+      const bundles = IMap<string, any>().asMutable();
+      bundles.setIn([1, 'response'], response);
+      bundles.setIn([1, 'market'], market);
+      bundles.setIn([1, 'events'], events);
+
       output.set(
         ownerAddress,
         convertKujiraOrdersToMapOfOrders({
-          kujiraOrders: results,
-          events: convertKujiraEventsToMapOfEvents(
-            results.events as KujiraEvent[]
-          ),
+          type: ConvertOrderType.CANCELLED_ORDERS,
+          bundles,
         })
       );
     }

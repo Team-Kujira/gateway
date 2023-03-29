@@ -1,16 +1,18 @@
 import { Denom, fin } from 'kujira.js';
 import { ExecuteResult } from '@cosmjs/cosmwasm-stargate';
 
-import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
+import {
+  List as ImmutableList,
+  Set as ImmutableSet,
+  Map as ImmutableMap,
+} from 'immutable';
 import { BigNumber } from 'bignumber.js';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
-import {
-  Event, Attribute
-} from '@cosmjs/stargate/build/events';
+import { Attribute, Event } from '@cosmjs/stargate/build/events';
 
 //
 //  Types and Constants
@@ -25,10 +27,14 @@ export type AsyncFunctionType<Arguments, Return> = (
   ...args: Arguments[]
 ) => Promise<Return>;
 
-export type IMap<K, V> = ImmutableMap<K, V>;
-export const IMap = ImmutableMap;
+export type IList<V> = ImmutableList<V>;
+export const IList = ImmutableList;
+
 export type ISet<V> = ImmutableSet<V>;
 export const ISet = ImmutableSet;
+
+export type IMap<K, V> = ImmutableMap<K, V>;
+export const IMap = ImmutableMap;
 
 export type BasicKujiraToken = Denom;
 export type BasicKujiraMarket = fin.Pair;
@@ -131,6 +137,14 @@ export enum TickerSource {
   ORDER_BOOK_VWAP = 'orderBookVolumeWeightedAveragePrice',
   LAST_FILLED_ORDER = 'lastFilledOrder',
   NOMICS = 'nomics',
+}
+
+export enum ConvertOrderType {
+  GET_ORDERS = 'getOrders',
+  PLACE_ORDERS = 'placeOrders',
+  CANCELLED_ORDERS = 'cancelledOrders',
+
+  ORDER_BOOK = 'orderBook',
 }
 
 //
