@@ -611,10 +611,9 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
   const output = IMap<OrderId, Order>().asMutable();
 
   if ((<KujiraOrder>options.kujiraOrders).events) {
-    for (const item of getNotNullOrThrowError<IMap<OrderId, IMap<string, any>>>(
-      options.events
-    ).entries()) {
-      const [key, events] = item;
+    for (const [orderId, events] of getNotNullOrThrowError<
+      IMap<OrderId, IMap<string, any>>
+    >(options.events).entries()) {
       const order = {
         id: events.getIn(['wasm', 'order_idx']),
         clientId: undefined,
@@ -625,8 +624,8 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         price: events.getIn(['wasm', 'quote_price']),
         amount: events.getIn(['wasm', 'offer_amount']),
         // side: OrderSide.BUY,
-        // status: OrderStatus.OPEN,
-        // type: OrderType.LIMIT,
+        status: OrderStatus.OPEN,
+        type: OrderType.LIMIT,
         fee: events.getIn(['tx', 'fee']),
         // fillingTimestamp: undefined,
         signatures: {
@@ -635,7 +634,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         // connectorOrder: undefined,
       } as Order;
 
-      output.set(key, order);
+      output.set(orderId, order);
     }
   } else if ((<KujiraOrderBook>options.kujiraOrders).base) {
     (<KujiraOrderBook>options.kujiraOrders).quote.forEach((kujiraOrder) => {
@@ -659,29 +658,30 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 
       output.set('None', order);
     });
+
+    (<KujiraOrderBook>options.kujiraOrders).base.forEach((kujiraOrder) => {
+      const order = {
+        id: undefined,
+        clientId: undefined,
+        marketName: options.market?.name,
+        marketId: options.market?.id,
+        ownerAddress: undefined,
+        payerAddress: undefined,
+        price: BigNumber(kujiraOrder.quote_price),
+        amount: BigNumber(kujiraOrder.total_offer_amount),
+        side: OrderSide.BUY,
+        status: OrderStatus.OPEN,
+        type: OrderType.LIMIT,
+        // fee: undefined,
+        // fillingTimestamp: undefined,
+        // signatures: undefined,
+        // connectorOrder: undefined,
+      } as Order;
+
+      output.set('None', order);
+    });
   }
 
-  (<KujiraOrderBook>options.kujiraOrders).base.forEach((kujiraOrder) => {
-    const order = {
-      id: undefined,
-      clientId: undefined,
-      marketName: options.market?.name,
-      marketId: options.market?.id,
-      ownerAddress: undefined,
-      payerAddress: undefined,
-      price: BigNumber(kujiraOrder.quote_price),
-      amount: BigNumber(kujiraOrder.total_offer_amount),
-      side: OrderSide.BUY,
-      status: OrderStatus.OPEN,
-      type: OrderType.LIMIT,
-      // fee: undefined,
-      // fillingTimestamp: undefined,
-      // signatures: undefined,
-      // connectorOrder: undefined,
-    } as Order;
-
-    output.set('None', order);
-  });
   return output;
 };
 
@@ -843,7 +843,7 @@ export const convertKujiraEventsToMapOfEvents = (
       orderIdIndex = 0;
     }
 
-    output.get(orderIds[orderIdIndex])?.set([event[0], event[1]], event[2]);
+    output.get(orderIds[orderIdIndex])?.setIn([event[0], event[1]], event[2]);
 
     orderIdIndex++;
   }
