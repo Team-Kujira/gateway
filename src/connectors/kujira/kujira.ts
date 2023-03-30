@@ -95,7 +95,6 @@ import {
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
   convertKujiraOrdersToMapOfOrders,
-  convertKujiraOrderToOrder,
   convertKujiraSettlementToSettlement,
   convertKujiraTokenToToken,
   convertKujiraTransactionToTransaction,
@@ -905,7 +904,7 @@ export class Kujira {
     if (options.marketId) {
       const market = await this.getMarket({ id: options.marketId });
 
-      const result = await this.kujiraQueryClientWasmQueryContractSmart(
+      const response = await this.kujiraQueryClientWasmQueryContractSmart(
         market.connectorMarket.address,
         {
           order: {
@@ -914,13 +913,38 @@ export class Kujira {
         }
       );
 
-      if (!result) {
+      if (!response) {
         throw new OrderNotFoundError(
           `Order with id "${options.id}" not found in market "${market.id}".`
         );
       }
 
-      const order = convertKujiraOrderToOrder(result, market);
+      const bundles = IMap<string, any>().asMutable();
+      bundles.setIn(['common', 'response'], response);
+      bundles.setIn(['common', 'status'], options.status);
+
+      bundles.setIn(['orders', 1, 'ownerAddress'], options.ownerAddress);
+      bundles.setIn(['orders', 1, 'market'], market);
+
+      const mapOfEvents = convertKujiraEventsToMapOfEvents(
+        response.events as KujiraEvent[]
+      );
+
+      let bundleIndex = 0;
+      for (const events of mapOfEvents.values()) {
+        for (const [key, value] of events.entries()) {
+          bundles.setIn(['orders', bundleIndex, 'events', key], value);
+        }
+
+        bundleIndex++;
+      }
+
+      const orders = convertKujiraOrdersToMapOfOrders({
+        type: ConvertOrderType.GET_ORDERS,
+        bundles,
+      });
+
+      const order = getNotNullOrThrowError<Order>(orders.valueSeq().first());
 
       if (options.status && order.status !== options.status) {
         throw new OrderNotFoundError(
@@ -945,7 +969,7 @@ export class Kujira {
         );
       }
 
-      return result;
+      return response;
     } else {
       for (const market of (await this.getAllMarkets({})).values()) {
         try {

@@ -5,7 +5,6 @@ import {
   CancelOrderOptions,
   CancelOrdersOptions,
   ConvertOrderType,
-  CreateOrdersRequest,
   EstimatedFees,
   EstimatedGaResponse,
   GetAllBalancesOptions,
@@ -17,7 +16,6 @@ import {
   GetTransactionOptions,
   IMap,
   KujiraEvent,
-  KujiraOrder,
   KujiraOrderBook,
   KujiraSettlement,
   Market,
@@ -759,34 +757,6 @@ export const convertKujiraTransactionToTransaction = (
     gasWanted: input.gasWanted,
     code: input.code,
   };
-};
-
-// TODO fix!!!
-export const convertKujiraOrderToOrder = (
-  _kujiraOrder: KujiraOrder,
-  _market?: Market,
-  _ownerAddress?: string,
-  _status?: OrderStatus,
-  _signatures?: TransactionSignatures,
-  _candidateOrder?: CreateOrdersRequest
-): Order => {
-  return {
-    id: undefined,
-    clientId: undefined,
-    marketName: undefined,
-    marketId: undefined,
-    ownerAddress: undefined,
-    payerAddress: undefined,
-    price: undefined,
-    amount: undefined,
-    side: undefined,
-    status: undefined,
-    type: undefined,
-    fee: undefined,
-    fillingTimestamp: undefined,
-    signatures: undefined,
-    connectorOrder: undefined,
-  } as unknown as Order;
 };
 
 export const convertKujiraSettlementToSettlement = (
