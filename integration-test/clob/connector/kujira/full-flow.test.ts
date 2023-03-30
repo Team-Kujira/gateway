@@ -77,18 +77,18 @@ const orders: IMap<OrderClientId, Record<any, any>> = IMap<
   Record<any, any>
 >().asMutable();
 
-const getOrder = (ordinal: OrderClientId): Record<any, any> => {
-  return getOrders([ordinal]).first();
+const getOrder = (clientId: OrderClientId): Record<any, any> => {
+  return getOrders([clientId]).first();
 };
 
 const getOrders = (
-  ordinals: OrderClientId[]
+  clientIds: OrderClientId[]
 ): IMap<OrderClientId, Record<any, any>> => {
   const output = IMap<OrderClientId, Record<any, any>>().asMutable();
-  for (const ordinal of ordinals) {
+  for (const clientId of clientIds) {
     output.set(
-      ordinal,
-      getNotNullOrThrowError<Record<any, any>>(orders.get(ordinal))
+      clientId,
+      getNotNullOrThrowError<Record<any, any>>(orders.get(clientId))
     );
   }
 

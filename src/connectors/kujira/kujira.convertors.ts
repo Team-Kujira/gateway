@@ -608,8 +608,12 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 }): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
 
-  if (options.type == ConvertOrderType.PLACE_ORDERS) {
-    for (const bundle of options.bundles.get('orders').entries()) {
+  if (
+    [ConvertOrderType.GET_ORDERS, ConvertOrderType.PLACE_ORDERS].includes(
+      options.type
+    )
+  ) {
+    for (const bundle of options.bundles.get('orders').values()) {
       const orderId = bundle.getIn(['events', 'wasm', 'order_idx']);
 
       const order = {

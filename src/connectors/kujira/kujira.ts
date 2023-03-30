@@ -991,10 +991,25 @@ export class Kujira {
           }
         );
 
-        // TODO fix definition!!!
         const bundles = IMap<string, any>().asMutable();
-        bundles.setIn([1, 'response'], response);
-        bundles.setIn([1, 'market'], market);
+        bundles.setIn(['common', 'response'], response);
+        bundles.setIn(['common', 'status'], options.status);
+
+        bundles.setIn(['orders', 1, 'ownerAddress'], ownerAddress);
+        bundles.setIn(['orders', 1, 'market'], market);
+
+        const mapOfEvents = convertKujiraEventsToMapOfEvents(
+          response.events as KujiraEvent[]
+        );
+
+        let bundleIndex = 0;
+        for (const events of mapOfEvents.values()) {
+          for (const [key, value] of events.entries()) {
+            bundles.setIn(['orders', bundleIndex, 'events', key], value);
+          }
+
+          bundleIndex++;
+        }
 
         orders = convertKujiraOrdersToMapOfOrders({
           type: ConvertOrderType.GET_ORDERS,
@@ -1119,7 +1134,7 @@ export class Kujira {
     bundleIndex = 0;
     for (const events of mapOfEvents.values()) {
       for (const [key, value] of events.entries()) {
-        bundles.setIn(['orders', bundleIndex, 'events', ...key], value);
+        bundles.setIn(['orders', bundleIndex, 'events', key], value);
       }
 
       bundleIndex++;
