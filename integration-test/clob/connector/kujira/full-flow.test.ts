@@ -8,6 +8,7 @@ import {
   logResponse as helperLogResponse,
 } from '../../../helpers';
 import {
+  CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
   GetAllBalancesOptions,
@@ -37,6 +38,8 @@ import {
   OwnerAddress,
   PlaceOrderOptions,
   PlaceOrdersOptions,
+  SettlementOptions,
+  SettlementsOptions,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -509,26 +512,26 @@ describe('Kujira Full Flow', () => {
 
     Get the wallet balances from the tokens 1, 2, and 3
 
-    create a buy order 1 for market 1
+    create a limit buy order 1 for market 1
 
     check the available wallet balances from the tokens 1 and 2
 
     get the open order 1
 
-    create a sell order 2 for market 2
+    create a market sell order 2 for market 2
 
     check the available wallet balances from the tokens 1 and 2
 
     get the open order 2
 
     create 7 orders at once as the following:
-      order 3, buy, market 1
-      order 4, sell, market 1
-      order 5, buy, market 2
-      order 6, sell, market 2
-      order 7, buy, market 3
-      order 8, sell, market 3
-      order 9, buy, market 3
+      order 3, limit, buy, market 1
+      order 4, limit, sell, market 1
+      order 5, limit, buy, market 2
+      order 6, market, sell, market 2
+      order 7, market, buy, market 3
+      order 8, limit, sell, market 3
+      order 9, limit, buy, market 3
 
     check the wallet balances from the tokens 1, 2, and 3
 
@@ -815,271 +818,388 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Cancel the orders 3, 4, and 5 from markets 1 and 2', async () => {
-      request = {} as CancelOrdersOptions;
+      const orders = getOrders(['3', '4', '5']).valueSeq().toArray();
+
+      request = {
+        ids: [orders[0].id, orders[1].id],
+        marketId: orders[0].marketId,
+        ownerAddresses: [ownerAddress],
+      } as CancelOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
+
+      logResponse(response);
+
+      request = {
+        ids: [orders[2].id],
+        marketId: orders[2].marketId,
+        ownerAddresses: [ownerAddress],
+      } as CancelOrdersOptions;
+
+      logRequest(request);
+
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
+        tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      };
+      } as GetBalancesOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     it("Check that it's not possible to get the cancelled orders 3, 4, and 5 from the markets 1 and 2", async () => {
-      request = {};
+      const ids = getOrders(['3', '4', '5'])
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      request = {
+        ids,
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.OPEN,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Get all open orders and check that the orders 1, 3, 4, and 5 are missing', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.OPEN,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
-    it('Force the filling of order 2', async () => {
-      request = {};
-
-      logRequest(request);
-
-      response = undefined;
-
-      logResponse(response);
-    });
+    // it('Force the filling of order 2', async () => {
+    // });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
       request = {
+        tokenIds: [tokenIds[1], tokenIds[2]],
         ownerAddress: ownerAddress,
-      };
+      } as GetBalancesOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     it('Get the filled order 2', async () => {
-      request = {};
+      const id = getOrder('2').id;
+
+      request = { id, status: OrderStatus.FILLED } as GetOrderOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrder(request);
 
       logResponse(response);
     });
 
     it('Get all open orders and check that the orders 1, 2, 3, 4, and 5 are missing', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.OPEN,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Get all orders (open or filled) and check that the order 2 is present', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
-    it('Force the filling of orders 6 and 7', async () => {
-      request = {};
-
-      logRequest(request);
-
-      response = undefined;
-
-      logResponse(response);
-    });
+    // it('Force the filling of orders 6 and 7', async () => {
+    // });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
+        tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      };
+      } as GetBalancesOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     it('Get the filled orders 6 and 7', async () => {
-      request = {};
+      const ids = getOrders(['6', '7'])
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      request = {
+        ids,
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.FILLED,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.FILLED,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, and 7 are missing', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.OPEN,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Cancel all the open orders', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as CancelAllOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.cancelOrder(request);
 
       logResponse(response);
     });
 
     it('Check the wallet balances from the tokens 2 and 3', async () => {
       request = {
+        tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      };
+      } as GetBalancesOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     it('Get all open orders and check that there are no open orders', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.OPEN,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
-    it('Create 2 orders at once', async () => {
-      request = {};
+    it('Create orders 10 and 11 at once', async () => {
+      const candidates = getOrders(['10', '11']);
+
+      request = {
+        orders: candidates
+          .valueSeq()
+          .map((candidate) => ({ ...candidate }))
+          .toArray(),
+      } as PlaceOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.placeOrders(request);
+
+      response.valueSeq().map((order: Order) => {
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
+        const candidateOrder = getNotNullOrThrowError<Order>(
+          candidates.get(clientId)
+        );
+        candidateOrder.id = order.id;
+      });
 
       logResponse(response);
     });
 
-    it('Cet all open orders and check that the orders 10 and 11 are present', async () => {
-      request = {};
+    it('Get all open orders and check that the orders 10 and 11 are present', async () => {
+      request = {
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.OPEN,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 6, 7, 10, and 11 are present', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     it('Cancel all the open orders', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as CancelAllOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.cancelOrder(request);
 
       logResponse(response);
     });
 
     it('Check the wallet balances from the tokens 2 and 3', async () => {
       request = {
+        tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      };
+      } as GetBalancesOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     it('Get all open orders and check that there are no open orders', async () => {
-      request = {};
+      request = {
+        ownerAddresses: [ownerAddress],
+        status: OrderStatus.OPEN,
+      } as GetOrdersOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
-    it('Settle funds for an order', async () => {
-      request = {};
+    it('Settle funds for market 1', async () => {
+      request = {
+        marketId: marketIds[1],
+        ownerAddresses: [ownerAddress],
+      } as SettlementOptions;
 
       logRequest(request);
 
-      response = undefined;
+      response = await kujira.settleMarketFunds(request);
+
+      logResponse(response);
+    });
+
+    it('Check the wallet balances', async () => {
+      request = {
+        ownerAddress: ownerAddress,
+      } as GetAllBalancesOptions;
+
+      logRequest(request);
+
+      response = await kujira.getBalances(request);
+
+      logResponse(response);
+    });
+
+    it('Settle funds for markets 2 and 3', async () => {
+      request = {
+        marketIds: [marketIds[1], marketIds[2]],
+        ownerAddresses: [ownerAddress],
+      } as SettlementsOptions;
+
+      logRequest(request);
+
+      response = await kujira.settleMarketsFunds(request);
+
+      logResponse(response);
+    });
+
+    it('Check the wallet balances', async () => {
+      request = {
+        ownerAddress: ownerAddress,
+      } as GetAllBalancesOptions;
+
+      logRequest(request);
+
+      response = await kujira.getBalances(request);
 
       logResponse(response);
     });
