@@ -678,52 +678,6 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
       throw new Error('Not implemented for more than 1 order');
     }
   }
-  // TODO fix!!!
-  // } else if (options.type == ConvertOrderType.ORDER_BOOK) {
-  //   (<KujiraOrderBook>options.kujiraOrders).quote.forEach((kujiraOrder) => {
-  //     const order = {
-  //       id: undefined,
-  //       clientId: undefined,
-  //       marketName: options.market?.name,
-  //       marketId: options.market?.id,
-  //       ownerAddress: undefined,
-  //       payerAddress: undefined,
-  //       price: BigNumber(kujiraOrder.quote_price),
-  //       amount: BigNumber(kujiraOrder.total_offer_amount),
-  //       side: OrderSide.SELL,
-  //       status: OrderStatus.OPEN,
-  //       type: OrderType.LIMIT,
-  //       fee: undefined,
-  //       fillingTimestamp: undefined,
-  //       signatures: undefined,
-  //       connectorOrder: undefined,
-  //     } as Order;
-  //
-  //     output.set('None', order);
-  //   });
-  //
-  //   (<KujiraOrderBook>options.kujiraOrders).base.forEach((kujiraOrder) => {
-  //     const order = {
-  //       id: undefined,
-  //       clientId: undefined,
-  //       marketName: options.market?.name,
-  //       marketId: options.market?.id,
-  //       ownerAddress: undefined,
-  //       payerAddress: undefined,
-  //       price: BigNumber(kujiraOrder.quote_price),
-  //       amount: BigNumber(kujiraOrder.total_offer_amount),
-  //       side: OrderSide.BUY,
-  //       status: OrderStatus.OPEN,
-  //       type: OrderType.LIMIT,
-  //       // fee: undefined,
-  //       // fillingTimestamp: undefined,
-  //       // signatures: undefined,
-  //       // connectorOrder: undefined,
-  //     } as Order;
-  //
-  //     output.set('None', order);
-  //   });
-  // }
 
   return output;
 };

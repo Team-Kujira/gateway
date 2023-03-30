@@ -761,9 +761,12 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Cancel the order 1', async () => {
-      const id = getOrder('1').id;
+      const order = getOrder('1');
 
-      request = { id } as CancelOrderOptions;
+      request = {
+        id: order.id,
+        marketId: order.marketId,
+      } as CancelOrderOptions;
 
       logRequest(request);
 

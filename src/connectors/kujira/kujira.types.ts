@@ -143,8 +143,6 @@ export enum ConvertOrderType {
   GET_ORDERS = 'getOrders',
   PLACE_ORDERS = 'placeOrders',
   CANCELLED_ORDERS = 'cancelledOrders',
-
-  ORDER_BOOK = 'orderBook',
 }
 
 //
