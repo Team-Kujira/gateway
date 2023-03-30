@@ -18,6 +18,7 @@ import {
   KujiraEvent,
   KujiraOrderBook,
   KujiraSettlement,
+  KujiraTicker,
   Market,
   Order,
   OrderBook,
@@ -25,7 +26,6 @@ import {
   OrderSide,
   OrderStatus,
   OrderType,
-  OrderType as KujiraOrderType,
   PlaceOrderOptions,
   PlaceOrdersOptions,
   Settlement,
@@ -66,8 +66,10 @@ import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   BalancesRequest,
   BalancesResponse,
+  BankBalance,
   PollRequest,
   PollResponse,
+  SubaccountBalancesWithId,
 } from '../../chains/kujira/kujira.requests';
 import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
@@ -99,7 +101,7 @@ export const convertClobTickerRequestToGetTickerOptions = (
   } as GetTickerOptions;
 };
 
-export const convertClobSideToKujiraOrderSide = (request: Side): OrderSide => {
+export const convertClobSideToOrderSide = (request: Side): OrderSide => {
   if (request == 'BUY') {
     return OrderSide.BUY;
   } else if (request == 'SELL') {
@@ -109,7 +111,7 @@ export const convertClobSideToKujiraOrderSide = (request: Side): OrderSide => {
   }
 };
 
-export const convertKujiraOrderSideToClobSide = (request: OrderSide): Side => {
+export const convertOrderSideToClobSide = (request: OrderSide): Side => {
   if (request == OrderSide.BUY) {
     return 'BUY';
   } else if (request == OrderSide.SELL) {
@@ -119,13 +121,13 @@ export const convertKujiraOrderSideToClobSide = (request: OrderSide): Side => {
   }
 };
 
-export const convertClobOrderTypeToKujiraOrderType = (
+export const convertClobOrderTypeToOrderType = (
   request: ClobOrderType
-): KujiraOrderType => {
+): OrderType => {
   if (request == 'LIMIT') {
-    return KujiraOrderType.LIMIT;
+    return OrderType.LIMIT;
   } else if (request == 'LIMIT_MAKER') {
-    return KujiraOrderType.POST_ONLY;
+    return OrderType.POST_ONLY;
   } else {
     throw new Error('Error in conversion between order type');
   }
@@ -138,11 +140,11 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     waitUntilIncludedInBlock: false,
     marketId: request.market,
     ownerAddress: 'address' in request ? request.address : undefined,
-    side: convertClobSideToKujiraOrderSide(request.side),
+    side: convertClobSideToOrderSide(request.side),
     price: BigNumber(request.price),
     amount: BigNumber(request.amount),
-    type: convertClobOrderTypeToKujiraOrderType(request.orderType),
-    payerAddress: 'address' in request ? request.address : undefined, // TODO, is the payer always the owner? !!!
+    type: convertClobOrderTypeToOrderType(request.orderType),
+    payerAddress: 'address' in request ? request.address : undefined,
   } as PlaceOrderOptions;
 };
 
@@ -261,7 +263,7 @@ export const convertToClobMarketResponse = (
       cw20s: undefined,
       erc20: undefined,
     },
-    takerFeeRate: response.fee.maker, // TODO what is the differrence between maker to taker? !!!
+    takerFeeRate: response.fee.maker, // TODO what is the difference between maker to taker? !!!
     serviceProviderFee: undefined, // TODO resolve this one as well !!!
     minPriceTickSize: response.minimumOrderSize,
     minQuantityTickSize: response.minimumBaseIncrement,
@@ -271,13 +273,11 @@ export const convertToClobMarketResponse = (
 };
 
 // TODO fix!!!
-export const convertKujiraOrderToClobPriceLevel = (
-  response: Order
-): PriceLevel => {
+export const convertOrderToClobPriceLevel = (response: Order): PriceLevel => {
   return {
     price: response.price.toString(),
     quantity: response.amount.toString(),
-    timestamp: Date.now(), // TODO verify if this is the correct way to convert the timestamp !!!
+    timestamp: Date.now(), // TODO Check if it is needed to retrieve this info (probably from the transaction)!!!
   } as PriceLevel;
 };
 
@@ -288,13 +288,13 @@ export const convertToClobOrderbookResponse = (
     buys: response.bids
       .valueSeq()
       .map((obj) => {
-        return convertKujiraOrderToClobPriceLevel(obj);
+        return convertOrderToClobPriceLevel(obj);
       })
       .toArray() as PriceLevel[],
     sells: response.asks
       .valueSeq()
       .map((obj) => {
-        return convertKujiraOrderToClobPriceLevel(obj);
+        return convertOrderToClobPriceLevel(obj);
       })
       .toArray() as PriceLevel[],
   } as Orderbook;
@@ -356,7 +356,6 @@ export const convertToClobPostOrderResponse = (
 
 // TODO fix!!!
 export const convertToClobGetOrderResponse = (
-  // TODO verify the injective output to ensure the return data !!!
   response: Order
 ): ClobGetOrderResponse => {
   return {
@@ -370,9 +369,7 @@ export const convertToClobGetOrderResponse = (
         // active: true,
         subaccountId: response.ownerAddress,
         executionType: response.type?.toLowerCase(),
-        orderType: convertKujiraOrderSideToClobSide(
-          response.side
-        ).toLowerCase(),
+        orderType: convertOrderSideToClobSide(response.side).toLowerCase(),
         price: response.price.toString(),
         // triggerPrice: 'None',
         quantity: response.amount.toString(),
@@ -380,9 +377,7 @@ export const convertToClobGetOrderResponse = (
         state: response.status?.toLowerCase(),
         // createdAt: response.fillingTimestamp,
         // updatedAt: response.fillingTimestamp, //TODO there is no mention to update into order type !!!
-        direction: convertKujiraOrderSideToClobSide(
-          response.side
-        ).toLowerCase(),
+        direction: convertOrderSideToClobSide(response.side).toLowerCase(),
       },
     ] as SpotOrderHistory[],
   } as ClobGetOrderResponse;
@@ -428,10 +423,10 @@ export const convertToBalancesResponse = (
   _response: Balances
 ): BalancesResponse => {
   return {
-    injectiveAddress: undefined,
-    balances: undefined,
-    subaccounts: undefined,
-  } as unknown as BalancesResponse;
+    injectiveAddress: undefined as unknown as string,
+    balances: [] as Array<BankBalance>,
+    subaccounts: [] as Array<SubaccountBalancesWithId>,
+  } as BalancesResponse;
 };
 
 // TODO fix!!!
@@ -445,7 +440,7 @@ export const convertToPollResponse = (
     gasWanted: undefined,
     gasLimit: undefined,
     gasUsed: undefined,
-    sequences: undefined,
+    sequences: [] as Array<number>,
   } as unknown as PollResponse;
 };
 
@@ -462,7 +457,6 @@ export const convertToGetTokensResponse = (_tokens: Token): TokenInfo => {
 
 // TODO fix!!!
 export const convertToEstimatedFeesResponse = (
-  // TODO both types are kujira types, verify if this is correct !!!
   _response: EstimatedFees
 ): EstimatedGaResponse => {
   return {
@@ -687,8 +681,10 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
   return output;
 };
 
-// TODO create an interface for the input type!!!
-export const convertToTicker = (input: any, market: Market): Ticker => {
+export const convertKujiraTickerToTicker = (
+  input: KujiraTicker,
+  market: Market
+): Ticker => {
   const price = BigNumber(input.price);
   const timestamp = Date.now(); // TODO check if there's a timestamp available!!!
 

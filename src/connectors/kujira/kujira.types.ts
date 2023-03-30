@@ -151,6 +151,10 @@ export enum ConvertOrderType {
 //  Interfaces
 //
 
+export interface KujiraTicker {
+  price: Price;
+}
+
 export interface KujiraOrderBookItem {
   quote_price: string;
   offer_denom: {

@@ -99,7 +99,7 @@ import {
   convertKujiraTokenToToken,
   convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
-  convertToTicker,
+  convertKujiraTickerToTicker,
 } from './kujira.convertors';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
@@ -738,7 +738,7 @@ export class Kujira {
             timestamp: Date.now(),
           };
 
-          return convertToTicker(result, market);
+          return convertKujiraTickerToTicker(result, market);
         } else if (source === TickerSource.ORDER_BOOK_WAP) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.ORDER_BOOK_VWAP) {
@@ -761,7 +761,7 @@ export class Kujira {
             )
           ).data.items[0];
 
-          return convertToTicker(result, market);
+          return convertKujiraTickerToTicker(result, market);
         } else {
           throw new TickerNotFoundError(
             `Ticker source (${source}) not supported, check your kujira configuration file.`
