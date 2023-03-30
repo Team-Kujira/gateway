@@ -766,6 +766,7 @@ describe('Kujira Full Flow', () => {
       request = {
         id: order.id,
         marketId: order.marketId,
+        ownerAddress: order.ownerAddress,
       } as CancelOrderOptions;
 
       logRequest(request);
