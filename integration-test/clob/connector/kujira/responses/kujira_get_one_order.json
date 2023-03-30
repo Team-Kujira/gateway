@@ -1,0 +1,12 @@
+{
+  "idx": "94060",
+  "owner": "kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7",
+  "quote_price": "0.001",
+  "offer_denom": {
+    "native": "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+  },
+  "offer_amount": "10",
+  "filled_amount": "0",
+  "created_at": "1680206896089191146",
+  "original_offer_amount": "10"
+}

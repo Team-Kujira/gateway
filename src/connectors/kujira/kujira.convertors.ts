@@ -594,6 +594,23 @@ export const convertKujiraOrderBookToOrderBook = (
   } as OrderBook;
 };
 
+export const convertOfferDenomToOrderSide = (
+  offer_denom: string,
+  market: Market
+): OrderSide => {
+  const offerDenom = Denom.from(offer_denom);
+  const baseTokenDenom = Denom.from(market.baseToken.id);
+  const quoteTokenDenom = Denom.from(market.quoteToken.id);
+
+  if (offerDenom.eq(baseTokenDenom)) {
+    return OrderSide.SELL;
+  } else if (offerDenom.eq(quoteTokenDenom)) {
+    return OrderSide.BUY;
+  } else {
+    throw new Error('Order side from offer denom not recognized');
+  }
+};
+
 export const convertKujiraOrdersToMapOfOrders = (options: {
   type: ConvertOrderType;
   bundles: IMap<string, any>;
@@ -617,7 +634,10 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         payerAddress: bundle.getIn(['events', 'tx', 'fee_payer']),
         price: bundle.getIn(['events', 'wasm', 'quote_price']),
         amount: bundle.getIn(['events', 'wasm', 'offer_amount']),
-        side: undefined as unknown as OrderSide, // TODO fix!!!
+        side: convertOfferDenomToOrderSide(
+          bundle.getIn(['events', 'wasm', 'offer_denom']),
+          bundle.getIn(['market'])
+        ),
         status: bundle.getIn(['status']),
         type: OrderType.LIMIT,
         fee: bundle.getIn(['events', 'tx', 'fee']),
