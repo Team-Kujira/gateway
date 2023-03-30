@@ -272,7 +272,6 @@ export const convertToClobMarketResponse = (
   return { markets: resp };
 };
 
-// TODO fix!!!
 export const convertOrderToClobPriceLevel = (response: Order): PriceLevel => {
   return {
     price: response.price.toString(),

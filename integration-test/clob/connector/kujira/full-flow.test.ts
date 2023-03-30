@@ -1,4 +1,5 @@
 import 'jest-extended';
+import { BigNumber } from 'bignumber.js';
 import { Kujira } from '../../../../src/connectors/kujira/kujira';
 import { KujiraConfig } from '../../../../src/connectors/kujira/kujira.config';
 import {
@@ -29,7 +30,10 @@ import {
   IMap,
   Order,
   OrderClientId,
+  OrderMarketName,
+  OrderSide,
   OrderStatus,
+  OrderType,
   OwnerAddress,
   PlaceOrderOptions,
   PlaceOrdersOptions,
@@ -72,24 +76,19 @@ const marketIds = {
   ].address, // DEMO/USK
 };
 
-const orders: IMap<OrderClientId, Record<any, any>> = IMap<
+const orders: IMap<OrderClientId, Order> = IMap<
   OrderClientId,
-  Record<any, any>
+  Order
 >().asMutable();
 
-const getOrder = (clientId: OrderClientId): Record<any, any> => {
+const getOrder = (clientId: OrderClientId): Order => {
   return getOrders([clientId]).first();
 };
 
-const getOrders = (
-  clientIds: OrderClientId[]
-): IMap<OrderClientId, Record<any, any>> => {
-  const output = IMap<OrderClientId, Record<any, any>>().asMutable();
+const getOrders = (clientIds: OrderClientId[]): IMap<OrderClientId, Order> => {
+  const output = IMap<OrderClientId, Order>().asMutable();
   for (const clientId of clientIds) {
-    output.set(
-      clientId,
-      getNotNullOrThrowError<Record<any, any>>(orders.get(clientId))
-    );
+    output.set(clientId, getNotNullOrThrowError<Order>(orders.get(clientId)));
   }
 
   return output;
@@ -121,168 +120,190 @@ beforeAll(async () => {
   await kujira.init();
 
   orders.set('1', {
-    id: null,
+    id: undefined,
     clientId: '1',
-    ownerAddress: ownerAddress,
+    marketName: undefined as unknown as OrderMarketName,
     marketId: marketIds[1],
-    side: 'BUY',
-    price: 0.001,
-    amount: 10,
-    type: 'LIMIT',
+    ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(0.001),
+    amount: BigNumber(10),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('2', {
-    id: null,
+    id: undefined,
     clientId: '2',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[2],
     ownerAddress: ownerAddress,
-    marketId: marketIds[1],
-    side: 'SELL',
-    price: 999.99,
-    amount: 10,
-    type: 'LIMIT',
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(999.99),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('3', {
-    id: null,
-    clientId: 3,
-    ownerAddress: ownerAddress,
+    id: undefined,
+    clientId: '3',
+    marketName: undefined as unknown as OrderMarketName,
     marketId: marketIds[1],
-    side: 'BUY',
-    price: 0.001,
-    amount: 10,
-    type: 'LIMIT',
+    ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(0.001),
+    amount: BigNumber(10),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('4', {
-    id: null,
+    id: undefined,
     clientId: '4',
-    ownerAddress: ownerAddress,
+    marketName: undefined as unknown as OrderMarketName,
     marketId: marketIds[1],
-    side: 'SELL',
-    price: 999.99,
-    amount: 10,
-    type: 'LIMIT',
+    ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(999.99),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('5', {
-    id: null,
+    id: undefined,
     clientId: '5',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[2],
     ownerAddress: ownerAddress,
-    marketId: marketIds[1],
-    side: 'BUY',
-    price: 0.001,
-    amount: 10,
-    type: 'LIMIT',
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(0.001),
+    amount: BigNumber(10),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('6', {
-    id: null,
+    id: undefined,
     clientId: '6',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[2],
     ownerAddress: ownerAddress,
-    marketId: marketIds[1],
-    side: 'SELL',
-    price: 999.99,
-    amount: 10,
-    type: 'LIMIT',
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(999.99),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('7', {
-    id: null,
+    id: undefined,
     clientId: '7',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[3],
     ownerAddress: ownerAddress,
-    marketId: marketIds[1],
-    side: 'BUY',
-    price: 0.001,
-    amount: 10,
-    type: 'LIMIT',
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(0.001),
+    amount: BigNumber(10),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('8', {
-    id: null,
+    id: undefined,
     clientId: '8',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[3],
     ownerAddress: ownerAddress,
-    marketId: marketIds[1],
-    side: 'SELL',
-    price: 999.99,
-    amount: 10,
-    type: 'LIMIT',
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(999.99),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('9', {
-    id: null,
+    id: undefined,
     clientId: '9',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[3],
     ownerAddress: ownerAddress,
-    marketId: marketIds[1],
-    side: 'BUY',
-    price: 0.001,
-    amount: 10,
-    type: 'LIMIT',
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(0.001),
+    amount: BigNumber(10),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('10', {
-    id: null,
+    id: undefined,
     clientId: '10',
-    ownerAddress: ownerAddress,
+    marketName: undefined as unknown as OrderMarketName,
     marketId: marketIds[1],
-    side: 'BUY',
-    price: 0.001,
-    amount: 10,
-    type: 'LIMIT',
+    ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(999.99),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 
   orders.set('11', {
-    id: null,
+    id: undefined,
     clientId: '11',
-    ownerAddress: ownerAddress,
+    marketName: undefined as unknown as OrderMarketName,
     marketId: marketIds[2],
-    side: 'SELL',
-    price: 999.99,
-    amount: 10,
-    type: 'LIMIT',
+    ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    status: null,
-    signature: null,
-    fee: null,
+    price: BigNumber(0.001),
+    amount: BigNumber(10),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
   });
 });
 
@@ -564,8 +585,8 @@ describe('Kujira Full Flow', () => {
     get all orders (open or filled) and check that the orders 2, 6, and 7 are present
 
     create 2 orders at once as the following:
-      order 10, buy, market 1
-      order 11, sell, market 2
+      order 10, sell, market 1
+      order 11, buy, market 2
 
     get all open orders and check that the orders 10 and 11 are present
 
@@ -765,9 +786,9 @@ describe('Kujira Full Flow', () => {
     });
 
     it("Check that it's not possible to get the cancelled order 1", async () => {
-      const id = getOrder('1').id;
+      const order = getOrder('1');
 
-      request = { id } as GetOrderOptions;
+      request = { id: order.id, marketId: order.marketId } as GetOrderOptions;
 
       logRequest(request);
 
