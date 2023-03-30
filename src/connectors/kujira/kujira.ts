@@ -926,18 +926,18 @@ export class Kujira {
       bundles.setIn(['orders', 1, 'ownerAddress'], options.ownerAddress);
       bundles.setIn(['orders', 1, 'market'], market);
 
-      const mapOfEvents = convertKujiraEventsToMapOfEvents(
-        response.events as KujiraEvent[]
-      );
+      // const mapOfEvents = convertKujiraEventsToMapOfEvents(
+      //   response.events as KujiraEvent[]
+      // );
 
-      let bundleIndex = 0;
-      for (const events of mapOfEvents.values()) {
-        for (const [key, value] of events.entries()) {
-          bundles.setIn(['orders', bundleIndex, 'events', key], value);
-        }
-
-        bundleIndex++;
-      }
+      // let bundleIndex = 0;
+      // for (const events of mapOfEvents.values()) {
+      //   for (const [key, value] of events.entries()) {
+      //     bundles.setIn(['orders', bundleIndex, 'events', key], value);
+      //   }
+      //
+      //   bundleIndex++;
+      // }
 
       const orders = convertKujiraOrdersToMapOfOrders({
         type: ConvertOrderType.GET_ORDERS,

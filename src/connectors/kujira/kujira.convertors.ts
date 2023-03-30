@@ -616,11 +616,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 }): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
 
-  if (
-    [ConvertOrderType.GET_ORDERS, ConvertOrderType.PLACE_ORDERS].includes(
-      options.type
-    )
-  ) {
+  if (ConvertOrderType.PLACE_ORDERS == options.type) {
     for (const bundle of options.bundles.get('orders').values()) {
       const orderId = bundle.getIn(['events', 'wasm', 'order_idx']);
 
@@ -638,7 +634,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
           bundle.getIn(['market'])
         ),
         status: bundle.getIn(['status']),
-        type: OrderType.LIMIT,
+        type: OrderType.LIMIT, // TODO is that correct? !!!
         fee: bundle.getIn(['events', 'tx', 'fee']),
         // fillingTimestamp: undefined,
         signatures: {
@@ -648,6 +644,38 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
       } as Order;
 
       output.set(orderId, order);
+    }
+  } else if (ConvertOrderType.GET_ORDERS == options.type) {
+    if (options.bundles.get('orders').size == 1) {
+      const response: any = options.bundles.getIn(['common', 'response']);
+      const market = options.bundles.get('orders').first().get('market');
+      const order = {
+        id: response['idx'],
+        clientId: undefined,
+        marketName: market.name,
+        marketId: market.id,
+        ownerAddress: response['owner'],
+        payerAddress: undefined,
+        price: response['quote_price'],
+        amount: response['original_offer_amount'],
+        side: convertOfferDenomToOrderSide(
+          response['offer_denom']['native'],
+          market
+        ),
+        status:
+          response['offer_amount'] == '0'
+            ? OrderStatus.FILLED
+            : OrderStatus.OPEN,
+        type: OrderType.LIMIT,
+        fee: undefined,
+        // fillingTimestamp: undefined,
+        signatures: undefined,
+        connectorOrder: undefined,
+      } as Order;
+
+      output.set(response['idx'], order);
+    } else {
+      throw new Error('Not implemented for more than 1 order');
     }
   }
   // TODO fix!!!
