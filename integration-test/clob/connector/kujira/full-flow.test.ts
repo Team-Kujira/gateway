@@ -39,6 +39,7 @@ import {
   PlaceOrderOptions,
   PlaceOrdersOptions,
   SettlementOptions,
+  SettlementsAllOptions,
   SettlementsOptions,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
@@ -1181,7 +1182,7 @@ describe('Kujira Full Flow', () => {
 
     it('Settle funds for markets 2 and 3', async () => {
       request = {
-        marketIds: [marketIds[1], marketIds[2]],
+        marketIds: [marketIds[2], marketIds[3]],
         ownerAddresses: [ownerAddress],
       } as SettlementsOptions;
 
@@ -1200,6 +1201,18 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getBalances(request);
+
+      logResponse(response);
+    });
+
+    it('Settle funds for all markets', async () => {
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as SettlementsAllOptions;
+
+      logRequest(request);
+
+      response = await kujira.settleMarketsFunds(request);
 
       logResponse(response);
     });
