@@ -37,7 +37,6 @@ import {
   GetWalletArtifactsOptions,
   GetWalletPublicKeyOptions,
   IMap,
-  KujiraEvent,
   KujiraOrder,
   KujiraWalletArtifacts,
   Market,
@@ -47,7 +46,6 @@ import {
   Order,
   OrderBook,
   OrderId,
-  OrderNotFoundError,
   OrderOwnerAddress,
   OrderSide,
   OrderStatus,
@@ -96,10 +94,10 @@ import {
   convertKujiraOrderBookToOrderBook,
   convertKujiraOrdersToMapOfOrders,
   convertKujiraSettlementToSettlement,
+  convertKujiraTickerToTicker,
   convertKujiraTokenToToken,
   convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
-  convertKujiraTickerToTicker,
 } from './kujira.convertors';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
@@ -901,93 +899,17 @@ export class Kujira {
    * @param options
    */
   async getOrder(options: GetOrderOptions): Promise<Order> {
-    if (options.marketId) {
-      const market = await this.getMarket({ id: options.marketId });
+    const ownersMap = await this.getOrders({
+      ...options,
+      ids: [options.id],
+      ownerAddresses: [options.ownerAddress],
+    });
 
-      const response = await this.kujiraQueryClientWasmQueryContractSmart(
-        market.connectorMarket.address,
-        {
-          order: {
-            order_idx: options.id,
-          },
-        }
-      );
+    const orders = getNotNullOrThrowError<IMap<OrderId, Order>>(
+      ownersMap.first()
+    );
 
-      if (!response) {
-        throw new OrderNotFoundError(
-          `Order with id "${options.id}" not found in market "${market.id}".`
-        );
-      }
-
-      const bundles = IMap<string, any>().asMutable();
-      bundles.setIn(['common', 'response'], response);
-      bundles.setIn(['common', 'status'], options.status);
-
-      bundles.setIn(['orders', 1, 'ownerAddress'], options.ownerAddress);
-      bundles.setIn(['orders', 1, 'market'], market);
-
-      // const mapOfEvents = convertKujiraEventsToMapOfEvents(
-      //   response.events as KujiraEvent[]
-      // );
-
-      // let bundleIndex = 0;
-      // for (const events of mapOfEvents.values()) {
-      //   for (const [key, value] of events.entries()) {
-      //     bundles.setIn(['orders', bundleIndex, 'events', key], value);
-      //   }
-      //
-      //   bundleIndex++;
-      // }
-
-      const orders = convertKujiraOrdersToMapOfOrders({
-        type: ConvertOrderType.GET_ORDERS,
-        bundles,
-      });
-
-      const order = getNotNullOrThrowError<Order>(orders.valueSeq().first());
-
-      if (options.status && order.status !== options.status) {
-        throw new OrderNotFoundError(
-          `Order with id "${options.id}" with status "${options.status}" not found in market "${market.id}".`
-        );
-      } else if (
-        options.statuses &&
-        !options.statuses.includes(getNotNullOrThrowError(order.status))
-      ) {
-        throw new OrderNotFoundError(
-          `Order with id "${
-            options.id
-          }" with one of the statuses "${options.statuses.join(
-            ', '
-          )}" not found in market "${market.id}".`
-        );
-      }
-
-      if (options.ownerAddress && order.ownerAddress !== options.ownerAddress) {
-        throw new OrderNotFoundError(
-          `Order with id "${options.id}" with owner address "${options.ownerAddress}" not found in market "${market.id}".`
-        );
-      }
-
-      return response;
-    } else {
-      for (const market of (await this.getAllMarkets({})).values()) {
-        try {
-          const order = await this.getOrder({
-            ...options,
-            marketId: market.id,
-          });
-
-          return order;
-        } catch (exception) {
-          // Ignoring so other markets can be tried.
-        }
-      }
-
-      throw new OrderNotFoundError(
-        `Order with id "${options.id}" not found in any market.`
-      );
-    }
+    return orders.first();
   }
 
   /**
@@ -1016,21 +938,21 @@ export class Kujira {
         );
 
         const bundles = IMap<string, any>().asMutable();
+
         bundles.setIn(['common', 'response'], response);
         bundles.setIn(['common', 'status'], options.status);
 
-        bundles.setIn(['orders', 1, 'ownerAddress'], ownerAddress);
-        bundles.setIn(['orders', 1, 'market'], market);
-
         const mapOfEvents = convertKujiraEventsToMapOfEvents(
-          response.events as KujiraEvent[]
+          JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
         );
 
         let bundleIndex = 0;
         for (const events of mapOfEvents.values()) {
-          for (const [key, value] of events.entries()) {
+          for (const [key, value] of events.get(bundleIndex).entries()) {
             bundles.setIn(['orders', bundleIndex, 'events', key], value);
           }
+
+          bundles.setIn(['orders', bundleIndex, 'market'], market);
 
           bundleIndex++;
         }
@@ -1105,7 +1027,7 @@ export class Kujira {
     const bundles = IMap<string, any>().asMutable();
     let bundleIndex = 0;
     for (const candidate of options.orders) {
-      bundles.setIn(['orders', bundleIndex, 'ownerAddress'], ownerAddress);
+      bundles.setIn(['orders', bundleIndex, 'candidate'], candidate);
 
       const market = await this.getMarket({ id: candidate.marketId });
       bundles.setIn(['orders', bundleIndex, 'market'], market);
@@ -1152,16 +1074,13 @@ export class Kujira {
     bundles.setIn(['common', 'status'], OrderStatus.OPEN);
 
     const mapOfEvents = convertKujiraEventsToMapOfEvents(
-      response.events as KujiraEvent[]
+      JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
     );
 
-    bundleIndex = 0;
-    for (const events of mapOfEvents.values()) {
+    for (const [bundleIndex, events] of mapOfEvents.entries()) {
       for (const [key, value] of events.entries()) {
         bundles.setIn(['orders', bundleIndex, 'events', key], value);
       }
-
-      bundleIndex++;
     }
 
     return convertKujiraOrdersToMapOfOrders({
@@ -1227,15 +1146,25 @@ export class Kujira {
         config.orders.create.fee
       );
 
-      const events = convertKujiraEventsToMapOfEvents(
-        response.events as KujiraEvent[]
+      const bundles = IMap<string, any>().asMutable();
+
+      bundles.setIn(['common', 'response'], response);
+      bundles.setIn(['common', 'status'], OrderStatus.CANCELLED);
+
+      const mapOfEvents = convertKujiraEventsToMapOfEvents(
+        JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
       );
 
-      // TODO fix definitions!!!
-      const bundles = IMap<string, any>().asMutable();
-      bundles.setIn([1, 'response'], response);
-      bundles.setIn([1, 'market'], market);
-      bundles.setIn([1, 'events'], events);
+      let bundleIndex = 0;
+      for (const events of mapOfEvents.values()) {
+        for (const [key, value] of events.get(bundleIndex).entries()) {
+          bundles.setIn(['orders', bundleIndex, 'events', key], value);
+        }
+
+        bundles.setIn(['orders', bundleIndex, 'market'], market);
+
+        bundleIndex++;
+      }
 
       output.set(
         ownerAddress,

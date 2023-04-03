@@ -394,7 +394,7 @@ export interface GetOrderOptions {
   id: OrderId;
   marketId?: MarketId;
   marketIds?: MarketId[];
-  ownerAddress?: OrderOwnerAddress;
+  ownerAddress: OrderOwnerAddress;
   status?: OrderStatus;
   statuses?: OrderStatus[];
 }

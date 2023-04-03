@@ -15,7 +15,6 @@ import {
   GetTickerOptions,
   GetTransactionOptions,
   IMap,
-  KujiraEvent,
   KujiraOrderBook,
   KujiraSettlement,
   KujiraTicker,
@@ -782,55 +781,19 @@ export const convertNetworkToKujiraNetwork = (
 };
 
 export const convertKujiraEventsToMapOfEvents = (
-  events: KujiraEvent[]
-): IMap<OrderId, IMap<string, any>> => {
-  let output = IMap<string, any>().asMutable();
-  const flattenedEvents = [];
+  eventsLog: Array<any>
+): IMap<string, any> => {
+  const output = IMap<string, any>().asMutable();
 
-  for (const event of events) {
-    for (const attribute of event.attributes) {
-      flattenedEvents.push([event.type, attribute.key, attribute.value]);
+  for (const eventLog of eventsLog) {
+    const bundleIndex = eventLog['msg_index'];
+    const events = eventLog['events'];
+    for (const event of events) {
+      for (const attribute of event.attributes) {
+        output.setIn([bundleIndex, event.type, attribute.key], attribute.value);
+      }
     }
   }
-
-  // flattenedEvents.sort((a, b) => {
-  //   return (
-  //     a[0].localeCompare(b[0]) ||
-  //     a[1].localeCompare(b[1]) ||
-  //     a[2].localeCompare(b[2])
-  //   );
-  // });
-
-  const orderIds: OrderId[] = flattenedEvents
-    .filter((item) => item[0] == 'wasm' && item[1] == 'order_idx')
-    .map((item) => {
-      output.set(item[2], IMap<string, any>().asMutable());
-      return item[2];
-    });
-
-  let orderIdIndex = 0;
-  for (const event of flattenedEvents) {
-    if (orderIdIndex % orderIds.length == 0) {
-      orderIdIndex = 0;
-    }
-
-    output.get(orderIds[orderIdIndex])?.setIn([event[0], event[1]], event[2]);
-
-    orderIdIndex++;
-  }
-
-  output = output.sort((a: IMap<string, any>, b: IMap<string, any>) => {
-    return (
-      getNotNullOrThrowError<string>(a.getIn(['wasm', 'market'])).localeCompare(
-        getNotNullOrThrowError<string>(b.getIn(['wasm', 'market']))
-      ) ||
-      getNotNullOrThrowError<string>(
-        a.getIn(['wasm', 'order_idx'])
-      ).localeCompare(
-        getNotNullOrThrowError<string>(b.getIn(['wasm', 'order_idx']))
-      )
-    );
-  });
 
   return output;
 };

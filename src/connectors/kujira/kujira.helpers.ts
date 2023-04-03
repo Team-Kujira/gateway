@@ -16,6 +16,17 @@ export const getNotNullOrThrowError = <R>(
 
 /**
  *
+ * @param value
+ * @param defaultValue
+ */
+export const getOrDefault = <R>(value: any, defaultValue: R): R => {
+  if (value === undefined || value === null) return defaultValue;
+
+  return value as R;
+};
+
+/**
+ *
  * @param milliseconds
  */
 export const sleep = (milliseconds: number) =>
