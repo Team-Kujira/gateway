@@ -784,7 +784,7 @@ export const convertNetworkToKujiraNetwork = (
 export const convertKujiraEventsToMapOfEvents = (
   events: KujiraEvent[]
 ): IMap<OrderId, IMap<string, any>> => {
-  const output = IMap<string, any>().asMutable();
+  let output = IMap<string, any>().asMutable();
   const flattenedEvents = [];
 
   for (const event of events) {
@@ -793,13 +793,13 @@ export const convertKujiraEventsToMapOfEvents = (
     }
   }
 
-  flattenedEvents.sort((a, b) => {
-    return (
-      a[0].localeCompare(b[0]) ||
-      a[1].localeCompare(b[1]) ||
-      a[2].localeCompare(b[2])
-    );
-  });
+  // flattenedEvents.sort((a, b) => {
+  //   return (
+  //     a[0].localeCompare(b[0]) ||
+  //     a[1].localeCompare(b[1]) ||
+  //     a[2].localeCompare(b[2])
+  //   );
+  // });
 
   const orderIds: OrderId[] = flattenedEvents
     .filter((item) => item[0] == 'wasm' && item[1] == 'order_idx')
@@ -818,6 +818,19 @@ export const convertKujiraEventsToMapOfEvents = (
 
     orderIdIndex++;
   }
+
+  output = output.sort((a: IMap<string, any>, b: IMap<string, any>) => {
+    return (
+      getNotNullOrThrowError<string>(a.getIn(['wasm', 'market'])).localeCompare(
+        getNotNullOrThrowError<string>(b.getIn(['wasm', 'market']))
+      ) ||
+      getNotNullOrThrowError<string>(
+        a.getIn(['wasm', 'order_idx'])
+      ).localeCompare(
+        getNotNullOrThrowError<string>(b.getIn(['wasm', 'order_idx']))
+      )
+    );
+  });
 
   return output;
 };
