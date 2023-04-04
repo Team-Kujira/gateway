@@ -646,7 +646,11 @@ describe('Kujira Full Flow', () => {
     it('Get the open order 1', async () => {
       const id = getOrder('1').id;
 
-      request = { id, status: OrderStatus.OPEN } as GetOrderOptions;
+      request = {
+        id,
+        status: OrderStatus.OPEN,
+        ownerAddress: ownerAddress,
+      } as GetOrderOptions;
 
       logRequest(request);
 
@@ -685,7 +689,11 @@ describe('Kujira Full Flow', () => {
     it('Get the open order 2', async () => {
       const id = getOrder('2').id;
 
-      request = { id, status: OrderStatus.OPEN } as GetOrderOptions;
+      request = {
+        id,
+        status: OrderStatus.OPEN,
+        ownerAddress: ownerAddress,
+      } as GetOrderOptions;
 
       logRequest(request);
 
