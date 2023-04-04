@@ -41,6 +41,7 @@ import {
   SettlementOptions,
   SettlementsAllOptions,
   SettlementsOptions,
+  Balances,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -84,6 +85,8 @@ const orders: IMap<OrderClientId, Order> = IMap<
   OrderClientId,
   Order
 >().asMutable();
+
+let userBalances: Balances;
 
 const getOrder = (clientId: OrderClientId): Order => {
   return getOrders([clientId]).first();
@@ -613,7 +616,16 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getBalances(request);
 
-      logResponse(response);
+      userBalances = response;
+
+      expect(response).toContainKey('total');
+      expect(response['total']).toContainKeys([
+        'free',
+        'unsettled',
+        'lockedInOrders',
+      ]);
+
+      logResponse(userBalances);
     });
 
     it('Create a buy order 1 for market 1', async () => {
@@ -625,20 +637,37 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.placeOrder(request);
 
+      expect(response).toBeObject();
+      expect(response.id.length).toBeGreaterThan(0);
+
       candidate.id = response.id;
 
       logResponse(response);
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
-      request = {
-        tokenIds: [tokenIds[1], tokenIds[2]],
-        ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      // request = {
+      //   tokenIds: [tokenIds[1], tokenIds[2]],
+      //   ownerAddress: ownerAddress,
+      // } as GetBalancesOptions;
+      //
+      // logRequest(request);
+      //
+      // response = await kujira.getBalances(request);
 
-      logRequest(request);
+      response = userBalances;
 
-      response = await kujira.getBalances(request);
+      expect(response['tokens']['_root']['entries']['0']['1']).toContainKeys([
+        'free',
+        'unsettled',
+        'lockedInOrders',
+      ]);
+
+      expect(response['tokens']['_root']['entries']['1']['1']).toContainKeys([
+        'free',
+        'unsettled',
+        'lockedInOrders',
+      ]);
 
       logResponse(response);
     });
@@ -667,6 +696,9 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.placeOrder(request);
+
+      expect(response['id'].length).toBeGreaterThan(0);
+      expect(response['signatures']['creation'].length).toBeCloseTo(64);
 
       logResponse(response);
 
