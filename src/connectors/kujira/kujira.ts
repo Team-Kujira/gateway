@@ -932,7 +932,6 @@ export class Kujira {
           {
             orders_by_user: {
               address: ownerAddress,
-              limit: config.orders.filled.limit,
             },
           }
         );
@@ -941,21 +940,8 @@ export class Kujira {
 
         bundles.setIn(['common', 'response'], response);
         bundles.setIn(['common', 'status'], options.status);
-
-        const mapOfEvents = convertKujiraEventsToMapOfEvents(
-          JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
-        );
-
-        let bundleIndex = 0;
-        for (const events of mapOfEvents.values()) {
-          for (const [key, value] of events.get(bundleIndex).entries()) {
-            bundles.setIn(['orders', bundleIndex, 'events', key], value);
-          }
-
-          bundles.setIn(['orders', bundleIndex, 'market'], market);
-
-          bundleIndex++;
-        }
+        bundles.setIn(['common', 'market'], market);
+        bundles.setIn(['orders'], response.orders);
 
         orders = convertKujiraOrdersToMapOfOrders({
           type: ConvertOrderType.GET_ORDERS,

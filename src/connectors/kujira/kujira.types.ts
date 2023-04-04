@@ -84,6 +84,7 @@ export type OrderPayerAddress = PayerAddress;
 export type OrderPrice = Price;
 export type OrderAmount = Amount;
 export type OrderFee = Fee;
+export type OrderCreationTimestamp = Timestamp;
 export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionSignatures = TransactionSignatures;
 export type OrderReplaceIfExists = boolean;
@@ -242,6 +243,7 @@ export interface Order {
   status?: OrderStatus;
   type?: OrderType;
   fee?: OrderFee;
+  creationTimestamp?: OrderCreationTimestamp;
   fillingTimestamp?: OrderFillingTimestamp;
   signatures?: OrderTransactionSignatures;
   connectorOrder?: ConnectorOrder;

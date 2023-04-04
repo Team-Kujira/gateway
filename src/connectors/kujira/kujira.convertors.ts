@@ -620,7 +620,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
       const orderId = bundle.getIn(['events', 'wasm', 'order_idx']);
 
       const order = {
-        id: bundle.getIn(['events', 'wasm', 'order_idx']),
+        id: orderId,
         clientId: undefined,
         marketName: bundle.getIn(['market']).name,
         marketId: bundle.getIn(['market']).id,
@@ -633,48 +633,48 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
           bundle.getIn(['market'])
         ),
         status: bundle.getIn(['status']),
-        type: OrderType.LIMIT, // TODO is that correct? !!!
+        type: OrderType.LIMIT, // TODO how to decide between market and limit?!!!
         fee: bundle.getIn(['events', 'tx', 'fee']),
-        // fillingTimestamp: undefined,
+        creationTimestamp: undefined,
+        fillingTimestamp: undefined,
         signatures: {
           creation: bundle.getIn(['events', 'tx', 'signature']),
         } as TransactionSignatures,
-        connectorOrder: bundle,
+        connectorOrder: bundle.getIn(['common', 'response']),
       } as Order;
 
       output.set(orderId, order);
     }
   } else if (ConvertOrderType.GET_ORDERS == options.type) {
-    if (options.bundles.get('orders').size == 1) {
-      const response: any = options.bundles.getIn(['common', 'response']);
-      const market = options.bundles.get('orders').first().get('market');
+    for (const bundle of options.bundles.get('orders')) {
+      const orderId = bundle['idx'];
+
+      const market = options.bundles.getIn(['common', 'market']) as Market;
+
       const order = {
-        id: response['idx'],
+        id: orderId,
         clientId: undefined,
         marketName: market.name,
         marketId: market.id,
-        ownerAddress: response['owner'],
-        payerAddress: undefined,
-        price: response['quote_price'],
-        amount: response['original_offer_amount'],
+        ownerAddress: bundle['owner'],
+        payerAddress: bundle['owner'],
+        price: BigNumber(bundle['quote_price']),
+        amount: BigNumber(bundle['original_offer_amount']),
         side: convertOfferDenomToOrderSide(
-          response['offer_denom']['native'],
+          bundle['offer_denom']['native'],
           market
         ),
         status:
-          response['offer_amount'] == '0'
-            ? OrderStatus.FILLED
-            : OrderStatus.OPEN,
+          bundle['offer_amount'] == '0' ? OrderStatus.FILLED : OrderStatus.OPEN,
         type: OrderType.LIMIT,
         fee: undefined,
-        // fillingTimestamp: undefined,
+        fillingTimestamp: undefined,
+        creationTimestamp: Number(bundle['created_at']),
         signatures: undefined,
-        connectorOrder: undefined,
+        connectorOrder: bundle,
       } as Order;
 
-      output.set(response['idx'], order);
-    } else {
-      throw new Error('Not implemented for more than 1 order');
+      output.set(orderId, order);
     }
   }
 
