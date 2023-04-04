@@ -1141,15 +1141,15 @@ export class Kujira {
         JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
       );
 
-      let bundleIndex = 0;
-      for (const events of mapOfEvents.values()) {
-        for (const [key, value] of events.get(bundleIndex).entries()) {
+      for (const [bundleIndex, events] of mapOfEvents.entries()) {
+        for (const [key, value] of events.entries()) {
+          bundles.setIn(
+            ['orders', bundleIndex, 'id'],
+            options.ids[Number(bundleIndex)]
+          );
+          bundles.setIn(['orders', bundleIndex, 'market'], market);
           bundles.setIn(['orders', bundleIndex, 'events', key], value);
         }
-
-        bundles.setIn(['orders', bundleIndex, 'market'], market);
-
-        bundleIndex++;
       }
 
       output.set(

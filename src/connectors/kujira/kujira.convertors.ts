@@ -20,8 +20,10 @@ import {
   KujiraTicker,
   Market,
   Order,
+  OrderAmount,
   OrderBook,
   OrderId,
+  OrderPrice,
   OrderSide,
   OrderStatus,
   OrderType,
@@ -648,7 +650,11 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         creationTimestamp: undefined,
         fillingTimestamp: undefined,
         signatures: {
-          creation: bundle.getIn(['events', 'tx', 'signature']),
+          creation: options.bundles.getIn([
+            'common',
+            'response',
+            'transactionHash',
+          ]),
         } as TransactionSignatures,
         connectorOrder: bundle.getIn(['common', 'response']),
       } as Order;
@@ -681,6 +687,37 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         creationTimestamp: Number(bundle['created_at']),
         signatures: undefined,
         connectorOrder: bundle,
+      } as Order;
+
+      output.set(orderId, order);
+    }
+  } else if (ConvertOrderType.CANCELLED_ORDERS == options.type) {
+    for (const bundle of options.bundles.get('orders').values()) {
+      const orderId = bundle.getIn(['id']);
+
+      const order = {
+        id: orderId,
+        clientId: undefined,
+        marketName: bundle.getIn(['market']).name,
+        marketId: bundle.getIn(['market']).id,
+        ownerAddress: bundle.getIn(['events', 'transfer', 'sender']),
+        payerAddress: bundle.getIn(['events', 'transfer', 'sender']),
+        price: undefined as unknown as OrderPrice,
+        amount: undefined as unknown as OrderAmount,
+        side: undefined as unknown as OrderSide,
+        status: OrderStatus.CANCELLED,
+        type: OrderType.LIMIT,
+        fee: undefined,
+        creationTimestamp: undefined,
+        fillingTimestamp: undefined,
+        signatures: {
+          cancellation: options.bundles.getIn([
+            'common',
+            'response',
+            'transactionHash',
+          ]),
+        } as TransactionSignatures,
+        connectorOrder: bundle.getIn(['common', 'response']),
       } as Order;
 
       output.set(orderId, order);
