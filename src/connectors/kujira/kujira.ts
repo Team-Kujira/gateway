@@ -1296,12 +1296,19 @@ export class Kujira {
       settlements.set(options.marketId, results);
     };
 
-    await promiseAllInBatches<HelperSettleFundsOptions, void>(
-      settleMarketFunds,
-      options.marketIds.map((id) => {
-        return { marketId: id, ownerAddresses: options.ownerAddresses };
-      })
-    );
+    for (const marketId of options.marketIds) {
+      settleMarketFunds({
+        marketId: marketId,
+        ownerAddresses: options.ownerAddresses,
+      });
+    }
+
+    // await promiseAllInBatches<HelperSettleFundsOptions, void>(
+    //   settleMarketFunds,
+    //   options.marketIds.map((id) => {
+    //     return { marketId: id, ownerAddresses: options.ownerAddresses };
+    //   })
+    // );
 
     return settlements;
   }
