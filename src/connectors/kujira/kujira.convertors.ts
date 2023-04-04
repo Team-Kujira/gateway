@@ -614,7 +614,7 @@ export const convertOfferDenomToOrderSide = (
 export const convertKujiraOrderToStatus = (kujiraOrder: any): OrderStatus => {
   if (kujiraOrder['offer_amount'] == '0') {
     return OrderStatus.FILLED;
-  } else if (kujiraOrder['offer_amount'] == kujiraOrder['total_offer_amount']) {
+  } else if (kujiraOrder['offer_amount'] == kujiraOrder['original_offer_amount']) {
     return OrderStatus.OPEN;
   } else {
     return OrderStatus.PARTIALLY_FILLED;
