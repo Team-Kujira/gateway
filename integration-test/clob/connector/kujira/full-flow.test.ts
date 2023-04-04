@@ -804,7 +804,11 @@ describe('Kujira Full Flow', () => {
     it("Check that it's not possible to get the cancelled order 1", async () => {
       const order = getOrder('1');
 
-      request = { id: order.id, marketId: order.marketId } as GetOrderOptions;
+      request = {
+        id: order.id,
+        ownerAddress: order.ownerAddress,
+        marketId: order.marketId,
+      } as GetOrderOptions;
 
       logRequest(request);
 
@@ -918,7 +922,11 @@ describe('Kujira Full Flow', () => {
     it('Get the filled order 2', async () => {
       const id = getOrder('2').id;
 
-      request = { id, status: OrderStatus.FILLED } as GetOrderOptions;
+      request = {
+        id,
+        status: OrderStatus.FILLED,
+        ownerAddress: ownerAddress,
+      } as GetOrderOptions;
 
       logRequest(request);
 
