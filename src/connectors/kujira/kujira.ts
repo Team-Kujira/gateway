@@ -932,6 +932,7 @@ export class Kujira {
           {
             orders_by_user: {
               address: ownerAddress,
+              limit: KujiraConfig.config.orderBook.limit,
             },
           }
         );
