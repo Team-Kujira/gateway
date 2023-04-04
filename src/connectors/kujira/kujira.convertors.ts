@@ -642,7 +642,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
           bundle.getIn(['events', 'wasm', 'offer_denom']),
           bundle.getIn(['market'])
         ),
-        status: convertKujiraOrderToStatus(bundle),
+        status: bundle.getIn(['status']),
         type: OrderType.LIMIT, // TODO how to decide between market and limit?!!!
         fee: bundle.getIn(['events', 'tx', 'fee']),
         creationTimestamp: undefined,
@@ -674,8 +674,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
           bundle['offer_denom']['native'],
           market
         ),
-        status:
-          bundle['offer_amount'] == '0' ? OrderStatus.FILLED : OrderStatus.OPEN,
+        status: convertKujiraOrderToStatus(bundle),
         type: OrderType.LIMIT,
         fee: undefined,
         fillingTimestamp: undefined,
