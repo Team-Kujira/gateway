@@ -1188,6 +1188,7 @@ export class Kujira {
       for (const marketId of marketIds) {
         const openOrders = await this.getOrders({
           ownerAddresses: [ownerAddress],
+          marketId: marketId,
           status: OrderStatus.OPEN,
         });
 
