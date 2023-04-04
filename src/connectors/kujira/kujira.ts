@@ -954,10 +954,14 @@ export class Kujira {
         orders = IMap<OrderId, Order>().asMutable();
 
         const getOrders = async (marketId: string): Promise<void> => {
-          const marketOrders = await this.getOrders({
-            ...options,
-            marketId,
-          });
+          const marketOrders = getNotNullOrThrowError<IMap<OrderId, Order>>(
+            (
+              await this.getOrders({
+                ...options,
+                marketId,
+              })
+            ).first()
+          );
 
           orders.merge(marketOrders);
         };
@@ -1181,16 +1185,15 @@ export class Kujira {
       const cancelledOrders = IMap<OrderId, Order>().asMutable();
 
       for (const marketId of marketIds) {
+        const openOrders = await this.getOrders({
+          ownerAddresses: [ownerAddress],
+          status: OrderStatus.OPEN,
+        });
+
         const openOrdersIds = getNotNullOrThrowError<IMap<OrderId, Order>>(
-          (
-            await this.getOrders({
-              ownerAddresses: [ownerAddress],
-              status: OrderStatus.OPEN,
-            })
-          ).first()
+          openOrders.first()
         )
-          .valueSeq()
-          .map((order) => getNotNullOrThrowError<OrderId>(order.id))
+          .keySeq()
           .toArray();
 
         cancelledOrders.merge(
