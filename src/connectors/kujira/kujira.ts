@@ -1116,7 +1116,7 @@ export class Kujira {
             },
           })
         ),
-        funds: coins(0, denom.reference),
+        funds: coins(1, denom.reference),
       });
 
       const messages: readonly EncodeObject[] = [message];
