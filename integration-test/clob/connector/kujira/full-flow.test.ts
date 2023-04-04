@@ -1216,7 +1216,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      response = await kujira.getAllBalances(request);
 
       logResponse(response);
     });
