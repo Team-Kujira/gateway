@@ -1140,7 +1140,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.cancelOrder(request);
+      response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
     });
@@ -1228,7 +1228,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.settleMarketsFunds(request);
+      response = await kujira.settleAllMarketsFunds(request);
 
       logResponse(response);
     });
