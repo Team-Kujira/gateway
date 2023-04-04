@@ -1040,7 +1040,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.cancelOrder(request);
+      response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
     });
