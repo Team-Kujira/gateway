@@ -609,6 +609,16 @@ export const convertOfferDenomToOrderSide = (
   }
 };
 
+export const convertKujiraOrderToStatus = (kujiraOrder: any): OrderStatus => {
+  if (kujiraOrder['offer_amount'] == '0') {
+    return OrderStatus.FILLED;
+  } else if (kujiraOrder['offer_amount'] == kujiraOrder['total_offer_amount']) {
+    return OrderStatus.OPEN;
+  } else {
+    return OrderStatus.PARTIALLY_FILLED;
+  }
+};
+
 export const convertKujiraOrdersToMapOfOrders = (options: {
   type: ConvertOrderType;
   bundles: IMap<string, any>;
@@ -632,7 +642,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
           bundle.getIn(['events', 'wasm', 'offer_denom']),
           bundle.getIn(['market'])
         ),
-        status: bundle.getIn(['status']),
+        status: convertKujiraOrderToStatus(bundle),
         type: OrderType.LIMIT, // TODO how to decide between market and limit?!!!
         fee: bundle.getIn(['events', 'tx', 'fee']),
         creationTimestamp: undefined,
