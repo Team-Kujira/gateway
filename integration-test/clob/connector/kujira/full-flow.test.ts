@@ -44,7 +44,7 @@ import {
   Balances,
   MarketName,
 } from '../../../../src/connectors/kujira/kujira.types';
-import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
+import { Denom, DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
 
@@ -655,6 +655,7 @@ describe('Kujira Full Flow', () => {
       expect(response).toBeObject();
       expect(response['signatures']['creation'].length).toBeCloseTo(64);
       expect(response.id.length).toBeGreaterThan(0);
+      candidate.id = response.id;
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price.toNumber().toString());
@@ -717,7 +718,7 @@ describe('Kujira Full Flow', () => {
       expect(response.marketId).toBe(marketIds['1']);
       expect(response.ownerAddress).toEqual(ownerAddress);
       expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
-
+      expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
       logResponse(response);
     });
 
@@ -748,6 +749,36 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getBalances(request);
 
+      const RequestTokensDenom = [
+        Denom.from(request.tokenIds[0]),
+        Denom.from(request.tokenIds[1]),
+      ];
+
+      const ResponseTokens = response.tokens
+        .keySeq()
+        .map((obj: any) => obj)
+        .toArray();
+      const ResponseTokensDenom = [
+        Denom.from(ResponseTokens[0]),
+        Denom.from(ResponseTokens[1]),
+      ];
+
+      expect(ResponseTokensDenom[0].eq(ResponseTokensDenom[1])).toBeFalsy;
+      expect(
+        RequestTokensDenom[0].eq(ResponseTokensDenom[0]) ||
+          RequestTokensDenom[0].eq(ResponseTokensDenom[1])
+      ).toBeTruthy();
+      expect(
+        RequestTokensDenom[1].eq(ResponseTokensDenom[1]) ||
+          RequestTokensDenom[1].eq(ResponseTokensDenom[0])
+      ).toBeTruthy();
+
+      expect(response).toContainKey('total');
+
+      const tokens = response.tokens.toJS();
+      tokens.forEach((token: any) => {
+        expect(token).toContainKeys(['free', 'unsettled', 'lockedInOrders']);
+      });
       logResponse(response);
     });
 
