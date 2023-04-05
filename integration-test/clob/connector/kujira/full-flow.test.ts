@@ -661,7 +661,7 @@ describe('Kujira Full Flow', () => {
       const marketPair = getMarketPair(marketIds['1']);
 
       expect(response.marketName).toBe(marketPair);
-      // expect(response.payerAddress).toBe(candidate.payerAddress);
+      expect(response.payerAddress).toBe(candidate.payerAddress);
       // expect(response.status).toBe('OPEN');
 
       logResponse(response);
@@ -679,6 +679,7 @@ describe('Kujira Full Flow', () => {
 
       response = userBalances;
 
+      // TODO - Use the ToJs method to convert object in a JS object!!!
       expect(response['tokens']['_root']['entries']['0']['1']).toContainKeys([
         'free',
         'unsettled',

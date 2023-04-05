@@ -614,7 +614,9 @@ export const convertOfferDenomToOrderSide = (
 export const convertKujiraOrderToStatus = (kujiraOrder: any): OrderStatus => {
   if (kujiraOrder['offer_amount'] == '0') {
     return OrderStatus.FILLED;
-  } else if (kujiraOrder['offer_amount'] == kujiraOrder['original_offer_amount']) {
+  } else if (
+    kujiraOrder['offer_amount'] == kujiraOrder['original_offer_amount']
+  ) {
     return OrderStatus.OPEN;
   } else {
     return OrderStatus.PARTIALLY_FILLED;
@@ -637,7 +639,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         marketName: bundle.getIn(['market']).name,
         marketId: bundle.getIn(['market']).id,
         ownerAddress: bundle.getIn(['events', 'transfer', 'sender']),
-        payerAddress: bundle.getIn(['events', 'tx', 'fee_payer']),
+        payerAddress: bundle.getIn(['events', 'transfer', 'sender']),
         price: bundle.getIn(['events', 'wasm', 'quote_price']),
         amount: bundle.getIn(['events', 'wasm', 'offer_amount']),
         side: convertOfferDenomToOrderSide(
