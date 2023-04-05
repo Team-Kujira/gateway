@@ -2098,3 +2098,113 @@ definitions:
       txReceipt:
         type: 'object'
 
+  KujiraBankBalance:
+    type: 'object'
+    required:
+      - 'token'
+      - 'amount'
+    properties:
+      token:
+        type: 'string'
+        example: 'inj'
+      amount:
+        type: 'string'
+        example: '1.25'
+
+  KujiraSubaccountBalanceSub:
+    type: 'object'
+    required:
+      - 'token'
+      - 'totalBalance'
+      - 'availableBalance'
+    properties:
+      token:
+        type: 'string'
+        example: 'inj'
+      totalBalance:
+        type: 'string'
+        example: '100.0'
+      availableBalance:
+        type: 'string'
+        example: '15.0'
+
+  KujiraSubaccountBalancesWithId:
+    type: 'object'
+    required:
+      - 'subaccountId'
+      - 'balances'
+    properties:
+      subaccountId:
+        type: 'string'
+        example: '0'
+      balances:
+        type: 'array'
+        item:
+          $ref: '#/definitions/InjectiveSubaccountBalanceSub'
+        example: '{"token": "inj", "tokenBalance": "100.0", "availableBalance": "15.0"}'
+
+  KujiraBalancesResponse:
+    type: 'object'
+    required:
+      - 'injectiveAddress'
+      - 'balances'
+      - 'subaccounts'
+    properties:
+      injectiveAddress:
+        type: 'string'
+        example: 'inj1l2sjl5gzl6rz8jffn3etq0j9zpljwu44ed7zuc'
+      balances:
+        type: 'array'
+        item:
+          $ref: '#/definitions/InjectiveBankBalance'
+      subaccoutns:
+        type: 'array'
+        item:
+          $ref: '#/definitions/InjectiveSubaccountBalancesWithId'
+
+  KujiraPollResponse:
+    type: 'object'
+    required:
+      - 'blockNumber'
+      - 'hash'
+      - 'gasWanted'
+      - 'gasLimit'
+      - 'gasUsed'
+      - 'sequences'
+    properties:
+      blockNumber:
+        type: 'number'
+        example: 123456
+      hash:
+        type: 'string'
+        example: '0xaaaaaaaaaabbbb'
+      gasWanted:
+        type: 'number'
+        example: 1000000
+      gasLimit:
+        type: 'number'
+        example: 2000000
+      gasUsed:
+        type: 'number'
+        example: 1000000
+      sequences:
+        type: 'array'
+        items: 'number'
+        example: [1,2]
+
+  KujiraPollRequest:
+    type: 'object'
+    required:
+      - 'txHash'
+      - 'chain'
+      - 'network'
+    properties:
+      txHash:
+        type: 'string'
+        example: '0xa321bbe8888c3bc88ecb1ad4f03f22a71e6f5715dfcb19e0a2dca9036c981b6d'  # noqa: documentation
+      chain:
+        type: 'string'
+        example: 'injective'
+      network:
+        type: 'string'
+        example: 'mainnet'

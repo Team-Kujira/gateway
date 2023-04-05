@@ -1,0 +1,89 @@
+paths:
+  /kujira/balances:
+    post:
+      tags:
+        - 'kujira'
+      summary: 'Get the balances of an kujira public key'
+      operationId: 'balances'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/BalancesRequest'
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/KujiraBalancesResponse'
+  
+  /kujira/block/current:
+    post:
+      tags:
+        - 'kujira'
+      summary: 'Get the current block number for an kujira network'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/NetworkSelectionRequest'
+      produces:
+        - 'application/json'
+      responses:
+        '200'
+  
+  /kujira/poll:
+    post:
+      tags:
+        - 'kujira'
+      summary: 'Poll the status of a transaction'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/KujiraPollRequest'
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/KujiraPollResponse'
+  
+  /kujira/transfer/to/bank:
+    post:
+      tags:
+        - 'kujira'
+      summary: 'Transfer subaccount balance to bank'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/TransferToSubAccountRequest'
+      produces:
+        - 'application/json'
+      responses:
+        '200'
+  
+  /kujira/transfer/to/sub:
+    post:
+      tags:
+        - 'kujira'
+      summary: 'Transfer bank balance to subaccount balance'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/TransferToSubAccountRequest'
+      produces:
+        - 'application/json'
+      responses:
+        '200'
