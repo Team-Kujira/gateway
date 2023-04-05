@@ -42,6 +42,7 @@ import {
   SettlementsAllOptions,
   SettlementsOptions,
   Balances,
+  MarketName,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -87,6 +88,7 @@ const orders: IMap<OrderClientId, Order> = IMap<
 >().asMutable();
 
 let userBalances: Balances;
+let marketName: MarketName;
 
 const getOrder = (clientId: OrderClientId): Order => {
   return getOrders([clientId]).first();
@@ -101,7 +103,7 @@ const getOrders = (clientIds: OrderClientId[]): IMap<OrderClientId, Order> => {
   return output;
 };
 
-const getMarketPair = (marketId: any): any => {
+const getMarketName = (marketId: any): any => {
   const market = Object.entries(networkPairs).find(([key]) => key === marketId);
   let base;
   let quote;
@@ -648,19 +650,20 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.placeOrder(request);
 
+      candidate.id = response.id;
+
       expect(response).toBeObject();
       expect(response['signatures']['creation'].length).toBeCloseTo(64);
       expect(response.id.length).toBeGreaterThan(0);
-      candidate.id = response.id;
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price.toNumber().toString());
       expect(response.amount).toEqual(candidate.amount.toNumber().toString());
       expect(response.side).toBe(candidate.side);
 
-      const marketPair = getMarketPair(marketIds['1']);
+      marketName = getMarketName(marketIds['1']);
 
-      expect(response.marketName).toBe(marketPair);
+      expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
       // expect(response.status).toBe('OPEN');
 
@@ -679,14 +682,13 @@ describe('Kujira Full Flow', () => {
 
       response = userBalances;
 
-      // TODO - Use the ToJs method to convert object in a JS object!!!
-      expect(response['tokens']['_root']['entries']['0']['1']).toContainKeys([
+      expect(Object.entries(response.tokens.toJS())[0][1]).toContainKeys([
         'free',
         'unsettled',
         'lockedInOrders',
       ]);
 
-      expect(response['tokens']['_root']['entries']['1']['1']).toContainKeys([
+      expect(Object.entries(response.tokens.toJS())[0][1]).toContainKeys([
         'free',
         'unsettled',
         'lockedInOrders',
@@ -696,10 +698,10 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open order 1', async () => {
-      const id = getOrder('1').id;
+      const orderPlaced = getOrder('1');
 
       request = {
-        id,
+        id: orderPlaced.id,
         status: OrderStatus.OPEN,
         ownerAddress: ownerAddress,
       } as GetOrderOptions;
@@ -707,6 +709,14 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrder(request);
+
+      expect(response).toBeObject();
+      expect(response.status).toEqual('OPEN');
+      expect(response.id).toEqual(orderPlaced.id);
+      expect(response.marketName).toBe(marketName);
+      expect(response.marketId).toBe(marketIds['1']);
+      expect(response.ownerAddress).toEqual(ownerAddress);
+      expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
 
       logResponse(response);
     });
