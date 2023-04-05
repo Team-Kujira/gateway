@@ -655,7 +655,6 @@ describe('Kujira Full Flow', () => {
       expect(response).toBeObject();
       expect(response['signatures']['creation'].length).toBeCloseTo(64);
       expect(response.id.length).toBeGreaterThan(0);
-      candidate.id = response.id;
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price.toNumber().toString());
