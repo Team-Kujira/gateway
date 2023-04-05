@@ -101,6 +101,17 @@ const getOrders = (clientIds: OrderClientId[]): IMap<OrderClientId, Order> => {
   return output;
 };
 
+const getMarketPair = (marketId: any): any => {
+  const market = Object.entries(networkPairs).find(([key]) => key === marketId);
+  let base;
+  let quote;
+  if (market) {
+    base = market[1]['denoms'][0]['symbol'];
+    quote = market[1]['denoms'][1]['symbol'];
+  }
+  return base + '/' + quote;
+};
+
 let ownerAddress: OwnerAddress;
 
 beforeAll(async () => {
@@ -638,9 +649,20 @@ describe('Kujira Full Flow', () => {
       response = await kujira.placeOrder(request);
 
       expect(response).toBeObject();
+      expect(response['signatures']['creation'].length).toBeCloseTo(64);
       expect(response.id.length).toBeGreaterThan(0);
-
       candidate.id = response.id;
+      expect(response.marketId).toBe(candidate.marketId);
+      expect(response.ownerAddress).toBe(candidate.ownerAddress);
+      expect(response.price).toEqual(candidate.price.toNumber().toString());
+      expect(response.amount).toEqual(candidate.amount.toNumber().toString());
+      expect(response.side).toBe(candidate.side);
+
+      const marketPair = getMarketPair(marketIds['1']);
+
+      expect(response.marketName).toBe(marketPair);
+      // expect(response.payerAddress).toBe(candidate.payerAddress);
+      // expect(response.status).toBe('OPEN');
 
       logResponse(response);
     });
