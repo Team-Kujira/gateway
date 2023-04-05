@@ -978,6 +978,11 @@ export class Kujira {
           !options.statuses.includes(getNotNullOrThrowError(order.status))
         ) {
           return false;
+        } else if (
+          options.ids &&
+          !options.ids.includes(getNotNullOrThrowError<OrderId>(order.id))
+        ) {
+          return false;
         }
 
         return true;
