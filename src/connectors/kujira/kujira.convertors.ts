@@ -635,7 +635,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 
       const order = {
         id: orderId,
-        clientId: undefined,
+        clientId: bundle.getIn(['candidate']).clientId,
         marketName: bundle.getIn(['market']).name,
         marketId: bundle.getIn(['market']).id,
         ownerAddress: bundle.getIn(['events', 'transfer', 'sender']),
@@ -646,7 +646,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
           bundle.getIn(['events', 'wasm', 'offer_denom']),
           bundle.getIn(['market'])
         ),
-        status: bundle.getIn(['status']),
+        status: options.bundles.getIn(['common', 'status']),
         type: OrderType.LIMIT, // TODO how to decide between market and limit?!!!
         fee: bundle.getIn(['events', 'tx', 'fee']),
         creationTimestamp: undefined,

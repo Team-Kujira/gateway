@@ -832,6 +832,22 @@ describe('Kujira Full Flow', () => {
         candidateOrder.id = order.id;
       });
 
+      for (const [, order] of response.entries()) {
+        const clientId = getNotNullOrThrowError<Order>(order.clientId);
+        const candidate = candidates.get(clientId.toString());
+
+        expect(order.id).toBeString();
+        expect(order.marketId).toBe(candidate!.marketId);
+        expect(order.ownerAddress).toBe(candidate!.ownerAddress);
+        expect(order.price).toEqual(candidate!.price.toNumber().toString());
+        expect(order.amount).toEqual(candidate!.amount.toNumber().toString());
+        expect(order.side).toBe(candidate!.side);
+        expect(order.payerAddress).toBe(candidate!.payerAddress);
+        expect(order.status).toBe(OrderStatus.OPEN);
+        expect(order.signatures).toBeObject();
+        expect(order.type).toBe(candidate!.type);
+      }
+
       logResponse(response);
     });
 
