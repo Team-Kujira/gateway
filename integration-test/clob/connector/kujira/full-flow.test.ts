@@ -713,7 +713,7 @@ describe('Kujira Full Flow', () => {
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
-      // expect(response.id).toEqual(orderPlaced.id);
+      expect(response.id).toEqual(orderPlaced.id);
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['1']);
       expect(response.ownerAddress).toEqual(ownerAddress);
@@ -837,15 +837,15 @@ describe('Kujira Full Flow', () => {
         const candidate = candidates.get(clientId.toString());
 
         expect(order.id).toBeString();
-        expect(order.marketId).toBe(candidate!.marketId);
-        expect(order.ownerAddress).toBe(candidate!.ownerAddress);
-        expect(order.price).toEqual(candidate!.price.toNumber().toString());
-        expect(order.amount).toEqual(candidate!.amount.toNumber().toString());
-        expect(order.side).toBe(candidate!.side);
-        expect(order.payerAddress).toBe(candidate!.payerAddress);
+        expect(order.marketId).toBe(candidate?.marketId);
+        expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+        expect(order.price).toEqual(candidate?.price.toNumber().toString());
+        expect(order.amount).toEqual(candidate?.amount.toNumber().toString());
+        expect(order.side).toBe(candidate?.side);
+        expect(order.payerAddress).toBe(candidate?.payerAddress);
         expect(order.status).toBe(OrderStatus.OPEN);
         expect(order.signatures).toBeObject();
-        expect(order.type).toBe(candidate!.type);
+        expect(order.type).toBe(candidate?.type);
       }
 
       logResponse(response);
