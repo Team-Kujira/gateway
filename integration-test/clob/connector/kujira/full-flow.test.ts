@@ -698,6 +698,7 @@ describe('Kujira Full Flow', () => {
 
     it('Get the open order 1', async () => {
       const orderPlaced = getOrder('1');
+      const marketName: MarketName = getMarketName(marketIds['1']);
 
       request = {
         id: orderPlaced.id,
@@ -708,8 +709,6 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrder(request);
-
-      const marketName: MarketName = getMarketName(marketIds['1']);
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
@@ -747,7 +746,7 @@ describe('Kujira Full Flow', () => {
 
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
-      // expect(response.status).toBe(OrderStatus.OPEN);
+      expect(response.status).toBe(OrderStatus.OPEN);
 
       logResponse(response);
     });
@@ -795,10 +794,11 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open order 2', async () => {
-      const id = getOrder('2').id;
+      const orderPlaced = getOrder('2');
+      const marketName: MarketName = getMarketName(marketIds['2']);
 
       request = {
-        id,
+        id: orderPlaced.id,
         status: OrderStatus.OPEN,
         ownerAddress: ownerAddress,
       } as GetOrderOptions;
@@ -806,6 +806,15 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrder(request);
+
+      expect(response).toBeObject();
+      expect(response.status).toEqual(OrderStatus.OPEN);
+      expect(response.id).toEqual(orderPlaced.id);
+      expect(response.marketName).toBe(marketName);
+      expect(response.marketId).toBe(marketIds['2']);
+      expect(response.ownerAddress).toEqual(ownerAddress);
+      expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
+      expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
 
       logResponse(response);
     });
