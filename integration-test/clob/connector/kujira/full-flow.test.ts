@@ -88,7 +88,6 @@ const orders: IMap<OrderClientId, Order> = IMap<
 >().asMutable();
 
 let userBalances: Balances;
-let marketName: MarketName;
 
 const getOrder = (clientId: OrderClientId): Order => {
   return getOrders([clientId]).first();
@@ -661,7 +660,7 @@ describe('Kujira Full Flow', () => {
       expect(response.amount).toEqual(candidate.amount.toNumber().toString());
       expect(response.side).toBe(candidate.side);
 
-      marketName = getMarketName(marketIds['1']);
+      const marketName: MarketName = getMarketName(marketIds['1']);
 
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
@@ -710,6 +709,8 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrder(request);
 
+      const marketName: MarketName = getMarketName(marketIds['1']);
+
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
       // expect(response.id).toEqual(orderPlaced.id);
@@ -742,7 +743,7 @@ describe('Kujira Full Flow', () => {
       expect(response.amount).toEqual(candidate.amount.toNumber().toString());
       expect(response.side).toBe(candidate.side);
 
-      marketName = getMarketName(marketIds['2']);
+      const marketName: MarketName = getMarketName(marketIds['2']);
 
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
