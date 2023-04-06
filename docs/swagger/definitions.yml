@@ -2106,7 +2106,7 @@ definitions:
     properties:
       token:
         type: 'string'
-        example: 'inj'
+        example: 'kuji'
       amount:
         type: 'string'
         example: '1.25'
@@ -2120,7 +2120,7 @@ definitions:
     properties:
       token:
         type: 'string'
-        example: 'inj'
+        example: 'kuji'
       totalBalance:
         type: 'string'
         example: '100.0'
@@ -2140,27 +2140,27 @@ definitions:
       balances:
         type: 'array'
         item:
-          $ref: '#/definitions/InjectiveSubaccountBalanceSub'
-        example: '{"token": "inj", "tokenBalance": "100.0", "availableBalance": "15.0"}'
+          $ref: '#/definitions/KujiraSubaccountBalanceSub'
+        example: '{"token": "kuji", "tokenBalance": "100.0", "availableBalance": "15.0"}'
 
   KujiraBalancesResponse:
     type: 'object'
     required:
-      - 'injectiveAddress'
+      - 'kujiraAddress'
       - 'balances'
       - 'subaccounts'
     properties:
       injectiveAddress:
         type: 'string'
-        example: 'inj1l2sjl5gzl6rz8jffn3etq0j9zpljwu44ed7zuc'
+        example: ''
       balances:
         type: 'array'
         item:
-          $ref: '#/definitions/InjectiveBankBalance'
+          $ref: '#/definitions/KujiraBankBalance'
       subaccoutns:
         type: 'array'
         item:
-          $ref: '#/definitions/InjectiveSubaccountBalancesWithId'
+          $ref: '#/definitions/KujiraSubaccountBalancesWithId'
 
   KujiraPollResponse:
     type: 'object'
@@ -2201,10 +2201,10 @@ definitions:
     properties:
       txHash:
         type: 'string'
-        example: '0xa321bbe8888c3bc88ecb1ad4f03f22a71e6f5715dfcb19e0a2dca9036c981b6d'  # noqa: documentation
+        example: ''  # noqa: documentation
       chain:
         type: 'string'
-        example: 'injective'
+        example: 'kujira'
       network:
         type: 'string'
         example: 'mainnet'

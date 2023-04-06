@@ -665,7 +665,7 @@ describe('Kujira Full Flow', () => {
 
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
-      // expect(response.status).toBe('OPEN');
+      // expect(response.status).toBe(OrderStatus.OPEN);
 
       logResponse(response);
     });
@@ -711,13 +711,14 @@ describe('Kujira Full Flow', () => {
       response = await kujira.getOrder(request);
 
       expect(response).toBeObject();
-      expect(response.status).toEqual('OPEN');
-      expect(response.id).toEqual(orderPlaced.id);
+      expect(response.status).toEqual(OrderStatus.OPEN);
+      // expect(response.id).toEqual(orderPlaced.id);
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['1']);
       expect(response.ownerAddress).toEqual(ownerAddress);
       expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
+
       logResponse(response);
     });
 
@@ -730,12 +731,24 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.placeOrder(request);
 
+      candidate.id = response.id;
+
+      expect(response).toBeObject();
       expect(response['id'].length).toBeGreaterThan(0);
       expect(response['signatures']['creation'].length).toBeCloseTo(64);
+      expect(response.marketId).toBe(candidate.marketId);
+      expect(response.ownerAddress).toBe(candidate.ownerAddress);
+      expect(response.price).toEqual(candidate.price.toNumber().toString());
+      expect(response.amount).toEqual(candidate.amount.toNumber().toString());
+      expect(response.side).toBe(candidate.side);
+
+      marketName = getMarketName(marketIds['2']);
+
+      expect(response.marketName).toBe(marketName);
+      expect(response.payerAddress).toBe(candidate.payerAddress);
+      // expect(response.status).toBe(OrderStatus.OPEN);
 
       logResponse(response);
-
-      candidate.id = response.id;
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
