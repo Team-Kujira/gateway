@@ -41,7 +41,9 @@ export const isCosmosPrivateKey = (str: string): boolean => {
 };
 
 export const isKujiraPrivateKey = (str: string): boolean => {
-  return /^(0x|xdc)?[a-fA-F0-9]{64}$/.test(str);
+  return /^(?:\b[a-z]+\b(?:\s|$)){12}(?:(?:\b[a-z]+\b(?:\s|$)){12})?$/.test(
+    str
+  );
 };
 
 // given a request, look for a key called privateKey that is an Ethereum private key

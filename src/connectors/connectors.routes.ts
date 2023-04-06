@@ -128,10 +128,10 @@ export namespace ConnectorsRoutes {
           {
             name: 'kujira',
             trading_type: KujiraConfig.config.tradingTypes,
-            available_networks: InjectiveCLOBConfig.config.availableNetworks,
+            available_networks: KujiraConfig.config.availableNetworks,
             additional_add_wallet_prompts: {
               accountId:
-                'Enter your kujira sub account id wallet key (input 0 if unsure) >>> ',
+                'Enter your kujira account number wallet key (input 0 if unsure) >>> ',
             },
           },
         ],

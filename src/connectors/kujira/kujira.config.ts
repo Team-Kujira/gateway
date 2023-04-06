@@ -1,6 +1,5 @@
 import { BigNumber } from 'bignumber.js';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
-import { LOCALNET, MAINNET, TESTNET } from 'kujira.js';
 import { getNotNullOrThrowError } from './kujira.helpers';
 
 const configManager = ConfigManagerV2.getInstance();
@@ -72,7 +71,7 @@ export namespace KujiraConfig {
     availableNetworks: [
       {
         chain: 'kujira',
-        networks: [MAINNET, TESTNET, LOCALNET],
+        networks: ['mainnet', 'testnet', 'localnet'],
       },
     ],
     retry: {

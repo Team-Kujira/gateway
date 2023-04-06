@@ -150,7 +150,7 @@ export async function addWallet(
       }
     } else if (connection instanceof Kujira) {
       const mnemonic = req.privateKey;
-      const accountNumber = req.accountId;
+      const accountNumber = Number(req.accountId);
       address = await connection.getWalletPublicKey(mnemonic, accountNumber);
 
       if (accountNumber !== undefined) {
