@@ -787,8 +787,7 @@ describe('Kujira Full Flow', () => {
 
       expect(response).toContainKey('total');
 
-      const tokens = response.tokens.toJS();
-      tokens.forEach((token: any) => {
+      response.tokens.valueSeq().forEach((token: any) => {
         expect(token).toContainKeys(['free', 'unsettled', 'lockedInOrders']);
       });
       logResponse(response);
