@@ -711,8 +711,6 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getBalances(request);
 
-      // response = userBalances;
-
       expect(Object.entries(response.tokens.toJS())[0][1]).toContainKeys([
         'free',
         'unsettled',
@@ -729,17 +727,23 @@ describe('Kujira Full Flow', () => {
 
       const oldBalances = userBalances.tokens.toArray();
 
-      // console.log(oldBalances);
-
       const currentBalances = response.tokens.toArray();
 
       expect(currentBalances[0][1].free.toNumber()).toBeLessThanOrEqual(
         oldBalances[1][1].free.toNumber()
       );
 
+      expect(currentBalances[0][1].lockedInOrders.toNumber()).toBeGreaterThan(
+        oldBalances[1][1].lockedInOrders.toNumber()
+      );
+
       expect(currentBalances[1][1].free.toNumber()).toBeLessThan(
         oldBalances[2][1].free.toNumber()
       );
+
+      expect(
+        currentBalances[1][1].lockedInOrders.toNumber()
+      ).toBeGreaterThanOrEqual(oldBalances[2][1].lockedInOrders.toNumber());
 
       userBalances = response;
     });
@@ -919,6 +923,36 @@ describe('Kujira Full Flow', () => {
       response = await kujira.getBalances(request);
 
       logResponse(response);
+
+      const oldBalances = userBalances.tokens.toArray();
+
+      const currentBalances = response.tokens.toArray();
+
+      expect(currentBalances[0][1].free.toNumber()).toBeLessThanOrEqual(
+        oldBalances[0][1].free.toNumber()
+      );
+
+      expect(currentBalances[0][1].lockedInOrders.toNumber()).toBeGreaterThan(
+        oldBalances[0][1].lockedInOrders.toNumber()
+      );
+
+      expect(currentBalances[1][1].free.toNumber()).toBeLessThan(
+        oldBalances[1][1].free.toNumber()
+      );
+
+      expect(
+        currentBalances[1][1].lockedInOrders.toNumber()
+      ).toBeGreaterThanOrEqual(oldBalances[1][1].lockedInOrders.toNumber());
+
+      expect(currentBalances[2][1].free.toNumber()).toBeLessThan(
+        oldBalances[2][1].free.toNumber()
+      );
+
+      expect(
+        currentBalances[2][1].lockedInOrders.toNumber()
+      ).toBeGreaterThanOrEqual(oldBalances[2][1].lockedInOrders.toNumber());
+
+      userBalances = response;
     });
 
     it('Get the open orders 6 and 7', async () => {
