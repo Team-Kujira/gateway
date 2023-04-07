@@ -628,8 +628,6 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getBalances(request);
 
-      userBalances = response;
-
       expect(response).toContainKey('total');
       expect(response['total']).toContainKeys([
         'free',
@@ -637,7 +635,41 @@ describe('Kujira Full Flow', () => {
         'lockedInOrders',
       ]);
 
-      logResponse(userBalances);
+      logResponse(response);
+
+      userBalances = response;
+
+      const balances = userBalances.tokens.toArray();
+
+      if (balances) {
+        const output = {
+          token1: {
+            symbol: 'token1',
+            balances: {
+              free: balances[0][1].free.toNumber().toPrecision(2),
+              lockedInOrders: balances[0][1].lockedInOrders.toNumber(),
+              unsettled: balances[0][1].unsettled.toNumber(),
+            },
+          },
+          token2: {
+            symbol: 'token2',
+            balances: {
+              free: balances[1][1].free.toNumber(),
+              lockedInOrders: balances[1][1].lockedInOrders.toNumber(),
+              unsettled: balances[1][1].unsettled.toNumber(),
+            },
+          },
+          token3: {
+            symbol: 'token3',
+            balances: {
+              free: balances[2][1].free.toNumber(),
+              lockedInOrders: balances[2][1].lockedInOrders.toNumber(),
+              unsettled: balances[2][1].unsettled.toNumber(),
+            },
+          },
+        };
+        console.log(output);
+      }
     });
 
     it('Create a buy order 1 for market 1', async () => {
@@ -670,16 +702,16 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
-      // request = {
-      //   tokenIds: [tokenIds[1], tokenIds[2]],
-      //   ownerAddress: ownerAddress,
-      // } as GetBalancesOptions;
-      //
-      // logRequest(request);
-      //
-      // response = await kujira.getBalances(request);
+      request = {
+        tokenIds: [tokenIds[1], tokenIds[2]],
+        ownerAddress: ownerAddress,
+      } as GetBalancesOptions;
 
-      response = userBalances;
+      logRequest(request);
+
+      response = await kujira.getBalances(request);
+
+      // response = userBalances;
 
       expect(Object.entries(response.tokens.toJS())[0][1]).toContainKeys([
         'free',
@@ -694,6 +726,22 @@ describe('Kujira Full Flow', () => {
       ]);
 
       logResponse(response);
+
+      const oldBalances = userBalances.tokens.toArray();
+
+      // console.log(oldBalances);
+
+      const currentBalances = response.tokens.toArray();
+
+      expect(currentBalances[0][1].free.toNumber()).toBeLessThanOrEqual(
+        oldBalances[1][1].free.toNumber()
+      );
+
+      expect(currentBalances[1][1].free.toNumber()).toBeLessThan(
+        oldBalances[2][1].free.toNumber()
+      );
+
+      userBalances = response;
     });
 
     it('Get the open order 1', async () => {
