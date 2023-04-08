@@ -885,13 +885,18 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.placeOrders(request);
 
-      response.valueSeq().map((order: Order) => {
-        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
-        const candidateOrder = getNotNullOrThrowError<Order>(
-          candidates.get(clientId)
-        );
-        candidateOrder.id = order.id;
-      });
+      response
+        .valueSeq()
+        .toArray()
+        .map((order: Order) => {
+          const clientId = getNotNullOrThrowError<OrderClientId>(
+            order.clientId
+          );
+          const candidateOrder = getNotNullOrThrowError<Order>(
+            candidates.get(clientId)
+          );
+          candidateOrder.id = order.id;
+        });
 
       for (const [, order] of response.entries()) {
         const clientId = getNotNullOrThrowError<Order>(order.clientId);
@@ -956,10 +961,15 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open orders 6 and 7', async () => {
-      const ids = getOrders(['6', '7'])
+      const ordersPlaced = getOrders(['6', '7']);
+      const ids = ordersPlaced
         .map((order) => order.id)
         .valueSeq()
         .toArray();
+
+      const numOfOrders = Object.entries(ordersPlaced.toArray()).length;
+
+      console.log(numOfOrders);
 
       request = {
         ids,
@@ -970,6 +980,22 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
+      const responseArray = response.toArray();
+      console.log(responseArray);
+
+      // for (let i = 0; i < numOfOrders; i++) {
+      //   expect(responseArray[i][1].toArray()[i][1].status).toEqual(
+      //     OrderStatus.OPEN
+      //   );
+      //   // expect(responseArray[i].id).toEqual(ordersPlaced.toArray()[i].id);
+      //   // expect(order.marketName).toBe(marketName);
+      //   // expect(responseArray[i].marketId).toBe(marketIds['2']);
+      //   expect(responseArray[i][1].toArray().ownerAddress).toEqual(
+      //     ownerAddress
+      //   );
+      //   // expect(responseArray[i].price.toNumber()).toEqual(ordersPlaced.toArray()[i].price.toNumber());
+      //   // expect(responseArray[i].amount.toNumber()).toEqual(ordersPlaced.toArray()[i].amount.toNumber());
+      // }
 
       logResponse(response);
     });
