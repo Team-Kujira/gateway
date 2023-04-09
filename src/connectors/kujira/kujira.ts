@@ -932,7 +932,7 @@ export class Kujira {
           {
             orders_by_user: {
               address: ownerAddress,
-              limit: KujiraConfig.config.orderBook.limit,
+              limit: KujiraConfig.config.orders.open.limit,
             },
           }
         );
@@ -970,7 +970,7 @@ export class Kujira {
         await promiseAllInBatches(getOrders, marketIds);
       }
 
-      orders.filter((order) => {
+      orders = orders.filter((order) => {
         if (options.status && order.status !== options.status) {
           return false;
         } else if (

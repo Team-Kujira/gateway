@@ -44,8 +44,11 @@ export namespace KujiraConfig {
           `kujira.orders.create.maxPerTransaction`
         ),
       },
+      open: {
+        limit: configManager.get(`kujira.orders.open.limit`) | 255,
+      },
       filled: {
-        limit: configManager.get(`kujira.orders.filled.limit`),
+        limit: configManager.get(`kujira.orders.filled.limit`) | 255,
       },
       cancel: {
         maxPerTransaction: configManager.get(
@@ -66,7 +69,7 @@ export namespace KujiraConfig {
     },
     orderBook: {
       offset: configManager.get(`kujira.orderBook.offset`) || 0,
-      limit: configManager.get(`kujira.orderBook.limit`) || 100,
+      limit: configManager.get(`kujira.orderBook.limit`) || 255,
     },
     availableNetworks: [
       {

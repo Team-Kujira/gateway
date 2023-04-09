@@ -69,6 +69,15 @@
 						}
 					}
         },
+        "open": {
+          "type": "object",
+					"required": ["limit"],
+					"properties": {
+						"limit": {
+							"type": "integer"
+						}
+					}
+        },
         "filled": {
           "type": "object",
 					"required": ["limit"],
