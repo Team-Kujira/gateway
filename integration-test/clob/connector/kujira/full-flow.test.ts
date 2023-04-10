@@ -729,7 +729,7 @@ describe('Kujira Full Flow', () => {
 
       const currentBalances = response.tokens.toArray();
 
-      expect(currentBalances[0][1].free.toNumber()).toBeLessThanOrEqual(
+      expect(currentBalances[0][1].free.toNumber()).toBeLessThan(
         oldBalances[1][1].free.toNumber()
       );
 
@@ -741,9 +741,9 @@ describe('Kujira Full Flow', () => {
         oldBalances[2][1].free.toNumber()
       );
 
-      expect(
-        currentBalances[1][1].lockedInOrders.toNumber()
-      ).toBeGreaterThanOrEqual(oldBalances[2][1].lockedInOrders.toNumber());
+      expect(currentBalances[1][1].lockedInOrders.toNumber()).toBeGreaterThan(
+        oldBalances[2][1].lockedInOrders.toNumber()
+      );
 
       userBalances = response;
     });
@@ -933,7 +933,7 @@ describe('Kujira Full Flow', () => {
 
       const currentBalances = response.tokens.toArray();
 
-      expect(currentBalances[0][1].free.toNumber()).toBeLessThanOrEqual(
+      expect(currentBalances[0][1].free.toNumber()).toBeLessThan(
         oldBalances[0][1].free.toNumber()
       );
 
@@ -945,17 +945,17 @@ describe('Kujira Full Flow', () => {
         oldBalances[1][1].free.toNumber()
       );
 
-      expect(
-        currentBalances[1][1].lockedInOrders.toNumber()
-      ).toBeGreaterThanOrEqual(oldBalances[1][1].lockedInOrders.toNumber());
+      expect(currentBalances[1][1].lockedInOrders.toNumber()).toBeGreaterThan(
+        oldBalances[1][1].lockedInOrders.toNumber()
+      );
 
       expect(currentBalances[2][1].free.toNumber()).toBeLessThan(
         oldBalances[2][1].free.toNumber()
       );
 
-      expect(
-        currentBalances[2][1].lockedInOrders.toNumber()
-      ).toBeGreaterThanOrEqual(oldBalances[2][1].lockedInOrders.toNumber());
+      expect(currentBalances[2][1].lockedInOrders.toNumber()).toBeGreaterThan(
+        oldBalances[2][1].lockedInOrders.toNumber()
+      );
 
       userBalances = response;
     });
@@ -980,8 +980,8 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
-      const responseArray = response.toArray();
-      console.log(responseArray);
+      // const responseArray = response.toArray();
+      // console.log(responseArray);
 
       // for (let i = 0; i < numOfOrders; i++) {
       //   expect(responseArray[i][1].toArray()[i][1].status).toEqual(
@@ -1026,6 +1026,13 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.cancelOrder(request);
 
+      expect(response).not.toBeEmpty();
+      expect(response.id).toEqual(order.id);
+      expect(response.marketId).toBe(order.marketId);
+      expect(response.status).toBe(OrderStatus.CANCELLED);
+      expect(response.signatures).toHaveProperty('cancellation');
+      expect(response.signatures['cancellation'].length).toBeGreaterThan(0);
+
       logResponse(response);
     });
 
@@ -1055,10 +1062,15 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrder(request);
 
+      expect(response).not.toBeObject();
+      expect(response).toBeUndefined();
+
       logResponse(response);
     });
 
     it('Get all open orders and check that order 1 is missing', async () => {
+      const order = getOrder('1');
+
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1067,6 +1079,14 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
+
+      // const ordersIds = [];
+      // ordersIds.push(response.filter((order: Order) => order.id));
+      // console.log(ordersIds);
+      //
+      // expect(response.toArray()[0][1].toJSON()).toInclude(
+      //   getNotNullOrThrowError(order.id)
+      // );
 
       logResponse(response);
     });
