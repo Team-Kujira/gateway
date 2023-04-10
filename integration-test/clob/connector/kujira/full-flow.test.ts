@@ -43,6 +43,7 @@ import {
   SettlementsOptions,
   Balances,
   MarketName,
+  Balance,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { Denom, DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -675,6 +676,12 @@ describe('Kujira Full Flow', () => {
     it('Create a buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
 
+      // // Cheking the available wallet balances from the base tokens
+      // const marketTokens = networkPairs[candidate.marketId].denoms;
+      // let baseBalance = userBalances.tokens.get(marketTokens[0].reference);
+      // const orderAmount = candidate.amount;
+      // expect(baseBalance?.free.toNumber()).toBeGreaterThanOrEqual(orderAmount.toNumber());
+
       request = { ...candidate } as PlaceOrderOptions;
 
       logRequest(request);
@@ -725,24 +732,37 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const oldBalances = userBalances.tokens.toArray();
+      // const oldBalances = userBalances.tokens.toArray();
+      //
+      // const currentBalances = response.tokens.toArray();
+      //
+      // expect(currentBalances[0][1].free.toNumber()).toBeLessThan(
+      //   oldBalances[1][1].free.toNumber()
+      // );
+      //
+      // expect(currentBalances[0][1].lockedInOrders.toNumber()).toBeGreaterThan(
+      //   oldBalances[1][1].lockedInOrders.toNumber()
+      // );
+      //
+      // expect(currentBalances[1][1].free.toNumber()).toBeLessThan(
+      //   oldBalances[2][1].free.toNumber()
+      // );
+      //
+      // expect(currentBalances[1][1].lockedInOrders.toNumber()).toBeGreaterThan(
+      //   oldBalances[2][1].lockedInOrders.toNumber()
+      // );
 
-      const currentBalances = response.tokens.toArray();
-
-      expect(currentBalances[0][1].free.toNumber()).toBeLessThan(
-        oldBalances[1][1].free.toNumber()
+      const candidate = getOrder('1');
+      const marketTokens = networkPairs[candidate.marketId].denoms;
+      const oldBaseBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(marketTokens[0].reference)
       );
-
-      expect(currentBalances[0][1].lockedInOrders.toNumber()).toBeGreaterThan(
-        oldBalances[1][1].lockedInOrders.toNumber()
+      const newBaseBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(marketTokens[0].reference)
       );
-
-      expect(currentBalances[1][1].free.toNumber()).toBeLessThan(
-        oldBalances[2][1].free.toNumber()
-      );
-
-      expect(currentBalances[1][1].lockedInOrders.toNumber()).toBeGreaterThan(
-        oldBalances[2][1].lockedInOrders.toNumber()
+      const orderAmount = candidate.amount;
+      expect(oldBaseBalance.free.toNumber() - orderAmount.toNumber()).toEqual(
+        newBaseBalance.free?.toNumber()
       );
 
       userBalances = response;

@@ -15,6 +15,7 @@ import {
   GetTickerOptions,
   GetTransactionOptions,
   IMap,
+  KujiraEvent,
   KujiraOrderBook,
   KujiraSettlement,
   KujiraTicker,
@@ -75,6 +76,7 @@ import {
 import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
 import { TokenInfo } from '../../chains/ethereum/ethereum-base';
+import { parseCoins } from '@cosmjs/stargate';
 
 const config = KujiraConfig.config;
 
@@ -623,6 +625,11 @@ export const convertKujiraOrderToStatus = (kujiraOrder: any): OrderStatus => {
   }
 };
 
+export const convertKujiraFeeToFee = (kujiraFee: string) => {
+  const fee = parseCoins(kujiraFee)[0];
+  return BigNumber(fee.amount);
+};
+
 export const convertKujiraOrdersToMapOfOrders = (options: {
   type: ConvertOrderType;
   bundles: IMap<string, any>;
@@ -648,7 +655,9 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         ),
         status: options.bundles.getIn(['common', 'status']),
         type: OrderType.LIMIT, // TODO how to decide between market and limit?!!!
-        fee: bundle.getIn(['events', 'tx', 'fee']),
+        fee: convertKujiraFeeToFee(
+          options.bundles.getIn(['common', 'events', 'tx', 'fee']) as string
+        ),
         creationTimestamp: undefined,
         fillingTimestamp: undefined,
         signatures: {
@@ -829,6 +838,20 @@ export const convertNetworkToKujiraNetwork = (
 };
 
 export const convertKujiraEventsToMapOfEvents = (
+  events: readonly KujiraEvent[]
+): IMap<string, any> => {
+  const output = IMap<string, any>().asMutable();
+
+  for (const event of events) {
+    for (const attribute of event.attributes) {
+      output.setIn([event.type, attribute.key], attribute.value);
+    }
+  }
+
+  return output;
+};
+
+export const convertKujiraRawLogEventsToMapOfEvents = (
   eventsLog: Array<any>
 ): IMap<string, any> => {
   const output = IMap<string, any>().asMutable();

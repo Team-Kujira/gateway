@@ -89,7 +89,7 @@ import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
   convertKujiraBalancesToBalances,
-  convertKujiraEventsToMapOfEvents,
+  convertKujiraRawLogEventsToMapOfEvents,
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
   convertKujiraOrdersToMapOfOrders,
@@ -98,6 +98,7 @@ import {
   convertKujiraTokenToToken,
   convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
+  convertKujiraEventsToMapOfEvents,
 } from './kujira.convertors';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
@@ -1068,8 +1069,12 @@ export class Kujira {
 
     bundles.setIn(['common', 'response'], response);
     bundles.setIn(['common', 'status'], OrderStatus.OPEN);
+    bundles.setIn(
+      ['common', 'events'],
+      convertKujiraEventsToMapOfEvents(response.events)
+    );
 
-    const mapOfEvents = convertKujiraEventsToMapOfEvents(
+    const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
       JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
     );
 
@@ -1147,7 +1152,7 @@ export class Kujira {
       bundles.setIn(['common', 'response'], response);
       bundles.setIn(['common', 'status'], OrderStatus.CANCELLED);
 
-      const mapOfEvents = convertKujiraEventsToMapOfEvents(
+      const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
         JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
       );
 
