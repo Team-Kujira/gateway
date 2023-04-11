@@ -43,6 +43,7 @@ import {
   SettlementsOptions,
   Balances,
   MarketName,
+  Balance,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { Denom, DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -683,6 +684,10 @@ describe('Kujira Full Flow', () => {
       response = await kujira.placeOrder(request);
 
       candidate.id = response.id;
+      candidate.marketName = response.marketName;
+      candidate.status = response.status;
+      candidate.fee = response.fee;
+      candidate.signatures = response.signatures;
 
       expect(response).toBeObject();
       expect(response['signatures']['creation'].length).toBeCloseTo(64);
@@ -704,7 +709,7 @@ describe('Kujira Full Flow', () => {
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
       request = {
-        tokenIds: [tokenIds[1], tokenIds[2]],
+        tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesOptions;
 
@@ -726,25 +731,30 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const oldBalances = userBalances.tokens.toArray();
+      const order = getOrder('1');
+      const marketTokens = networkPairs[order.marketId].denoms;
+      const oldBaseBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(marketTokens[0].reference)
+      );
+      const newBaseBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(marketTokens[0].reference)
+      );
+      const oldQuoteBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(marketTokens[1].reference)
+      );
+      const newQuoteBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(marketTokens[1].reference)
+      );
+      const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
+      const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
 
-      const currentBalances = response.tokens.toArray();
-
-      expect(currentBalances[0][1].free.toNumber()).toBeLessThanOrEqual(
-        oldBalances[1][1].free.toNumber()
+      expect(oldBaseBalance.free.toNumber() - orderFee.toNumber()).toEqual(
+        newBaseBalance.free?.toNumber()
       );
 
-      expect(currentBalances[0][1].lockedInOrders.toNumber()).toBeGreaterThan(
-        oldBalances[1][1].lockedInOrders.toNumber()
+      expect(oldQuoteBalance.free.toNumber() - orderAmount.toNumber()).toEqual(
+        newQuoteBalance.free.toNumber()
       );
-
-      expect(currentBalances[1][1].free.toNumber()).toBeLessThan(
-        oldBalances[2][1].free.toNumber()
-      );
-
-      expect(
-        currentBalances[1][1].lockedInOrders.toNumber()
-      ).toBeGreaterThanOrEqual(oldBalances[2][1].lockedInOrders.toNumber());
 
       userBalances = response;
     });
@@ -934,7 +944,7 @@ describe('Kujira Full Flow', () => {
 
       const currentBalances = response.tokens.toArray();
 
-      expect(currentBalances[0][1].free.toNumber()).toBeLessThanOrEqual(
+      expect(currentBalances[0][1].free.toNumber()).toBeLessThan(
         oldBalances[0][1].free.toNumber()
       );
 
@@ -946,17 +956,17 @@ describe('Kujira Full Flow', () => {
         oldBalances[1][1].free.toNumber()
       );
 
-      expect(
-        currentBalances[1][1].lockedInOrders.toNumber()
-      ).toBeGreaterThanOrEqual(oldBalances[1][1].lockedInOrders.toNumber());
+      expect(currentBalances[1][1].lockedInOrders.toNumber()).toBeGreaterThan(
+        oldBalances[1][1].lockedInOrders.toNumber()
+      );
 
       expect(currentBalances[2][1].free.toNumber()).toBeLessThan(
         oldBalances[2][1].free.toNumber()
       );
 
-      expect(
-        currentBalances[2][1].lockedInOrders.toNumber()
-      ).toBeGreaterThanOrEqual(oldBalances[2][1].lockedInOrders.toNumber());
+      expect(currentBalances[2][1].lockedInOrders.toNumber()).toBeGreaterThan(
+        oldBalances[2][1].lockedInOrders.toNumber()
+      );
 
       userBalances = response;
     });
@@ -981,8 +991,8 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
-      const responseArray = response.toArray();
-      console.log(responseArray);
+      // const responseArray = response.toArray();
+      // console.log(responseArray);
 
       // for (let i = 0; i < numOfOrders; i++) {
       //   expect(responseArray[i][1].toArray()[i][1].status).toEqual(
@@ -1027,6 +1037,13 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.cancelOrder(request);
 
+      expect(response).not.toBeEmpty();
+      expect(response.id).toEqual(order.id);
+      expect(response.marketId).toBe(order.marketId);
+      expect(response.status).toBe(OrderStatus.CANCELLED);
+      expect(response.signatures).toHaveProperty('cancellation');
+      expect(response.signatures['cancellation'].length).toBeGreaterThan(0);
+
       logResponse(response);
     });
 
@@ -1056,10 +1073,15 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrder(request);
 
+      expect(response).not.toBeObject();
+      expect(response).toBeUndefined();
+
       logResponse(response);
     });
 
     it('Get all open orders and check that order 1 is missing', async () => {
+      const order = getOrder('1');
+
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1068,6 +1090,10 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
+
+      expect(response.first().keySeq().toArray()).toContain(
+        getNotNullOrThrowError(order.id)
+      );
 
       logResponse(response);
     });
