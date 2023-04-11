@@ -2,18 +2,18 @@ import {
   Balance,
   Balances,
   Block,
-  CancelOrderOptions,
-  CancelOrdersOptions,
+  CancelOrderRequest,
+  CancelOrdersRequest,
   ConvertOrderType,
   EstimatedFees,
   EstimatedGaResponse,
-  GetAllBalancesOptions,
-  GetEstimatedFeesOptions,
-  GetMarketOptions,
-  GetOrderBookOptions,
-  GetOrderOptions,
-  GetTickerOptions,
-  GetTransactionOptions,
+  GetAllBalancesRequest,
+  GetEstimatedFeesRequest,
+  GetMarketRequest,
+  GetOrderBookRequest,
+  GetOrderRequest,
+  GetTickerRequest,
+  GetTransactionRequest,
   IMap,
   KujiraEvent,
   KujiraOrderBook,
@@ -28,8 +28,8 @@ import {
   OrderSide,
   OrderStatus,
   OrderType,
-  PlaceOrderOptions,
-  PlaceOrdersOptions,
+  PlaceOrderRequest,
+  PlaceOrdersRequest,
   Settlement,
   Ticker,
   Token,
@@ -82,26 +82,26 @@ const config = KujiraConfig.config;
 
 export const convertClobMarketsRequestToGetMarketOptions = (
   request: ClobMarketsRequest
-): GetMarketOptions => {
+): GetMarketRequest => {
   return {
     id: request.market,
-  } as GetMarketOptions;
+  } as GetMarketRequest;
 };
 
 export const convertClobOrderbookRequestToGetOrderBookOptions = (
   request: ClobOrderbookRequest
-): GetOrderBookOptions => {
+): GetOrderBookRequest => {
   return {
     marketId: request.market,
-  } as GetOrderBookOptions;
+  } as GetOrderBookRequest;
 };
 
 export const convertClobTickerRequestToGetTickerOptions = (
   request: ClobTickerRequest
-): GetTickerOptions => {
+): GetTickerRequest => {
   return {
     marketId: request.market,
-  } as GetTickerOptions;
+  } as GetTickerRequest;
 };
 
 export const convertClobSideToOrderSide = (request: Side): OrderSide => {
@@ -138,7 +138,7 @@ export const convertClobOrderTypeToOrderType = (
 
 export const convertClobPostOrderRequestToPlaceOrderOptions = (
   request: ClobPostOrderRequest | CreateOrderParam
-): PlaceOrderOptions => {
+): PlaceOrderRequest => {
   return {
     waitUntilIncludedInBlock: false,
     marketId: request.market,
@@ -148,12 +148,12 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
     amount: BigNumber(request.amount),
     type: convertClobOrderTypeToOrderType(request.orderType),
     payerAddress: 'address' in request ? request.address : undefined,
-  } as PlaceOrderOptions;
+  } as PlaceOrderRequest;
 };
 
 export const convertClobGetOrderRequestToGetOrderOptions = (
   request: ClobGetOrderRequest
-): GetOrderOptions => {
+): GetOrderRequest => {
   return {
     id: request.orderId,
     marketId: request.market,
@@ -161,23 +161,23 @@ export const convertClobGetOrderRequestToGetOrderOptions = (
     ownerAddress: request.address,
     status: OrderStatus.OPEN,
     statuses: undefined,
-  } as GetOrderOptions;
+  } as GetOrderRequest;
 };
 
 export const convertClobBatchUpdateRequestToPlaceOrdersOptions = (
   request: ClobBatchUpdateRequest
-): PlaceOrdersOptions => {
+): PlaceOrdersRequest => {
   return {
     waitUntilIncludedInBlock: false,
     orders: request.createOrderParams?.map((order) => {
       return convertClobPostOrderRequestToPlaceOrderOptions(order);
     }),
-  } as PlaceOrdersOptions;
+  } as PlaceOrdersRequest;
 };
 
 export const convertClobBatchUpdateRequestToDeleteOrdersOptions = (
   request: ClobBatchUpdateRequest
-): CancelOrdersOptions => {
+): CancelOrdersRequest => {
   const marketId = convertClobDeleteOrderRequestToCancelOrderOptions(
     getNotNullOrThrowError<ClobDeleteOrderRequestExtract[]>(
       request.cancelOrderParams
@@ -190,33 +190,33 @@ export const convertClobBatchUpdateRequestToDeleteOrdersOptions = (
     }),
     marketId: marketId,
     ownerAddresses: [request.address],
-  } as CancelOrdersOptions;
+  } as CancelOrdersRequest;
 };
 
 export const convertClobDeleteOrderRequestToCancelOrderOptions = (
   request: ClobDeleteOrderRequest | ClobDeleteOrderRequestExtract
-): CancelOrderOptions => {
+): CancelOrderRequest => {
   return {
     id: request.orderId,
     ownerAddress: 'address' in request ? request.address : undefined,
     marketId: 'market' in request ? request.market : undefined,
-  } as CancelOrderOptions;
+  } as CancelOrderRequest;
 };
 
 export const convertBalanceRequestToGetAllBalancesOptions = (
   request: BalancesRequest
-): GetAllBalancesOptions => {
+): GetAllBalancesRequest => {
   return {
     ownerAddress: request.address,
-  } as GetAllBalancesOptions;
+  } as GetAllBalancesRequest;
 };
 
 export const convertPollRequestToGetTransactionOptions = (
   request: PollRequest
-): GetTransactionOptions => {
+): GetTransactionRequest => {
   return {
     signature: request.txHash,
-  } as GetTransactionOptions;
+  } as GetTransactionRequest;
 };
 
 export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
@@ -224,8 +224,8 @@ export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
   _gasPriceToken: string,
   _gasLimit: number,
   _gasCost: number
-): GetEstimatedFeesOptions => {
-  return {} as GetEstimatedFeesOptions;
+): GetEstimatedFeesRequest => {
+  return {} as GetEstimatedFeesRequest;
 };
 
 // TODO fix!!!

@@ -8,26 +8,26 @@ import {
   logResponse as helperLogResponse,
 } from '../../../helpers';
 import {
-  CancelAllOrdersOptions,
-  CancelOrderOptions,
-  CancelOrdersOptions,
-  GetAllBalancesOptions,
-  GetAllMarketsOptions,
-  GetAllOrderBookOptions,
-  GetAllTickersOptions,
-  GetAllTokensOptions,
-  GetBalanceOptions,
-  GetBalancesOptions,
-  GetMarketOptions,
-  GetMarketsOptions,
-  GetOrderBookOptions,
-  GetOrderBooksOptions,
-  GetOrderOptions,
-  GetOrdersOptions,
-  GetTickerOptions,
-  GetTickersOptions,
-  GetTokenOptions,
-  GetTokensOptions,
+  CancelAllOrdersRequest,
+  CancelOrderRequest,
+  CancelOrdersRequest,
+  GetAllBalancesRequest,
+  GetAllMarketsRequest,
+  GetAllOrderBookRequest,
+  GetAllTickersRequest,
+  GetAllTokensRequest,
+  GetBalanceRequest,
+  GetBalancesRequest,
+  GetMarketRequest,
+  GetMarketsRequest,
+  GetOrderBookRequest,
+  GetOrderBooksRequest,
+  GetOrderRequest,
+  GetOrdersRequest,
+  GetTickerRequest,
+  GetTickersRequest,
+  GetTokenRequest,
+  GetTokensRequest,
   IMap,
   Order,
   OrderClientId,
@@ -36,11 +36,11 @@ import {
   OrderStatus,
   OrderType,
   OwnerAddress,
-  PlaceOrderOptions,
-  PlaceOrdersOptions,
-  SettlementOptions,
-  SettlementsAllOptions,
-  SettlementsOptions,
+  PlaceOrderRequest,
+  PlaceOrdersRequest,
+  SettlementRequest,
+  SettlementsAllRequest,
+  SettlementsRequest,
   Balances,
   MarketName,
   Balance,
@@ -340,7 +340,7 @@ describe('Kujira Full Flow', () => {
     it('Get token 1', async () => {
       request = {
         id: tokenIds[1],
-      } as GetTokenOptions;
+      } as GetTokenRequest;
 
       logRequest(request);
 
@@ -352,7 +352,7 @@ describe('Kujira Full Flow', () => {
     it('Get tokens 2 and 3', async () => {
       request = {
         ids: [tokenIds[2], tokenIds[3]],
-      } as GetTokensOptions;
+      } as GetTokensRequest;
 
       logRequest(request);
 
@@ -362,7 +362,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all tokens', async () => {
-      request = {} as GetAllTokensOptions;
+      request = {} as GetAllTokensRequest;
 
       logRequest(request);
 
@@ -376,7 +376,7 @@ describe('Kujira Full Flow', () => {
     it('Get market 1', async () => {
       request = {
         id: marketIds[1],
-      } as GetMarketOptions;
+      } as GetMarketRequest;
 
       logRequest(request);
 
@@ -388,7 +388,7 @@ describe('Kujira Full Flow', () => {
     it('Get markets 2 and 3', async () => {
       request = {
         ids: [marketIds[2], marketIds[3]],
-      } as GetMarketsOptions;
+      } as GetMarketsRequest;
 
       logRequest(request);
 
@@ -398,7 +398,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all markets', async () => {
-      request = {} as GetAllMarketsOptions;
+      request = {} as GetAllMarketsRequest;
 
       logRequest(request);
 
@@ -412,7 +412,7 @@ describe('Kujira Full Flow', () => {
     it('Get order book from market 1', async () => {
       request = {
         marketId: marketIds[1],
-      } as GetOrderBookOptions;
+      } as GetOrderBookRequest;
 
       logRequest(request);
 
@@ -424,7 +424,7 @@ describe('Kujira Full Flow', () => {
     it('Get order books from the markets 2 and 3', async () => {
       request = {
         marketIds: [marketIds[2], marketIds[3]],
-      } as GetOrderBooksOptions;
+      } as GetOrderBooksRequest;
 
       logRequest(request);
 
@@ -434,7 +434,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all order books', async () => {
-      request = {} as GetAllOrderBookOptions;
+      request = {} as GetAllOrderBookRequest;
 
       logRequest(request);
 
@@ -448,7 +448,7 @@ describe('Kujira Full Flow', () => {
     it('Get ticker from market 1', async () => {
       request = {
         marketId: marketIds[1],
-      } as GetTickerOptions;
+      } as GetTickerRequest;
 
       logRequest(request);
 
@@ -460,7 +460,7 @@ describe('Kujira Full Flow', () => {
     it('Get tickers from markets 2 and 3', async () => {
       request = {
         marketIds: [marketIds[2], marketIds[3]],
-      } as GetTickersOptions;
+      } as GetTickersRequest;
 
       logRequest(request);
 
@@ -470,7 +470,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all tickers', async () => {
-      request = {} as GetAllTickersOptions;
+      request = {} as GetAllTickersRequest;
 
       logRequest(request);
 
@@ -485,7 +485,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenId: tokenIds[1],
         ownerAddress: ownerAddress,
-      } as GetBalanceOptions;
+      } as GetBalanceRequest;
 
       logRequest(request);
 
@@ -498,7 +498,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -510,7 +510,7 @@ describe('Kujira Full Flow', () => {
     it('Get all balances', async () => {
       request = {
         ownerAddress: ownerAddress,
-      } as GetAllBalancesOptions;
+      } as GetAllBalancesRequest;
 
       logRequest(request);
 
@@ -624,7 +624,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -677,7 +677,7 @@ describe('Kujira Full Flow', () => {
     it('Create a buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
 
-      request = { ...candidate } as PlaceOrderOptions;
+      request = { ...candidate } as PlaceOrderRequest;
 
       logRequest(request);
 
@@ -711,7 +711,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -767,7 +767,7 @@ describe('Kujira Full Flow', () => {
         id: orderPlaced.id,
         status: OrderStatus.OPEN,
         ownerAddress: ownerAddress,
-      } as GetOrderOptions;
+      } as GetOrderRequest;
 
       logRequest(request);
 
@@ -788,7 +788,7 @@ describe('Kujira Full Flow', () => {
     it('Create a sell order 2 for market 2', async () => {
       const candidate = getOrder('2');
 
-      request = { ...candidate } as PlaceOrderOptions;
+      request = { ...candidate } as PlaceOrderRequest;
 
       logRequest(request);
 
@@ -818,7 +818,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -864,7 +864,7 @@ describe('Kujira Full Flow', () => {
         id: orderPlaced.id,
         status: OrderStatus.OPEN,
         ownerAddress: ownerAddress,
-      } as GetOrderOptions;
+      } as GetOrderRequest;
 
       logRequest(request);
 
@@ -890,7 +890,7 @@ describe('Kujira Full Flow', () => {
           .valueSeq()
           .map((candidate) => ({ ...candidate }))
           .toArray(),
-      } as PlaceOrdersOptions;
+      } as PlaceOrdersRequest;
 
       logRequest(request);
 
@@ -932,7 +932,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -986,7 +986,7 @@ describe('Kujira Full Flow', () => {
         ids,
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1015,7 +1015,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1031,7 +1031,7 @@ describe('Kujira Full Flow', () => {
         id: order.id,
         marketId: order.marketId,
         ownerAddress: order.ownerAddress,
-      } as CancelOrderOptions;
+      } as CancelOrderRequest;
 
       logRequest(request);
 
@@ -1051,7 +1051,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -1067,7 +1067,7 @@ describe('Kujira Full Flow', () => {
         id: order.id,
         ownerAddress: order.ownerAddress,
         marketId: order.marketId,
-      } as GetOrderOptions;
+      } as GetOrderRequest;
 
       logRequest(request);
 
@@ -1085,7 +1085,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1105,7 +1105,7 @@ describe('Kujira Full Flow', () => {
         ids: [orders[0].id, orders[1].id],
         marketId: orders[0].marketId,
         ownerAddresses: [ownerAddress],
-      } as CancelOrdersOptions;
+      } as CancelOrdersRequest;
 
       logRequest(request);
 
@@ -1117,7 +1117,7 @@ describe('Kujira Full Flow', () => {
         ids: [orders[2].id],
         marketId: orders[2].marketId,
         ownerAddresses: [ownerAddress],
-      } as CancelOrdersOptions;
+      } as CancelOrdersRequest;
 
       logRequest(request);
 
@@ -1130,7 +1130,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -1149,7 +1149,7 @@ describe('Kujira Full Flow', () => {
         ids,
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1162,7 +1162,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1178,7 +1178,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -1194,7 +1194,7 @@ describe('Kujira Full Flow', () => {
         id,
         status: OrderStatus.FILLED,
         ownerAddress: ownerAddress,
-      } as GetOrderOptions;
+      } as GetOrderRequest;
 
       logRequest(request);
 
@@ -1207,7 +1207,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1219,7 +1219,7 @@ describe('Kujira Full Flow', () => {
     it('Get all orders (open or filled) and check that the order 2 is present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1235,7 +1235,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -1254,7 +1254,7 @@ describe('Kujira Full Flow', () => {
         ids,
         ownerAddresses: [ownerAddress],
         status: OrderStatus.FILLED,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1267,7 +1267,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.FILLED,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1280,7 +1280,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1292,7 +1292,7 @@ describe('Kujira Full Flow', () => {
     it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1304,7 +1304,7 @@ describe('Kujira Full Flow', () => {
     it('Cancel all the open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as CancelAllOrdersOptions;
+      } as CancelAllOrdersRequest;
 
       logRequest(request);
 
@@ -1317,7 +1317,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -1330,7 +1330,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1342,7 +1342,7 @@ describe('Kujira Full Flow', () => {
     it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1359,7 +1359,7 @@ describe('Kujira Full Flow', () => {
           .valueSeq()
           .map((candidate) => ({ ...candidate }))
           .toArray(),
-      } as PlaceOrdersOptions;
+      } as PlaceOrdersRequest;
 
       logRequest(request);
 
@@ -1380,7 +1380,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1392,7 +1392,7 @@ describe('Kujira Full Flow', () => {
     it('Get all orders (open or filled) and check that the orders 2, 6, 7, 10, and 11 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1404,7 +1404,7 @@ describe('Kujira Full Flow', () => {
     it('Cancel all the open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as CancelAllOrdersOptions;
+      } as CancelAllOrdersRequest;
 
       logRequest(request);
 
@@ -1417,7 +1417,7 @@ describe('Kujira Full Flow', () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
-      } as GetBalancesOptions;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
@@ -1430,7 +1430,7 @@ describe('Kujira Full Flow', () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
-      } as GetOrdersOptions;
+      } as GetOrdersRequest;
 
       logRequest(request);
 
@@ -1443,7 +1443,7 @@ describe('Kujira Full Flow', () => {
       request = {
         marketId: marketIds[1],
         ownerAddresses: [ownerAddress],
-      } as SettlementOptions;
+      } as SettlementRequest;
 
       logRequest(request);
 
@@ -1455,7 +1455,7 @@ describe('Kujira Full Flow', () => {
     it('Check the wallet balances', async () => {
       request = {
         ownerAddress: ownerAddress,
-      } as GetAllBalancesOptions;
+      } as GetAllBalancesRequest;
 
       logRequest(request);
 
@@ -1468,7 +1468,7 @@ describe('Kujira Full Flow', () => {
       request = {
         marketIds: [marketIds[2], marketIds[3]],
         ownerAddresses: [ownerAddress],
-      } as SettlementsOptions;
+      } as SettlementsRequest;
 
       logRequest(request);
 
@@ -1480,7 +1480,7 @@ describe('Kujira Full Flow', () => {
     it('Check the wallet balances', async () => {
       request = {
         ownerAddress: ownerAddress,
-      } as GetAllBalancesOptions;
+      } as GetAllBalancesRequest;
 
       logRequest(request);
 
@@ -1492,7 +1492,7 @@ describe('Kujira Full Flow', () => {
     it('Settle funds for all markets', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as SettlementsAllOptions;
+      } as SettlementsAllRequest;
 
       logRequest(request);
 

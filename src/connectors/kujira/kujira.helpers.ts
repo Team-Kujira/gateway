@@ -1,4 +1,6 @@
+import { NextFunction, Request, Response } from 'express';
 import { KujiraConfig } from './kujira.config';
+import { Kujira } from './kujira';
 
 /**
  *
@@ -154,3 +156,13 @@ export function* splitInChunks<T>(
     yield target.slice(i, i + quantity);
   }
 }
+
+export const verifyKujiraIsAvailable = async (
+  request: Request,
+  _response: Response,
+  next: NextFunction
+) => {
+  await Kujira.getInstance(request.body.chain, request.body.network);
+
+  return next();
+};

@@ -7,33 +7,33 @@ import {
   Address,
   BalanceNotFoundError,
   Block,
-  CancelAllOrdersOptions,
-  CancelOrderOptions,
-  CancelOrdersOptions,
+  CancelAllOrdersRequest,
+  CancelOrderRequest,
+  CancelOrdersRequest,
   EstimatedFees,
-  GetAllBalancesOptions,
-  GetAllMarketsOptions,
-  GetAllOrderBookOptions,
-  GetAllTickersOptions,
-  GetAllTokensOptions,
-  GetBalanceOptions,
-  GetBalancesOptions,
-  GetCurrentBlockOptions,
-  GetEstimatedFeesOptions,
-  GetMarketOptions,
-  GetMarketsOptions,
-  GetOrderBookOptions,
-  GetOrderBooksOptions,
-  GetOrderOptions,
-  GetOrdersOptions,
-  GetTickerOptions,
-  GetTickersOptions,
-  GetTokenOptions,
-  GetTokensOptions,
-  GetTransactionOptions,
-  GetTransactionsOptions,
-  GetWalletPublicKeyOptions,
-  GetWalletsPublicKeysOptions,
+  GetAllBalancesRequest,
+  GetAllMarketsRequest,
+  GetAllOrderBookRequest,
+  GetAllTickersRequest,
+  GetAllTokensRequest,
+  GetBalanceRequest,
+  GetBalancesRequest,
+  GetCurrentBlockRequest,
+  GetEstimatedFeesRequest,
+  GetMarketRequest,
+  GetMarketsRequest,
+  GetOrderBookRequest,
+  GetOrderBooksRequest,
+  GetOrderRequest,
+  GetOrdersRequest,
+  GetTickerRequest,
+  GetTickersRequest,
+  GetTokenRequest,
+  GetTokensRequest,
+  GetTransactionRequest,
+  GetTransactionsRequest,
+  GetWalletPublicKeyRequest,
+  GetWalletsPublicKeysRequest,
   IMap,
   Market,
   MarketId,
@@ -44,12 +44,12 @@ import {
   OrderId,
   OrderNotFoundError,
   OwnerAddress,
-  PlaceOrderOptions,
-  PlaceOrdersOptions,
+  PlaceOrderRequest,
+  PlaceOrdersRequest,
   Settlement,
-  SettlementOptions,
-  SettlementsAllOptions,
-  SettlementsOptions,
+  SettlementRequest,
+  SettlementsAllRequest,
+  SettlementsRequest,
   TickerNotFoundError,
   Token,
   TokenId,
@@ -86,7 +86,7 @@ import {
 
 export async function getToken(
   connector: Connector,
-  request: GetTokenOptions
+  request: GetTokenRequest
 ): Promise<ResponseWrapper<Token>> {
   validateGetTokenRequest(request);
 
@@ -109,7 +109,7 @@ export async function getToken(
 
 export async function getTokens(
   connector: Connector,
-  request: GetTokensOptions
+  request: GetTokensRequest
 ): Promise<ResponseWrapper<IMap<TokenId, Token>>> {
   validateGetTokensRequest(request);
 
@@ -132,7 +132,7 @@ export async function getTokens(
 
 export async function getAllTokens(
   connector: Connector,
-  request: GetAllTokensOptions
+  request: GetAllTokensRequest
 ): Promise<ResponseWrapper<IMap<TokenId, Token>>> {
   validateGetAllTokensRequest(request);
 
@@ -157,7 +157,7 @@ export async function getAllTokens(
 
 export async function getMarket(
   connector: Connector,
-  request: GetMarketOptions
+  request: GetMarketRequest
 ): Promise<ResponseWrapper<Market>> {
   validateGetMarketRequest(request);
 
@@ -180,7 +180,7 @@ export async function getMarket(
 
 export async function getMarkets(
   connector: Connector,
-  request: GetMarketsOptions
+  request: GetMarketsRequest
 ): Promise<ResponseWrapper<IMap<MarketId, Market>>> {
   validateGetMarketsRequest(request);
 
@@ -203,7 +203,7 @@ export async function getMarkets(
 
 export async function getAllMarkets(
   connector: Connector,
-  request: GetAllMarketsOptions
+  request: GetAllMarketsRequest
 ): Promise<ResponseWrapper<IMap<MarketId, Market>>> {
   validateGetAllMarketsRequest(request);
 
@@ -228,7 +228,7 @@ export async function getAllMarkets(
 
 export async function getOrderBook(
   connector: Connector,
-  request: GetOrderBookOptions
+  request: GetOrderBookRequest
 ): Promise<ResponseWrapper<OrderBook>> {
   validateGetOrderBookRequest(request);
 
@@ -253,7 +253,7 @@ export async function getOrderBook(
 
 export async function getOrderBooks(
   connector: Connector,
-  request: GetOrderBooksOptions
+  request: GetOrderBooksRequest
 ): Promise<ResponseWrapper<IMap<MarketId, OrderBook>>> {
   validateGetOrderBooksRequest(request);
 
@@ -278,7 +278,7 @@ export async function getOrderBooks(
 
 export async function getAllOrderBooks(
   connector: Connector,
-  request: GetAllOrderBookOptions
+  request: GetAllOrderBookRequest
 ): Promise<ResponseWrapper<IMap<MarketId, OrderBook>>> {
   validateGetAllOrderBooksRequest(request);
 
@@ -303,7 +303,7 @@ export async function getAllOrderBooks(
 
 export async function getTicker(
   connector: Connector,
-  request: GetTickerOptions
+  request: GetTickerRequest
 ): Promise<ResponseWrapper<any>> {
   validateGetTickerRequest(request);
 
@@ -326,7 +326,7 @@ export async function getTicker(
 
 export async function getTickers(
   connector: Connector,
-  request: GetTickersOptions
+  request: GetTickersRequest
 ): Promise<ResponseWrapper<any>> {
   validateGetTickersRequest(request);
 
@@ -349,7 +349,7 @@ export async function getTickers(
 
 export async function getAllTickers(
   connector: Connector,
-  request: GetAllTickersOptions
+  request: GetAllTickersRequest
 ): Promise<ResponseWrapper<any>> {
   validateGetAllTickersRequest(request);
 
@@ -374,7 +374,7 @@ export async function getAllTickers(
 
 export async function getBalance(
   connector: Connector,
-  request: GetBalanceOptions
+  request: GetBalanceRequest
 ): Promise<ResponseWrapper<any>> {
   validateGetBalanceRequest(request);
 
@@ -397,7 +397,7 @@ export async function getBalance(
 
 export async function getBalances(
   connector: Connector,
-  request: GetBalancesOptions
+  request: GetBalancesRequest
 ): Promise<ResponseWrapper<any>> {
   validateGetBalancesRequest(request);
 
@@ -420,7 +420,7 @@ export async function getBalances(
 
 export async function getAllBalances(
   connector: Connector,
-  request: GetAllBalancesOptions
+  request: GetAllBalancesRequest
 ): Promise<ResponseWrapper<any>> {
   validateGetAllBalancesRequest(request);
 
@@ -445,7 +445,7 @@ export async function getAllBalances(
 
 export async function getOrder(
   connector: Connector,
-  request: GetOrderOptions
+  request: GetOrderRequest
 ): Promise<ResponseWrapper<Order>> {
   validateGetOrderRequest(request);
 
@@ -468,7 +468,7 @@ export async function getOrder(
 
 export async function getOrders(
   connector: Connector,
-  request: GetOrdersOptions
+  request: GetOrdersRequest
 ): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
   validateGetOrdersRequest(request);
 
@@ -491,7 +491,7 @@ export async function getOrders(
 
 export async function placeOrder(
   connector: Connector,
-  request: PlaceOrderOptions
+  request: PlaceOrderRequest
 ): Promise<ResponseWrapper<Order>> {
   validatePlaceOrderRequest(request);
 
@@ -506,7 +506,7 @@ export async function placeOrder(
 
 export async function placeOrders(
   connector: Connector,
-  request: PlaceOrdersOptions
+  request: PlaceOrdersRequest
 ): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
   validatePlaceOrdersRequest(request);
 
@@ -521,7 +521,7 @@ export async function placeOrders(
 
 export async function cancelOrder(
   connector: Connector,
-  request: CancelOrderOptions
+  request: CancelOrderRequest
 ): Promise<ResponseWrapper<Order>> {
   validateCancelOrderRequest(request);
 
@@ -544,7 +544,7 @@ export async function cancelOrder(
 
 export async function cancelOrders(
   connector: Connector,
-  request: CancelOrdersOptions
+  request: CancelOrdersRequest
 ): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
   validateCancelOrdersRequest(request);
 
@@ -569,7 +569,7 @@ export async function cancelOrders(
 
 export async function cancelAllOrders(
   connector: Connector,
-  request: CancelAllOrdersOptions
+  request: CancelAllOrdersRequest
 ): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
   validateCancelAllOrdersRequest(request);
 
@@ -586,7 +586,7 @@ export async function cancelAllOrders(
 
 export async function settleMarketFunds(
   connector: Connector,
-  request: SettlementOptions
+  request: SettlementRequest
 ): Promise<ResponseWrapper<IMap<OwnerAddress, Settlement>>> {
   // validateSettleMarketFundsRequest(request);
 
@@ -611,7 +611,7 @@ export async function settleMarketFunds(
 
 export async function settleMarketsFunds(
   connector: Connector,
-  request: SettlementsOptions
+  request: SettlementsRequest
 ): Promise<ResponseWrapper<IMap<MarketId, IMap<OwnerAddress, Settlement>>>> {
   // validateSettleMarketsFundsRequest(request);
 
@@ -638,7 +638,7 @@ export async function settleMarketsFunds(
 
 export async function settleAllMarketsFunds(
   connector: Connector,
-  request: SettlementsAllOptions
+  request: SettlementsAllRequest
 ): Promise<ResponseWrapper<IMap<MarketId, IMap<OwnerAddress, Settlement>>>> {
   // validateSettleAllMarketsFundsRequest(request);
 
@@ -657,7 +657,7 @@ export async function settleAllMarketsFunds(
 
 export async function getWalletPublicKey(
   connector: Connector,
-  request: GetWalletPublicKeyOptions
+  request: GetWalletPublicKeyRequest
 ): Promise<ResponseWrapper<Address>> {
   // validateGetWalletPublicKeyRequest(request);
 
@@ -682,7 +682,7 @@ export async function getWalletPublicKey(
 
 export async function getWalletsPublicKeys(
   connector: Connector,
-  request: GetWalletsPublicKeysOptions
+  request: GetWalletsPublicKeysRequest
 ): Promise<ResponseWrapper<Address[]>> {
   // validateGetWalletsPublicKeysRequest(request);
 
@@ -707,7 +707,7 @@ export async function getWalletsPublicKeys(
 
 export async function getTransaction(
   connector: Connector,
-  request: GetTransactionOptions
+  request: GetTransactionRequest
 ): Promise<ResponseWrapper<Transaction>> {
   // validateGetTransactionRequest(request);
 
@@ -732,7 +732,7 @@ export async function getTransaction(
 
 export async function getTransactions(
   connector: Connector,
-  request: GetTransactionsOptions
+  request: GetTransactionsRequest
 ): Promise<ResponseWrapper<IMap<TransactionSignature, Transaction>>> {
   // validateGetTransactionsRequest(request);
 
@@ -759,7 +759,7 @@ export async function getTransactions(
 
 export async function getCurrentBlock(
   connector: Connector,
-  request: GetCurrentBlockOptions
+  request: GetCurrentBlockRequest
 ): Promise<ResponseWrapper<Block>> {
   // validateGetCurrentBlockRequest(request);
 
@@ -776,7 +776,7 @@ export async function getCurrentBlock(
 
 export async function getEstimatedFees(
   connector: Connector,
-  request: GetEstimatedFeesOptions
+  request: GetEstimatedFeesRequest
 ): Promise<ResponseWrapper<EstimatedFees>> {
   // validateGetEstimatedFeesRequest(request);
 
