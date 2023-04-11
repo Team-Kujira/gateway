@@ -4,59 +4,75 @@ import { HttpException } from '../../services/error-handler';
 import { Kujira as Connector } from './kujira';
 import { convertToResponseBody } from './kujira.convertors';
 import {
-  Address,
   BalanceNotFoundError,
-  Block,
   CancelAllOrdersRequest,
+  CancelAllOrdersResponse,
   CancelOrderRequest,
+  CancelOrderResponse,
   CancelOrdersRequest,
-  EstimatedFees,
+  CancelOrdersResponse,
   GetAllBalancesRequest,
+  GetAllBalancesResponse,
   GetAllMarketsRequest,
-  GetAllOrderBookRequest,
+  GetAllMarketsResponse,
+  GetAllOrderBooksRequest,
+  GetAllOrderBooksResponse,
   GetAllTickersRequest,
+  GetAllTickersResponse,
   GetAllTokensRequest,
+  GetAllTokensResponse,
   GetBalanceRequest,
+  GetBalanceResponse,
   GetBalancesRequest,
+  GetBalancesResponse,
   GetCurrentBlockRequest,
+  GetCurrentBlockResponse,
   GetEstimatedFeesRequest,
+  GetEstimatedFeesResponse,
   GetMarketRequest,
+  GetMarketResponse,
   GetMarketsRequest,
+  GetMarketsResponse,
   GetOrderBookRequest,
+  GetOrderBookResponse,
   GetOrderBooksRequest,
+  GetOrderBooksResponse,
   GetOrderRequest,
+  GetOrderResponse,
   GetOrdersRequest,
+  GetOrdersResponse,
   GetTickerRequest,
+  GetTickerResponse,
   GetTickersRequest,
+  GetTickersResponse,
   GetTokenRequest,
+  GetTokenResponse,
   GetTokensRequest,
+  GetTokensResponse,
   GetTransactionRequest,
+  GetTransactionResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   GetWalletPublicKeyRequest,
+  GetWalletPublicKeyResponse,
   GetWalletsPublicKeysRequest,
-  IMap,
-  Market,
-  MarketId,
+  GetWalletsPublicKeysResponse,
   MarketNotFoundError,
-  Order,
-  OrderBook,
   OrderBookNotFoundError,
-  OrderId,
   OrderNotFoundError,
-  OwnerAddress,
   PlaceOrderRequest,
+  PlaceOrderResponse,
   PlaceOrdersRequest,
-  Settlement,
+  PlaceOrdersResponse,
   SettlementRequest,
+  SettlementResponse,
   SettlementsAllRequest,
+  SettlementsAllResponse,
   SettlementsRequest,
+  SettlementsResponse,
   TickerNotFoundError,
-  Token,
-  TokenId,
   TokenNotFoundError,
-  Transaction,
   TransactionNotFoundError,
-  TransactionSignature,
   WalletPublicKeyNotFoundError,
 } from './kujira.types';
 import {
@@ -87,10 +103,10 @@ import {
 export async function getToken(
   connector: Connector,
   request: GetTokenRequest
-): Promise<ResponseWrapper<Token>> {
+): Promise<ResponseWrapper<GetTokenResponse>> {
   validateGetTokenRequest(request);
 
-  const response = new ResponseWrapper<Token>();
+  const response = new ResponseWrapper<GetTokenResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getToken(request));
@@ -110,10 +126,10 @@ export async function getToken(
 export async function getTokens(
   connector: Connector,
   request: GetTokensRequest
-): Promise<ResponseWrapper<IMap<TokenId, Token>>> {
+): Promise<ResponseWrapper<GetTokensResponse>> {
   validateGetTokensRequest(request);
 
-  const response = new ResponseWrapper<IMap<TokenId, Token>>();
+  const response = new ResponseWrapper<GetTokensResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getTokens(request));
@@ -133,10 +149,10 @@ export async function getTokens(
 export async function getAllTokens(
   connector: Connector,
   request: GetAllTokensRequest
-): Promise<ResponseWrapper<IMap<TokenId, Token>>> {
+): Promise<ResponseWrapper<GetAllTokensResponse>> {
   validateGetAllTokensRequest(request);
 
-  const response = new ResponseWrapper<IMap<TokenId, Token>>();
+  const response = new ResponseWrapper<GetAllTokensResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -158,10 +174,10 @@ export async function getAllTokens(
 export async function getMarket(
   connector: Connector,
   request: GetMarketRequest
-): Promise<ResponseWrapper<Market>> {
+): Promise<ResponseWrapper<GetMarketResponse>> {
   validateGetMarketRequest(request);
 
-  const response = new ResponseWrapper<Market>();
+  const response = new ResponseWrapper<GetMarketResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getMarket(request));
@@ -181,10 +197,10 @@ export async function getMarket(
 export async function getMarkets(
   connector: Connector,
   request: GetMarketsRequest
-): Promise<ResponseWrapper<IMap<MarketId, Market>>> {
+): Promise<ResponseWrapper<GetMarketsResponse>> {
   validateGetMarketsRequest(request);
 
-  const response = new ResponseWrapper<IMap<MarketId, Market>>();
+  const response = new ResponseWrapper<GetMarketsResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getMarkets(request));
@@ -204,10 +220,10 @@ export async function getMarkets(
 export async function getAllMarkets(
   connector: Connector,
   request: GetAllMarketsRequest
-): Promise<ResponseWrapper<IMap<MarketId, Market>>> {
+): Promise<ResponseWrapper<GetAllMarketsResponse>> {
   validateGetAllMarketsRequest(request);
 
-  const response = new ResponseWrapper<IMap<MarketId, Market>>();
+  const response = new ResponseWrapper<GetAllMarketsResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -229,10 +245,10 @@ export async function getAllMarkets(
 export async function getOrderBook(
   connector: Connector,
   request: GetOrderBookRequest
-): Promise<ResponseWrapper<OrderBook>> {
+): Promise<ResponseWrapper<GetOrderBookResponse>> {
   validateGetOrderBookRequest(request);
 
-  const response = new ResponseWrapper<OrderBook>();
+  const response = new ResponseWrapper<GetOrderBookResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -254,10 +270,10 @@ export async function getOrderBook(
 export async function getOrderBooks(
   connector: Connector,
   request: GetOrderBooksRequest
-): Promise<ResponseWrapper<IMap<MarketId, OrderBook>>> {
+): Promise<ResponseWrapper<GetOrderBooksResponse>> {
   validateGetOrderBooksRequest(request);
 
-  const response = new ResponseWrapper<IMap<MarketId, OrderBook>>();
+  const response = new ResponseWrapper<GetOrderBooksResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -278,11 +294,11 @@ export async function getOrderBooks(
 
 export async function getAllOrderBooks(
   connector: Connector,
-  request: GetAllOrderBookRequest
-): Promise<ResponseWrapper<IMap<MarketId, OrderBook>>> {
+  request: GetAllOrderBooksRequest
+): Promise<ResponseWrapper<GetAllOrderBooksResponse>> {
   validateGetAllOrderBooksRequest(request);
 
-  const response = new ResponseWrapper<IMap<MarketId, OrderBook>>();
+  const response = new ResponseWrapper<GetAllOrderBooksResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -304,10 +320,10 @@ export async function getAllOrderBooks(
 export async function getTicker(
   connector: Connector,
   request: GetTickerRequest
-): Promise<ResponseWrapper<any>> {
+): Promise<ResponseWrapper<GetTickerResponse>> {
   validateGetTickerRequest(request);
 
-  const response = new ResponseWrapper<any>();
+  const response = new ResponseWrapper<GetTickerResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getTicker(request));
@@ -327,10 +343,10 @@ export async function getTicker(
 export async function getTickers(
   connector: Connector,
   request: GetTickersRequest
-): Promise<ResponseWrapper<any>> {
+): Promise<ResponseWrapper<GetTickersResponse>> {
   validateGetTickersRequest(request);
 
-  const response = new ResponseWrapper<any>();
+  const response = new ResponseWrapper<GetTickersResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getTickers(request));
@@ -350,10 +366,10 @@ export async function getTickers(
 export async function getAllTickers(
   connector: Connector,
   request: GetAllTickersRequest
-): Promise<ResponseWrapper<any>> {
+): Promise<ResponseWrapper<GetAllTickersResponse>> {
   validateGetAllTickersRequest(request);
 
-  const response = new ResponseWrapper<any>();
+  const response = new ResponseWrapper<GetAllTickersResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -375,10 +391,10 @@ export async function getAllTickers(
 export async function getBalance(
   connector: Connector,
   request: GetBalanceRequest
-): Promise<ResponseWrapper<any>> {
+): Promise<ResponseWrapper<GetBalanceResponse>> {
   validateGetBalanceRequest(request);
 
-  const response = new ResponseWrapper<any>();
+  const response = new ResponseWrapper<GetBalanceResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getBalance(request));
@@ -398,10 +414,10 @@ export async function getBalance(
 export async function getBalances(
   connector: Connector,
   request: GetBalancesRequest
-): Promise<ResponseWrapper<any>> {
+): Promise<ResponseWrapper<GetBalancesResponse>> {
   validateGetBalancesRequest(request);
 
-  const response = new ResponseWrapper<any>();
+  const response = new ResponseWrapper<GetBalancesResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getBalances(request));
@@ -421,10 +437,10 @@ export async function getBalances(
 export async function getAllBalances(
   connector: Connector,
   request: GetAllBalancesRequest
-): Promise<ResponseWrapper<any>> {
+): Promise<ResponseWrapper<GetAllBalancesResponse>> {
   validateGetAllBalancesRequest(request);
 
-  const response = new ResponseWrapper<any>();
+  const response = new ResponseWrapper<GetAllBalancesResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -446,10 +462,10 @@ export async function getAllBalances(
 export async function getOrder(
   connector: Connector,
   request: GetOrderRequest
-): Promise<ResponseWrapper<Order>> {
+): Promise<ResponseWrapper<GetOrderResponse>> {
   validateGetOrderRequest(request);
 
-  const response = new ResponseWrapper<Order>();
+  const response = new ResponseWrapper<GetOrderResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getOrder(request));
@@ -469,10 +485,10 @@ export async function getOrder(
 export async function getOrders(
   connector: Connector,
   request: GetOrdersRequest
-): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
+): Promise<ResponseWrapper<GetOrdersResponse>> {
   validateGetOrdersRequest(request);
 
-  const response = new ResponseWrapper<IMap<OrderId, Order>>();
+  const response = new ResponseWrapper<GetOrdersResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.getOrders(request));
@@ -492,10 +508,10 @@ export async function getOrders(
 export async function placeOrder(
   connector: Connector,
   request: PlaceOrderRequest
-): Promise<ResponseWrapper<Order>> {
+): Promise<ResponseWrapper<PlaceOrderResponse>> {
   validatePlaceOrderRequest(request);
 
-  const response = new ResponseWrapper<Order>();
+  const response = new ResponseWrapper<PlaceOrderResponse>();
 
   response.body = convertToResponseBody(await connector.placeOrder(request));
 
@@ -507,10 +523,10 @@ export async function placeOrder(
 export async function placeOrders(
   connector: Connector,
   request: PlaceOrdersRequest
-): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
+): Promise<ResponseWrapper<PlaceOrdersResponse>> {
   validatePlaceOrdersRequest(request);
 
-  const response = new ResponseWrapper<IMap<OrderId, Order>>();
+  const response = new ResponseWrapper<PlaceOrdersResponse>();
 
   response.body = convertToResponseBody(await connector.placeOrders(request));
 
@@ -522,10 +538,10 @@ export async function placeOrders(
 export async function cancelOrder(
   connector: Connector,
   request: CancelOrderRequest
-): Promise<ResponseWrapper<Order>> {
+): Promise<ResponseWrapper<CancelOrderResponse>> {
   validateCancelOrderRequest(request);
 
-  const response = new ResponseWrapper<Order>();
+  const response = new ResponseWrapper<CancelOrderResponse>();
 
   try {
     response.body = convertToResponseBody(await connector.cancelOrder(request));
@@ -545,10 +561,10 @@ export async function cancelOrder(
 export async function cancelOrders(
   connector: Connector,
   request: CancelOrdersRequest
-): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
+): Promise<ResponseWrapper<CancelOrdersResponse>> {
   validateCancelOrdersRequest(request);
 
-  const response = new ResponseWrapper<IMap<OrderId, Order>>();
+  const response = new ResponseWrapper<CancelOrdersResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -570,10 +586,10 @@ export async function cancelOrders(
 export async function cancelAllOrders(
   connector: Connector,
   request: CancelAllOrdersRequest
-): Promise<ResponseWrapper<IMap<OrderId, Order>>> {
+): Promise<ResponseWrapper<CancelAllOrdersResponse>> {
   validateCancelAllOrdersRequest(request);
 
-  const response = new ResponseWrapper<IMap<OrderId, Order>>();
+  const response = new ResponseWrapper<CancelAllOrdersResponse>();
 
   response.body = convertToResponseBody(
     await connector.cancelAllOrders(request)
@@ -587,10 +603,10 @@ export async function cancelAllOrders(
 export async function settleMarketFunds(
   connector: Connector,
   request: SettlementRequest
-): Promise<ResponseWrapper<IMap<OwnerAddress, Settlement>>> {
+): Promise<ResponseWrapper<SettlementResponse>> {
   // validateSettleMarketFundsRequest(request);
 
-  const response = new ResponseWrapper<IMap<OwnerAddress, Settlement>>();
+  const response = new ResponseWrapper<SettlementResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -612,12 +628,10 @@ export async function settleMarketFunds(
 export async function settleMarketsFunds(
   connector: Connector,
   request: SettlementsRequest
-): Promise<ResponseWrapper<IMap<MarketId, IMap<OwnerAddress, Settlement>>>> {
+): Promise<ResponseWrapper<SettlementsResponse>> {
   // validateSettleMarketsFundsRequest(request);
 
-  const response = new ResponseWrapper<
-    IMap<MarketId, IMap<OwnerAddress, Settlement>>
-  >();
+  const response = new ResponseWrapper<SettlementsResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -639,12 +653,10 @@ export async function settleMarketsFunds(
 export async function settleAllMarketsFunds(
   connector: Connector,
   request: SettlementsAllRequest
-): Promise<ResponseWrapper<IMap<MarketId, IMap<OwnerAddress, Settlement>>>> {
+): Promise<ResponseWrapper<SettlementsAllResponse>> {
   // validateSettleAllMarketsFundsRequest(request);
 
-  const response = new ResponseWrapper<
-    IMap<MarketId, IMap<OwnerAddress, Settlement>>
-  >();
+  const response = new ResponseWrapper<SettlementsAllResponse>();
 
   response.body = convertToResponseBody(
     await connector.settleAllMarketsFunds(request)
@@ -658,10 +670,10 @@ export async function settleAllMarketsFunds(
 export async function getWalletPublicKey(
   connector: Connector,
   request: GetWalletPublicKeyRequest
-): Promise<ResponseWrapper<Address>> {
+): Promise<ResponseWrapper<GetWalletPublicKeyResponse>> {
   // validateGetWalletPublicKeyRequest(request);
 
-  const response = new ResponseWrapper<Address>();
+  const response = new ResponseWrapper<GetWalletPublicKeyResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -683,10 +695,10 @@ export async function getWalletPublicKey(
 export async function getWalletsPublicKeys(
   connector: Connector,
   request: GetWalletsPublicKeysRequest
-): Promise<ResponseWrapper<Address[]>> {
+): Promise<ResponseWrapper<GetWalletsPublicKeysResponse>> {
   // validateGetWalletsPublicKeysRequest(request);
 
-  const response = new ResponseWrapper<Address[]>();
+  const response = new ResponseWrapper<GetWalletsPublicKeysResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -708,10 +720,10 @@ export async function getWalletsPublicKeys(
 export async function getTransaction(
   connector: Connector,
   request: GetTransactionRequest
-): Promise<ResponseWrapper<Transaction>> {
+): Promise<ResponseWrapper<GetTransactionResponse>> {
   // validateGetTransactionRequest(request);
 
-  const response = new ResponseWrapper<Transaction>();
+  const response = new ResponseWrapper<GetTransactionResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -733,12 +745,10 @@ export async function getTransaction(
 export async function getTransactions(
   connector: Connector,
   request: GetTransactionsRequest
-): Promise<ResponseWrapper<IMap<TransactionSignature, Transaction>>> {
+): Promise<ResponseWrapper<GetTransactionsResponse>> {
   // validateGetTransactionsRequest(request);
 
-  const response = new ResponseWrapper<
-    IMap<TransactionSignature, Transaction>
-  >();
+  const response = new ResponseWrapper<GetTransactionsResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -760,10 +770,10 @@ export async function getTransactions(
 export async function getCurrentBlock(
   connector: Connector,
   request: GetCurrentBlockRequest
-): Promise<ResponseWrapper<Block>> {
+): Promise<ResponseWrapper<GetCurrentBlockResponse>> {
   // validateGetCurrentBlockRequest(request);
 
-  const response = new ResponseWrapper<Block>();
+  const response = new ResponseWrapper<GetCurrentBlockResponse>();
 
   response.body = convertToResponseBody(
     await connector.getCurrentBlock(request)
@@ -777,10 +787,10 @@ export async function getCurrentBlock(
 export async function getEstimatedFees(
   connector: Connector,
   request: GetEstimatedFeesRequest
-): Promise<ResponseWrapper<EstimatedFees>> {
+): Promise<ResponseWrapper<GetEstimatedFeesResponse>> {
   // validateGetEstimatedFeesRequest(request);
 
-  const response = new ResponseWrapper<EstimatedFees>();
+  const response = new ResponseWrapper<GetEstimatedFeesResponse>();
 
   response.body = convertToResponseBody(
     await connector.getEstimatedFees(request)

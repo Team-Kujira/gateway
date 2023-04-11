@@ -51,6 +51,7 @@ export type Amount = BigNumber;
 export type Fee = BigNumber;
 export type Timestamp = number;
 export type Block = number;
+export type EncryptedWallet = string;
 
 export type ConnectorMarket = any;
 export type ConnectorTicker = any;
@@ -336,6 +337,9 @@ export interface GetTokenRequest {
   symbol?: TokenSymbol;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTokenResponse extends Token {}
+
 export interface GetTokensRequest {
   ids?: TokenId[];
 
@@ -343,44 +347,80 @@ export interface GetTokensRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTokensResponse extends IMap<TokenId, Token> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllTokensRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllTokensResponse extends IMap<TokenId, Token> {}
 
 export interface GetMarketRequest {
   id?: MarketId;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetMarketResponse extends Market {}
 
 export interface GetMarketsRequest {
   ids?: MarketId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetMarketsResponse extends IMap<MarketId, Market> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllMarketsRequest extends GetMarketsRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllMarketsResponse extends IMap<MarketId, Market> {}
 
 export interface GetOrderBookRequest {
   marketId?: MarketId;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetOrderBookResponse extends OrderBook {}
 
 export interface GetOrderBooksRequest {
   marketIds?: MarketId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetAllOrderBookRequest extends GetOrderBooksRequest {}
+export interface GetOrderBooksResponse extends IMap<MarketId, OrderBook> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllOrderBooksRequest extends GetOrderBooksRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllOrderBooksResponse extends IMap<MarketId, OrderBook> {}
 
 export interface GetTickerRequest {
   marketId?: MarketId;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTickerResponse extends Ticker {}
 
 export interface GetTickersRequest {
   marketIds?: MarketId[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTickersResponse extends IMap<MarketId, Ticker> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllTickersRequest extends GetTickersRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllTickersResponse extends IMap<MarketId, Ticker> {}
 
 export interface GetWalletArtifactsRequest {
   ownerAddress: OwnerAddress;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetWalletArtifactsResponse extends KujiraWalletArtifacts {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalanceRequest {
@@ -390,6 +430,9 @@ export interface GetBalanceRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetBalanceResponse extends Balance {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalancesRequest {
   tokenIds: TokenId[];
 
@@ -397,9 +440,15 @@ export interface GetBalancesRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetBalancesResponse extends Balances {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllBalancesRequest {
   ownerAddress: OwnerAddress;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetAllBalancesResponse extends Balances {}
 
 export interface GetOrderRequest {
   id: OrderId;
@@ -410,6 +459,9 @@ export interface GetOrderRequest {
   statuses?: OrderStatus[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetOrderResponse extends Order {}
+
 export interface GetOrdersRequest {
   ids?: OrderId[];
   marketId?: MarketId;
@@ -418,6 +470,10 @@ export interface GetOrdersRequest {
   status?: OrderStatus;
   statuses?: OrderStatus[];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetOrdersResponse
+  extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
 
 export interface PlaceOrderRequest {
   waitUntilIncludedInBlock?: boolean;
@@ -430,17 +486,26 @@ export interface PlaceOrderRequest {
   payerAddress?: OrderPayerAddress;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PlaceOrderResponse extends Order {}
+
 export interface PlaceOrdersRequest {
   ownerAddress?: OrderOwnerAddress;
   waitUntilIncludedInBlock?: boolean;
   orders: PlaceOrderRequest[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PlaceOrdersResponse extends IMap<OrderId, Order> {}
+
 export interface CancelOrderRequest {
   id: OrderId;
   ownerAddress: OrderOwnerAddress;
   marketId: MarketId;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CancelOrderResponse extends Order {}
 
 export interface CancelOrdersRequest {
   ids: OrderId[];
@@ -449,16 +514,27 @@ export interface CancelOrdersRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CancelOrdersResponse
+  extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CancelAllOrdersRequest {
   marketId?: MarketId;
   marketIds?: MarketId[];
   ownerAddresses: OrderOwnerAddress[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CancelAllOrdersResponse
+  extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
+
 export interface SettlementRequest {
   marketId?: MarketId;
   ownerAddresses: OrderOwnerAddress[];
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SettlementResponse extends IMap<OwnerAddress, Settlement> {}
 
 export interface SettlementsRequest {
   marketIds?: MarketId[];
@@ -466,10 +542,21 @@ export interface SettlementsRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SettlementsResponse
+  extends IMap<MarketId, IMap<OwnerAddress, Settlement>> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SettlementsAllRequest extends SettlementsRequest {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SettlementsAllResponse
+  extends IMap<MarketId, IMap<OwnerAddress, Settlement>> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetCurrentBlockRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export type GetCurrentBlockResponse = Block;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTransactionRequest {
@@ -477,12 +564,22 @@ export interface GetTransactionRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTransactionResponse extends Transaction {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTransactionsRequest {
   signatures: TransactionSignature[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTransactionsResponse
+  extends IMap<TransactionSignature, Transaction> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetEstimatedFeesRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetEstimatedFeesResponse extends EstimatedFees {}
 
 export interface GetWalletPublicKeyRequest {
   mnemonic: Mnemonic;
@@ -490,16 +587,28 @@ export interface GetWalletPublicKeyRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export type GetWalletPublicKeyResponse = Address;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetWalletsPublicKeysRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export type GetWalletsPublicKeysResponse = Address[];
 
 export interface EncryptWalletRequest {
   wallet: BasicWallet;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
+export type EncryptWalletResponse = EncryptedWallet;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DecryptWalletRequest {
   accountAddress: OwnerAddress;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export type DecryptWalletResponse = BasicWallet;
 
 //
 // Extensions

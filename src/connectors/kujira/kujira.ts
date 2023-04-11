@@ -4,38 +4,62 @@ import {
   Balances,
   BasicKujiraMarket,
   BasicKujiraToken,
-  BasicWallet,
-  Block,
   CancelAllOrdersRequest,
+  CancelAllOrdersResponse,
   CancelOrderRequest,
+  CancelOrderResponse,
   CancelOrdersRequest,
+  CancelOrdersResponse,
   ConvertOrderType,
   DecryptWalletRequest,
+  DecryptWalletResponse,
   EncryptWalletRequest,
+  EncryptWalletResponse,
   EstimatedFees,
   GetAllBalancesRequest,
+  GetAllBalancesResponse,
   GetAllMarketsRequest,
-  GetAllOrderBookRequest,
+  GetAllMarketsResponse,
+  GetAllOrderBooksRequest,
+  GetAllOrderBooksResponse,
   GetAllTickersRequest,
+  GetAllTickersResponse,
   GetAllTokensRequest,
+  GetAllTokensResponse,
   GetBalanceRequest,
+  GetBalanceResponse,
   GetBalancesRequest,
+  GetBalancesResponse,
   GetCurrentBlockRequest,
+  GetCurrentBlockResponse,
   GetEstimatedFeesRequest,
   GetMarketRequest,
+  GetMarketResponse,
   GetMarketsRequest,
+  GetMarketsResponse,
   GetOrderBookRequest,
+  GetOrderBookResponse,
   GetOrderBooksRequest,
+  GetOrderBooksResponse,
   GetOrderRequest,
+  GetOrderResponse,
   GetOrdersRequest,
+  GetOrdersResponse,
   GetTickerRequest,
+  GetTickerResponse,
   GetTickersRequest,
+  GetTickersResponse,
   GetTokenRequest,
+  GetTokenResponse,
   GetTokensRequest,
+  GetTokensResponse,
   GetTransactionRequest,
+  GetTransactionResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   GetWalletArtifactsRequest,
   GetWalletPublicKeyRequest,
+  GetWalletPublicKeyResponse,
   GetWalletsPublicKeysRequest,
   IMap,
   KujiraOrder,
@@ -52,11 +76,16 @@ import {
   OrderStatus,
   OwnerAddress,
   PlaceOrderRequest,
+  PlaceOrderResponse,
   PlaceOrdersRequest,
+  PlaceOrdersResponse,
   Settlement,
   SettlementRequest,
+  SettlementResponse,
   SettlementsAllRequest,
+  SettlementsAllResponse,
   SettlementsRequest,
+  SettlementsResponse,
   Ticker,
   TickerNotFoundError,
   TickerSource,
@@ -90,16 +119,16 @@ import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
   convertKujiraBalancesToBalances,
-  convertKujiraRawLogEventsToMapOfEvents,
+  convertKujiraEventsToMapOfEvents,
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
   convertKujiraOrdersToMapOfOrders,
+  convertKujiraRawLogEventsToMapOfEvents,
   convertKujiraSettlementToSettlement,
   convertKujiraTickerToTicker,
   convertKujiraTokenToToken,
   convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
-  convertKujiraEventsToMapOfEvents,
 } from './kujira.convertors';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
@@ -540,7 +569,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getToken(options: GetTokenRequest): Promise<Token> {
+  async getToken(options: GetTokenRequest): Promise<GetTokenResponse> {
     if (!options.id) throw new TokenNotFoundError(`No token informed.`);
 
     // TODO Consider the id (aka reference) and the symbol!!!
@@ -551,7 +580,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getTokens(options: GetTokensRequest): Promise<IMap<TokenId, Token>> {
+  async getTokens(options: GetTokensRequest): Promise<GetTokensResponse> {
     if (!options.ids) throw new TokenNotFoundError(`No token informed.`);
 
     const tokens = IMap<TokenId, Token>().asMutable();
@@ -574,7 +603,7 @@ export class Kujira {
   @Cache(caches.tokens, { ttl: config.cache.tokens })
   async getAllTokens(
     _options: GetAllTokensRequest
-  ): Promise<IMap<TokenId, Token>> {
+  ): Promise<GetAllTokensResponse> {
     const tokenIds = (await this.kujiraGetBasicTokens())
       .valueSeq()
       .map((token) => token.reference)
@@ -587,7 +616,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getMarket(options: GetMarketRequest): Promise<Market> {
+  async getMarket(options: GetMarketRequest): Promise<GetMarketResponse> {
     if (!options.id) throw new MarketNotFoundError(`No market informed.`);
 
     const markets = await this.getAllMarkets();
@@ -604,9 +633,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getMarkets(
-    options: GetMarketsRequest
-  ): Promise<IMap<MarketId, Market>> {
+  async getMarkets(options: GetMarketsRequest): Promise<GetMarketsResponse> {
     if (!options.ids) throw new MarketNotFoundError(`No market informed.`);
 
     const markets = IMap<MarketId, Market>().asMutable();
@@ -628,7 +655,7 @@ export class Kujira {
   @Cache(caches.markets, { ttl: config.cache.markets })
   async getAllMarkets(
     _options?: GetAllMarketsRequest
-  ): Promise<IMap<MarketId, Market>> {
+  ): Promise<GetAllMarketsResponse> {
     const allMarkets = IMap<MarketId, Market>().asMutable();
 
     let marketsData: IMap<MarketId, BasicKujiraMarket> =
@@ -658,7 +685,9 @@ export class Kujira {
    *
    * @param options
    */
-  async getOrderBook(options: GetOrderBookRequest): Promise<OrderBook> {
+  async getOrderBook(
+    options: GetOrderBookRequest
+  ): Promise<GetOrderBookResponse> {
     const market = await this.getMarket({ id: options.marketId });
 
     const orderBook = await this.kujiraQueryClientWasmQueryContractSmart(
@@ -680,7 +709,7 @@ export class Kujira {
    */
   async getOrderBooks(
     options: GetOrderBooksRequest
-  ): Promise<IMap<MarketId, OrderBook>> {
+  ): Promise<GetOrderBooksResponse> {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
@@ -702,8 +731,8 @@ export class Kujira {
    * @param _options
    */
   async getAllOrderBooks(
-    _options: GetAllOrderBookRequest
-  ): Promise<IMap<MarketId, OrderBook>> {
+    _options: GetAllOrderBooksRequest
+  ): Promise<GetAllOrderBooksResponse> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
     return this.getOrderBooks({ marketIds });
@@ -713,7 +742,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getTicker(options: GetTickerRequest): Promise<Ticker> {
+  async getTicker(options: GetTickerRequest): Promise<GetTickerResponse> {
     const market = await this.getMarket({ id: options.marketId });
 
     for (const [source, configuration] of config.tickers.sources) {
@@ -781,9 +810,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getTickers(
-    options: GetTickersRequest
-  ): Promise<IMap<MarketId, Ticker>> {
+  async getTickers(options: GetTickersRequest): Promise<GetTickersResponse> {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
@@ -806,13 +833,13 @@ export class Kujira {
    */
   async getAllTickers(
     _options: GetAllTickersRequest
-  ): Promise<IMap<MarketId, Ticker>> {
+  ): Promise<GetAllTickersResponse> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
     return await this.getTickers({ marketIds });
   }
 
-  async getBalance(options: GetBalanceRequest): Promise<Balance> {
+  async getBalance(options: GetBalanceRequest): Promise<GetBalanceResponse> {
     const balances = await this.getBalances({
       ownerAddress: options.ownerAddress,
       tokenIds: [options.tokenId],
@@ -827,7 +854,7 @@ export class Kujira {
     throw new Error(`Token "${options.tokenId}" not found.`);
   }
 
-  async getBalances(options: GetBalancesRequest): Promise<Balances> {
+  async getBalances(options: GetBalancesRequest): Promise<GetBalancesResponse> {
     const allBalances = await this.getAllBalances({
       ownerAddress: options.ownerAddress,
     });
@@ -863,7 +890,9 @@ export class Kujira {
    *
    * @param options
    */
-  async getAllBalances(options: GetAllBalancesRequest): Promise<Balances> {
+  async getAllBalances(
+    options: GetAllBalancesRequest
+  ): Promise<GetAllBalancesResponse> {
     const kujiraBalances = await this.kujiraStargateClientGetAllBalances(
       options.ownerAddress
     );
@@ -900,7 +929,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getOrder(options: GetOrderRequest): Promise<Order> {
+  async getOrder(options: GetOrderRequest): Promise<GetOrderResponse> {
     const ownersMap = await this.getOrders({
       ...options,
       ids: [options.id],
@@ -918,9 +947,7 @@ export class Kujira {
    *
    * @param options
    */
-  async getOrders(
-    options: GetOrdersRequest
-  ): Promise<IMap<OwnerAddress, IMap<OrderId, Order>>> {
+  async getOrders(options: GetOrdersRequest): Promise<GetOrdersResponse> {
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
     for (const ownerAddress of options.ownerAddresses) {
@@ -1000,7 +1027,7 @@ export class Kujira {
    *
    * @param options
    */
-  async placeOrder(options: PlaceOrderRequest): Promise<Order> {
+  async placeOrder(options: PlaceOrderRequest): Promise<PlaceOrderResponse> {
     return (
       await this.placeOrders({
         orders: [options],
@@ -1013,9 +1040,7 @@ export class Kujira {
    *
    * @param options
    */
-  async placeOrders(
-    options: PlaceOrdersRequest
-  ): Promise<IMap<OrderId, Order>> {
+  async placeOrders(options: PlaceOrdersRequest): Promise<PlaceOrdersResponse> {
     const ownerAddress =
       options.ownerAddress ||
       getNotNullOrThrowError<OrderOwnerAddress>(options.orders[0].ownerAddress);
@@ -1095,7 +1120,7 @@ export class Kujira {
    *
    * @param options
    */
-  async cancelOrder(options: CancelOrderRequest): Promise<Order> {
+  async cancelOrder(options: CancelOrderRequest): Promise<CancelOrderResponse> {
     return getNotNullOrThrowError<IMap<OrderId, Order>>(
       (
         await this.cancelOrders({
@@ -1113,7 +1138,7 @@ export class Kujira {
    */
   async cancelOrders(
     options: CancelOrdersRequest
-  ): Promise<IMap<OwnerAddress, IMap<OrderId, Order>>> {
+  ): Promise<CancelOrdersResponse> {
     const market = await this.getMarket({ id: options.marketId });
 
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
@@ -1186,7 +1211,7 @@ export class Kujira {
    */
   async cancelAllOrders(
     options: CancelAllOrdersRequest
-  ): Promise<IMap<OwnerAddress, IMap<OrderId, Order>>> {
+  ): Promise<CancelAllOrdersResponse> {
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
     for (const ownerAddress of options.ownerAddresses) {
@@ -1230,7 +1255,7 @@ export class Kujira {
    */
   async settleMarketFunds(
     options: SettlementRequest
-  ): Promise<IMap<OwnerAddress, Settlement>> {
+  ): Promise<SettlementResponse> {
     const market = await this.getMarket({ id: options.marketId });
 
     const output = IMap<OwnerAddress, Settlement>().asMutable();
@@ -1284,7 +1309,7 @@ export class Kujira {
    */
   async settleMarketsFunds(
     options: SettlementsRequest
-  ): Promise<IMap<MarketId, IMap<OwnerAddress, Settlement>>> {
+  ): Promise<SettlementsResponse> {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
@@ -1332,7 +1357,7 @@ export class Kujira {
    */
   async settleAllMarketsFunds(
     options: SettlementsAllRequest
-  ): Promise<IMap<MarketId, IMap<OwnerAddress, Settlement>>> {
+  ): Promise<SettlementsAllResponse> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
     return await this.settleMarketsFunds({
@@ -1341,11 +1366,15 @@ export class Kujira {
     });
   }
 
-  async getCurrentBlock(_options: GetCurrentBlockRequest): Promise<Block> {
+  async getCurrentBlock(
+    _options: GetCurrentBlockRequest
+  ): Promise<GetCurrentBlockResponse> {
     return await this.kujiraStargateClientGetHeight();
   }
 
-  async getTransaction(options: GetTransactionRequest): Promise<Transaction> {
+  async getTransaction(
+    options: GetTransactionRequest
+  ): Promise<GetTransactionResponse> {
     return convertKujiraTransactionToTransaction(
       getNotNullOrThrowError<IndexedTx>(
         await this.kujiraStargateClientGetTx(options.signature)
@@ -1359,7 +1388,7 @@ export class Kujira {
    */
   async getTransactions(
     options: GetTransactionsRequest
-  ): Promise<IMap<TransactionSignature, Transaction>> {
+  ): Promise<GetTransactionsResponse> {
     const transactions = IMap<TransactionSignature, Transaction>().asMutable();
 
     const getTransaction = async (
@@ -1380,7 +1409,7 @@ export class Kujira {
     return transactions;
   }
 
-  getEstimatedFees(_options: GetEstimatedFeesRequest): EstimatedFees {
+  getEstimatedFees(_options: GetEstimatedFeesRequest): GetEstimatedFeesRequest {
     return {
       token: config.nativeToken,
       price: config.gasPrice,
@@ -1395,7 +1424,7 @@ export class Kujira {
    */
   async getWalletPublicKey(
     options: GetWalletPublicKeyRequest
-  ): Promise<Address> {
+  ): Promise<GetWalletPublicKeyResponse> {
     return (
       await (
         await this.getDirectSecp256k1HdWallet(
@@ -1411,7 +1440,9 @@ export class Kujira {
    *
    * @param options
    */
-  async encryptWallet(options: EncryptWalletRequest): Promise<string> {
+  async encryptWallet(
+    options: EncryptWalletRequest
+  ): Promise<EncryptWalletResponse> {
     const passphrase = ConfigManagerCertPassphrase.readPassphrase();
     if (!passphrase) {
       throw new Error('missing passphrase');
@@ -1475,7 +1506,9 @@ export class Kujira {
    *
    * @param options
    */
-  async decryptWallet(options: DecryptWalletRequest): Promise<BasicWallet> {
+  async decryptWallet(
+    options: DecryptWalletRequest
+  ): Promise<DecryptWalletResponse> {
     const path = `${walletPath}/${this.chain}`;
 
     const encryptedPrivateKey: EncryptedPrivateKey = JSON.parse(

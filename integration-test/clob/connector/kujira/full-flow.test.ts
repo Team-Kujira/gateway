@@ -13,7 +13,7 @@ import {
   CancelOrdersRequest,
   GetAllBalancesRequest,
   GetAllMarketsRequest,
-  GetAllOrderBookRequest,
+  GetAllOrderBooksRequest,
   GetAllTickersRequest,
   GetAllTokensRequest,
   GetBalanceRequest,
@@ -434,7 +434,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all order books', async () => {
-      request = {} as GetAllOrderBookRequest;
+      request = {} as GetAllOrderBooksRequest;
 
       logRequest(request);
 
