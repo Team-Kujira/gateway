@@ -1100,13 +1100,9 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
-      // const ordersIds = [];
-      // ordersIds.push(response.filter((order: Order) => order.id));
-      // console.log(ordersIds);
-      //
-      // expect(response.toArray()[0][1].toJSON()).toInclude(
-      //   getNotNullOrThrowError(order.id)
-      // );
+      expect(response.first().keySeq().toArray()).toContain(
+        getNotNullOrThrowError(order.id)
+      );
 
       logResponse(response);
     });
