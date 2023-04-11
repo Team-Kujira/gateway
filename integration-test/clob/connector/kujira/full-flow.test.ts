@@ -1124,7 +1124,7 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
-      expect(response.first().keySeq().toArray()).toContain(
+      expect(response.first().keySeq().toArray()).not.toContain(
         getNotNullOrThrowError(order.id)
       );
 
@@ -1142,7 +1142,17 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      response = await kujira.cancelOrders(request);
+
+      expect(response).not.toBeEmpty();
+      expect(
+        Object.entries(response.first().keySeq().toArray()).length
+      ).toEqual(request.ids.length);
+      expect(response.first().keySeq().toArray()).toEqual(request.ids);
+      expect(response.first().first().marketId).toEqual(request.marketId);
+      // expect(response.status).toBe(OrderStatus.CANCELLED);
+      // expect(response.signatures).toHaveProperty('cancellation');
+      // expect(response.signatures['cancellation'].length).toBeGreaterThan(0);
 
       logResponse(response);
 
@@ -1154,7 +1164,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      response = await kujira.cancelOrders(request);
 
       logResponse(response);
     });
