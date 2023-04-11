@@ -707,7 +707,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the available wallet balances from the tokens 1 and 2', async () => {
+    it('Check the available wallet balances from the tokens 1 and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
@@ -756,7 +756,8 @@ describe('Kujira Full Flow', () => {
         newQuoteBalance.free.toNumber()
       );
 
-      userBalances = response;
+      userBalances.tokens.set(marketTokens[0].reference, newBaseBalance);
+      userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
     it('Get the open order 1', async () => {
@@ -795,6 +796,10 @@ describe('Kujira Full Flow', () => {
       response = await kujira.placeOrder(request);
 
       candidate.id = response.id;
+      candidate.marketName = response.marketName;
+      candidate.status = response.status;
+      candidate.fee = response.fee;
+      candidate.signatures = response.signatures;
 
       expect(response).toBeObject();
       expect(response['id'].length).toBeGreaterThan(0);
@@ -854,6 +859,34 @@ describe('Kujira Full Flow', () => {
         expect(token).toContainKeys(['free', 'unsettled', 'lockedInOrders']);
       });
       logResponse(response);
+
+      const order = getOrder('2');
+      const marketTokens = networkPairs[order.marketId].denoms;
+      const oldBaseBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(marketTokens[0].reference)
+      );
+      const newBaseBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(marketTokens[0].reference)
+      );
+      const oldQuoteBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(marketTokens[1].reference)
+      );
+      const newQuoteBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(marketTokens[1].reference)
+      );
+      const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
+      const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
+
+      expect(
+        oldBaseBalance.free.toNumber() -
+          (orderFee.toNumber() + orderAmount.toNumber())
+      ).toEqual(newBaseBalance.free?.toNumber());
+
+      expect(oldQuoteBalance.free.toNumber()).toEqual(
+        newQuoteBalance.free.toNumber()
+      );
+      userBalances.tokens.set(marketTokens[0].reference, newBaseBalance);
+      userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
     it('Get the open order 2', async () => {
