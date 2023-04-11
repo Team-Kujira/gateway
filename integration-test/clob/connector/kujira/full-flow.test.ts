@@ -733,9 +733,9 @@ describe('Kujira Full Flow', () => {
 
       const order = getOrder('1');
       const marketTokens = networkPairs[order.marketId].denoms;
-      const oldBaseBalance = getNotNullOrThrowError<Balance>(
-        userBalances.tokens.get(marketTokens[0].reference)
-      );
+      // const oldBaseBalance = getNotNullOrThrowError<Balance>(
+      //   userBalances.tokens.get(marketTokens[0].reference)
+      // );
       const newBaseBalance = getNotNullOrThrowError<Balance>(
         response.tokens.get(marketTokens[0].reference)
       );
@@ -748,8 +748,17 @@ describe('Kujira Full Flow', () => {
       const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
       const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
 
-      expect(oldBaseBalance.free.toNumber() - orderFee.toNumber()).toEqual(
-        newBaseBalance.free?.toNumber()
+      // expect(oldBaseBalance.free.toNumber() - orderFee.toNumber()).toEqual(
+      //   newBaseBalance.free?.toNumber()
+      // );
+      const oldKujiBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(KUJI.reference)
+      );
+      const newKujiBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(KUJI.reference)
+      );
+      expect(oldKujiBalance.free.toNumber() - orderFee.toNumber()).toEqual(
+        newKujiBalance.free.toNumber()
       );
 
       expect(oldQuoteBalance.free.toNumber() - orderAmount.toNumber()).toEqual(
@@ -970,38 +979,71 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getBalances(request);
+      const finalBalanceChange = userBalances;
+
+      const orders = getOrders(['3', '4', '5', '6', '7', '8', '9']);
+      const kujiBalanceChange = getNotNullOrThrowError<Balance>(
+        finalBalanceChange.tokens.get(KUJI.reference)
+      );
+      const orderFee = getNotNullOrThrowError<BigNumber>(orders.first()?.fee);
+      kujiBalanceChange.free = kujiBalanceChange.free.minus(orderFee);
+      orders.map((order) => {
+        const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
+        const marketTokens = networkPairs[order.marketId].denoms;
+        const oldBaseBalance = getNotNullOrThrowError<Balance>(
+          finalBalanceChange.tokens.get(marketTokens[0].reference)
+        );
+        const oldQuoteBalance = getNotNullOrThrowError<Balance>(
+          finalBalanceChange.tokens.get(marketTokens[1].reference)
+        );
+
+        if (order.side == OrderSide.BUY) {
+          oldQuoteBalance.free = oldQuoteBalance.free.minus(orderAmount);
+        } else if (order.side == OrderSide.SELL) {
+          oldBaseBalance.free = oldBaseBalance.free.minus(orderAmount);
+        }
+      });
+
+      const oldKujiBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(KUJI.reference)
+      );
+      const newKujiBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(KUJI.reference)
+      );
+
+      const oldDemoBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(DEMO.reference)
+      );
+      const demoBalanceChange = getNotNullOrThrowError<Balance>(
+        finalBalanceChange.tokens.get(DEMO.reference)
+      );
+      const newDemoBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(DEMO.reference)
+      );
+
+      const oldUskBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(USK_TESTNET.reference)
+      );
+      const uskBalanceChange = getNotNullOrThrowError<Balance>(
+        finalBalanceChange.tokens.get(USK_TESTNET.reference)
+      );
+      const newUskBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(USK_TESTNET.reference)
+      );
+
+      expect(oldKujiBalance.free.minus(kujiBalanceChange.free)).toEqual(
+        newKujiBalance.free
+      );
+
+      expect(oldDemoBalance.free.minus(demoBalanceChange.free)).toEqual(
+        newDemoBalance
+      );
+
+      expect(oldUskBalance.free.minus(uskBalanceChange.free)).toEqual(
+        newUskBalance
+      );
 
       logResponse(response);
-
-      const oldBalances = userBalances.tokens.toArray();
-
-      const currentBalances = response.tokens.toArray();
-
-      expect(currentBalances[0][1].free.toNumber()).toBeLessThan(
-        oldBalances[0][1].free.toNumber()
-      );
-
-      expect(currentBalances[0][1].lockedInOrders.toNumber()).toBeGreaterThan(
-        oldBalances[0][1].lockedInOrders.toNumber()
-      );
-
-      expect(currentBalances[1][1].free.toNumber()).toBeLessThan(
-        oldBalances[1][1].free.toNumber()
-      );
-
-      expect(currentBalances[1][1].lockedInOrders.toNumber()).toBeGreaterThan(
-        oldBalances[1][1].lockedInOrders.toNumber()
-      );
-
-      expect(currentBalances[2][1].free.toNumber()).toBeLessThan(
-        oldBalances[2][1].free.toNumber()
-      );
-
-      expect(currentBalances[2][1].lockedInOrders.toNumber()).toBeGreaterThan(
-        oldBalances[2][1].lockedInOrders.toNumber()
-      );
-
-      userBalances = response;
     });
 
     it('Get the open orders 6 and 7', async () => {
