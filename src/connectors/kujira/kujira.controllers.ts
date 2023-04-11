@@ -64,12 +64,12 @@ import {
   PlaceOrderResponse,
   PlaceOrdersRequest,
   PlaceOrdersResponse,
-  SettlementRequest,
-  SettlementResponse,
-  SettlementsAllRequest,
-  SettlementsAllResponse,
-  SettlementsRequest,
-  SettlementsResponse,
+  MarketWithdrawRequest,
+  MarketWithdrawResponse,
+  AllMarketsWithdrawsRequest,
+  AllMarketsWithdrawsResponse,
+  MarketsWithdrawsRequest,
+  MarketsWithdrawsFundsResponse,
   TickerNotFoundError,
   TokenNotFoundError,
   TransactionNotFoundError,
@@ -600,13 +600,13 @@ export async function cancelAllOrders(
   return response;
 }
 
-export async function settleMarketFunds(
+export async function widthdrawFromMarket(
   connector: Connector,
-  request: SettlementRequest
-): Promise<ResponseWrapper<SettlementResponse>> {
+  request: MarketWithdrawRequest
+): Promise<ResponseWrapper<MarketWithdrawResponse>> {
   // validateSettleMarketFundsRequest(request);
 
-  const response = new ResponseWrapper<SettlementResponse>();
+  const response = new ResponseWrapper<MarketWithdrawResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -625,13 +625,13 @@ export async function settleMarketFunds(
   }
 }
 
-export async function settleMarketsFunds(
+export async function withdrawsFromMarkets(
   connector: Connector,
-  request: SettlementsRequest
-): Promise<ResponseWrapper<SettlementsResponse>> {
+  request: MarketsWithdrawsRequest
+): Promise<ResponseWrapper<MarketsWithdrawsFundsResponse>> {
   // validateSettleMarketsFundsRequest(request);
 
-  const response = new ResponseWrapper<SettlementsResponse>();
+  const response = new ResponseWrapper<MarketsWithdrawsFundsResponse>();
 
   try {
     response.body = convertToResponseBody(
@@ -650,13 +650,13 @@ export async function settleMarketsFunds(
   }
 }
 
-export async function settleAllMarketsFunds(
+export async function withdrawFromAllMarkets(
   connector: Connector,
-  request: SettlementsAllRequest
-): Promise<ResponseWrapper<SettlementsAllResponse>> {
+  request: AllMarketsWithdrawsRequest
+): Promise<ResponseWrapper<AllMarketsWithdrawsResponse>> {
   // validateSettleAllMarketsFundsRequest(request);
 
-  const response = new ResponseWrapper<SettlementsAllResponse>();
+  const response = new ResponseWrapper<AllMarketsWithdrawsResponse>();
 
   response.body = convertToResponseBody(
     await connector.settleAllMarketsFunds(request)

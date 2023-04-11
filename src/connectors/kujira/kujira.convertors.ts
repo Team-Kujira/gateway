@@ -17,7 +17,7 @@ import {
   IMap,
   KujiraEvent,
   KujiraOrderBook,
-  KujiraSettlement,
+  KujiraWithdraw,
   KujiraTicker,
   Market,
   Order,
@@ -30,7 +30,7 @@ import {
   OrderType,
   PlaceOrderRequest,
   PlaceOrdersRequest,
-  Settlement,
+  Withdraw,
   Ticker,
   Token,
   TokenId,
@@ -813,8 +813,8 @@ export const convertKujiraTransactionToTransaction = (
 };
 
 export const convertKujiraSettlementToSettlement = (
-  input: KujiraSettlement
-): Settlement => {
+  input: KujiraWithdraw
+): Withdraw => {
   return {
     signature: input.transactionHash,
   };

@@ -79,13 +79,13 @@ import {
   PlaceOrderResponse,
   PlaceOrdersRequest,
   PlaceOrdersResponse,
-  Settlement,
-  SettlementRequest,
-  SettlementResponse,
-  SettlementsAllRequest,
-  SettlementsAllResponse,
-  SettlementsRequest,
-  SettlementsResponse,
+  Withdraw,
+  MarketWithdrawRequest,
+  MarketWithdrawResponse,
+  AllMarketsWithdrawsRequest,
+  AllMarketsWithdrawsResponse,
+  MarketsWithdrawsRequest,
+  MarketsWithdrawsFundsResponse,
   Ticker,
   TickerNotFoundError,
   TickerSource,
@@ -1254,11 +1254,11 @@ export class Kujira {
    * @param options
    */
   async settleMarketFunds(
-    options: SettlementRequest
-  ): Promise<SettlementResponse> {
+    options: MarketWithdrawRequest
+  ): Promise<MarketWithdrawResponse> {
     const market = await this.getMarket({ id: options.marketId });
 
-    const output = IMap<OwnerAddress, Settlement>().asMutable();
+    const output = IMap<OwnerAddress, Withdraw>().asMutable();
 
     for (const ownerAddress of options.ownerAddresses) {
       const walletArtifacts = await this.getWalletArtifacts({
@@ -1308,14 +1308,14 @@ export class Kujira {
    * @param options
    */
   async settleMarketsFunds(
-    options: SettlementsRequest
-  ): Promise<SettlementsResponse> {
+    options: MarketsWithdrawsRequest
+  ): Promise<MarketsWithdrawsFundsResponse> {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
     const settlements = IMap<
       MarketId,
-      IMap<OwnerAddress, Settlement>
+      IMap<OwnerAddress, Withdraw>
     >().asMutable();
 
     interface HelperSettleFundsOptions {
@@ -1356,8 +1356,8 @@ export class Kujira {
    * @param options
    */
   async settleAllMarketsFunds(
-    options: SettlementsAllRequest
-  ): Promise<SettlementsAllResponse> {
+    options: AllMarketsWithdrawsRequest
+  ): Promise<AllMarketsWithdrawsResponse> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
     return await this.settleMarketsFunds({

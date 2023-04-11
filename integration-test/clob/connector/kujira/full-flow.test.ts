@@ -38,9 +38,9 @@ import {
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrdersRequest,
-  SettlementRequest,
-  SettlementsAllRequest,
-  SettlementsRequest,
+  MarketWithdrawRequest,
+  AllMarketsWithdrawsRequest,
+  MarketsWithdrawsRequest,
   Balances,
   MarketName,
   Balance,
@@ -1443,7 +1443,7 @@ describe('Kujira Full Flow', () => {
       request = {
         marketId: marketIds[1],
         ownerAddresses: [ownerAddress],
-      } as SettlementRequest;
+      } as MarketWithdrawRequest;
 
       logRequest(request);
 
@@ -1468,7 +1468,7 @@ describe('Kujira Full Flow', () => {
       request = {
         marketIds: [marketIds[2], marketIds[3]],
         ownerAddresses: [ownerAddress],
-      } as SettlementsRequest;
+      } as MarketsWithdrawsRequest;
 
       logRequest(request);
 
@@ -1492,7 +1492,7 @@ describe('Kujira Full Flow', () => {
     it('Settle funds for all markets', async () => {
       request = {
         ownerAddresses: [ownerAddress],
-      } as SettlementsAllRequest;
+      } as AllMarketsWithdrawsRequest;
 
       logRequest(request);
 

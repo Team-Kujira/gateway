@@ -40,7 +40,7 @@ export type BasicKujiraToken = Denom;
 export type BasicKujiraMarket = fin.Pair;
 
 export type KujiraOrderParams = any;
-export type KujiraSettlement = ExecuteResult;
+export type KujiraWithdraw = ExecuteResult;
 
 export type Address = string;
 export type OwnerAddress = Address;
@@ -90,7 +90,7 @@ export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionSignatures = TransactionSignatures;
 export type OrderReplaceIfExists = boolean;
 
-export type Settlement = {
+export type Withdraw = {
   signature: TransactionSignature;
 };
 
@@ -254,10 +254,10 @@ export interface Order {
 export interface TransactionSignatures {
   creation?: TransactionSignature;
   cancellation?: TransactionSignature;
-  settlement?: TransactionSignature;
+  withdraw?: TransactionSignature;
   creations?: TransactionSignature[];
   cancellations?: TransactionSignature[];
-  settlements?: TransactionSignature[];
+  withdraws?: TransactionSignature[];
 }
 
 export interface MarketFee {
@@ -322,7 +322,7 @@ export class TickerNotFoundError extends CLOBishError {}
 
 export class OrderNotFoundError extends CLOBishError {}
 
-export class SettlementError extends CLOBishError {}
+export class MarketWithdrawError extends CLOBishError {}
 
 export class TransactionNotFoundError extends CLOBishError {}
 
@@ -528,29 +528,29 @@ export interface CancelAllOrdersRequest {
 export interface CancelAllOrdersResponse
   extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
 
-export interface SettlementRequest {
+export interface MarketWithdrawRequest {
   marketId?: MarketId;
   ownerAddresses: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SettlementResponse extends IMap<OwnerAddress, Settlement> {}
+export interface MarketWithdrawResponse extends IMap<OwnerAddress, Withdraw> {}
 
-export interface SettlementsRequest {
+export interface MarketsWithdrawsRequest {
   marketIds?: MarketId[];
   ownerAddresses: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SettlementsResponse
-  extends IMap<MarketId, IMap<OwnerAddress, Settlement>> {}
+export interface MarketsWithdrawsFundsResponse
+  extends IMap<MarketId, IMap<OwnerAddress, Withdraw>> {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SettlementsAllRequest extends SettlementsRequest {}
+export interface AllMarketsWithdrawsRequest extends MarketsWithdrawsRequest {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SettlementsAllResponse
-  extends IMap<MarketId, IMap<OwnerAddress, Settlement>> {}
+export interface AllMarketsWithdrawsResponse
+  extends IMap<MarketId, IMap<OwnerAddress, Withdraw>> {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetCurrentBlockRequest {}
