@@ -979,7 +979,20 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getBalances(request);
-      const finalBalanceChange = userBalances;
+      // const finalBalanceChange = userBalances;
+      const finalBalanceChange = {
+        tokens: userBalances.tokens.map((balance) => {
+          const newBalance = {
+            token: balance.token,
+            ticker: balance.ticker,
+            free: new BigNumber(0),
+            unsettled: new BigNumber(0),
+            lockedInOrders: new BigNumber(0),
+          } as Balance;
+          return newBalance;
+        }),
+        total: userBalances.total,
+      };
 
       const orders = getOrders(['3', '4', '5', '6', '7', '8', '9']);
       const kujiBalanceChange = getNotNullOrThrowError<Balance>(
@@ -998,9 +1011,9 @@ describe('Kujira Full Flow', () => {
         );
 
         if (order.side == OrderSide.BUY) {
-          oldQuoteBalance.free = oldQuoteBalance.free.minus(orderAmount);
+          oldQuoteBalance.free = oldQuoteBalance.free.plus(orderAmount);
         } else if (order.side == OrderSide.SELL) {
-          oldBaseBalance.free = oldBaseBalance.free.minus(orderAmount);
+          oldBaseBalance.free = oldBaseBalance.free.plus(orderAmount);
         }
       });
 
