@@ -1,7 +1,7 @@
 import {
   Balance,
   Balances,
-  BlockNumber,
+  Block,
   CancelOrderOptions,
   CancelOrdersOptions,
   ConvertOrderType,
@@ -432,7 +432,7 @@ export const convertToBalancesResponse = (
 // TODO fix!!!
 export const convertToPollResponse = (
   _transaction: Transaction,
-  _currentBlockNumber: BlockNumber
+  _currentBlockNumber: Block
 ): PollResponse => {
   return {
     blockNumber: undefined,
@@ -842,6 +842,14 @@ export const convertKujiraEventsToMapOfEvents = (
       }
     }
   }
+
+  return output;
+};
+
+export const convertToResponseBody = (input: any): any => {
+  let output = input;
+
+  if (IMap.isMap(input)) output = input.toJS();
 
   return output;
 };

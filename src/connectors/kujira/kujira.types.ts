@@ -50,7 +50,7 @@ export type Price = BigNumber;
 export type Amount = BigNumber;
 export type Fee = BigNumber;
 export type Timestamp = number;
-export type BlockNumber = number;
+export type Block = number;
 
 export type ConnectorMarket = any;
 export type ConnectorTicker = any;
@@ -313,11 +313,19 @@ export class TokenNotFoundError extends CLOBishError {}
 
 export class MarketNotFoundError extends CLOBishError {}
 
+export class BalanceNotFoundError extends CLOBishError {}
+
+export class OrderBookNotFoundError extends CLOBishError {}
+
 export class TickerNotFoundError extends CLOBishError {}
 
 export class OrderNotFoundError extends CLOBishError {}
 
 export class SettlementError extends CLOBishError {}
+
+export class TransactionNotFoundError extends CLOBishError {}
+
+export class WalletPublicKeyNotFoundError extends CLOBishError {}
 
 //
 //  Main methods options
@@ -368,7 +376,7 @@ export interface GetTickersOptions {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetAllTickerOptions extends GetTickersOptions {}
+export interface GetAllTickersOptions extends GetTickersOptions {}
 
 export interface GetWalletArtifactsOptions {
   ownerAddress: OwnerAddress;
@@ -480,6 +488,9 @@ export interface GetWalletPublicKeyOptions {
   mnemonic: Mnemonic;
   accountNumber: AccountNumber;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetWalletsPublicKeysOptions {}
 
 export interface EncryptWalletOptions {
   wallet: BasicWallet;

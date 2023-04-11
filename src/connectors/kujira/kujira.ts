@@ -5,7 +5,7 @@ import {
   BasicKujiraMarket,
   BasicKujiraToken,
   BasicWallet,
-  BlockNumber,
+  Block,
   CancelAllOrdersOptions,
   CancelOrderOptions,
   CancelOrdersOptions,
@@ -16,7 +16,7 @@ import {
   GetAllBalancesOptions,
   GetAllMarketsOptions,
   GetAllOrderBookOptions,
-  GetAllTickerOptions,
+  GetAllTickersOptions,
   GetAllTokensOptions,
   GetBalanceOptions,
   GetBalancesOptions,
@@ -36,6 +36,7 @@ import {
   GetTransactionsOptions,
   GetWalletArtifactsOptions,
   GetWalletPublicKeyOptions,
+  GetWalletsPublicKeysOptions,
   IMap,
   KujiraOrder,
   KujiraWalletArtifacts,
@@ -380,7 +381,7 @@ export class Kujira {
     return basicMarkets;
   }
 
-  getWalletsPublicKeys(): Address[] {
+  getWalletsPublicKeys(_options: GetWalletsPublicKeysOptions): Address[] {
     return this.accounts.keySeq().toArray();
   }
 
@@ -803,7 +804,7 @@ export class Kujira {
    * @param _options
    */
   async getAllTickers(
-    _options: GetAllTickerOptions
+    _options: GetAllTickersOptions
   ): Promise<IMap<MarketId, Ticker>> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
@@ -1335,9 +1336,7 @@ export class Kujira {
     });
   }
 
-  async getCurrentBlock(
-    _options: GetCurrentBlockOptions
-  ): Promise<BlockNumber> {
+  async getCurrentBlock(_options: GetCurrentBlockOptions): Promise<Block> {
     return await this.kujiraStargateClientGetHeight();
   }
 

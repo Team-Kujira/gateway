@@ -14,7 +14,7 @@ import {
   GetAllBalancesOptions,
   GetAllMarketsOptions,
   GetAllOrderBookOptions,
-  GetAllTickerOptions,
+  GetAllTickersOptions,
   GetAllTokensOptions,
   GetBalanceOptions,
   GetBalancesOptions,
@@ -333,6 +333,7 @@ beforeEach(async () => {
   // logOutput = (target: any) => helperLogOutput(target, testTitle);
 });
 
+// TODO Add tests to test the retrieval of the estimated fees, current block, and one or more transactions or wallet public keys.
 describe('Kujira Full Flow', () => {
   describe('Tokens', () => {
     it('Get token 1', async () => {
@@ -468,7 +469,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all tickers', async () => {
-      request = {} as GetAllTickerOptions;
+      request = {} as GetAllTickersOptions;
 
       logRequest(request);
 
