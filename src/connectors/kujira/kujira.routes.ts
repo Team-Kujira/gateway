@@ -166,6 +166,54 @@ export namespace KujiraRoutes {
   );
 
   router.get(
+    '/market',
+    asyncHandler(
+      async (
+        request: Request<any, any, GetMarketRequest>,
+        response: Response<GetMarketResponse, any>
+      ) => {
+        const controller = await getController(request);
+
+        const result = await getMarket(controller, request.body);
+
+        return await response.status(result.status).json(result.body);
+      }
+    )
+  );
+
+  router.get(
+    '/markets',
+    asyncHandler(
+      async (
+        request: Request<any, any, GetMarketsRequest>,
+        response: Response<GetMarketsResponse, any>
+      ) => {
+        const controller = await getController(request);
+
+        const result = await getMarkets(controller, request.body);
+
+        return await response.status(result.status).json(result.body);
+      }
+    )
+  );
+
+  router.get(
+    '/markets/all',
+    asyncHandler(
+      async (
+        request: Request<any, any, GetAllMarketsRequest>,
+        response: Response<GetAllMarketsResponse, any>
+      ) => {
+        const controller = await getController(request);
+
+        const result = await getAllMarkets(controller, request.body);
+
+        return await response.status(result.status).json(result.body);
+      }
+    )
+  );
+
+  router.get(
     '/orderBook',
     asyncHandler(
       async (
