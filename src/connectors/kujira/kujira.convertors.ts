@@ -6,7 +6,7 @@ import {
   CancelOrdersRequest,
   ConvertOrderType,
   EstimatedFees,
-  EstimatedGaResponse,
+  EstimatedGasResponse,
   GetAllBalancesRequest,
   GetEstimatedFeesRequest,
   GetMarketRequest,
@@ -460,13 +460,13 @@ export const convertToGetTokensResponse = (_tokens: Token): TokenInfo => {
 // TODO fix!!!
 export const convertToEstimatedFeesResponse = (
   _response: EstimatedFees
-): EstimatedGaResponse => {
+): EstimatedGasResponse => {
   return {
     gasPrice: undefined,
     gasPriceToken: undefined,
     gasLimit: undefined,
     gasCost: undefined,
-  } as unknown as EstimatedGaResponse;
+  } as unknown as EstimatedGasResponse;
 };
 
 export const convertKujiraTokenToToken = (token: Denom): Token => {

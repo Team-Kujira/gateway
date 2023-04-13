@@ -34,7 +34,7 @@ import { Kujira } from './kujira';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
-import { EstimatedGaResponse } from './kujira.types';
+import { EstimatedFees, EstimatedGasResponse } from './kujira.types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -157,7 +157,7 @@ export class KujiraConnector {
     gasPriceToken: string,
     gasLimit: number,
     gasCost: number
-  ): EstimatedGaResponse {
+  ): EstimatedGasResponse {
     return convertToEstimatedFeesResponse(
       this.kujira.getEstimatedFees(
         convertEstimateGasRequestToGetMarketEstimatedFeesOptions(
@@ -166,7 +166,7 @@ export class KujiraConnector {
           gasLimit,
           gasCost
         )
-      )
+      ) as EstimatedFees
     );
   }
 }

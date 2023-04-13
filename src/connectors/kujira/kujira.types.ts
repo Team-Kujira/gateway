@@ -614,7 +614,7 @@ export type DecryptWalletResponse = BasicWallet;
 // Extensions
 //
 
-export interface EstimatedGaResponse {
+export interface EstimatedGasResponse {
   gasPrice: number;
   gasPriceToken: string;
   gasLimit: number;
