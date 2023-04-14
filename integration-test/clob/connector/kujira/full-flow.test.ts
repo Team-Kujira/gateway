@@ -21,6 +21,7 @@ import {
   GetMarketRequest,
   GetMarketsRequest,
   GetOrderBookRequest,
+  TokenId,
   GetOrderBooksRequest,
   GetOrderRequest,
   GetOrdersRequest,
@@ -949,6 +950,10 @@ describe('Kujira Full Flow', () => {
             candidates.get(clientId)
           );
           candidateOrder.id = order.id;
+          candidateOrder.marketName = order.marketName;
+          candidateOrder.status = order.status;
+          candidateOrder.fee = order.fee;
+          candidateOrder.signatures = order.signatures;
         });
 
       for (const [, order] of response.entries()) {
@@ -980,26 +985,32 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getBalances(request);
       // const finalBalanceChange = userBalances;
-      const finalBalanceChange = {
-        tokens: userBalances.tokens.map((balance) => {
-          const newBalance = {
-            token: balance.token,
-            ticker: balance.ticker,
-            free: new BigNumber(0),
-            unsettled: new BigNumber(0),
-            lockedInOrders: new BigNumber(0),
-          } as Balance;
-          return newBalance;
-        }),
-        total: userBalances.total,
-      };
+      const finalBalanceChange: Balances = {
+        tokens: IMap<TokenId, Balance>().asMutable(),
+        total: {
+          token: 'total',
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+        },
+      } as Balances;
+
+      for (const [key, balance] of userBalances.tokens.entries()) {
+        finalBalanceChange.tokens.set(key, {
+          token: balance.token,
+          ticker: balance.ticker,
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+        } as Balance);
+      }
 
       const orders = getOrders(['3', '4', '5', '6', '7', '8', '9']);
       const kujiBalanceChange = getNotNullOrThrowError<Balance>(
         finalBalanceChange.tokens.get(KUJI.reference)
       );
       const orderFee = getNotNullOrThrowError<BigNumber>(orders.first()?.fee);
-      kujiBalanceChange.free = kujiBalanceChange.free.minus(orderFee);
+      kujiBalanceChange.free = kujiBalanceChange.free.plus(orderFee);
       orders.map((order) => {
         const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
         const marketTokens = networkPairs[order.marketId].denoms;
@@ -1049,11 +1060,11 @@ describe('Kujira Full Flow', () => {
       );
 
       expect(oldDemoBalance.free.minus(demoBalanceChange.free)).toEqual(
-        newDemoBalance
+        newDemoBalance.free
       );
 
       expect(oldUskBalance.free.minus(uskBalanceChange.free)).toEqual(
-        newUskBalance
+        newUskBalance.free
       );
 
       logResponse(response);
