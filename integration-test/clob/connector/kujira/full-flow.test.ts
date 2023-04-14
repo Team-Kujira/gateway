@@ -984,7 +984,6 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getBalances(request);
-      // const finalBalanceChange = userBalances;
       const finalBalanceChange: Balances = {
         tokens: IMap<TokenId, Balance>().asMutable(),
         total: {
@@ -1028,44 +1027,22 @@ describe('Kujira Full Flow', () => {
         }
       });
 
-      const oldKujiBalance = getNotNullOrThrowError<Balance>(
-        userBalances.tokens.get(KUJI.reference)
-      );
-      const newKujiBalance = getNotNullOrThrowError<Balance>(
-        response.tokens.get(KUJI.reference)
-      );
+      userBalances.tokens.keySeq().forEach((key) => {
+        const oldBalance = getNotNullOrThrowError<Balance>(
+          userBalances.tokens.get(key)
+        );
+        const balanceChange = getNotNullOrThrowError<Balance>(
+          finalBalanceChange.tokens.get(key)
+        );
+        const newBalance = getNotNullOrThrowError<Balance>(
+          response.tokens.get(key)
+        );
+        expect(oldBalance.free.minus(balanceChange.free)).toEqual(
+          newBalance.free
+        );
+      });
 
-      const oldDemoBalance = getNotNullOrThrowError<Balance>(
-        userBalances.tokens.get(DEMO.reference)
-      );
-      const demoBalanceChange = getNotNullOrThrowError<Balance>(
-        finalBalanceChange.tokens.get(DEMO.reference)
-      );
-      const newDemoBalance = getNotNullOrThrowError<Balance>(
-        response.tokens.get(DEMO.reference)
-      );
-
-      const oldUskBalance = getNotNullOrThrowError<Balance>(
-        userBalances.tokens.get(USK_TESTNET.reference)
-      );
-      const uskBalanceChange = getNotNullOrThrowError<Balance>(
-        finalBalanceChange.tokens.get(USK_TESTNET.reference)
-      );
-      const newUskBalance = getNotNullOrThrowError<Balance>(
-        response.tokens.get(USK_TESTNET.reference)
-      );
-
-      expect(oldKujiBalance.free.minus(kujiBalanceChange.free)).toEqual(
-        newKujiBalance.free
-      );
-
-      expect(oldDemoBalance.free.minus(demoBalanceChange.free)).toEqual(
-        newDemoBalance.free
-      );
-
-      expect(oldUskBalance.free.minus(uskBalanceChange.free)).toEqual(
-        newUskBalance.free
-      );
+      userBalances = response;
 
       logResponse(response);
     });
@@ -1143,18 +1120,77 @@ describe('Kujira Full Flow', () => {
       expect(response.signatures).toHaveProperty('cancellation');
       expect(response.signatures['cancellation'].length).toBeGreaterThan(0);
 
+      order.fee = response.fee;
+      // TODO Assign the cancellation signature to the order !!!
+
       logResponse(response);
     });
 
-    it('Check the wallet balances from the tokens 1 and 2', async () => {
+    it('Check the wallet balances from the tokens 1 and 3', async () => {
       request = {
-        tokenIds: [tokenIds[1], tokenIds[2]],
+        tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
       response = await kujira.getBalances(request);
+
+      const order = getOrder('1');
+      const finalBalanceChange: Balances = {
+        tokens: IMap<TokenId, Balance>().asMutable(),
+        total: {
+          token: 'total',
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+        },
+      } as Balances;
+
+      for (const [key, balance] of userBalances.tokens.entries()) {
+        finalBalanceChange.tokens.set(key, {
+          token: balance.token,
+          ticker: balance.ticker,
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+        } as Balance);
+      }
+      const kujiBalanceChange = getNotNullOrThrowError<Balance>(
+        finalBalanceChange.tokens.get(KUJI.reference)
+      );
+      const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
+      kujiBalanceChange.free = kujiBalanceChange.free.plus(orderFee);
+
+      const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
+      const marketTokens = networkPairs[order.marketId].denoms;
+      const oldBaseBalance = getNotNullOrThrowError<Balance>(
+        finalBalanceChange.tokens.get(marketTokens[0].reference)
+      );
+      const oldQuoteBalance = getNotNullOrThrowError<Balance>(
+        finalBalanceChange.tokens.get(marketTokens[1].reference)
+      );
+
+      if (order.side == OrderSide.BUY) {
+        oldQuoteBalance.free = oldQuoteBalance.free.minus(orderAmount);
+      } else if (order.side == OrderSide.SELL) {
+        oldBaseBalance.free = oldBaseBalance.free.minus(orderAmount);
+      }
+
+      response.tokens.keySeq().forEach((key: string) => {
+        const oldBalance = getNotNullOrThrowError<Balance>(
+          userBalances.tokens.get(key)
+        );
+        const balanceChange = getNotNullOrThrowError<Balance>(
+          finalBalanceChange.tokens.get(key)
+        );
+        const newBalance = getNotNullOrThrowError<Balance>(
+          response.tokens.get(key)
+        );
+        expect(oldBalance.free.minus(balanceChange.free)).toEqual(
+          newBalance.free
+        );
+      });
 
       logResponse(response);
     });

@@ -1177,6 +1177,10 @@ export class Kujira {
 
       bundles.setIn(['common', 'response'], response);
       bundles.setIn(['common', 'status'], OrderStatus.CANCELLED);
+      bundles.setIn(
+        ['common', 'events'],
+        convertKujiraEventsToMapOfEvents(response.events)
+      );
 
       const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
         JSON.parse(getNotNullOrThrowError<string>(response.rawLog))

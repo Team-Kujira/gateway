@@ -718,7 +718,9 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         side: undefined as unknown as OrderSide,
         status: OrderStatus.CANCELLED,
         type: OrderType.LIMIT,
-        fee: undefined,
+        fee: convertKujiraFeeToFee(
+          options.bundles.getIn(['common', 'events', 'tx', 'fee']) as string
+        ),
         creationTimestamp: undefined,
         fillingTimestamp: undefined,
         signatures: {
