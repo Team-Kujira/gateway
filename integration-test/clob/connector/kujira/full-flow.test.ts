@@ -1262,28 +1262,21 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
 
       request = {
-        ids: [orders[2].id],
+        id: orders[2].id,
+        ownerAddress: ownerAddress,
         marketId: orders[2].marketId,
-        ownerAddresses: [ownerAddress],
-      } as CancelOrdersRequest;
+      } as CancelOrderRequest;
 
       logRequest(request);
 
-      response = await kujira.cancelOrders(request);
+      response = await kujira.cancelOrder(request);
 
       expect(response).not.toBeEmpty();
-      expect(
-        Object.entries(response.first().keySeq().toArray()).length
-      ).toEqual(request.ids.length);
-      expect(response.first().keySeq().toArray()).toEqual(request.ids);
-      expect(response.first().first().marketId).toEqual(request.marketId);
-      expect(response.first().first().status).toBe(OrderStatus.CANCELLED);
-      expect(response.first().first().signatures).toHaveProperty(
-        'cancellation'
-      );
-      expect(
-        response.first().first().signatures['cancellation'].length
-      ).toEqual(64);
+      expect(response.id).toEqual(request.id);
+      expect(response.marketId).toEqual(request.marketId);
+      expect(response.status).toBe(OrderStatus.CANCELLED);
+      expect(response.signatures).toHaveProperty('cancellation');
+      expect(response.signatures['cancellation'].length).toEqual(64);
 
       logResponse(response);
     });
@@ -1388,14 +1381,20 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
-      expect(response).not.toBeObject();
-      expect(response).toBeUndefined();
-      expect(response.toArray().length).toEqual(0);
+      // expect(response).not.toBeObject();
+      // expect(response).toBeUndefined();
+      expect(response.first().keySeq().toArray().length).toEqual(0);
 
       logResponse(response);
     });
 
     it('Get all open orders and check that the orders 1, 3, 4, and 5 are missing', async () => {
+      const orders = getOrders(['1', '3', '4', '5']);
+      const ids = orders
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1404,6 +1403,15 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
+
+      // const numOfOpenOrders = response.first().keySeq().toArray().length;
+      // console.log(numOfOpenOrders);
+
+      for (const id of ids) {
+        for (const value of response.valueSeq().first().toArray()) {
+          expect(value[1].id).not.toEqual(id);
+        }
+      }
 
       logResponse(response);
     });
