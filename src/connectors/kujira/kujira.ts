@@ -1144,7 +1144,7 @@ export class Kujira {
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
     for (const ownerAddress of options.ownerAddresses) {
-      // TODO check if using index 0 would work for all!!!
+      // TODO check if using index 0 would work for all !!!
       const denom: Denom = market.connectorMarket.denoms[0];
 
       const message = msg.wasm.msgExecuteContract({

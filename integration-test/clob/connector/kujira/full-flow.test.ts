@@ -1160,7 +1160,7 @@ describe('Kujira Full Flow', () => {
         finalBalanceChange.tokens.get(KUJI.reference)
       );
       const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
-      kujiBalanceChange.free = kujiBalanceChange.free.plus(orderFee);
+      kujiBalanceChange.free = kujiBalanceChange.free.plus(orderFee); // TODO should have +1 of cancellation fee !!!
 
       const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
       const marketTokens = networkPairs[order.marketId].denoms;
@@ -1190,6 +1190,7 @@ describe('Kujira Full Flow', () => {
         expect(oldBalance.free.minus(balanceChange.free)).toEqual(
           newBalance.free
         );
+        userBalances.tokens.set(key, newBalance);
       });
 
       logResponse(response);
@@ -1280,6 +1281,76 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getBalances(request);
+
+      const orders = getOrders(['3', '4', '5']).valueSeq().toArray();
+      const finalBalanceChange: Balances = {
+        tokens: IMap<TokenId, Balance>().asMutable(),
+        total: {
+          token: 'total',
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+        },
+      } as Balances;
+
+      for (const [key, balance] of userBalances.tokens.entries()) {
+        finalBalanceChange.tokens.set(key, {
+          token: balance.token,
+          ticker: balance.ticker,
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+        } as Balance);
+      }
+      const kujiBalanceChange = getNotNullOrThrowError<Balance>(
+        finalBalanceChange.tokens.get(KUJI.reference)
+      );
+
+      const firstCancellationOrderFee = getNotNullOrThrowError<BigNumber>(
+        orders[0].fee
+      );
+      const secondCancellationOrderFee = getNotNullOrThrowError<BigNumber>(
+        orders[2].fee
+      );
+      kujiBalanceChange.free = kujiBalanceChange.free.plus(
+        firstCancellationOrderFee
+      );
+      kujiBalanceChange.free = kujiBalanceChange.free.plus(
+        secondCancellationOrderFee
+      );
+
+      orders.forEach((order) => {
+        const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
+        const marketTokens = networkPairs[order.marketId].denoms;
+        const oldBaseBalance = getNotNullOrThrowError<Balance>(
+          finalBalanceChange.tokens.get(marketTokens[0].reference)
+        );
+        const oldQuoteBalance = getNotNullOrThrowError<Balance>(
+          finalBalanceChange.tokens.get(marketTokens[1].reference)
+        );
+
+        if (order.side == OrderSide.BUY) {
+          oldQuoteBalance.free = oldQuoteBalance.free.minus(orderAmount);
+        } else if (order.side == OrderSide.SELL) {
+          oldBaseBalance.free = oldBaseBalance.free.minus(orderAmount);
+        }
+      });
+
+      response.tokens.keySeq().forEach((key: string) => {
+        const oldBalance = getNotNullOrThrowError<Balance>(
+          userBalances.tokens.get(key)
+        );
+        const balanceChange = getNotNullOrThrowError<Balance>(
+          finalBalanceChange.tokens.get(key)
+        );
+        const newBalance = getNotNullOrThrowError<Balance>(
+          response.tokens.get(key)
+        );
+        expect(oldBalance.free.minus(balanceChange.free)).toEqual(
+          newBalance.free
+        );
+        // userBalances.tokens.set(key, newBalance);
+      });
 
       logResponse(response);
     });
