@@ -1248,14 +1248,16 @@ describe('Kujira Full Flow', () => {
       response = await kujira.cancelOrders(request);
 
       expect(response).not.toBeEmpty();
+      for (const value of response.first()) {
+        expect(value[1].status).toBe(OrderStatus.CANCELLED);
+        expect(value[1].signatures).toHaveProperty('cancellation');
+        expect(value[1].signatures['cancellation'].length).toEqual(64);
+      }
       expect(
         Object.entries(response.first().keySeq().toArray()).length
       ).toEqual(request.ids.length);
       expect(response.first().keySeq().toArray()).toEqual(request.ids);
       expect(response.first().first().marketId).toEqual(request.marketId);
-      // expect(response.status).toBe(OrderStatus.CANCELLED);
-      // expect(response.signatures).toHaveProperty('cancellation');
-      // expect(response.signatures['cancellation'].length).toBeGreaterThan(0);
 
       logResponse(response);
 
@@ -1268,6 +1270,20 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.cancelOrders(request);
+
+      expect(response).not.toBeEmpty();
+      expect(
+        Object.entries(response.first().keySeq().toArray()).length
+      ).toEqual(request.ids.length);
+      expect(response.first().keySeq().toArray()).toEqual(request.ids);
+      expect(response.first().first().marketId).toEqual(request.marketId);
+      expect(response.first().first().status).toBe(OrderStatus.CANCELLED);
+      expect(response.first().first().signatures).toHaveProperty(
+        'cancellation'
+      );
+      expect(
+        response.first().first().signatures['cancellation'].length
+      ).toEqual(64);
 
       logResponse(response);
     });
@@ -1356,7 +1372,8 @@ describe('Kujira Full Flow', () => {
     });
 
     it("Check that it's not possible to get the cancelled orders 3, 4, and 5 from the markets 1 and 2", async () => {
-      const ids = getOrders(['3', '4', '5'])
+      const orders = getOrders(['3', '4', '5']);
+      const ids = orders
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -1370,6 +1387,10 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
+
+      expect(response).not.toBeObject();
+      expect(response).toBeUndefined();
+      expect(response.toArray().length).toEqual(0);
 
       logResponse(response);
     });
