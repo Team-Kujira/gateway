@@ -1183,7 +1183,8 @@ export class Kujira {
       );
 
       const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
-        JSON.parse(getNotNullOrThrowError<string>(response.rawLog))
+        JSON.parse(getNotNullOrThrowError<string>(response.rawLog)),
+        options.ids.length
       );
 
       for (const [bundleIndex, events] of mapOfEvents.entries()) {

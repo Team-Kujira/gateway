@@ -854,10 +854,19 @@ export const convertKujiraEventsToMapOfEvents = (
 };
 
 export const convertKujiraRawLogEventsToMapOfEvents = (
-  eventsLog: Array<any>
+  eventsLog: Array<any>,
+  cancellManyOrderNumber?: number
 ): IMap<string, any> => {
+  if (cancellManyOrderNumber) {
+    let msgIndex = (eventsLog[0]['msg_index'] as number) + 1;
+    for (let i = 0; i < cancellManyOrderNumber - 1; i++) {
+      const newEventLog = { ...eventsLog[0] };
+      newEventLog['msg_index'] = msgIndex;
+      eventsLog.push(newEventLog);
+      msgIndex = msgIndex + 1;
+    }
+  }
   const output = IMap<string, any>().asMutable();
-
   for (const eventLog of eventsLog) {
     const bundleIndex = eventLog['msg_index'];
     const events = eventLog['events'];
