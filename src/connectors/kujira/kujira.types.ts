@@ -357,6 +357,7 @@ export interface GetAllTokensResponse extends IMap<TokenId, Token> {}
 
 export interface GetMarketRequest {
   id?: MarketId;
+  name?: MarketName;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -364,6 +365,7 @@ export interface GetMarketResponse extends Market {}
 
 export interface GetMarketsRequest {
   ids?: MarketId[];
+  names?: MarketName[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -377,6 +379,7 @@ export interface GetAllMarketsResponse extends IMap<MarketId, Market> {}
 
 export interface GetOrderBookRequest {
   marketId?: MarketId;
+  marketName?: MarketName;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -384,6 +387,7 @@ export interface GetOrderBookResponse extends OrderBook {}
 
 export interface GetOrderBooksRequest {
   marketIds?: MarketId[];
+  marketNames?: MarketName[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -397,6 +401,7 @@ export interface GetAllOrderBooksResponse extends IMap<MarketId, OrderBook> {}
 
 export interface GetTickerRequest {
   marketId?: MarketId;
+  marketName?: MarketName;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -404,6 +409,7 @@ export interface GetTickerResponse extends Ticker {}
 
 export interface GetTickersRequest {
   marketIds?: MarketId[];
+  marketNames?: MarketName[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -425,7 +431,7 @@ export interface GetWalletArtifactsResponse extends KujiraWalletArtifacts {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalanceRequest {
   tokenId: TokenId;
-
+  tokenSymbol: TokenSymbol;
   ownerAddress: OwnerAddress;
 }
 
@@ -435,7 +441,7 @@ export interface GetBalanceResponse extends Balance {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalancesRequest {
   tokenIds: TokenId[];
-
+  tokenSymbols: TokenSymbol[];
   ownerAddress: OwnerAddress;
 }
 
@@ -453,7 +459,9 @@ export interface GetAllBalancesResponse extends Balances {}
 export interface GetOrderRequest {
   id: OrderId;
   marketId?: MarketId;
+  marketName?: MarketName;
   marketIds?: MarketId[];
+  marketNames?: MarketName[];
   ownerAddress: OrderOwnerAddress;
   status?: OrderStatus;
   statuses?: OrderStatus[];
@@ -465,7 +473,9 @@ export interface GetOrderResponse extends Order {}
 export interface GetOrdersRequest {
   ids?: OrderId[];
   marketId?: MarketId;
+  marketName?: MarketName;
   marketIds?: MarketId[];
+  marketNames?: MarketName[];
   ownerAddresses: OrderOwnerAddress[];
   status?: OrderStatus;
   statuses?: OrderStatus[];
@@ -478,6 +488,7 @@ export interface GetOrdersResponse
 export interface PlaceOrderRequest {
   waitUntilIncludedInBlock?: boolean;
   marketId: MarketId;
+  marketName?: MarketName;
   ownerAddress?: OrderOwnerAddress;
   side: OrderSide;
   price: OrderPrice;
@@ -502,6 +513,7 @@ export interface CancelOrderRequest {
   id: OrderId;
   ownerAddress: OrderOwnerAddress;
   marketId: MarketId;
+  marketName?: MarketName;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -510,6 +522,7 @@ export interface CancelOrderResponse extends Order {}
 export interface CancelOrdersRequest {
   ids: OrderId[];
   marketId: MarketId;
+  marketName?: MarketName;
   ownerAddresses: OrderOwnerAddress[];
 }
 
@@ -520,7 +533,9 @@ export interface CancelOrdersResponse
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CancelAllOrdersRequest {
   marketId?: MarketId;
+  marketName?: MarketName;
   marketIds?: MarketId[];
+  marketNames?: MarketName[];
   ownerAddresses: OrderOwnerAddress[];
 }
 
@@ -530,6 +545,7 @@ export interface CancelAllOrdersResponse
 
 export interface MarketWithdrawRequest {
   marketId?: MarketId;
+  marketName?: MarketName;
   ownerAddresses: OrderOwnerAddress[];
 }
 
@@ -538,6 +554,7 @@ export interface MarketWithdrawResponse extends IMap<OwnerAddress, Withdraw> {}
 
 export interface MarketsWithdrawsRequest {
   marketIds?: MarketId[];
+  marketNames?: MarketName[];
   ownerAddresses: OrderOwnerAddress[];
 }
 
