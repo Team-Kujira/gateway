@@ -1,5 +1,7 @@
 import {
   Address,
+  AllMarketsWithdrawsRequest,
+  AllMarketsWithdrawsResponse,
   Balance,
   Balances,
   BasicKujiraMarket,
@@ -53,6 +55,8 @@ import {
   GetTokenResponse,
   GetTokensRequest,
   GetTokensResponse,
+  GetTokenSymbolsToTokenIdsMapRequest,
+  GetTokenSymbolsToTokenIdsMapResponse,
   GetTransactionRequest,
   GetTransactionResponse,
   GetTransactionsRequest,
@@ -67,6 +71,10 @@ import {
   Market,
   MarketId,
   MarketNotFoundError,
+  MarketsWithdrawsFundsResponse,
+  MarketsWithdrawsRequest,
+  MarketWithdrawRequest,
+  MarketWithdrawResponse,
   Mnemonic,
   Order,
   OrderBook,
@@ -79,21 +87,16 @@ import {
   PlaceOrderResponse,
   PlaceOrdersRequest,
   PlaceOrdersResponse,
-  Withdraw,
-  MarketWithdrawRequest,
-  MarketWithdrawResponse,
-  AllMarketsWithdrawsRequest,
-  AllMarketsWithdrawsResponse,
-  MarketsWithdrawsRequest,
-  MarketsWithdrawsFundsResponse,
   Ticker,
   TickerNotFoundError,
   TickerSource,
   Token,
   TokenId,
   TokenNotFoundError,
+  TokenSymbol,
   Transaction,
   TransactionSignature,
+  Withdraw,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -612,6 +615,24 @@ export class Kujira {
     return await this.getTokens({ ids: tokenIds });
   }
 
+  @Cache(caches.tokens, { ttl: config.cache.tokens })
+  async getTokenSymbolsToTokenIdsMap(
+    options?: GetTokenSymbolsToTokenIdsMapRequest
+  ): Promise<GetTokenSymbolsToTokenIdsMapResponse> {
+    const tokens = await this.getAllTokens({});
+
+    let output = IMap<TokenSymbol, TokenId>().asMutable();
+
+    tokens.map((token) => output.set(token.symbol, token.id));
+
+    if (options?.symbols) {
+      const symbols = getNotNullOrThrowError<TokenSymbol[]>(options.symbols);
+      output = output.filter((_, symbol) => symbols.includes(symbol));
+    }
+
+    return output;
+  }
+
   /**
    *
    * @param options
@@ -842,7 +863,8 @@ export class Kujira {
   async getBalance(options: GetBalanceRequest): Promise<GetBalanceResponse> {
     const balances = await this.getBalances({
       ownerAddress: options.ownerAddress,
-      tokenIds: [options.tokenId],
+      tokenIds: options.tokenId ? [options.tokenId] : undefined,
+      tokenSymbols: options.tokenSymbol ? [options.tokenSymbol] : undefined,
     });
 
     if (balances.tokens.has(options.tokenId)) {
@@ -869,8 +891,18 @@ export class Kujira {
       },
     };
 
+    const tokenIds =
+      options.tokenIds ||
+      (
+        await this.getTokenSymbolsToTokenIdsMap({
+          symbols: options.tokenSymbols,
+        })
+      )
+        .valueSeq()
+        .toArray();
+
     for (const [tokenId, balance] of allBalances.tokens) {
-      if (options.tokenIds.includes(tokenId)) {
+      if (tokenIds.includes(tokenId)) {
         balances.tokens.set(tokenId, balance);
 
         balances.total.free = balances.total.free.plus(balance.free);
@@ -950,7 +982,11 @@ export class Kujira {
   async getOrders(options: GetOrdersRequest): Promise<GetOrdersResponse> {
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
-    for (const ownerAddress of options.ownerAddresses) {
+    const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
+      ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
+      : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
+
+    for (const ownerAddress of ownerAddresses) {
       let orders: IMap<OrderId, Order>;
 
       if (options.marketId) {
@@ -1143,7 +1179,11 @@ export class Kujira {
 
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
-    for (const ownerAddress of options.ownerAddresses) {
+    const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
+      ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
+      : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
+
+    for (const ownerAddress of ownerAddresses) {
       // TODO check if using index 0 would work for all !!!
       const denom: Denom = market.connectorMarket.denoms[0];
 
@@ -1219,7 +1259,11 @@ export class Kujira {
   ): Promise<CancelAllOrdersResponse> {
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
-    for (const ownerAddress of options.ownerAddresses) {
+    const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
+      ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
+      : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
+
+    for (const ownerAddress of ownerAddresses) {
       const marketIds: MarketId[] = options?.marketId
         ? [options?.marketId]
         : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
@@ -1243,7 +1287,7 @@ export class Kujira {
           await this.cancelOrders({
             ids: openOrdersIds,
             marketId,
-            ownerAddresses: options.ownerAddresses,
+            ownerAddresses: ownerAddresses,
           })
         );
       }
@@ -1265,7 +1309,11 @@ export class Kujira {
 
     const output = IMap<OwnerAddress, Withdraw>().asMutable();
 
-    for (const ownerAddress of options.ownerAddresses) {
+    const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
+      ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
+      : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
+
+    for (const ownerAddress of ownerAddresses) {
       const walletArtifacts = await this.getWalletArtifacts({
         ownerAddress,
       });
@@ -1328,12 +1376,16 @@ export class Kujira {
       ownerAddresses: OrderOwnerAddress[];
     }
 
+    const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
+      ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
+      : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
+
     const settleMarketFunds = async (
       options: HelperSettleFundsOptions
     ): Promise<void> => {
       const results = await this.settleMarketFunds({
         marketId: options.marketId,
-        ownerAddresses: options.ownerAddresses,
+        ownerAddresses: ownerAddresses,
       });
 
       settlements.set(options.marketId, results);
@@ -1342,14 +1394,14 @@ export class Kujira {
     for (const marketId of options.marketIds) {
       settleMarketFunds({
         marketId: marketId,
-        ownerAddresses: options.ownerAddresses,
+        ownerAddresses: ownerAddresses,
       });
     }
 
     // await promiseAllInBatches<HelperSettleFundsOptions, void>(
     //   settleMarketFunds,
     //   options.marketIds.map((id) => {
-    //     return { marketId: id, ownerAddresses: options.ownerAddresses };
+    //     return { marketId: id, ownerAddresses: ownerAddresses };
     //   })
     // );
 
@@ -1365,9 +1417,13 @@ export class Kujira {
   ): Promise<AllMarketsWithdrawsResponse> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
 
+    const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
+      ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
+      : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
+
     return await this.settleMarketsFunds({
       marketIds,
-      ownerAddresses: options.ownerAddresses,
+      ownerAddresses,
     });
   }
 

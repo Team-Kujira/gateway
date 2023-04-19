@@ -355,6 +355,14 @@ export interface GetAllTokensRequest {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllTokensResponse extends IMap<TokenId, Token> {}
 
+export interface GetTokenSymbolsToTokenIdsMapRequest {
+  symbols?: TokenSymbol[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetTokenSymbolsToTokenIdsMapResponse
+  extends IMap<TokenSymbol, TokenId> {}
+
 export interface GetMarketRequest {
   id?: MarketId;
   name?: MarketName;
@@ -440,8 +448,8 @@ export interface GetBalanceResponse extends Balance {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalancesRequest {
-  tokenIds: TokenId[];
-  tokenSymbols: TokenSymbol[];
+  tokenIds?: TokenId[];
+  tokenSymbols?: TokenSymbol[];
   ownerAddress: OwnerAddress;
 }
 
@@ -476,6 +484,7 @@ export interface GetOrdersRequest {
   marketName?: MarketName;
   marketIds?: MarketId[];
   marketNames?: MarketName[];
+  ownerAddress?: OrderOwnerAddress;
   ownerAddresses: OrderOwnerAddress[];
   status?: OrderStatus;
   statuses?: OrderStatus[];
@@ -486,7 +495,6 @@ export interface GetOrdersResponse
   extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
 
 export interface PlaceOrderRequest {
-  waitUntilIncludedInBlock?: boolean;
   marketId: MarketId;
   marketName?: MarketName;
   ownerAddress?: OrderOwnerAddress;
@@ -495,6 +503,8 @@ export interface PlaceOrderRequest {
   amount: OrderAmount;
   type: OrderType;
   payerAddress?: OrderPayerAddress;
+  replaceIfExists?: boolean; // TODO Add support for this!!!
+  waitUntilIncludedInBlock?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -502,8 +512,9 @@ export interface PlaceOrderResponse extends Order {}
 
 export interface PlaceOrdersRequest {
   ownerAddress?: OrderOwnerAddress;
-  waitUntilIncludedInBlock?: boolean;
   orders: PlaceOrderRequest[];
+  waitUntilIncludedInBlock?: boolean;
+  replaceIfExists?: boolean; // TODO Add support for this!!!
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -511,6 +522,7 @@ export interface PlaceOrdersResponse extends IMap<OrderId, Order> {}
 
 export interface CancelOrderRequest {
   id: OrderId;
+  clientId?: OrderClientId; // TODO Add support if possible!!!
   ownerAddress: OrderOwnerAddress;
   marketId: MarketId;
   marketName?: MarketName;
@@ -521,9 +533,11 @@ export interface CancelOrderResponse extends Order {}
 
 export interface CancelOrdersRequest {
   ids: OrderId[];
+  clientIds?: OrderClientId[]; // TODO Add support if possible!!!
   marketId: MarketId;
   marketName?: MarketName;
-  ownerAddresses: OrderOwnerAddress[];
+  ownerAddress?: OrderOwnerAddress;
+  ownerAddresses?: OrderOwnerAddress[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -536,6 +550,7 @@ export interface CancelAllOrdersRequest {
   marketName?: MarketName;
   marketIds?: MarketId[];
   marketNames?: MarketName[];
+  ownerAddress?: OrderOwnerAddress;
   ownerAddresses: OrderOwnerAddress[];
 }
 
@@ -546,6 +561,7 @@ export interface CancelAllOrdersResponse
 export interface MarketWithdrawRequest {
   marketId?: MarketId;
   marketName?: MarketName;
+  ownerAddress?: OrderOwnerAddress;
   ownerAddresses: OrderOwnerAddress[];
 }
 
@@ -555,6 +571,7 @@ export interface MarketWithdrawResponse extends IMap<OwnerAddress, Withdraw> {}
 export interface MarketsWithdrawsRequest {
   marketIds?: MarketId[];
   marketNames?: MarketName[];
+  ownerAddress?: OrderOwnerAddress;
   ownerAddresses: OrderOwnerAddress[];
 }
 
