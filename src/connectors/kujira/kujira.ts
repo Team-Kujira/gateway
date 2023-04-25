@@ -638,16 +638,18 @@ export class Kujira {
    * @param options
    */
   async getMarket(options: GetMarketRequest): Promise<GetMarketResponse> {
-    if (!options.id) throw new MarketNotFoundError(`No market informed.`);
-
     const markets = await this.getAllMarkets();
 
-    const market = markets.get(options.id);
+    const marketId =
+      options.id || markets.findKey((market) => market.name === options.name);
+    if (!marketId) throw new MarketNotFoundError(`No market informed.`);
+
+    const market = markets.get(marketId);
 
     if (!market)
       throw new MarketNotFoundError(`Market "${options.id}" not found.`);
 
-    return market;
+    return getNotNullOrThrowError<GetMarketResponse>(market);
   }
 
   /**
@@ -655,17 +657,14 @@ export class Kujira {
    * @param options
    */
   async getMarkets(options: GetMarketsRequest): Promise<GetMarketsResponse> {
-    if (!options.ids) throw new MarketNotFoundError(`No market informed.`);
+    const allMarkets = IMap<MarketId, Market>().asMutable();
 
-    const markets = IMap<MarketId, Market>().asMutable();
-
-    const getMarket = async (id: MarketId): Promise<void> => {
-      const market = await this.getMarket({ id });
-
-      markets.set(id, market);
-    };
-
-    await promiseAllInBatches(getMarket, options.ids);
+    const markets = allMarkets.filter(
+      (market) =>
+        options.ids?.includes(market.id) ||
+        options.names?.includes(market.name) ||
+        false
+    );
 
     return markets;
   }
