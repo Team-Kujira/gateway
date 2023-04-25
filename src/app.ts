@@ -19,7 +19,7 @@ import { ConnectorsRoutes } from './connectors/connectors.routes';
 import { EVMRoutes } from './evm/evm.routes';
 import { AmmRoutes, AmmLiquidityRoutes, PerpAmmRoutes } from './amm/amm.routes';
 import { InjectiveRoutes } from './chains/injective/injective.routes';
-import { KujiraRoutes } from './chains/kujira/kujira.routes';
+import { KujiraRoutes } from './connectors/kujira/kujira.routes';
 import { NearRoutes } from './chains/near/near.routes';
 import { CLOBRoutes, PerpClobRoutes } from './clob/clob.routes';
 
