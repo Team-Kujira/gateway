@@ -100,6 +100,19 @@ import {
   PlaceOrdersRequest,
   PlaceOrdersResponse,
 } from './kujira.types';
+import { RequestWrapper } from '../../services/common-interfaces';
+import {
+  BalancesRequest,
+  BalancesResponse,
+  PollRequest,
+  PollResponse,
+} from '../../chains/injective/injective.requests';
+import {
+  validateBalanceRequest,
+  validatePollRequest,
+} from '../../chains/injective/injective.validators';
+import { getChain } from '../../services/connection-manager';
+import { KujiraChain } from '../../chains/kujira/kujira.chain';
 
 export namespace KujiraRoutes {
   export const router = Router();
@@ -130,7 +143,7 @@ export namespace KujiraRoutes {
     '/token',
     asyncHandler(
       async (
-        request: Request<any, any, GetTokenRequest>,
+        request: Request<any, any, RequestWrapper<GetTokenRequest>>,
         response: Response<GetTokenResponse, any>
       ) => {
         const controller = await getController(request);
@@ -146,7 +159,7 @@ export namespace KujiraRoutes {
     '/tokens',
     asyncHandler(
       async (
-        request: Request<any, any, GetTokensRequest>,
+        request: Request<any, any, RequestWrapper<GetTokensRequest>>,
         response: Response<GetTokensResponse, any>
       ) => {
         const controller = await getController(request);
@@ -162,7 +175,7 @@ export namespace KujiraRoutes {
     '/tokens/all',
     asyncHandler(
       async (
-        request: Request<any, any, GetAllTokensRequest>,
+        request: Request<any, any, RequestWrapper<GetAllTokensRequest>>,
         response: Response<GetAllTokensResponse, any>
       ) => {
         const controller = await getController(request);
@@ -178,7 +191,7 @@ export namespace KujiraRoutes {
     '/market',
     asyncHandler(
       async (
-        request: Request<any, any, GetMarketRequest>,
+        request: Request<any, any, RequestWrapper<GetMarketRequest>>,
         response: Response<GetMarketResponse, any>
       ) => {
         const controller = await getController(request);
@@ -194,7 +207,7 @@ export namespace KujiraRoutes {
     '/markets',
     asyncHandler(
       async (
-        request: Request<any, any, GetMarketsRequest>,
+        request: Request<any, any, RequestWrapper<GetMarketsRequest>>,
         response: Response<GetMarketsResponse, any>
       ) => {
         const controller = await getController(request);
@@ -210,7 +223,7 @@ export namespace KujiraRoutes {
     '/markets/all',
     asyncHandler(
       async (
-        request: Request<any, any, GetAllMarketsRequest>,
+        request: Request<any, any, RequestWrapper<GetAllMarketsRequest>>,
         response: Response<GetAllMarketsResponse, any>
       ) => {
         const controller = await getController(request);
@@ -226,7 +239,7 @@ export namespace KujiraRoutes {
     '/orderBook',
     asyncHandler(
       async (
-        request: Request<any, any, GetOrderBookRequest>,
+        request: Request<any, any, RequestWrapper<GetOrderBookRequest>>,
         response: Response<GetOrderBookResponse, any>
       ) => {
         const controller = await getController(request);
@@ -242,7 +255,7 @@ export namespace KujiraRoutes {
     '/orderBooks',
     asyncHandler(
       async (
-        request: Request<any, any, GetOrderBooksRequest>,
+        request: Request<any, any, RequestWrapper<GetOrderBooksRequest>>,
         response: Response<GetOrderBooksResponse, any>
       ) => {
         const controller = await getController(request);
@@ -258,7 +271,7 @@ export namespace KujiraRoutes {
     '/orderBooks/all',
     asyncHandler(
       async (
-        request: Request<any, any, GetAllOrderBooksRequest>,
+        request: Request<any, any, RequestWrapper<GetAllOrderBooksRequest>>,
         response: Response<GetAllOrderBooksResponse, any>
       ) => {
         const controller = await getController(request);
@@ -274,7 +287,7 @@ export namespace KujiraRoutes {
     '/ticker',
     asyncHandler(
       async (
-        request: Request<any, any, GetTickerRequest>,
+        request: Request<any, any, RequestWrapper<GetTickerRequest>>,
         response: Response<GetTickerResponse, any>
       ) => {
         const controller = await getController(request);
@@ -290,7 +303,7 @@ export namespace KujiraRoutes {
     '/tickers',
     asyncHandler(
       async (
-        request: Request<any, any, GetTickersRequest>,
+        request: Request<any, any, RequestWrapper<GetTickersRequest>>,
         response: Response<GetTickersResponse, any>
       ) => {
         const controller = await getController(request);
@@ -306,7 +319,7 @@ export namespace KujiraRoutes {
     '/ticker/all',
     asyncHandler(
       async (
-        request: Request<any, any, GetAllTickersRequest>,
+        request: Request<any, any, RequestWrapper<GetAllTickersRequest>>,
         response: Response<GetAllTickersResponse, any>
       ) => {
         const controller = await getController(request);
@@ -322,7 +335,7 @@ export namespace KujiraRoutes {
     '/balance',
     asyncHandler(
       async (
-        request: Request<any, any, GetBalanceRequest>,
+        request: Request<any, any, RequestWrapper<GetBalanceRequest>>,
         response: Response<GetBalanceResponse, any>
       ) => {
         const controller = await getController(request);
@@ -338,7 +351,7 @@ export namespace KujiraRoutes {
     '/balances',
     asyncHandler(
       async (
-        request: Request<any, any, GetBalancesRequest>,
+        request: Request<any, any, RequestWrapper<GetBalancesRequest>>,
         response: Response<GetBalancesResponse, any>
       ) => {
         const controller = await getController(request);
@@ -354,7 +367,7 @@ export namespace KujiraRoutes {
     '/balances/all',
     asyncHandler(
       async (
-        request: Request<any, any, GetAllBalancesRequest>,
+        request: Request<any, any, RequestWrapper<GetAllBalancesRequest>>,
         response: Response<GetAllBalancesResponse, any>
       ) => {
         const controller = await getController(request);
@@ -370,7 +383,7 @@ export namespace KujiraRoutes {
     '/order',
     asyncHandler(
       async (
-        request: Request<any, any, GetOrderRequest>,
+        request: Request<any, any, RequestWrapper<GetOrderRequest>>,
         response: Response<GetOrderResponse, any>
       ) => {
         const controller = await getController(request);
@@ -386,7 +399,7 @@ export namespace KujiraRoutes {
     '/orders',
     asyncHandler(
       async (
-        request: Request<any, any, GetOrdersRequest>,
+        request: Request<any, any, RequestWrapper<GetOrdersRequest>>,
         response: Response<GetOrdersResponse, any>
       ) => {
         const controller = await getController(request);
@@ -402,7 +415,7 @@ export namespace KujiraRoutes {
     '/order',
     asyncHandler(
       async (
-        request: Request<any, any, PlaceOrderRequest>,
+        request: Request<any, any, RequestWrapper<PlaceOrderRequest>>,
         response: Response<PlaceOrderResponse, any>
       ) => {
         const controller = await getController(request);
@@ -418,7 +431,7 @@ export namespace KujiraRoutes {
     '/orders',
     asyncHandler(
       async (
-        request: Request<any, any, PlaceOrdersRequest>,
+        request: Request<any, any, RequestWrapper<PlaceOrdersRequest>>,
         response: Response<PlaceOrdersResponse, any>
       ) => {
         const controller = await getController(request);
@@ -434,7 +447,7 @@ export namespace KujiraRoutes {
     '/order',
     asyncHandler(
       async (
-        request: Request<any, any, CancelOrderRequest>,
+        request: Request<any, any, RequestWrapper<CancelOrderRequest>>,
         response: Response<CancelOrderResponse, any>
       ) => {
         const controller = await getController(request);
@@ -450,7 +463,7 @@ export namespace KujiraRoutes {
     '/orders',
     asyncHandler(
       async (
-        request: Request<any, any, CancelOrdersRequest>,
+        request: Request<any, any, RequestWrapper<CancelOrdersRequest>>,
         response: Response<CancelOrdersResponse, any>
       ) => {
         const controller = await getController(request);
@@ -466,7 +479,7 @@ export namespace KujiraRoutes {
     '/orders/all',
     asyncHandler(
       async (
-        request: Request<any, any, CancelAllOrdersRequest>,
+        request: Request<any, any, RequestWrapper<CancelAllOrdersRequest>>,
         response: Response<CancelAllOrdersResponse, any>
       ) => {
         const controller = await getController(request);
@@ -482,7 +495,7 @@ export namespace KujiraRoutes {
     '/market/withdraw',
     asyncHandler(
       async (
-        request: Request<any, any, MarketWithdrawRequest>,
+        request: Request<any, any, RequestWrapper<MarketWithdrawRequest>>,
         response: Response<MarketWithdrawResponse, any>
       ) => {
         const controller = await getController(request);
@@ -498,7 +511,7 @@ export namespace KujiraRoutes {
     '/market/withdraws',
     asyncHandler(
       async (
-        request: Request<any, any, MarketsWithdrawsRequest>,
+        request: Request<any, any, RequestWrapper<MarketsWithdrawsRequest>>,
         response: Response<MarketsWithdrawsFundsResponse, any>
       ) => {
         const controller = await getController(request);
@@ -514,7 +527,7 @@ export namespace KujiraRoutes {
     '/market/withdraws/all',
     asyncHandler(
       async (
-        request: Request<any, any, AllMarketsWithdrawsRequest>,
+        request: Request<any, any, RequestWrapper<AllMarketsWithdrawsRequest>>,
         response: Response<AllMarketsWithdrawsResponse, any>
       ) => {
         const controller = await getController(request);
@@ -530,7 +543,7 @@ export namespace KujiraRoutes {
     '/transaction',
     asyncHandler(
       async (
-        request: Request<any, any, GetTransactionRequest>,
+        request: Request<any, any, RequestWrapper<GetTransactionRequest>>,
         response: Response<GetTransactionResponse, any>
       ) => {
         const controller = await getController(request);
@@ -546,7 +559,7 @@ export namespace KujiraRoutes {
     '/transactions',
     asyncHandler(
       async (
-        request: Request<any, any, GetTransactionsRequest>,
+        request: Request<any, any, RequestWrapper<GetTransactionsRequest>>,
         response: Response<GetTransactionsResponse, any>
       ) => {
         const controller = await getController(request);
@@ -562,7 +575,7 @@ export namespace KujiraRoutes {
     '/wallet/publicKey',
     asyncHandler(
       async (
-        request: Request<any, any, GetWalletPublicKeyRequest>,
+        request: Request<any, any, RequestWrapper<GetWalletPublicKeyRequest>>,
         response: Response<GetWalletPublicKeyResponse, any>
       ) => {
         const controller = await getController(request);
@@ -578,7 +591,7 @@ export namespace KujiraRoutes {
     '/wallet/publicKeys',
     asyncHandler(
       async (
-        request: Request<any, any, GetWalletsPublicKeysRequest>,
+        request: Request<any, any, RequestWrapper<GetWalletsPublicKeysRequest>>,
         response: Response<GetWalletsPublicKeysResponse, any>
       ) => {
         const controller = await getController(request);
@@ -594,7 +607,7 @@ export namespace KujiraRoutes {
     '/block/current',
     asyncHandler(
       async (
-        request: Request<any, any, GetCurrentBlockRequest>,
+        request: Request<any, any, RequestWrapper<GetCurrentBlockRequest>>,
         response: Response<GetCurrentBlockResponse, any>
       ) => {
         const controller = await getController(request);
@@ -610,7 +623,7 @@ export namespace KujiraRoutes {
     '/fees/estimated',
     asyncHandler(
       async (
-        request: Request<any, any, GetEstimatedFeesRequest>,
+        request: Request<any, any, RequestWrapper<GetEstimatedFeesRequest>>,
         response: Response<GetEstimatedFeesResponse, any>
       ) => {
         const controller = await getController(request);
@@ -618,6 +631,48 @@ export namespace KujiraRoutes {
         const result = await getEstimatedFees(controller, request.body);
 
         return await response.status(result.status).json(result.body);
+      }
+    )
+  );
+
+  router.post(
+    '/balances',
+    asyncHandler(
+      async (
+        req: Request<any, any, RequestWrapper<BalancesRequest>>,
+        res: Response<BalancesResponse, any>
+      ) => {
+        validateBalanceRequest(req.body);
+
+        const kujira = await getChain<KujiraChain>(
+          req.body.chain,
+          req.body.network
+        );
+
+        const result = await kujira.balances(req.body);
+
+        res.status(200).json(result);
+      }
+    )
+  );
+
+  router.post(
+    '/poll',
+    asyncHandler(
+      async (
+        req: Request<any, any, RequestWrapper<PollRequest>>,
+        res: Response<PollResponse, any>
+      ) => {
+        validatePollRequest(req.body);
+
+        const kujira = await getChain<KujiraChain>(
+          req.body.chain,
+          req.body.network
+        );
+
+        const result = await kujira.poll(req.body);
+
+        res.status(200).json(result);
       }
     )
   );
