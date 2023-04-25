@@ -8,6 +8,9 @@ import {
   logResponse as helperLogResponse,
 } from '../../../helpers';
 import {
+  AllMarketsWithdrawsRequest,
+  Balance,
+  Balances,
   CancelAllOrdersRequest,
   CancelOrderRequest,
   CancelOrdersRequest,
@@ -21,7 +24,6 @@ import {
   GetMarketRequest,
   GetMarketsRequest,
   GetOrderBookRequest,
-  TokenId,
   GetOrderBooksRequest,
   GetOrderRequest,
   GetOrdersRequest,
@@ -30,6 +32,9 @@ import {
   GetTokenRequest,
   GetTokensRequest,
   IMap,
+  MarketName,
+  MarketsWithdrawsRequest,
+  MarketWithdrawRequest,
   Order,
   OrderClientId,
   OrderMarketName,
@@ -39,12 +44,7 @@ import {
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrdersRequest,
-  MarketWithdrawRequest,
-  AllMarketsWithdrawsRequest,
-  MarketsWithdrawsRequest,
-  Balances,
-  MarketName,
-  Balance,
+  TokenId,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { Denom, DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -1454,8 +1454,48 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // it('Force the filling of order 2', async () => {
-    // });
+    it('Force the filling of order 2', async () => {
+      const order = getOrder('2');
+
+      request = {
+        id: order.id,
+        ownerAddress: ownerAddress,
+        marketId: order.marketId,
+      } as CancelOrderRequest;
+
+      logRequest(request);
+
+      response = await kujira.cancelOrder(request);
+
+      order.status = OrderStatus.CANCELLED;
+      order.id = undefined;
+
+      // request = {
+      //   marketId: marketIds[2],
+      // } as GetTickerRequest;
+      //
+      // response = await kujira.getTicker(request);
+
+      request = {
+        marketIds: [marketIds[2]],
+      } as GetOrderBooksRequest;
+
+      response = await kujira.getOrderBooks(request);
+
+      const modifiedOrder = { ...order } as Order;
+
+      modifiedOrder.price = BigNumber(response.first().bestBid.price);
+
+      request = { ...modifiedOrder } as PlaceOrderRequest;
+
+      logRequest(request);
+
+      response = await kujira.placeOrder(request);
+
+      order.id = response.id;
+
+      logResponse(response);
+    });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
       request = {
