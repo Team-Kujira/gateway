@@ -756,6 +756,8 @@ export interface NetworkSelectionRequest {
   connector?: string; //the target connector (e.g. uniswap or pangolin)
 }
 
+export type RequestWrapper<T> = NetworkSelectionRequest & T;
+
 export class ResponseWrapper<T> {
   get status(): number {
     return this._status || -1;
