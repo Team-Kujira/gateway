@@ -148,7 +148,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -165,7 +165,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -182,7 +182,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -199,7 +199,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -216,7 +216,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -233,7 +233,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -250,7 +250,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -267,7 +267,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -284,7 +284,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -301,7 +301,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -318,7 +318,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -1511,7 +1511,8 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the filled order 2', async () => {
-      const id = getOrder('2').id;
+      const order = getOrder('2');
+      const id = order.id;
 
       request = {
         id,
@@ -1522,6 +1523,13 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrder(request);
+
+      expect(response.id).toEqual(id);
+      expect(response.status).toEqual(OrderStatus.FILLED);
+      expect(response.connectorOrder.offer_amount).toEqual('0');
+      expect(response.connectorOrder.filled_amount).toEqual(
+        order.amount.toNumber().toString()
+      );
 
       logResponse(response);
     });
