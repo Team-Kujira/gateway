@@ -60,6 +60,8 @@ let logRequest: (target: any) => void;
 let logResponse: (target: any) => void;
 // let logOutput: (target: any) => void;
 
+let allTokens: any;
+
 let kujira: Kujira;
 
 const config = KujiraConfig.config;
@@ -369,7 +371,9 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getAllTokens(request);
 
-      logResponse(response);
+      allTokens = response;
+
+      logResponse(allTokens);
     });
   });
 
