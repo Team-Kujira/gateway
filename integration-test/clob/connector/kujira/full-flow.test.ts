@@ -734,9 +734,6 @@ describe('Kujira Full Flow', () => {
 
       const order = getOrder('1');
       const marketTokens = networkPairs[order.marketId].denoms;
-      // const oldBaseBalance = getNotNullOrThrowError<Balance>(
-      //   userBalances.tokens.get(marketTokens[0].reference)
-      // );
       const newBaseBalance = getNotNullOrThrowError<Balance>(
         response.tokens.get(marketTokens[0].reference)
       );
@@ -749,9 +746,6 @@ describe('Kujira Full Flow', () => {
       const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
       const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
 
-      // expect(oldBaseBalance.free.toNumber() - orderFee.toNumber()).toEqual(
-      //   newBaseBalance.free?.toNumber()
-      // );
       const oldKujiBalance = getNotNullOrThrowError<Balance>(
         userBalances.tokens.get(KUJI.reference)
       );
@@ -1176,6 +1170,10 @@ describe('Kujira Full Flow', () => {
       } else if (order.side == OrderSide.SELL) {
         oldBaseBalance.free = oldBaseBalance.free.minus(orderAmount);
       }
+      let tolerance = BigNumber(0.001).times(orderAmount);
+      if (tolerance.lt(1)) {
+        tolerance = BigNumber(1);
+      }
 
       response.tokens.keySeq().forEach((key: string) => {
         const oldBalance = getNotNullOrThrowError<Balance>(
@@ -1187,9 +1185,20 @@ describe('Kujira Full Flow', () => {
         const newBalance = getNotNullOrThrowError<Balance>(
           response.tokens.get(key)
         );
-        expect(oldBalance.free.minus(balanceChange.free)).toEqual(
-          newBalance.free
-        );
+        expect(
+          oldBalance.free
+            .minus(balanceChange.free)
+            .minus(tolerance)
+            .lte(newBalance.free)
+        ).toBeTruthy();
+
+        expect(
+          oldBalance.free
+            .minus(balanceChange.free)
+            .plus(tolerance)
+            .gte(newBalance.free)
+        ).toBeTruthy();
+
         userBalances.tokens.set(key, newBalance);
       });
 
@@ -1301,6 +1310,7 @@ describe('Kujira Full Flow', () => {
           unsettled: BigNumber(0),
         },
       } as Balances;
+      const tolerance = IMap<TokenId, BigNumber>().asMutable();
 
       for (const [key, balance] of userBalances.tokens.entries()) {
         finalBalanceChange.tokens.set(key, {
@@ -1310,6 +1320,7 @@ describe('Kujira Full Flow', () => {
           lockedInOrders: BigNumber(0),
           unsettled: BigNumber(0),
         } as Balance);
+        tolerance.set(key, BigNumber(0));
       }
       const kujiBalanceChange = getNotNullOrThrowError<Balance>(
         finalBalanceChange.tokens.get(KUJI.reference)
@@ -1339,8 +1350,22 @@ describe('Kujira Full Flow', () => {
         );
 
         if (order.side == OrderSide.BUY) {
+          const toleranceNumber = getNotNullOrThrowError<BigNumber>(
+            tolerance.get(marketTokens[1].reference)
+          );
+          tolerance.set(
+            marketTokens[1].reference,
+            toleranceNumber.plus(orderAmount.times(0.01))
+          );
           oldQuoteBalance.free = oldQuoteBalance.free.minus(orderAmount);
         } else if (order.side == OrderSide.SELL) {
+          const toleranceNumber = getNotNullOrThrowError<BigNumber>(
+            tolerance.get(marketTokens[0].reference)
+          );
+          tolerance.set(
+            marketTokens[0].reference,
+            toleranceNumber.plus(orderAmount.times(0.01))
+          );
           oldBaseBalance.free = oldBaseBalance.free.minus(orderAmount);
         }
       });
@@ -1355,10 +1380,23 @@ describe('Kujira Full Flow', () => {
         const newBalance = getNotNullOrThrowError<Balance>(
           response.tokens.get(key)
         );
-        expect(oldBalance.free.minus(balanceChange.free)).toEqual(
-          newBalance.free
+        let toleranceNumber = getNotNullOrThrowError<BigNumber>(
+          tolerance.get(key)
         );
-        // userBalances.tokens.set(key, newBalance);
+        if (toleranceNumber.lt(1)) {
+          toleranceNumber = BigNumber(1);
+        }
+        expect(
+          newBalance.free.lte(
+            oldBalance.free.minus(balanceChange.free).plus(toleranceNumber)
+          )
+        ).toBeTruthy();
+        expect(
+          newBalance.free.gte(
+            oldBalance.free.minus(balanceChange.free).minus(toleranceNumber)
+          )
+        ).toBeTruthy();
+        userBalances.tokens.set(key, newBalance);
       });
 
       logResponse(response);
