@@ -8,6 +8,9 @@ import {
   logResponse as helperLogResponse,
 } from '../../../helpers';
 import {
+  AllMarketsWithdrawsRequest,
+  Balance,
+  Balances,
   CancelAllOrdersRequest,
   CancelOrderRequest,
   CancelOrdersRequest,
@@ -21,7 +24,6 @@ import {
   GetMarketRequest,
   GetMarketsRequest,
   GetOrderBookRequest,
-  TokenId,
   GetOrderBooksRequest,
   GetOrderRequest,
   GetOrdersRequest,
@@ -30,6 +32,9 @@ import {
   GetTokenRequest,
   GetTokensRequest,
   IMap,
+  MarketName,
+  MarketsWithdrawsRequest,
+  MarketWithdrawRequest,
   Order,
   OrderClientId,
   OrderMarketName,
@@ -39,12 +44,7 @@ import {
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrdersRequest,
-  MarketWithdrawRequest,
-  AllMarketsWithdrawsRequest,
-  MarketsWithdrawsRequest,
-  Balances,
-  MarketName,
-  Balance,
+  TokenId,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { Denom, DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -59,6 +59,8 @@ let testTitle: string;
 let logRequest: (target: any) => void;
 let logResponse: (target: any) => void;
 // let logOutput: (target: any) => void;
+
+let allTokens: any;
 
 let kujira: Kujira;
 
@@ -148,7 +150,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -165,7 +167,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -182,7 +184,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -199,7 +201,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -216,7 +218,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -233,7 +235,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -250,7 +252,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -267,7 +269,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -284,7 +286,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -301,7 +303,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -318,7 +320,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(10),
+    amount: BigNumber(100),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -369,7 +371,9 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getAllTokens(request);
 
-      logResponse(response);
+      allTokens = response;
+
+      logResponse(allTokens);
     });
   });
 
@@ -1454,8 +1458,48 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // it('Force the filling of order 2', async () => {
-    // });
+    it('Force the filling of order 2', async () => {
+      const order = getOrder('2');
+
+      request = {
+        id: order.id,
+        ownerAddress: ownerAddress,
+        marketId: order.marketId,
+      } as CancelOrderRequest;
+
+      logRequest(request);
+
+      response = await kujira.cancelOrder(request);
+
+      order.status = OrderStatus.CANCELLED;
+      order.id = undefined;
+
+      // request = {
+      //   marketId: marketIds[2],
+      // } as GetTickerRequest;
+      //
+      // response = await kujira.getTicker(request);
+
+      request = {
+        marketIds: [marketIds[2]],
+      } as GetOrderBooksRequest;
+
+      response = await kujira.getOrderBooks(request);
+
+      const modifiedOrder = { ...order } as Order;
+
+      modifiedOrder.price = BigNumber(response.first().bestBid.price);
+
+      request = { ...modifiedOrder } as PlaceOrderRequest;
+
+      logRequest(request);
+
+      response = await kujira.placeOrder(request);
+
+      order.id = response.id;
+
+      logResponse(response);
+    });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
       request = {
@@ -1471,7 +1515,8 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the filled order 2', async () => {
-      const id = getOrder('2').id;
+      const order = getOrder('2');
+      const id = order.id;
 
       request = {
         id,
@@ -1482,6 +1527,13 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrder(request);
+
+      expect(response.id).toEqual(id);
+      expect(response.status).toEqual(OrderStatus.FILLED);
+      expect(response.connectorOrder.offer_amount).toEqual('0');
+      expect(response.connectorOrder.filled_amount).toEqual(
+        order.amount.toNumber().toString()
+      );
 
       logResponse(response);
     });

@@ -522,12 +522,12 @@ export const convertKujiraOrderBookToOrderBook = (
 
   kujiraOrderBook.base.forEach((kujiraOrder) => {
     const order = {
-      id: undefined, //OrderId;
-      clientId: undefined, //OrderClientId?; // Client custom id
-      marketName: market.name, //OrderMarketName;
-      marketId: market.id, //OrderMarketId;
-      ownerAddress: undefined, //OrderOwnerAddress?;
-      payerAddress: undefined, //OrderPayerAddress?;
+      id: undefined,
+      clientId: undefined,
+      marketName: market.name,
+      marketId: market.id,
+      ownerAddress: undefined,
+      payerAddress: undefined,
       price: BigNumber(kujiraOrder.quote_price),
       amount: BigNumber(kujiraOrder.total_offer_amount),
       side: OrderSide.SELL,
@@ -535,8 +535,8 @@ export const convertKujiraOrderBookToOrderBook = (
       type: OrderType.LIMIT,
       fee: undefined,
       fillingTimestamp: undefined,
-      signatures: undefined, //OrderTransactionSignatures?;
-      connectorOrder: undefined, //ConnectorOrder?;
+      signatures: undefined,
+      connectorOrder: undefined,
     } as Order;
 
     if (bestAsk) {
@@ -544,8 +544,6 @@ export const convertKujiraOrderBookToOrderBook = (
         bestAsk = order;
         bestAskPrice = order.price;
       }
-      bestAsk = order;
-      bestAskPrice = order.price;
     } else {
       bestAsk = order;
       bestAskPrice = order.price;
