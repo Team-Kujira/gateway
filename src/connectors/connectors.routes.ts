@@ -122,7 +122,7 @@ export namespace ConnectorsRoutes {
             },
           },
           {
-            name: 'xsswap',
+            name: 'xswap',
             trading_type: XsswapConfig.config.tradingTypes,
             available_networks: XsswapConfig.config.availableNetworks,
           },
