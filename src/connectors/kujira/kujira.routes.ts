@@ -117,8 +117,18 @@ import { KujiraChain } from '../../chains/kujira/kujira.chain';
 export namespace KujiraRoutes {
   export const router = Router();
 
-  export const getController = async (request: Request) =>
-    await Kujira.getInstance(request.body.chain, request.body.network);
+  export const getController = async (request: Request) => {
+    const controller = await Kujira.getInstance(
+      request.body.chain,
+      request.body.network
+    );
+
+    if (!controller.isReady) {
+      await controller.init();
+    }
+
+    return controller;
+  };
 
   router.use(asyncHandler(verifyKujiraIsAvailable));
 

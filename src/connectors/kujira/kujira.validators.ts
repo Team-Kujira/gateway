@@ -1,7 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { HttpException } from '../../services/error-handler';
 import {
-  isBase58,
   isFloatString,
   isNaturalNumberString,
 } from '../../services/validators';
@@ -220,7 +219,7 @@ export const validateOrderMarketNames: Validator = createValidator(
 
 export const validateOrderOwnerAddress: Validator = createValidator(
   'ownerAddress',
-  (_, value) => isBase58(value),
+  (_, value) => /^kujira[a-z0-9]{39}$/.test(value),
   (_, value) => `Invalid owner address (${value}).`,
   false
 );
