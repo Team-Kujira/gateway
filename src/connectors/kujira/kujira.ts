@@ -278,7 +278,7 @@ export class Kujira {
 
     // TODO implement a mechanism to get the RPC with the lowest latency!!!
     if (!rpcEndpoint) {
-      rpcEndpoint = RPCS[this.kujiraNetwork][1];
+      rpcEndpoint = RPCS[this.kujiraNetwork][0];
     }
 
     return rpcEndpoint;
