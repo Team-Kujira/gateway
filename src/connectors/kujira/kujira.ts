@@ -278,7 +278,7 @@ export class Kujira {
 
     // TODO implement a mechanism to get the RPC with the lowest latency!!!
     if (!rpcEndpoint) {
-      rpcEndpoint = RPCS[this.kujiraNetwork][0];
+      rpcEndpoint = RPCS[this.kujiraNetwork][1];
     }
 
     return rpcEndpoint;
@@ -1104,10 +1104,15 @@ export class Kujira {
         contract: market.connectorMarket.address,
         msg: Buffer.from(
           JSON.stringify({
-            submit_order: { price: candidate.price.toString() },
+            submit_order: {
+              price: BigNumber(candidate.price).precision(1).toString(),
+            },
           })
         ),
-        funds: coins(Number(candidate.amount), denom.reference),
+        funds: coins(
+          BigNumber(candidate.amount).integerValue().toString(),
+          denom.reference
+        ),
       });
 
       candidateMessages.push(message);

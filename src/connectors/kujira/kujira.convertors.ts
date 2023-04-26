@@ -520,6 +520,7 @@ export const convertKujiraOrderBookToOrderBook = (
   let bestBidPrice = BigNumber('-Infinity');
   let bestAskPrice = BigNumber('Infinity');
 
+  let counter = 0;
   kujiraOrderBook.base.forEach((kujiraOrder) => {
     const order = {
       id: undefined,
@@ -549,7 +550,7 @@ export const convertKujiraOrderBookToOrderBook = (
       bestAskPrice = order.price;
     }
 
-    asks.set('None', order);
+    asks.set(`unknown_${counter++}`, order);
   });
 
   kujiraOrderBook.quote.forEach((kujiraOrder) => {
@@ -581,7 +582,7 @@ export const convertKujiraOrderBookToOrderBook = (
       bestBidPrice = order.price;
     }
 
-    bids.set('None', order);
+    bids.set(`unknown_${counter++}`, order);
   });
 
   return {
