@@ -166,7 +166,7 @@ beforeAll(async () => {
     marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.99),
+    price: BigNumber(999.999),
     amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
@@ -369,9 +369,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getAllTokens(request);
-
-      allTokens = response;
+      allTokens = await kujira.getAllTokens(request);
 
       logResponse(allTokens);
     });

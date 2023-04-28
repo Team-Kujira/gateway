@@ -1105,7 +1105,7 @@ export class Kujira {
         msg: Buffer.from(
           JSON.stringify({
             submit_order: {
-              price: BigNumber(candidate.price).precision(1).toString(),
+              price: BigNumber(candidate.price).precision(9).toString(),
             },
           })
         ),
