@@ -1488,7 +1488,7 @@ describe('Kujira Full Flow', () => {
 
       const modifiedOrder = { ...order } as Order;
 
-      modifiedOrder.price = BigNumber(response.first().bestBid.price);
+      modifiedOrder.price = response.first().bestBid.price;
 
       request = { ...modifiedOrder } as PlaceOrderRequest;
 
@@ -1581,8 +1581,57 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // it('Force the filling of orders 6 and 7', async () => {
-    // });
+    it('Force the filling of orders 6 and 7', async () => {
+      const orders = getOrders(['6', '7']).valueSeq().toArray();
+
+      let order;
+      for (order of orders) {
+        request = {
+          id: order.id,
+          ownerAddress: ownerAddress,
+          marketId: order.marketId,
+        } as CancelOrderRequest;
+
+        logRequest(request);
+
+        response = await kujira.cancelOrder(request);
+
+        order.id = undefined;
+        order.status = undefined;
+        order.fee = undefined;
+        order.signatures = undefined;
+
+        request = {
+          marketIds: [order.marketId],
+        } as GetOrderBooksRequest;
+
+        response = await kujira.getOrderBooks(request);
+
+        const modifiedOrder = { ...order } as Order;
+
+        if (order.side === OrderSide.BUY) {
+          modifiedOrder.price = response
+            .first()
+            .bestAsk.price.multipliedBy(1.02);
+        } else {
+          modifiedOrder.price = response
+            .first()
+            .bestBid.price.multipliedBy(0.98);
+        }
+
+        request = { ...modifiedOrder } as PlaceOrderRequest;
+
+        logRequest(request);
+
+        response = await kujira.placeOrder(request);
+
+        order.id = response.id;
+
+        logResponse(response);
+      }
+
+      logResponse(response);
+    });
 
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
