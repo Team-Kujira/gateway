@@ -1469,8 +1469,10 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.cancelOrder(request);
 
-      order.status = OrderStatus.CANCELLED;
       order.id = undefined;
+      order.status = undefined;
+      order.fee = undefined;
+      order.signatures = undefined;
 
       // request = {
       //   marketId: marketIds[2],
@@ -1537,6 +1539,12 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all open orders and check that the orders 1, 2, 3, 4, and 5 are missing', async () => {
+      const orders = getOrders(['1', '2', '3', '4', '5']);
+      const ids = orders
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1546,10 +1554,19 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
+      for (const id of ids) {
+        for (const value of response.valueSeq().first().toArray()) {
+          expect(value[1].id).not.toEqual(id);
+        }
+      }
+
       logResponse(response);
     });
 
     it('Get all orders (open or filled) and check that the order 2 is present', async () => {
+      const order = getOrder('2');
+      const id = order.id;
+
       request = {
         ownerAddresses: [ownerAddress],
       } as GetOrdersRequest;
@@ -1557,6 +1574,9 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = await kujira.getOrders(request);
+
+      expect(response.first().keySeq().toArray()).toContain(id);
+      expect(response.first().get(id).status).toEqual(OrderStatus.FILLED);
 
       logResponse(response);
     });
