@@ -961,17 +961,14 @@ export class Kujira {
    * @param options
    */
   async getOrder(options: GetOrderRequest): Promise<GetOrderResponse> {
-    const ownersMap = await this.getOrders({
-      ...options,
-      ids: [options.id],
-      ownerAddresses: [options.ownerAddress],
-    });
-
-    const orders = getNotNullOrThrowError<IMap<OrderId, Order>>(
-      ownersMap.first()
-    );
-
-    return orders.first();
+    return (
+      (await this.getOrders({
+        ...options,
+        ids: [options.id],
+        ownerAddresses: [options.ownerAddress],
+      })) as IMap<OrderId, Order>
+    ) // Cast because we only have one ownerAddress.
+      .first();
   }
 
   /**
@@ -1020,12 +1017,10 @@ export class Kujira {
 
         const getOrders = async (marketId: string): Promise<void> => {
           const marketOrders = getNotNullOrThrowError<IMap<OrderId, Order>>(
-            (
-              await this.getOrders({
-                ...options,
-                marketId,
-              })
-            ).first()
+            await this.getOrders({
+              ...options,
+              marketId,
+            })
           );
 
           orders.merge(marketOrders);
@@ -1165,15 +1160,14 @@ export class Kujira {
    * @param options
    */
   async cancelOrder(options: CancelOrderRequest): Promise<CancelOrderResponse> {
-    return getNotNullOrThrowError<IMap<OrderId, Order>>(
-      (
-        await this.cancelOrders({
-          ids: [options.id],
-          ownerAddresses: [options.ownerAddress],
-          marketId: options.marketId,
-        })
-      ).first()
-    ).first();
+    return (
+      (await this.cancelOrders({
+        ids: [options.id],
+        ownerAddresses: [options.ownerAddress],
+        marketId: options.marketId,
+      })) as IMap<OrderId, Order>
+    ) // Cast because we only have one ownerAddress.
+      .first();
   }
 
   /**
@@ -1283,17 +1277,13 @@ export class Kujira {
       const cancelledOrders = IMap<OrderId, Order>().asMutable();
 
       for (const marketId of marketIds) {
-        const openOrders = await this.getOrders({
+        const openOrders = (await this.getOrders({
           ownerAddresses: [ownerAddress],
           marketId: marketId,
           status: OrderStatus.OPEN,
-        });
+        })) as IMap<OrderId, Order>; // Cast because we have only one ownerAddress
 
-        const openOrdersIds = getNotNullOrThrowError<IMap<OrderId, Order>>(
-          openOrders.first()
-        )
-          .keySeq()
-          .toArray();
+        const openOrdersIds = openOrders.keySeq().toArray();
 
         cancelledOrders.merge(
           (await this.cancelOrders({
