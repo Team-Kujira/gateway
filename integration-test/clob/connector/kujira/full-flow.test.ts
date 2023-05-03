@@ -945,6 +945,10 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    it('create a market sell order 3 for market 3', async () => {
+      expect(false).toBeTruthy();
+    });
+
     it('Create 7 orders at once', async () => {
       const candidates = getOrders(['3', '4', '5', '6', '7', '8', '9']);
 
