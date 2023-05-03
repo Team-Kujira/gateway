@@ -167,7 +167,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.999),
-    amount: BigNumber(100),
+    amount: BigNumber(10),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -200,8 +200,8 @@ beforeAll(async () => {
     marketId: marketIds[1],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.99),
-    amount: BigNumber(100),
+    price: BigNumber(999.999),
+    amount: BigNumber(10),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -234,8 +234,8 @@ beforeAll(async () => {
     marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.99),
-    amount: BigNumber(100),
+    price: BigNumber(999.999),
+    amount: BigNumber(10),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -268,7 +268,7 @@ beforeAll(async () => {
     marketId: marketIds[3],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.99),
+    price: BigNumber(999.999),
     amount: BigNumber(100),
     side: OrderSide.SELL,
     status: undefined,
@@ -302,8 +302,8 @@ beforeAll(async () => {
     marketId: marketIds[1],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.99),
-    amount: BigNumber(100),
+    price: BigNumber(999.999),
+    amount: BigNumber(10),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -1489,6 +1489,7 @@ describe('Kujira Full Flow', () => {
       const modifiedOrder = { ...order } as Order;
 
       modifiedOrder.price = response.first().bestBid.price;
+      modifiedOrder.amount = BigNumber(4); // Minimun amount for the order to be filled
 
       request = { ...modifiedOrder } as PlaceOrderRequest;
 
@@ -1531,10 +1532,8 @@ describe('Kujira Full Flow', () => {
       expect(response.id).toEqual(id);
       expect(response.status).toEqual(OrderStatus.FILLED);
       expect(response.connectorOrder.offer_amount).toEqual('0');
-      expect(response.connectorOrder.filled_amount).toEqual(
-        order.amount.toNumber().toString()
-      );
-
+      expect(response.connectorOrder.original_offer_amount).toEqual('4');
+      expect(response.connectorOrder.filled_amount).toEqual('4');
       logResponse(response);
     });
 
@@ -1610,13 +1609,14 @@ describe('Kujira Full Flow', () => {
         const modifiedOrder = { ...order } as Order;
 
         if (order.side === OrderSide.BUY) {
-          modifiedOrder.price = response
-            .first()
-            .bestAsk.price.multipliedBy(1.02);
+          modifiedOrder.price = BigNumber(
+            response.first().bestAsk.price.multipliedBy(1.02)
+          ).decimalPlaces(3);
         } else {
-          modifiedOrder.price = response
-            .first()
-            .bestBid.price.multipliedBy(0.98);
+          modifiedOrder.price = BigNumber(
+            response.first().bestBid.price.multipliedBy(0.98)
+          ).decimalPlaces(3);
+          modifiedOrder.amount = BigNumber(4); // Minimum amount for the order to be filled
         }
 
         request = { ...modifiedOrder } as PlaceOrderRequest;
