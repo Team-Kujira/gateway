@@ -1488,7 +1488,10 @@ describe('Kujira Full Flow', () => {
 
       const modifiedOrder = { ...order } as Order;
 
-      modifiedOrder.price = response.first().bestBid.price;
+      modifiedOrder.price = BigNumber(
+        response.first().bestBid.price.multipliedBy(0.99)
+      ).decimalPlaces(3);
+
       modifiedOrder.amount = BigNumber(4); // Minimun amount for the order to be filled
 
       request = { ...modifiedOrder } as PlaceOrderRequest;
@@ -1610,11 +1613,11 @@ describe('Kujira Full Flow', () => {
 
         if (order.side === OrderSide.BUY) {
           modifiedOrder.price = BigNumber(
-            response.first().bestAsk.price.multipliedBy(1.02)
+            response.first().bestAsk.price.multipliedBy(1.01)
           ).decimalPlaces(3);
         } else {
           modifiedOrder.price = BigNumber(
-            response.first().bestBid.price.multipliedBy(0.98)
+            response.first().bestBid.price.multipliedBy(0.99)
           ).decimalPlaces(3);
           modifiedOrder.amount = BigNumber(4); // Minimum amount for the order to be filled
         }
@@ -1626,6 +1629,7 @@ describe('Kujira Full Flow', () => {
         response = await kujira.placeOrder(request);
 
         order.id = response.id;
+        order.status = OrderStatus.FILLED;
 
         logResponse(response);
       }
@@ -1647,22 +1651,35 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the filled orders 6 and 7', async () => {
-      const ids = getOrders(['6', '7'])
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const orders = getOrders(['6', '7']).valueSeq().toArray();
 
-      request = {
-        ids,
-        ownerAddresses: [ownerAddress],
-        status: OrderStatus.FILLED,
-      } as GetOrdersRequest;
+      let order;
+      for (order of orders) {
+        request = {
+          id: order.id,
+          ownerAddress: ownerAddress,
+          status: OrderStatus.FILLED,
+        } as GetOrderRequest;
 
-      logRequest(request);
+        logRequest(request);
 
-      response = await kujira.getOrders(request);
+        response = await kujira.getOrder(request);
 
-      logResponse(response);
+        expect(response.id).toEqual(order.id);
+        expect(response.status).toEqual(OrderStatus.FILLED);
+        expect(response.connectorOrder.offer_amount).toEqual('0');
+
+        if (order.side === OrderSide.BUY) {
+          expect(response.connectorOrder.filled_amount).toEqual(
+            order.amount.toNumber().toString()
+          );
+        } else {
+          expect(response.connectorOrder.original_offer_amount).toEqual('4');
+          expect(response.connectorOrder.filled_amount).toEqual('4');
+        }
+
+        logResponse(response);
+      }
     });
 
     it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
