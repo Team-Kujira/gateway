@@ -547,14 +547,22 @@ describe('Kujira Full Flow', () => {
 
     get the open order 2
 
+    create a market sell order 3 for market 3
+
+    check the available wallet balances from the tokens 2 and 3
+
+    get the filled order 3
+
     create 7 orders at once as the following:
-      order 3, limit, buy, market 1
-      order 4, limit, sell, market 1
-      order 5, limit, buy, market 2
-      order 6, market, sell, market 2
-      order 7, market, buy, market 3
-      order 8, limit, sell, market 3
-      order 9, limit, buy, market 3
+      order 4, limit, buy, market 1
+      order 5, limit, sell, market 1
+      order 6, limit, buy, market 2
+      order 7, market, sell, market 2
+      order 8, market, buy, market 3
+      order 9, limit, sell, market 3
+      order 10, limit, buy, market 3
+      order 11, market, sell, market 1
+      order 12, market, buy, market 2
 
     check the wallet balances from the tokens 1, 2, and 3
 
@@ -596,9 +604,9 @@ describe('Kujira Full Flow', () => {
 
     get the filled orders 6 and 7
 
-    get all filled orders and check that the orders 2, 6, and 7 are present
+    get all filled orders and check that the orders 2, 6, 7, 11, and 12 are present
 
-    get all open orders and check that the orders 1, 2, 3, 4, 5, 6, and 7 are missing
+    get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 11, and 12 are missing
 
     get all orders (open or filled) and check that the orders 2, 6, and 7 are present
 
@@ -611,12 +619,12 @@ describe('Kujira Full Flow', () => {
     get all orders (open or filled) and check that the orders 2, 6, and 7 are present
 
     create 2 orders at once as the following:
-      order 10, sell, market 1
-      order 11, buy, market 2
+      order 12, sell, market 1
+      order 13, buy, market 2
 
     get all open orders and check that the orders 10 and 11 are present
 
-    get all orders (open or filled) and check that the orders 2, 6, 7, 10, and 11 are present
+    get all orders (open or filled) and check that the orders 2, 6, 7, 10, 11, 12, and 13 are present
 
     cancel all the open orders
 
