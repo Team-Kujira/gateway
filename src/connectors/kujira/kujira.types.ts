@@ -490,9 +490,9 @@ export interface GetOrdersRequest {
   statuses?: OrderStatus[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetOrdersResponse
-  extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
+export type GetOrdersResponse =
+  | IMap<OrderId, Order>
+  | IMap<OwnerAddress, IMap<OrderId, Order>>;
 
 export interface PlaceOrderRequest {
   marketId: MarketId;
@@ -540,9 +540,9 @@ export interface CancelOrdersRequest {
   ownerAddresses?: OrderOwnerAddress[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CancelOrdersResponse
-  extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
+export type CancelOrdersResponse =
+  | IMap<OrderId, Order>
+  | IMap<OwnerAddress, IMap<OrderId, Order>>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CancelAllOrdersRequest {
@@ -554,9 +554,7 @@ export interface CancelAllOrdersRequest {
   ownerAddresses: OrderOwnerAddress[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CancelAllOrdersResponse
-  extends IMap<OwnerAddress, IMap<OrderId, Order>> {}
+export type CancelAllOrdersResponse = CancelOrdersResponse;
 
 export interface MarketWithdrawRequest {
   marketId?: MarketId;
@@ -565,8 +563,7 @@ export interface MarketWithdrawRequest {
   ownerAddresses: OrderOwnerAddress[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MarketWithdrawResponse extends IMap<OwnerAddress, Withdraw> {}
+export type MarketWithdrawResponse = Withdraw | IMap<OwnerAddress, Withdraw>;
 
 export interface MarketsWithdrawsRequest {
   marketIds?: MarketId[];
@@ -575,16 +572,14 @@ export interface MarketsWithdrawsRequest {
   ownerAddresses: OrderOwnerAddress[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MarketsWithdrawsFundsResponse
-  extends IMap<MarketId, IMap<OwnerAddress, Withdraw>> {}
+export type MarketsWithdrawsFundsResponse =
+  | IMap<MarketId, Withdraw>
+  | IMap<OwnerAddress, IMap<MarketId, Withdraw>>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AllMarketsWithdrawsRequest extends MarketsWithdrawsRequest {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AllMarketsWithdrawsResponse
-  extends IMap<MarketId, IMap<OwnerAddress, Withdraw>> {}
+export type AllMarketsWithdrawsResponse = MarketsWithdrawsFundsResponse;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetCurrentBlockRequest {}

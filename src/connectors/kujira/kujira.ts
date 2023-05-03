@@ -1055,6 +1055,10 @@ export class Kujira {
       output.set(ownerAddress, orders);
     }
 
+    if (ownerAddresses.length == 1) {
+      return output.first();
+    }
+
     return output;
   }
 
@@ -1251,6 +1255,10 @@ export class Kujira {
       );
     }
 
+    if (ownerAddresses.length == 1) {
+      return output.first();
+    }
+
     return output;
   }
 
@@ -1288,15 +1296,19 @@ export class Kujira {
           .toArray();
 
         cancelledOrders.merge(
-          await this.cancelOrders({
+          (await this.cancelOrders({
             ids: openOrdersIds,
             marketId,
-            ownerAddresses: ownerAddresses,
-          })
+            ownerAddresses: [ownerAddress],
+          })) as IMap<OrderId, Order> // Cast because we have only one ownerAddress
         );
       }
 
       output.set(ownerAddress, cancelledOrders);
+    }
+
+    if (ownerAddresses.length == 1) {
+      return output.first();
     }
 
     return output;
@@ -1357,6 +1369,10 @@ export class Kujira {
       output.set(ownerAddress, convertKujiraSettlementToSettlement(result));
     }
 
+    if (ownerAddresses.length == 1) {
+      return output.first();
+    }
+
     return output;
   }
 
@@ -1370,10 +1386,7 @@ export class Kujira {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
-    const settlements = IMap<
-      MarketId,
-      IMap<OwnerAddress, Withdraw>
-    >().asMutable();
+    const output = IMap<OwnerAddress, IMap<MarketId, Withdraw>>().asMutable();
 
     interface HelperSettleFundsOptions {
       marketId: MarketId;
@@ -1384,32 +1397,38 @@ export class Kujira {
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
-    const settleMarketFunds = async (
-      options: HelperSettleFundsOptions
-    ): Promise<void> => {
-      const results = await this.settleMarketFunds({
-        marketId: options.marketId,
-        ownerAddresses: ownerAddresses,
-      });
+    for (const ownerAddress of ownerAddresses) {
+      const settleMarketFunds = async (
+        options: HelperSettleFundsOptions
+      ): Promise<void> => {
+        const results = (await this.settleMarketFunds({
+          marketId: options.marketId,
+          ownerAddresses: ownerAddresses,
+        })) as Withdraw; // Cast because we have only one ownerAddress
 
-      settlements.set(options.marketId, results);
-    };
+        output.setIn([ownerAddress, options.marketId], results);
+      };
 
-    for (const marketId of options.marketIds) {
-      settleMarketFunds({
-        marketId: marketId,
-        ownerAddresses: ownerAddresses,
-      });
+      for (const marketId of options.marketIds) {
+        settleMarketFunds({
+          marketId: marketId,
+          ownerAddresses: [ownerAddress],
+        });
+      }
+
+      // await promiseAllInBatches<HelperSettleFundsOptions, void>(
+      //   settleMarketFunds,
+      //   options.marketIds.map((id) => {
+      //     return { marketId: id, ownerAddresses: [ownerAddress] };
+      //   })
+      // );
     }
 
-    // await promiseAllInBatches<HelperSettleFundsOptions, void>(
-    //   settleMarketFunds,
-    //   options.marketIds.map((id) => {
-    //     return { marketId: id, ownerAddresses: ownerAddresses };
-    //   })
-    // );
+    if (ownerAddresses.length == 1) {
+      return output.first();
+    }
 
-    return settlements;
+    return output;
   }
 
   /**
