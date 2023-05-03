@@ -34,7 +34,13 @@ import { Kujira } from './kujira';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
-import { EstimatedFees, EstimatedGasResponse } from './kujira.types';
+import {
+  EstimatedFees,
+  EstimatedGasResponse,
+  IMap,
+  Order,
+  OrderId,
+} from './kujira.types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -141,11 +147,9 @@ export class KujiraConnector {
       );
     } else if (req.cancelOrderParams) {
       return convertToClobDeleteOrderResponseForCancellation(
-        (
-          await this.kujira.cancelOrders(
-            convertClobBatchUpdateRequestToDeleteOrdersOptions(req)
-          )
-        ).first()
+        (await this.kujira.cancelOrders(
+          convertClobBatchUpdateRequestToDeleteOrdersOptions(req)
+        )) as IMap<OrderId, Order> // Cast because we have only one ownerAddress
       );
     } else {
       throw new Error('Invalid batch update request');
