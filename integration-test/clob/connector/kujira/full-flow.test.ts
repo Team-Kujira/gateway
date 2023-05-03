@@ -531,6 +531,8 @@ describe('Kujira Full Flow', () => {
     market 2: token1/token3
     market 3: token2/token3
 
+    cancel all the open orders
+
     Get the wallet balances from the tokens 1, 2, and 3
 
     create a limit buy order 1 for market 1
@@ -622,6 +624,18 @@ describe('Kujira Full Flow', () => {
 
     get all open orders and check that there are no open orders
     */
+
+    it('Cancel all the open orders', async () => {
+      request = {
+        ownerAddresses: [ownerAddress],
+      } as CancelAllOrdersRequest;
+
+      logRequest(request);
+
+      response = await kujira.cancelAllOrders(request);
+
+      logResponse(response);
+    });
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
@@ -773,6 +787,7 @@ describe('Kujira Full Flow', () => {
       request = {
         id: orderPlaced.id,
         status: OrderStatus.OPEN,
+        marketId: orderPlaced.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
@@ -902,6 +917,7 @@ describe('Kujira Full Flow', () => {
       request = {
         id: orderPlaced.id,
         status: OrderStatus.OPEN,
+        marketId: orderPlaced.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
@@ -1238,7 +1254,7 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
-      expect(response.first().keySeq().toArray()).not.toContain(
+      expect(response.keySeq().toArray()).not.toContain(
         getNotNullOrThrowError(order.id)
       );
 
@@ -1259,16 +1275,16 @@ describe('Kujira Full Flow', () => {
       response = await kujira.cancelOrders(request);
 
       expect(response).not.toBeEmpty();
-      for (const value of response.first()) {
+      for (const value of response) {
         expect(value[1].status).toBe(OrderStatus.CANCELLED);
         expect(value[1].signatures).toHaveProperty('cancellation');
         expect(value[1].signatures['cancellation'].length).toEqual(64);
       }
-      expect(
-        Object.entries(response.first().keySeq().toArray()).length
-      ).toEqual(request.ids.length);
-      expect(response.first().keySeq().toArray()).toEqual(request.ids);
-      expect(response.first().first().marketId).toEqual(request.marketId);
+      expect(Object.entries(response.keySeq().toArray()).length).toEqual(
+        request.ids.length
+      );
+      expect(response.keySeq().toArray()).toEqual(request.ids);
+      expect(response.first().marketId).toEqual(request.marketId);
 
       logResponse(response);
 
@@ -1423,7 +1439,7 @@ describe('Kujira Full Flow', () => {
 
       // expect(response).not.toBeObject();
       // expect(response).toBeUndefined();
-      expect(response.first().keySeq().toArray().length).toEqual(0);
+      expect(response.keySeq().toArray().length).toEqual(0);
 
       logResponse(response);
     });
@@ -1444,13 +1460,10 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
-      // const numOfOpenOrders = response.first().keySeq().toArray().length;
-      // console.log(numOfOpenOrders);
+      const openOrdersIds = response.keySeq().toArray();
 
       for (const id of ids) {
-        for (const value of response.valueSeq().first().toArray()) {
-          expect(value[1].id).not.toEqual(id);
-        }
+        expect(openOrdersIds.includes(id)).toBeFalsy();
       }
 
       logResponse(response);
@@ -1556,10 +1569,10 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
+      const openOrdersIds = response.keySeq().toArray();
+
       for (const id of ids) {
-        for (const value of response.valueSeq().first().toArray()) {
-          expect(value[1].id).not.toEqual(id);
-        }
+        expect(openOrdersIds.includes(id)).toBeFalsy();
       }
 
       logResponse(response);
@@ -1577,8 +1590,8 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getOrders(request);
 
-      expect(response.first().keySeq().toArray()).toContain(id);
-      expect(response.first().get(id).status).toEqual(OrderStatus.FILLED);
+      expect(response.keySeq().toArray()).toContain(id);
+      expect(response.get(id).status).toEqual(OrderStatus.FILLED);
 
       logResponse(response);
     });

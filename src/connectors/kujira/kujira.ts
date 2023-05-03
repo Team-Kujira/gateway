@@ -1341,12 +1341,10 @@ export class Kujira {
       }
 
       const filledOrdersIds = getNotNullOrThrowError<IMap<OrderId, Order>>(
-        (
-          await this.getOrders({
-            ownerAddresses: [ownerAddress],
-            status: OrderStatus.FILLED,
-          })
-        ).get(ownerAddress)
+        (await this.getOrders({
+          ownerAddresses: [ownerAddress],
+          status: OrderStatus.FILLED,
+        })) as IMap<OrderId, Order> // Cast because we have only one ownerAddress
       )
         .valueSeq()
         .map((order) => getNotNullOrThrowError<OrderId>(order.id))
