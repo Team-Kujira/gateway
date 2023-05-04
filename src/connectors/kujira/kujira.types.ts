@@ -485,7 +485,7 @@ export interface GetOrdersRequest {
   marketIds?: MarketId[];
   marketNames?: MarketName[];
   ownerAddress?: OrderOwnerAddress;
-  ownerAddresses: OrderOwnerAddress[];
+  ownerAddresses?: OrderOwnerAddress[];
   status?: OrderStatus;
   statuses?: OrderStatus[];
 }
@@ -551,7 +551,7 @@ export interface CancelAllOrdersRequest {
   marketIds?: MarketId[];
   marketNames?: MarketName[];
   ownerAddress?: OrderOwnerAddress;
-  ownerAddresses: OrderOwnerAddress[];
+  ownerAddresses?: OrderOwnerAddress[];
 }
 
 export type CancelAllOrdersResponse = CancelOrdersResponse;
@@ -560,7 +560,7 @@ export interface MarketWithdrawRequest {
   marketId?: MarketId;
   marketName?: MarketName;
   ownerAddress?: OrderOwnerAddress;
-  ownerAddresses: OrderOwnerAddress[];
+  ownerAddresses?: OrderOwnerAddress[];
 }
 
 export type MarketWithdrawResponse = Withdraw | IMap<OwnerAddress, Withdraw>;
@@ -569,7 +569,7 @@ export interface MarketsWithdrawsRequest {
   marketIds?: MarketId[];
   marketNames?: MarketName[];
   ownerAddress?: OrderOwnerAddress;
-  ownerAddresses: OrderOwnerAddress[];
+  ownerAddresses?: OrderOwnerAddress[];
 }
 
 export type MarketsWithdrawsFundsResponse =
