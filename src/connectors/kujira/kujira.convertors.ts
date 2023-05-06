@@ -35,7 +35,7 @@ import {
   Token,
   TokenId,
   Transaction,
-  TransactionSignatures,
+  TransactionHashes,
 } from './kujira.types';
 import {
   ClobBatchUpdateRequest,
@@ -215,7 +215,7 @@ export const convertPollRequestToGetTransactionOptions = (
   request: PollRequest
 ): GetTransactionRequest => {
   return {
-    signature: request.txHash,
+    hash: request.txHash,
   } as GetTransactionRequest;
 };
 
@@ -352,7 +352,7 @@ export const convertToClobPostOrderResponse = (
   response: Order
 ): { txHash: string } => {
   return {
-    txHash: response.signatures?.creation,
+    txHash: response.hashes?.creation,
   } as { txHash: string };
 };
 
@@ -366,7 +366,7 @@ export const convertToClobGetOrderResponse = (
     latency: 0,
     orders: [
       {
-        orderHash: response.signatures?.creation?.toString(),
+        orderHash: response.hashes?.creation?.toString(),
         marketId: response.marketId,
         // active: true,
         subaccountId: response.ownerAddress,
@@ -390,8 +390,8 @@ export const convertToClobDeleteOrderResponse = (
 ): { txHash: string } => {
   return {
     txHash: getNotNullOrThrowError<string>(
-      response.signatures?.cancellation ||
-        response.signatures?.cancellations?.values().next().value
+      response.hashes?.cancellation ||
+        response.hashes?.cancellations?.values().next().value
     ),
   };
 };
@@ -401,9 +401,8 @@ export const convertToClobDeleteOrderResponseForCreation = (
 ): { txHash: string } => {
   return {
     txHash: getNotNullOrThrowError<string>(
-      response.values().next().value.signatures?.creation ||
-        response.values().next().value.signatures?.creations.values().next()
-          .value
+      response.values().next().value.hashes?.creation ||
+        response.values().next().value.hashes?.creations.values().next().value
     ),
   };
 };
@@ -413,8 +412,8 @@ export const convertToClobDeleteOrderResponseForCancellation = (
 ): { txHash: string } => {
   return {
     txHash: getNotNullOrThrowError<string>(
-      response.values().next().value.signatures?.cancellation ||
-        response.values().next().value.signatures?.cancellations.values().next()
+      response.values().next().value.hashes?.cancellation ||
+        response.values().next().value.hashes?.cancellations.values().next()
           .value
     ),
   };
@@ -536,7 +535,7 @@ export const convertKujiraOrderBookToOrderBook = (
       type: OrderType.LIMIT,
       fee: undefined,
       fillingTimestamp: undefined,
-      signatures: undefined,
+      hashes: undefined,
       connectorOrder: undefined,
     } as Order;
 
@@ -568,7 +567,7 @@ export const convertKujiraOrderBookToOrderBook = (
       type: OrderType.LIMIT,
       fee: undefined,
       fillingTimestamp: undefined,
-      signatures: undefined,
+      hashes: undefined,
       connectorOrder: undefined,
     } as Order;
 
@@ -659,13 +658,13 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         ),
         creationTimestamp: undefined,
         fillingTimestamp: undefined,
-        signatures: {
+        hashes: {
           creation: options.bundles.getIn([
             'common',
             'response',
             'transactionHash',
           ]),
-        } as TransactionSignatures,
+        } as TransactionHashes,
         connectorOrder: bundle.getIn(['common', 'response']),
       } as Order;
 
@@ -695,7 +694,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         fee: undefined,
         fillingTimestamp: undefined,
         creationTimestamp: Number(bundle['created_at']),
-        signatures: undefined,
+        hashes: undefined,
         connectorOrder: bundle,
       } as Order;
 
@@ -722,13 +721,13 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         ),
         creationTimestamp: undefined,
         fillingTimestamp: undefined,
-        signatures: {
+        hashes: {
           cancellation: options.bundles.getIn([
             'common',
             'response',
             'transactionHash',
           ]),
-        } as TransactionSignatures,
+        } as TransactionHashes,
         connectorOrder: bundle.getIn(['common', 'response']),
       } as Order;
 
@@ -805,7 +804,7 @@ export const convertKujiraTransactionToTransaction = (
   input: IndexedTx
 ): Transaction => {
   return {
-    signature: input.hash,
+    hash: input.hash,
     blockNumber: input.height,
     gasUsed: input.gasUsed,
     gasWanted: input.gasWanted,
@@ -817,7 +816,7 @@ export const convertKujiraSettlementToSettlement = (
   input: KujiraWithdraw
 ): Withdraw => {
   return {
-    signature: input.transactionHash,
+    hash: input.transactionHash,
   };
 };
 

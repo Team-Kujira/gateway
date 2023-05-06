@@ -74,7 +74,7 @@ export type MarketMinimumBaseIncrement = BigNumber;
 export type TickerPrice = Price;
 export type TickerTimestamp = Timestamp;
 
-export type TransactionSignature = string;
+export type TransactionHash = string;
 
 export type OrderId = string;
 export type OrderClientId = string;
@@ -87,11 +87,11 @@ export type OrderAmount = Amount;
 export type OrderFee = Fee;
 export type OrderCreationTimestamp = Timestamp;
 export type OrderFillingTimestamp = Timestamp;
-export type OrderTransactionSignatures = TransactionSignatures;
+export type OrderTransactionHashes = TransactionHashes;
 export type OrderReplaceIfExists = boolean;
 
 export type Withdraw = {
-  signature: TransactionSignature;
+  hash: TransactionHash;
 };
 
 export type FeeMaker = Fee;
@@ -247,17 +247,17 @@ export interface Order {
   fee?: OrderFee;
   creationTimestamp?: OrderCreationTimestamp;
   fillingTimestamp?: OrderFillingTimestamp;
-  signatures?: OrderTransactionSignatures;
+  hashes?: OrderTransactionHashes;
   connectorOrder?: ConnectorOrder;
 }
 
-export interface TransactionSignatures {
-  creation?: TransactionSignature;
-  cancellation?: TransactionSignature;
-  withdraw?: TransactionSignature;
-  creations?: TransactionSignature[];
-  cancellations?: TransactionSignature[];
-  withdraws?: TransactionSignature[];
+export interface TransactionHashes {
+  creation?: TransactionHash;
+  cancellation?: TransactionHash;
+  withdraw?: TransactionHash;
+  creations?: TransactionHash[];
+  cancellations?: TransactionHash[];
+  withdraws?: TransactionHash[];
 }
 
 export interface MarketFee {
@@ -273,7 +273,7 @@ export interface EstimatedFees {
 }
 
 export interface Transaction {
-  signature: TransactionSignature;
+  hash: TransactionHash;
   blockNumber: number;
   gasUsed: number;
   gasWanted: number;
@@ -589,7 +589,7 @@ export type GetCurrentBlockResponse = Block;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTransactionRequest {
-  signature: TransactionSignature;
+  hash: TransactionHash;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -597,12 +597,12 @@ export interface GetTransactionResponse extends Transaction {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTransactionsRequest {
-  signatures: TransactionSignature[];
+  hashes: TransactionHash[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTransactionsResponse
-  extends IMap<TransactionSignature, Transaction> {}
+  extends IMap<TransactionHash, Transaction> {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetEstimatedFeesRequest {}

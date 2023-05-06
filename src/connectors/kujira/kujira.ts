@@ -96,7 +96,7 @@ import {
   TokenNotFoundError,
   TokenSymbol,
   Transaction,
-  TransactionSignature,
+  TransactionHash,
   Withdraw,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
@@ -1459,7 +1459,7 @@ export class Kujira {
   ): Promise<GetTransactionResponse> {
     return convertKujiraTransactionToTransaction(
       getNotNullOrThrowError<IndexedTx>(
-        await this.kujiraStargateClientGetTx(options.signature)
+        await this.kujiraStargateClientGetTx(options.hash)
       )
     );
   }
@@ -1471,20 +1471,20 @@ export class Kujira {
   async getTransactions(
     options: GetTransactionsRequest
   ): Promise<GetTransactionsResponse> {
-    const transactions = IMap<TransactionSignature, Transaction>().asMutable();
+    const transactions = IMap<TransactionHash, Transaction>().asMutable();
 
     const getTransaction = async (
       options: GetTransactionRequest
     ): Promise<void> => {
       const transaction = await this.getTransaction(options);
 
-      transactions.set(transaction.signature, transaction);
+      transactions.set(transaction.hash, transaction);
     };
 
     await promiseAllInBatches<GetTransactionRequest, void>(
       getTransaction,
-      options.signatures.map((signature) => {
-        return { signature };
+      options.hashes.map((hash) => {
+        return { hash };
       })
     );
 

@@ -156,7 +156,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('2', {
@@ -173,7 +173,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('3', {
@@ -190,7 +190,7 @@ beforeAll(async () => {
     type: OrderType.MARKET,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('4', {
@@ -207,7 +207,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('5', {
@@ -224,7 +224,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('6', {
@@ -241,7 +241,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('7', {
@@ -258,7 +258,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('8', {
@@ -275,7 +275,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('9', {
@@ -292,7 +292,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('10', {
@@ -309,7 +309,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('11', {
@@ -326,7 +326,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('12', {
@@ -343,7 +343,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 
   orders.set('13', {
@@ -360,7 +360,7 @@ beforeAll(async () => {
     type: OrderType.LIMIT,
     fee: undefined,
     fillingTimestamp: undefined,
-    signatures: undefined,
+    hashes: undefined,
   });
 });
 
@@ -646,7 +646,7 @@ describe('Kujira Full Flow', () => {
     get all open orders and check that there are no open orders
     */
 
-    it('Cancel all the open orders', async () => {
+    it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
       } as CancelAllOrdersRequest;
@@ -656,6 +656,8 @@ describe('Kujira Full Flow', () => {
       response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
+
+      // TODO Add expect verify if we have a transaction hash!!!
     });
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
@@ -725,10 +727,10 @@ describe('Kujira Full Flow', () => {
       candidate.marketName = response.marketName;
       candidate.status = response.status;
       candidate.fee = response.fee;
-      candidate.signatures = response.signatures;
+      candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
-      expect(response['signatures']['creation'].length).toBeCloseTo(64);
+      expect(response['hashes']['creation'].length).toBeCloseTo(64);
       expect(response.id.length).toBeGreaterThan(0);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
@@ -841,11 +843,11 @@ describe('Kujira Full Flow', () => {
       candidate.marketName = response.marketName;
       candidate.status = response.status;
       candidate.fee = response.fee;
-      candidate.signatures = response.signatures;
+      candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
       expect(response['id'].length).toBeGreaterThan(0);
-      expect(response['signatures']['creation'].length).toBeCloseTo(64);
+      expect(response['hashes']['creation'].length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price?.toNumber().toString());
@@ -971,11 +973,11 @@ describe('Kujira Full Flow', () => {
       candidate.marketName = response.marketName;
       candidate.status = response.status;
       candidate.fee = response.fee;
-      candidate.signatures = response.signatures;
+      candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
       expect(response['id'].length).toBeGreaterThan(0);
-      expect(response['signatures']['creation'].length).toBeCloseTo(64);
+      expect(response['hashes']['creation'].length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price?.toNumber().toString());
@@ -1116,7 +1118,7 @@ describe('Kujira Full Flow', () => {
           candidateOrder.marketName = order.marketName;
           candidateOrder.status = order.status;
           candidateOrder.fee = order.fee;
-          candidateOrder.signatures = order.signatures;
+          candidateOrder.hashes = order.hashes;
         });
 
       for (const [, order] of response.entries()) {
@@ -1131,7 +1133,7 @@ describe('Kujira Full Flow', () => {
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);
         expect(order.status).toBe(OrderStatus.OPEN);
-        expect(order.signatures).toBeObject();
+        expect(order.hashes).toBeObject();
         expect(order.type).toBe(candidate?.type);
       }
 
@@ -1280,11 +1282,11 @@ describe('Kujira Full Flow', () => {
       expect(response.id).toEqual(order.id);
       expect(response.marketId).toBe(order.marketId);
       expect(response.status).toBe(OrderStatus.CANCELLED);
-      expect(response.signatures).toHaveProperty('cancellation');
-      expect(response.signatures['cancellation'].length).toBeGreaterThan(0);
+      expect(response.hashes).toHaveProperty('cancellation');
+      expect(response.hashes['cancellation'].length).toBeGreaterThan(0);
 
       order.fee = response.fee;
-      // TODO Assign the cancellation signature to the order !!!
+      // TODO Assign the cancellation hash to the order !!!
 
       logResponse(response);
     });
@@ -1428,8 +1430,8 @@ describe('Kujira Full Flow', () => {
       expect(response).not.toBeEmpty();
       for (const value of response) {
         expect(value[1].status).toBe(OrderStatus.CANCELLED);
-        expect(value[1].signatures).toHaveProperty('cancellation');
-        expect(value[1].signatures['cancellation'].length).toEqual(64);
+        expect(value[1].hashes).toHaveProperty('cancellation');
+        expect(value[1].hashes['cancellation'].length).toEqual(64);
       }
       expect(Object.entries(response.keySeq().toArray()).length).toEqual(
         request.ids.length
@@ -1453,8 +1455,8 @@ describe('Kujira Full Flow', () => {
       expect(response.id).toEqual(request.id);
       expect(response.marketId).toEqual(request.marketId);
       expect(response.status).toBe(OrderStatus.CANCELLED);
-      expect(response.signatures).toHaveProperty('cancellation');
-      expect(response.signatures['cancellation'].length).toEqual(64);
+      expect(response.hashes).toHaveProperty('cancellation');
+      expect(response.hashes['cancellation'].length).toEqual(64);
 
       logResponse(response);
     });
@@ -1636,7 +1638,7 @@ describe('Kujira Full Flow', () => {
       order.id = undefined;
       order.status = undefined;
       order.fee = undefined;
-      order.signatures = undefined;
+      order.hashes = undefined;
 
       // request = {
       //   marketId: marketIds[2],
@@ -1765,7 +1767,7 @@ describe('Kujira Full Flow', () => {
         order.id = undefined;
         order.status = undefined;
         order.fee = undefined;
-        order.signatures = undefined;
+        order.hashes = undefined;
 
         request = {
           marketIds: [order.marketId],
