@@ -656,7 +656,6 @@ describe('Kujira Full Flow', () => {
     settle funds for all markets
     */
 
-    // TODO check and fix!!! (WIP)
     it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -667,11 +666,9 @@ describe('Kujira Full Flow', () => {
       response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
-
-      // TODO Add expect verify if we have a transaction hash!!!
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
