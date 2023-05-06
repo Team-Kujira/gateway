@@ -180,14 +180,14 @@ beforeAll(async () => {
     id: undefined,
     clientId: '3',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketIds[3],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(0.001),
-    amount: BigNumber(100),
-    side: OrderSide.BUY,
+    price: BigNumber(999.999),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
     status: undefined,
-    type: OrderType.LIMIT,
+    type: OrderType.MARKET,
     fee: undefined,
     fillingTimestamp: undefined,
     signatures: undefined,
@@ -200,9 +200,9 @@ beforeAll(async () => {
     marketId: marketIds[1],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.999),
-    amount: BigNumber(10),
-    side: OrderSide.SELL,
+    price: BigNumber(0.001),
+    amount: BigNumber(100),
+    side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -214,12 +214,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '5',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketIds[1],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(0.001),
-    amount: BigNumber(100),
-    side: OrderSide.BUY,
+    price: BigNumber(999.999),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -234,9 +234,9 @@ beforeAll(async () => {
     marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.999),
-    amount: BigNumber(10),
-    side: OrderSide.SELL,
+    price: BigNumber(0.001),
+    amount: BigNumber(100),
+    side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -248,12 +248,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '7',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[3],
+    marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(0.001),
-    amount: BigNumber(100),
-    side: OrderSide.BUY,
+    price: BigNumber(999.999),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -268,9 +268,9 @@ beforeAll(async () => {
     marketId: marketIds[3],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.999),
+    price: BigNumber(0.001),
     amount: BigNumber(100),
-    side: OrderSide.SELL,
+    side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -285,9 +285,9 @@ beforeAll(async () => {
     marketId: marketIds[3],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(0.001),
+    price: BigNumber(999.999),
     amount: BigNumber(100),
-    side: OrderSide.BUY,
+    side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -298,6 +298,23 @@ beforeAll(async () => {
   orders.set('10', {
     id: undefined,
     clientId: '10',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[3],
+    ownerAddress: ownerAddress,
+    payerAddress: ownerAddress,
+    price: BigNumber(0.001),
+    amount: BigNumber(100),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
+  });
+
+  orders.set('11', {
+    id: undefined,
+    clientId: '11',
     marketName: undefined as unknown as OrderMarketName,
     marketId: marketIds[1],
     ownerAddress: ownerAddress,
@@ -312,9 +329,43 @@ beforeAll(async () => {
     signatures: undefined,
   });
 
-  orders.set('11', {
+  orders.set('12', {
     id: undefined,
-    clientId: '11',
+    clientId: '12',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[2],
+    ownerAddress: ownerAddress,
+    payerAddress: ownerAddress,
+    price: BigNumber(0.001),
+    amount: BigNumber(100),
+    side: OrderSide.BUY,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
+  });
+
+  orders.set('12', {
+    id: undefined,
+    clientId: '12',
+    marketName: undefined as unknown as OrderMarketName,
+    marketId: marketIds[1],
+    ownerAddress: ownerAddress,
+    payerAddress: ownerAddress,
+    price: BigNumber(999.999),
+    amount: BigNumber(10),
+    side: OrderSide.SELL,
+    status: undefined,
+    type: OrderType.LIMIT,
+    fee: undefined,
+    fillingTimestamp: undefined,
+    signatures: undefined,
+  });
+
+  orders.set('13', {
+    id: undefined,
+    clientId: '13',
     marketName: undefined as unknown as OrderMarketName,
     marketId: marketIds[2],
     ownerAddress: ownerAddress,
@@ -531,9 +582,9 @@ describe('Kujira Full Flow', () => {
     market 2: token1/token3
     market 3: token2/token3
 
-    cancel all the open orders
+    cancel all open orders
 
-    Get the wallet balances from the tokens 1, 2, and 3
+    get the wallet balances from the tokens 1, 2, and 3
 
     create a limit buy order 1 for market 1
 
@@ -541,11 +592,11 @@ describe('Kujira Full Flow', () => {
 
     get the open order 1
 
-    create a market sell order 2 for market 2
+    create a limit sell order 2 for market 2 (slightly better than the market price)
 
-    check the available wallet balances from the tokens 1 and 2
+    check the available wallet balances from the tokens 1 and 3
 
-    get the open order 2
+    get the filled order 2
 
     create a market sell order 3 for market 3
 
@@ -553,22 +604,21 @@ describe('Kujira Full Flow', () => {
 
     get the filled order 3
 
-    create 7 orders at once as the following:
+    create 8 orders at once as the following:
       order 4, limit, buy, market 1
-      order 5, limit, sell, market 1
-      order 6, limit, buy, market 2
-      order 7, market, sell, market 2
-      order 8, market, buy, market 3
+      order 5, limit, sell, market 2
+      order 6, limit, buy, market 3  (slightly better than the market price)
+      order 7, limit, sell, market 1  (slightly better than the market price)
+      order 8, limit, buy, market 2
       order 9, limit, sell, market 3
-      order 10, limit, buy, market 3
-      order 11, market, sell, market 1
-      order 12, market, buy, market 2
+      order 10, market, buy, market 1
+      order 11, market, sell, market 2
 
     check the wallet balances from the tokens 1, 2, and 3
 
-    get the open orders 6 and 7
+    get the open orders 8 and 9
 
-    get all open orders
+    get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing
 
     cancel the order 1
 
@@ -576,59 +626,39 @@ describe('Kujira Full Flow', () => {
 
     check that it's not possible to get the cancelled order 1
 
-    get all open orders and check that order 1 is missing
+    get all open orders and check that order 1, 2, 3, 6, 7, 10, and 11 are missing
 
-    cancel the orders 3, 4, and 5 from markets 1 and 2
-
-    check the wallet balances from the tokens 1, 2, and 3
-
-    check that it's not possible to get the cancelled orders 3, 4, and 5 from the markets 1 and 2
-
-    get all open orders and check that the orders 1, 3, 4, and 5 are missing
-
-    force the filling of order 2
-
-    check the wallet balances from the tokens 1 and 2
-
-    get the filled order 2
-
-    get all filled orders and check that order 2 is present
-
-    get all open orders and check that the orders 1, 2, 3, 4, and 5 are missing
-
-    get all orders (open or filled) and check that the order 2 is present
-
-    force the filling of orders 6 and 7
+    cancel the orders 4 and 5
 
     check the wallet balances from the tokens 1, 2, and 3
 
-    get the filled orders 6 and 7
+    check that it's not possible to get the cancelled orders 4 and 5
 
-    get all filled orders and check that the orders 2, 6, 7, 11, and 12 are present
+    get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 10, and 11 are missing
 
-    get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 11, and 12 are missing
+    get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present
 
-    get all orders (open or filled) and check that the orders 2, 6, and 7 are present
+    get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing
 
     cancel all the open orders
 
-    check the wallet balances from the tokens 2 and 3
+    check the wallet balances from the tokens 1, 2 and 3
 
     get all open orders and check that there are no open orders
 
-    get all orders (open or filled) and check that the orders 2, 6, and 7 are present
+    get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present
 
     create 2 orders at once as the following:
-      order 12, sell, market 1
-      order 13, buy, market 2
+      order 12, limit, buy, market 3
+      order 13, limit, sell, market 1
 
-    get all open orders and check that the orders 10 and 11 are present
+    get all open orders and check that the orders 12 and 13 are present
 
-    get all orders (open or filled) and check that the orders 2, 6, 7, 10, 11, 12, and 13 are present
+    get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present
 
     cancel all the open orders
 
-    check the wallet balances from the tokens 2 and 3
+    check the wallet balances from the tokens 1, 2 and 3
 
     get all open orders and check that there are no open orders
     */
@@ -945,8 +975,134 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('create a market sell order 3 for market 3', async () => {
-      expect(false).toBeTruthy();
+    it('Create a market sell order 3 for market 3', async () => {
+      const candidate = getOrder('3');
+
+      request = { ...candidate } as PlaceOrderRequest;
+
+      logRequest(request);
+
+      response = await kujira.placeOrder(request);
+
+      candidate.id = response.id;
+      candidate.marketName = response.marketName;
+      candidate.status = response.status;
+      candidate.fee = response.fee;
+      candidate.signatures = response.signatures;
+
+      expect(response).toBeObject();
+      expect(response['id'].length).toBeGreaterThan(0);
+      expect(response['signatures']['creation'].length).toBeCloseTo(64);
+      expect(response.marketId).toBe(candidate.marketId);
+      expect(response.ownerAddress).toBe(candidate.ownerAddress);
+      expect(response.price).toEqual(candidate.price.toNumber().toString());
+      expect(response.amount).toEqual(candidate.amount.toNumber().toString());
+      expect(response.side).toBe(candidate.side);
+
+      const marketName: MarketName = getMarketName(marketIds['2']);
+
+      expect(response.marketName).toBe(marketName);
+      expect(response.payerAddress).toBe(candidate.payerAddress);
+      expect(response.status).toBe(OrderStatus.OPEN);
+
+      logResponse(response);
+    });
+
+    it('Check the available wallet balances from the tokens 1 and 2', async () => {
+      request = {
+        tokenIds: [tokenIds[1], tokenIds[2]],
+        ownerAddress: ownerAddress,
+      } as GetBalancesRequest;
+
+      logRequest(request);
+
+      response = await kujira.getBalances(request);
+
+      const RequestTokensDenom = [
+        Denom.from(request.tokenIds[0]),
+        Denom.from(request.tokenIds[1]),
+      ];
+
+      const ResponseTokens = response.tokens
+        .keySeq()
+        .map((obj: any) => obj)
+        .toArray();
+      const ResponseTokensDenom = [
+        Denom.from(ResponseTokens[0]),
+        Denom.from(ResponseTokens[1]),
+      ];
+
+      expect(ResponseTokensDenom[0].eq(ResponseTokensDenom[1])).toBeFalsy;
+      expect(
+        RequestTokensDenom[0].eq(ResponseTokensDenom[0]) ||
+          RequestTokensDenom[0].eq(ResponseTokensDenom[1])
+      ).toBeTruthy();
+      expect(
+        RequestTokensDenom[1].eq(ResponseTokensDenom[1]) ||
+          RequestTokensDenom[1].eq(ResponseTokensDenom[0])
+      ).toBeTruthy();
+
+      expect(response).toContainKey('total');
+
+      response.tokens.valueSeq().forEach((token: any) => {
+        expect(token).toContainKeys(['free', 'unsettled', 'lockedInOrders']);
+      });
+      logResponse(response);
+
+      const order = getOrder('2');
+      const marketTokens = networkPairs[order.marketId].denoms;
+      const oldBaseBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(marketTokens[0].reference)
+      );
+      const newBaseBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(marketTokens[0].reference)
+      );
+      const oldQuoteBalance = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(marketTokens[1].reference)
+      );
+      const newQuoteBalance = getNotNullOrThrowError<Balance>(
+        response.tokens.get(marketTokens[1].reference)
+      );
+      const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
+      const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
+
+      expect(
+        oldBaseBalance.free.toNumber() -
+          (orderFee.toNumber() + orderAmount.toNumber())
+      ).toEqual(newBaseBalance.free?.toNumber());
+
+      expect(oldQuoteBalance.free.toNumber()).toEqual(
+        newQuoteBalance.free.toNumber()
+      );
+      userBalances.tokens.set(marketTokens[0].reference, newBaseBalance);
+      userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
+    });
+
+    it('Get the open order 2', async () => {
+      const orderPlaced = getOrder('2');
+      const marketName: MarketName = getMarketName(marketIds['2']);
+
+      request = {
+        id: orderPlaced.id,
+        status: OrderStatus.OPEN,
+        marketId: orderPlaced.marketId,
+        ownerAddress: ownerAddress,
+      } as GetOrderRequest;
+
+      logRequest(request);
+
+      response = await kujira.getOrder(request);
+
+      expect(response).toBeObject();
+      expect(response.status).toEqual(OrderStatus.OPEN);
+      expect(response.id).toEqual(orderPlaced.id);
+      expect(response.marketName).toBe(marketName);
+      expect(response.marketId).toBe(marketIds['2']);
+      expect(response.ownerAddress).toEqual(ownerAddress);
+      expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
+      expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
+
+      logResponse(response);
     });
 
     it('Create 7 orders at once', async () => {
