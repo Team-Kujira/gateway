@@ -46,7 +46,7 @@ import {
   PlaceOrdersRequest,
   TokenId,
 } from '../../../../src/connectors/kujira/kujira.types';
-import { Denom, DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
+import { DEMO, Denom, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
 
@@ -668,7 +668,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!! (WIP)
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
@@ -679,51 +678,22 @@ describe('Kujira Full Flow', () => {
 
       response = await kujira.getBalances(request);
 
-      expect(response).toContainKey('total');
-      expect(response['total']).toContainKeys([
-        'free',
-        'unsettled',
-        'lockedInOrders',
-      ]);
-
       logResponse(response);
 
-      userBalances = response;
+      expect(response.total.free).toBeGreaterThanOrEqual(0);
+      expect(response.total.unsettled).toBeGreaterThanOrEqual(0);
+      expect(response.total.lockedInOrders).toBeGreaterThanOrEqual(0);
 
-      const balances = userBalances.tokens.toArray();
-
-      if (balances) {
-        const output = {
-          token1: {
-            symbol: 'token1',
-            balances: {
-              free: balances[0][1].free.toNumber().toPrecision(2),
-              lockedInOrders: balances[0][1].lockedInOrders.toNumber(),
-              unsettled: balances[0][1].unsettled.toNumber(),
-            },
-          },
-          token2: {
-            symbol: 'token2',
-            balances: {
-              free: balances[1][1].free.toNumber(),
-              lockedInOrders: balances[1][1].lockedInOrders.toNumber(),
-              unsettled: balances[1][1].unsettled.toNumber(),
-            },
-          },
-          token3: {
-            symbol: 'token3',
-            balances: {
-              free: balances[2][1].free.toNumber(),
-              lockedInOrders: balances[2][1].lockedInOrders.toNumber(),
-              unsettled: balances[2][1].unsettled.toNumber(),
-            },
-          },
-        };
-        console.log(output);
+      for (const balance of userBalances.tokens.values()) {
+        expect(balance.free).toBeGreaterThanOrEqual(0);
+        expect(balance.unsettled).toBeGreaterThanOrEqual(0);
+        expect(balance.lockedInOrders).toBeGreaterThanOrEqual(0);
       }
+
+      userBalances = response;
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it('Create a limit buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
 
