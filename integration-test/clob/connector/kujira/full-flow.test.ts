@@ -37,6 +37,7 @@ import {
   MarketWithdrawRequest,
   Order,
   OrderClientId,
+  OrderId,
   OrderMarketName,
   OrderSide,
   OrderStatus,
@@ -51,9 +52,6 @@ import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
 
 jest.setTimeout(30 * 60 * 1000);
-
-let request: any;
-let response: any;
 
 let testTitle: string;
 let logRequest: (target: any) => void;
@@ -375,31 +373,31 @@ beforeEach(async () => {
 describe('Kujira Full Flow', () => {
   describe('Tokens', () => {
     it('Get token 1', async () => {
-      request = {
+      const request = {
         id: tokenIds[1],
       } as GetTokenRequest;
 
       logRequest(request);
 
-      response = await kujira.getToken(request);
+      const response = await kujira.getToken(request);
 
       logResponse(response);
     });
 
     it('Get tokens 2 and 3', async () => {
-      request = {
+      const request = {
         ids: [tokenIds[2], tokenIds[3]],
       } as GetTokensRequest;
 
       logRequest(request);
 
-      response = await kujira.getTokens(request);
+      const response = await kujira.getTokens(request);
 
       logResponse(response);
     });
 
     it('Get all tokens', async () => {
-      request = {} as GetAllTokensRequest;
+      const request = {} as GetAllTokensRequest;
 
       logRequest(request);
 
@@ -411,35 +409,35 @@ describe('Kujira Full Flow', () => {
 
   describe('Markets', () => {
     it('Get market 1', async () => {
-      request = {
+      const request = {
         id: marketIds[1],
       } as GetMarketRequest;
 
       logRequest(request);
 
-      response = await kujira.getMarket(request);
+      const response = await kujira.getMarket(request);
 
       logResponse(response);
     });
 
     it('Get markets 2 and 3', async () => {
-      request = {
+      const request = {
         ids: [marketIds[2], marketIds[3]],
       } as GetMarketsRequest;
 
       logRequest(request);
 
-      response = await kujira.getMarkets(request);
+      const response = await kujira.getMarkets(request);
 
       logResponse(response);
     });
 
     it('Get all markets', async () => {
-      request = {} as GetAllMarketsRequest;
+      const request = {} as GetAllMarketsRequest;
 
       logRequest(request);
 
-      response = await kujira.getAllMarkets(request);
+      const response = await kujira.getAllMarkets(request);
 
       logResponse(response);
     });
@@ -447,35 +445,35 @@ describe('Kujira Full Flow', () => {
 
   describe('Order books', () => {
     it('Get order book from market 1', async () => {
-      request = {
+      const request = {
         marketId: marketIds[1],
       } as GetOrderBookRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrderBook(request);
+      const response = await kujira.getOrderBook(request);
 
       logResponse(response);
     });
 
     it('Get order books from the markets 2 and 3', async () => {
-      request = {
+      const request = {
         marketIds: [marketIds[2], marketIds[3]],
       } as GetOrderBooksRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrderBooks(request);
+      const response = await kujira.getOrderBooks(request);
 
       logResponse(response);
     });
 
     it('Get all order books', async () => {
-      request = {} as GetAllOrderBooksRequest;
+      const request = {} as GetAllOrderBooksRequest;
 
       logRequest(request);
 
-      response = await kujira.getAllOrderBooks(request);
+      const response = await kujira.getAllOrderBooks(request);
 
       logResponse(response);
     });
@@ -483,35 +481,35 @@ describe('Kujira Full Flow', () => {
 
   describe('Tickers', () => {
     it('Get ticker from market 1', async () => {
-      request = {
+      const request = {
         marketId: marketIds[1],
       } as GetTickerRequest;
 
       logRequest(request);
 
-      response = await kujira.getTicker(request);
+      const response = await kujira.getTicker(request);
 
       logResponse(response);
     });
 
     it('Get tickers from markets 2 and 3', async () => {
-      request = {
+      const request = {
         marketIds: [marketIds[2], marketIds[3]],
       } as GetTickersRequest;
 
       logRequest(request);
 
-      response = await kujira.getTickers(request);
+      const response = await kujira.getTickers(request);
 
       logResponse(response);
     });
 
     it('Get all tickers', async () => {
-      request = {} as GetAllTickersRequest;
+      const request = {} as GetAllTickersRequest;
 
       logRequest(request);
 
-      response = await kujira.getAllTickers(request);
+      const response = await kujira.getAllTickers(request);
 
       logResponse(response);
     });
@@ -519,39 +517,39 @@ describe('Kujira Full Flow', () => {
 
   describe('User', () => {
     it('Get balance of token 1', async () => {
-      request = {
+      const request = {
         tokenId: tokenIds[1],
         ownerAddress: ownerAddress,
       } as GetBalanceRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalance(request);
+      const response = await kujira.getBalance(request);
 
       logResponse(response);
     });
 
     it('Get balances of tokens 2 and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     it('Get all balances', async () => {
-      request = {
+      const request = {
         ownerAddress: ownerAddress,
       } as GetAllBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getAllBalances(request);
+      const response = await kujira.getAllBalances(request);
 
       logResponse(response);
     });
@@ -657,26 +655,26 @@ describe('Kujira Full Flow', () => {
     */
 
     it('Cancel all open orders', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
       } as CancelAllOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.cancelAllOrders(request);
+      const response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
     });
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
       logResponse(response);
 
@@ -693,15 +691,14 @@ describe('Kujira Full Flow', () => {
       userBalances = response;
     });
 
-    // TODO check and fix!!! (WIP)
     it('Create a limit buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
 
-      request = { ...candidate } as PlaceOrderRequest;
+      const request = { ...candidate } as PlaceOrderRequest;
 
       logRequest(request);
 
-      response = await kujira.placeOrder(request);
+      const response = await kujira.placeOrder(request);
 
       candidate.id = response.id;
       candidate.marketName = response.marketName;
@@ -710,8 +707,8 @@ describe('Kujira Full Flow', () => {
       candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
-      expect(response['hashes']['creation'].length).toBeCloseTo(64);
-      expect(response.id.length).toBeGreaterThan(0);
+      expect(response.hashes?.creation?.length).toBeCloseTo(64);
+      expect(response.id?.length).toBeGreaterThan(0);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price?.toNumber().toString());
@@ -722,21 +719,21 @@ describe('Kujira Full Flow', () => {
 
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
-      // expect(response.status).toBe(OrderStatus.OPEN);
+      expect(response.status).toBe(OrderStatus.OPEN);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
       expect(Object.entries(response.tokens.toJS())[0][1]).toContainKeys([
         'free',
@@ -789,7 +786,7 @@ describe('Kujira Full Flow', () => {
       const orderPlaced = getOrder('1');
       const marketName: MarketName = getMarketName(marketIds['1']);
 
-      request = {
+      const request = {
         id: orderPlaced.id,
         status: OrderStatus.OPEN,
         marketId: orderPlaced.marketId,
@@ -798,7 +795,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrder(request);
+      const response = await kujira.getOrder(request);
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
@@ -806,7 +803,7 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['1']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price.toNumber()).toEqual(orderPlaced.price?.toNumber());
+      expect(response.price?.toNumber()).toEqual(orderPlaced.price?.toNumber());
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
 
       logResponse(response);
@@ -816,11 +813,11 @@ describe('Kujira Full Flow', () => {
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
 
-      request = { ...candidate } as PlaceOrderRequest;
+      const request = { ...candidate } as PlaceOrderRequest;
 
       logRequest(request);
 
-      response = await kujira.placeOrder(request);
+      const response = await kujira.placeOrder(request);
 
       candidate.id = response.id;
       candidate.marketName = response.marketName;
@@ -829,8 +826,8 @@ describe('Kujira Full Flow', () => {
       candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
-      expect(response['id'].length).toBeGreaterThan(0);
-      expect(response['hashes']['creation'].length).toBeCloseTo(64);
+      expect(response.id?.length).toBeGreaterThan(0);
+      expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price?.toNumber().toString());
@@ -848,37 +845,37 @@ describe('Kujira Full Flow', () => {
 
     // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
-      const RequestTokensDenom = [
-        Denom.from(request.tokenIds[0]),
-        Denom.from(request.tokenIds[1]),
+      const requestTokensDenoms = [
+        Denom.from(getNotNullOrThrowError<TokenId[]>(request.tokenIds)[0]),
+        Denom.from(getNotNullOrThrowError<TokenId[]>(request.tokenIds)[1]),
       ];
 
-      const ResponseTokens = response.tokens
+      const responseTokens = response.tokens
         .keySeq()
         .map((obj: any) => obj)
         .toArray();
-      const ResponseTokensDenom = [
-        Denom.from(ResponseTokens[0]),
-        Denom.from(ResponseTokens[1]),
+      const responseTokensDenom = [
+        Denom.from(responseTokens[0]),
+        Denom.from(responseTokens[1]),
       ];
 
-      expect(ResponseTokensDenom[0].eq(ResponseTokensDenom[1])).toBeFalsy;
+      expect(responseTokensDenom[0].eq(responseTokensDenom[1])).toBeFalsy;
       expect(
-        RequestTokensDenom[0].eq(ResponseTokensDenom[0]) ||
-          RequestTokensDenom[0].eq(ResponseTokensDenom[1])
+        requestTokensDenoms[0].eq(responseTokensDenom[0]) ||
+          requestTokensDenoms[0].eq(responseTokensDenom[1])
       ).toBeTruthy();
       expect(
-        RequestTokensDenom[1].eq(ResponseTokensDenom[1]) ||
-          RequestTokensDenom[1].eq(ResponseTokensDenom[0])
+        requestTokensDenoms[1].eq(responseTokensDenom[1]) ||
+          requestTokensDenoms[1].eq(responseTokensDenom[0])
       ).toBeTruthy();
 
       expect(response).toContainKey('total');
@@ -922,7 +919,7 @@ describe('Kujira Full Flow', () => {
       const orderPlaced = getOrder('2');
       const marketName: MarketName = getMarketName(marketIds['2']);
 
-      request = {
+      const request = {
         id: orderPlaced.id,
         status: OrderStatus.FILLED,
         marketId: orderPlaced.marketId,
@@ -931,7 +928,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrder(request);
+      const response = await kujira.getOrder(request);
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
@@ -939,7 +936,7 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['2']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price.toNumber()).toEqual(orderPlaced.price?.toNumber());
+      expect(response.price?.toNumber()).toEqual(orderPlaced.price?.toNumber());
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
 
       logResponse(response);
@@ -949,11 +946,11 @@ describe('Kujira Full Flow', () => {
     it('Create a market sell order 3 for market 3', async () => {
       const candidate = getOrder('3');
 
-      request = { ...candidate } as PlaceOrderRequest;
+      const request = { ...candidate } as PlaceOrderRequest;
 
       logRequest(request);
 
-      response = await kujira.placeOrder(request);
+      const response = await kujira.placeOrder(request);
 
       candidate.id = response.id;
       candidate.marketName = response.marketName;
@@ -962,8 +959,8 @@ describe('Kujira Full Flow', () => {
       candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
-      expect(response['id'].length).toBeGreaterThan(0);
-      expect(response['hashes']['creation'].length).toBeCloseTo(64);
+      expect(response.id?.length).toBeGreaterThan(0);
+      expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price?.toNumber().toString());
@@ -981,37 +978,37 @@ describe('Kujira Full Flow', () => {
 
     // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 2 and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
-      const RequestTokensDenom = [
-        Denom.from(request.tokenIds[0]),
-        Denom.from(request.tokenIds[1]),
+      const requestTokensDenoms = [
+        Denom.from(getNotNullOrThrowError<TokenId[]>(request.tokenIds)[0]),
+        Denom.from(getNotNullOrThrowError<TokenId[]>(request.tokenIds)[1]),
       ];
 
-      const ResponseTokens = response.tokens
+      const responseTokens = response.tokens
         .keySeq()
         .map((obj: any) => obj)
         .toArray();
-      const ResponseTokensDenom = [
-        Denom.from(ResponseTokens[0]),
-        Denom.from(ResponseTokens[1]),
+      const responseTokensDenom = [
+        Denom.from(responseTokens[0]),
+        Denom.from(responseTokens[1]),
       ];
 
-      expect(ResponseTokensDenom[0].eq(ResponseTokensDenom[1])).toBeFalsy;
+      expect(responseTokensDenom[0].eq(responseTokensDenom[1])).toBeFalsy;
       expect(
-        RequestTokensDenom[0].eq(ResponseTokensDenom[0]) ||
-          RequestTokensDenom[0].eq(ResponseTokensDenom[1])
+        requestTokensDenoms[0].eq(responseTokensDenom[0]) ||
+          requestTokensDenoms[0].eq(responseTokensDenom[1])
       ).toBeTruthy();
       expect(
-        RequestTokensDenom[1].eq(ResponseTokensDenom[1]) ||
-          RequestTokensDenom[1].eq(ResponseTokensDenom[0])
+        requestTokensDenoms[1].eq(responseTokensDenom[1]) ||
+          requestTokensDenoms[1].eq(responseTokensDenom[0])
       ).toBeTruthy();
 
       expect(response).toContainKey('total');
@@ -1055,7 +1052,7 @@ describe('Kujira Full Flow', () => {
       const orderFilled = getOrder('3');
       const marketName: MarketName = getMarketName(marketIds['3']);
 
-      request = {
+      const request = {
         id: orderFilled.id,
         status: OrderStatus.FILLED,
         marketId: orderFilled.marketId,
@@ -1064,7 +1061,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrder(request);
+      const response = await kujira.getOrder(request);
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
@@ -1072,7 +1069,7 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['2']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price.toNumber()).toEqual(orderFilled.price?.toNumber());
+      expect(response.price?.toNumber()).toEqual(orderFilled.price?.toNumber());
       expect(response.amount.toNumber()).toEqual(orderFilled.amount.toNumber());
 
       logResponse(response);
@@ -1082,7 +1079,7 @@ describe('Kujira Full Flow', () => {
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
-      request = {
+      const request = {
         orders: candidates
           .valueSeq()
           .map((candidate) => ({ ...candidate }))
@@ -1091,7 +1088,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.placeOrders(request);
+      const response = await kujira.placeOrders(request);
 
       response
         .valueSeq()
@@ -1131,14 +1128,14 @@ describe('Kujira Full Flow', () => {
 
     // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
       const finalBalanceChange: Balances = {
         tokens: IMap<TokenId, Balance>().asMutable(),
         total: {
@@ -1214,7 +1211,7 @@ describe('Kujira Full Flow', () => {
 
       console.log(numOfOrders);
 
-      request = {
+      const request = {
         ids,
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1222,7 +1219,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
       // const responseArray = response.toArray();
       // console.log(responseArray);
 
@@ -1245,14 +1242,14 @@ describe('Kujira Full Flow', () => {
 
     // TODO check and fix!!!
     it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
@@ -1261,7 +1258,7 @@ describe('Kujira Full Flow', () => {
     it('Cancel the order 1', async () => {
       const order = getOrder('1');
 
-      request = {
+      const request = {
         id: order.id,
         marketId: order.marketId,
         ownerAddress: order.ownerAddress,
@@ -1269,14 +1266,14 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.cancelOrder(request);
+      const response = await kujira.cancelOrder(request);
 
       expect(response).not.toBeEmpty();
       expect(response.id).toEqual(order.id);
       expect(response.marketId).toBe(order.marketId);
       expect(response.status).toBe(OrderStatus.CANCELLED);
       expect(response.hashes).toHaveProperty('cancellation');
-      expect(response.hashes['cancellation'].length).toBeGreaterThan(0);
+      expect(response.hashes?.cancellation?.length).toBeGreaterThan(0);
 
       order.fee = response.fee;
       // TODO Assign the cancellation hash to the order !!!
@@ -1286,14 +1283,14 @@ describe('Kujira Full Flow', () => {
 
     // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1 and 2', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
       const order = getOrder('1');
       const finalBalanceChange: Balances = {
@@ -1374,7 +1371,7 @@ describe('Kujira Full Flow', () => {
     it("Check that it's not possible to get the cancelled order 1", async () => {
       const order = getOrder('1');
 
-      request = {
+      const request = {
         id: order.id,
         ownerAddress: order.ownerAddress,
         marketId: order.marketId,
@@ -1382,7 +1379,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrder(request);
+      const response = await kujira.getOrder(request);
 
       expect(response).not.toBeObject();
       expect(response).toBeUndefined();
@@ -1394,14 +1391,14 @@ describe('Kujira Full Flow', () => {
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const order = getOrder('1');
 
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       expect(response.keySeq().toArray()).not.toContain(
         getNotNullOrThrowError(order.id)
@@ -1414,7 +1411,7 @@ describe('Kujira Full Flow', () => {
     it('Cancel the orders 4 and 5', async () => {
       const orders = getOrders(['4', '5']).valueSeq().toArray();
 
-      request = {
+      const request = {
         ids: [orders[0].id, orders[1].id],
         marketId: orders[0].marketId,
         ownerAddresses: [ownerAddress],
@@ -1422,52 +1419,36 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.cancelOrders(request);
+      const response = (await kujira.cancelOrders(request)) as IMap<
+        OrderId,
+        Order
+      >;
+
+      logResponse(response);
 
       expect(response).not.toBeEmpty();
-      for (const value of response) {
-        expect(value[1].status).toBe(OrderStatus.CANCELLED);
-        expect(value[1].hashes).toHaveProperty('cancellation');
-        expect(value[1].hashes['cancellation'].length).toEqual(64);
+      for (const value of response.values()) {
+        expect(value.status).toBe(OrderStatus.CANCELLED);
+        expect(value.hashes).toHaveProperty('cancellation');
+        expect(value.hashes?.cancellation?.length).toEqual(64);
       }
       expect(Object.entries(response.keySeq().toArray()).length).toEqual(
         request.ids.length
       );
       expect(response.keySeq().toArray()).toEqual(request.ids);
-      expect(response.first().marketId).toEqual(request.marketId);
-
-      logResponse(response);
-
-      request = {
-        id: orders[2].id,
-        ownerAddress: ownerAddress,
-        marketId: orders[2].marketId,
-      } as CancelOrderRequest;
-
-      logRequest(request);
-
-      response = await kujira.cancelOrder(request);
-
-      expect(response).not.toBeEmpty();
-      expect(response.id).toEqual(request.id);
-      expect(response.marketId).toEqual(request.marketId);
-      expect(response.status).toBe(OrderStatus.CANCELLED);
-      expect(response.hashes).toHaveProperty('cancellation');
-      expect(response.hashes['cancellation'].length).toEqual(64);
-
-      logResponse(response);
+      expect(response.first()?.marketId).toEqual(request.marketId);
     });
 
     // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
       const orders = getOrders(['3', '4', '5']).valueSeq().toArray();
       const finalBalanceChange: Balances = {
@@ -1579,7 +1560,7 @@ describe('Kujira Full Flow', () => {
         .valueSeq()
         .toArray();
 
-      request = {
+      const request = {
         ids,
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1587,7 +1568,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       // expect(response).not.toBeObject();
       // expect(response).toBeUndefined();
@@ -1604,19 +1585,21 @@ describe('Kujira Full Flow', () => {
         .valueSeq()
         .toArray();
 
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       const openOrdersIds = response.keySeq().toArray();
 
       for (const id of ids) {
-        expect(openOrdersIds.includes(id)).toBeFalsy();
+        expect(
+          openOrdersIds.includes(getNotNullOrThrowError<OrderId>(id))
+        ).toBeFalsy();
       }
 
       logResponse(response);
@@ -1624,81 +1607,81 @@ describe('Kujira Full Flow', () => {
 
     // TODO check and fix!!!
     it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.FILLED,
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Cancel all open orders', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
       } as CancelAllOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.cancelAllOrders(request);
+      const response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
@@ -1707,7 +1690,7 @@ describe('Kujira Full Flow', () => {
     it('Create orders 12 and 13 at once', async () => {
       const candidates = getOrders(['12', '13']);
 
-      request = {
+      const request = {
         orders: candidates
           .valueSeq()
           .map((candidate) => ({ ...candidate }))
@@ -1716,7 +1699,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = await kujira.placeOrders(request);
+      const response = await kujira.placeOrders(request);
 
       response.valueSeq().map((order: Order) => {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
@@ -1731,135 +1714,135 @@ describe('Kujira Full Flow', () => {
 
     // TODO check and fix!!!
     it('Get all open orders and check that the orders 12 and 13 are present', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Cancel all open orders', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
       } as CancelAllOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.cancelAllOrders(request);
+      const response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
-      request = {
+      const request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getBalances(request);
+      const response = await kujira.getBalances(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
       logRequest(request);
 
-      response = await kujira.getOrders(request);
+      const response = await kujira.getOrders(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Settle funds for market 1', async () => {
-      request = {
+      const request = {
         marketId: marketIds[1],
         ownerAddresses: [ownerAddress],
       } as MarketWithdrawRequest;
 
       logRequest(request);
 
-      response = await kujira.settleMarketFunds(request);
+      const response = await kujira.settleMarketFunds(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
-      request = {
+      const request = {
         ownerAddress: ownerAddress,
       } as GetAllBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getAllBalances(request);
+      const response = await kujira.getAllBalances(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Settle funds for markets 2 and 3', async () => {
-      request = {
+      const request = {
         marketIds: [marketIds[2], marketIds[3]],
         ownerAddresses: [ownerAddress],
       } as MarketsWithdrawsRequest;
 
       logRequest(request);
 
-      response = await kujira.settleMarketsFunds(request);
+      const response = await kujira.settleMarketsFunds(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
-      request = {
+      const request = {
         ownerAddress: ownerAddress,
       } as GetAllBalancesRequest;
 
       logRequest(request);
 
-      response = await kujira.getAllBalances(request);
+      const response = await kujira.getAllBalances(request);
 
       logResponse(response);
     });
 
     // TODO check and fix!!!
     it('Settle funds for all markets', async () => {
-      request = {
+      const request = {
         ownerAddresses: [ownerAddress],
       } as AllMarketsWithdrawsRequest;
 
       logRequest(request);
 
-      response = await kujira.settleAllMarketsFunds(request);
+      const response = await kujira.settleAllMarketsFunds(request);
 
       logResponse(response);
     });

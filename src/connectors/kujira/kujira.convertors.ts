@@ -634,9 +634,14 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 }): IMap<OrderId, Order> => {
   const output = IMap<OrderId, Order>().asMutable();
 
+  let unknownCounter = 1;
   if (ConvertOrderType.PLACE_ORDERS == options.type) {
     for (const bundle of options.bundles.get('orders').values()) {
-      const orderId = bundle.getIn(['events', 'wasm', 'order_idx']);
+      let orderId = bundle.getIn(['events', 'wasm', 'order_idx']);
+
+      if (!orderId) {
+        orderId = `unknown_${unknownCounter++}`;
+      }
 
       const order = {
         id: orderId,
@@ -672,7 +677,11 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
     }
   } else if (ConvertOrderType.GET_ORDERS == options.type) {
     for (const bundle of options.bundles.get('orders')) {
-      const orderId = bundle['idx'];
+      let orderId = bundle['idx'];
+
+      if (!orderId) {
+        orderId = `unknown_${unknownCounter++}`;
+      }
 
       const market = options.bundles.getIn(['common', 'market']) as Market;
 
@@ -702,7 +711,11 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
     }
   } else if (ConvertOrderType.CANCELLED_ORDERS == options.type) {
     for (const bundle of options.bundles.get('orders').values()) {
-      const orderId = bundle.getIn(['id']);
+      let orderId = bundle.getIn(['id']);
+
+      if (!orderId) {
+        orderId = `unknown_${unknownCounter++}`;
+      }
 
       const order = {
         id: orderId,
@@ -853,11 +866,11 @@ export const convertKujiraEventsToMapOfEvents = (
 
 export const convertKujiraRawLogEventsToMapOfEvents = (
   eventsLog: Array<any>,
-  cancellManyOrderNumber?: number
+  cancelManyOrderNumber?: number
 ): IMap<string, any> => {
-  if (cancellManyOrderNumber) {
+  if (cancelManyOrderNumber) {
     let msgIndex = (eventsLog[0]['msg_index'] as number) + 1;
-    for (let i = 0; i < cancellManyOrderNumber - 1; i++) {
+    for (let i = 0; i < cancelManyOrderNumber - 1; i++) {
       const newEventLog = { ...eventsLog[0] };
       newEventLog['msg_index'] = msgIndex;
       eventsLog.push(newEventLog);
