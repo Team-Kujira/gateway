@@ -277,7 +277,7 @@ export const convertToClobMarketResponse = (
 
 export const convertOrderToClobPriceLevel = (response: Order): PriceLevel => {
   return {
-    price: response.price.toString(),
+    price: response.price?.toString(),
     quantity: response.amount.toString(),
     timestamp: Date.now(), // TODO Check if it is needed to retrieve this info (probably from the transaction)!!!
   } as PriceLevel;
@@ -372,7 +372,7 @@ export const convertToClobGetOrderResponse = (
         subaccountId: response.ownerAddress,
         executionType: response.type?.toLowerCase(),
         orderType: convertOrderSideToClobSide(response.side).toLowerCase(),
-        price: response.price.toString(),
+        price: response.price?.toString(),
         // triggerPrice: 'None',
         quantity: response.amount.toString(),
         // filledQuantity: 'None',
@@ -541,13 +541,13 @@ export const convertKujiraOrderBookToOrderBook = (
     } as Order;
 
     if (bestAsk) {
-      if (order.price.lt(bestAskPrice)) {
+      if (order.price?.lt(bestAskPrice)) {
         bestAsk = order;
-        bestAskPrice = order.price;
+        bestAskPrice = getNotNullOrThrowError<OrderPrice>(order.price);
       }
     } else {
       bestAsk = order;
-      bestAskPrice = order.price;
+      bestAskPrice = getNotNullOrThrowError<OrderPrice>(order.price);
     }
 
     asks.set(`unknown_${counter++}`, order);
@@ -573,13 +573,13 @@ export const convertKujiraOrderBookToOrderBook = (
     } as Order;
 
     if (bestBid) {
-      if (order.price.gt(bestBidPrice)) {
+      if (order.price?.gt(bestBidPrice)) {
         bestBid = order;
-        bestBidPrice = order.price;
+        bestBidPrice = getNotNullOrThrowError<OrderPrice>(order.price);
       }
     } else {
       bestBid = order;
-      bestBidPrice = order.price;
+      bestBidPrice = getNotNullOrThrowError<OrderPrice>(order.price);
     }
 
     bids.set(`unknown_${counter++}`, order);

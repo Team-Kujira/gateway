@@ -80,6 +80,7 @@ import {
   OrderBook,
   OrderId,
   OrderOwnerAddress,
+  OrderPrice,
   OrderSide,
   OrderStatus,
   OwnerAddress,
@@ -775,8 +776,10 @@ export class Kujira {
           let simpleAveragePrice: BigNumber;
 
           if (bestBid && bestAsk) {
-            simpleAveragePrice = getNotNullOrThrowError<Order>(bestBid)
-              .price.plus(getNotNullOrThrowError<Order>(bestAsk).price)
+            simpleAveragePrice = getNotNullOrThrowError<OrderPrice>(
+              bestBid.price
+            )
+              .plus(getNotNullOrThrowError<OrderPrice>(bestAsk.price))
               .div(BigNumber(2));
           } else {
             simpleAveragePrice = BigNumber('NaN');
@@ -1075,6 +1078,7 @@ export class Kujira {
    * @param options
    */
   async placeOrders(options: PlaceOrdersRequest): Promise<PlaceOrdersResponse> {
+    // TODO Make this method support multiple owner addresses!!!
     const ownerAddress =
       options.ownerAddress ||
       getNotNullOrThrowError<OrderOwnerAddress>(options.orders[0].ownerAddress);
@@ -1182,6 +1186,7 @@ export class Kujira {
   async cancelOrders(
     options: CancelOrdersRequest
   ): Promise<CancelOrdersResponse> {
+    // TODO Make this method to support multiple markets!!!
     const market = await this.getMarket({ id: options.marketId });
 
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
