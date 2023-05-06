@@ -643,6 +643,8 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         orderId = `unknown_${unknownCounter++}`;
       }
 
+      const denom = Denom.from(bundle.getIn(['events', 'wasm', 'offer_denom']));
+
       const order = {
         id: orderId,
         clientId: bundle.getIn(['candidate']).clientId,
@@ -651,13 +653,15 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         ownerAddress: bundle.getIn(['events', 'transfer', 'sender']),
         payerAddress: bundle.getIn(['events', 'transfer', 'sender']),
         price: bundle.getIn(['events', 'wasm', 'quote_price']),
-        amount: bundle.getIn(['events', 'wasm', 'offer_amount']),
+        amount: BigNumber(bundle.getIn(['events', 'wasm', 'offer_amount'])).div(
+          BigNumber(10).pow(denom.decimals)
+        ),
         side: convertOfferDenomToOrderSide(
           bundle.getIn(['events', 'wasm', 'offer_denom']),
           bundle.getIn(['market'])
         ),
         status: options.bundles.getIn(['common', 'status']),
-        type: OrderType.LIMIT, // TODO how to decide between market and limit?!!!
+        type: OrderType.LIMIT,
         fee: convertKujiraFeeToFee(
           options.bundles.getIn(['common', 'events', 'tx', 'fee']) as string
         ),
@@ -685,6 +689,8 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 
       const market = options.bundles.getIn(['common', 'market']) as Market;
 
+      const denom = Denom.from(bundle['offer_denom']['native']);
+
       const order = {
         id: orderId,
         clientId: undefined,
@@ -693,7 +699,9 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         ownerAddress: bundle['owner'],
         payerAddress: bundle['owner'],
         price: BigNumber(bundle['quote_price']),
-        amount: BigNumber(bundle['original_offer_amount']),
+        amount: BigNumber(bundle['original_offer_amount']).div(
+          BigNumber(10).pow(denom.decimals)
+        ),
         side: convertOfferDenomToOrderSide(
           bundle['offer_denom']['native'],
           market

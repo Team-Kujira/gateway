@@ -678,14 +678,14 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response.total.free).toBeGreaterThanOrEqual(0);
-      expect(response.total.unsettled).toBeGreaterThanOrEqual(0);
-      expect(response.total.lockedInOrders).toBeGreaterThanOrEqual(0);
+      expect(response.total.free.gte(0)).toBeTrue();
+      expect(response.total.unsettled.gte(0)).toBeTrue();
+      expect(response.total.lockedInOrders.gte(0)).toBeTrue();
 
-      for (const balance of userBalances.tokens.values()) {
-        expect(balance.free).toBeGreaterThanOrEqual(0);
-        expect(balance.unsettled).toBeGreaterThanOrEqual(0);
-        expect(balance.lockedInOrders).toBeGreaterThanOrEqual(0);
+      for (const balance of response.tokens.values()) {
+        expect(balance.free.gte(0)).toBeTrue();
+        expect(balance.unsettled.gte(0)).toBeTrue();
+        expect(balance.lockedInOrders.gte(0)).toBeTrue();
       }
 
       userBalances = response;
@@ -711,8 +711,8 @@ describe('Kujira Full Flow', () => {
       expect(response.id?.length).toBeGreaterThan(0);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price?.toNumber().toString());
-      expect(response.amount).toEqual(candidate.amount.toNumber().toString());
+      expect(response.price?.toString()).toEqual(candidate.price?.toString());
+      expect(response.amount.toString()).toEqual(candidate.amount.toString());
       expect(response.side).toBe(candidate.side);
 
       const marketName: MarketName = getMarketName(marketIds['1']);
