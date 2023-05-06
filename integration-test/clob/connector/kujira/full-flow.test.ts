@@ -609,7 +609,7 @@ describe('Kujira Full Flow', () => {
 
     check that it's not possible to get the cancelled order 1
 
-    get all open orders and check that order 1, 2, 3, 6, 7, 10, and 11 are missing
+    get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing
 
     cancel the orders 4 and 5
 
@@ -639,11 +639,21 @@ describe('Kujira Full Flow', () => {
 
     get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present
 
-    cancel all the open orders
+    cancel all open orders
 
     check the wallet balances from the tokens 1, 2 and 3
 
     get all open orders and check that there are no open orders
+
+    settle funds for market 1
+
+    check the wallet balances from the tokens 1, 2 and 3
+
+    settle funds for markets 2 and 3
+
+    check the wallet balances from the tokens 1, 2 and 3
+
+    settle funds for all markets
     */
 
     it('Cancel all open orders', async () => {
@@ -714,7 +724,7 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    it('Create a buy order 1 for market 1', async () => {
+    it('Create a limit buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
 
       request = { ...candidate } as PlaceOrderRequest;
@@ -747,9 +757,9 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the available wallet balances from the tokens 1 and 3', async () => {
+    it('Check the available wallet balances from the tokens 1 and 2', async () => {
       request = {
-        tokenIds: [tokenIds[1], tokenIds[3]],
+        tokenIds: [tokenIds[1], tokenIds[2]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -830,7 +840,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Create a sell order 2 for market 2', async () => {
+    it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
 
       request = { ...candidate } as PlaceOrderRequest;
@@ -863,9 +873,9 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the available wallet balances from the tokens 1 and 2', async () => {
+    it('Check the available wallet balances from the tokens 1 and 3', async () => {
       request = {
-        tokenIds: [tokenIds[1], tokenIds[2]],
+        tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -933,13 +943,13 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
-    it('Get the open order 2', async () => {
+    it('Get the filled order 2', async () => {
       const orderPlaced = getOrder('2');
       const marketName: MarketName = getMarketName(marketIds['2']);
 
       request = {
         id: orderPlaced.id,
-        status: OrderStatus.OPEN,
+        status: OrderStatus.FILLED,
         marketId: orderPlaced.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
@@ -993,9 +1003,9 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the available wallet balances from the tokens 1 and 2', async () => {
+    it('Check the available wallet balances from the tokens 2 and 3', async () => {
       request = {
-        tokenIds: [tokenIds[1], tokenIds[2]],
+        tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -1063,14 +1073,14 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
-    it('Get the open order 2', async () => {
-      const orderPlaced = getOrder('2');
-      const marketName: MarketName = getMarketName(marketIds['2']);
+    it('Get the filled order 3', async () => {
+      const orderFilled = getOrder('3');
+      const marketName: MarketName = getMarketName(marketIds['3']);
 
       request = {
-        id: orderPlaced.id,
-        status: OrderStatus.OPEN,
-        marketId: orderPlaced.marketId,
+        id: orderFilled.id,
+        status: OrderStatus.FILLED,
+        marketId: orderFilled.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
@@ -1080,18 +1090,18 @@ describe('Kujira Full Flow', () => {
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
-      expect(response.id).toEqual(orderPlaced.id);
+      expect(response.id).toEqual(orderFilled.id);
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['2']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price.toNumber()).toEqual(orderPlaced.price?.toNumber());
-      expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
+      expect(response.price.toNumber()).toEqual(orderFilled.price?.toNumber());
+      expect(response.amount.toNumber()).toEqual(orderFilled.amount.toNumber());
 
       logResponse(response);
     });
 
-    it('Create 7 orders at once', async () => {
-      const candidates = getOrders(['3', '4', '5', '6', '7', '8', '9']);
+    it('Create 8 orders at once', async () => {
+      const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
       request = {
         orders: candidates
@@ -1212,8 +1222,8 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get the open orders 6 and 7', async () => {
-      const ordersPlaced = getOrders(['6', '7']);
+    it('Get the open orders 8 and 9', async () => {
+      const ordersPlaced = getOrders(['8', '9']);
       const ids = ordersPlaced
         .map((order) => order.id)
         .valueSeq()
@@ -1252,7 +1262,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get all open orders', async () => {
+    it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1291,7 +1301,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the wallet balances from the tokens 1 and 3', async () => {
+    it('Check the wallet balances from the tokens 1 and 2', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
@@ -1395,7 +1405,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get all open orders and check that order 1 is missing', async () => {
+    it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const order = getOrder('1');
 
       request = {
@@ -1414,8 +1424,8 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Cancel the orders 3, 4, and 5 from markets 1 and 2', async () => {
-      const orders = getOrders(['3', '4', '5']).valueSeq().toArray();
+    it('Cancel the orders 4 and 5', async () => {
+      const orders = getOrders(['4', '5']).valueSeq().toArray();
 
       request = {
         ids: [orders[0].id, orders[1].id],
@@ -1573,8 +1583,8 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it("Check that it's not possible to get the cancelled orders 3, 4, and 5 from the markets 1 and 2", async () => {
-      const orders = getOrders(['3', '4', '5']);
+    it("Check that it's not possible to get the cancelled orders 4 and 5", async () => {
+      const orders = getOrders(['4', '5']);
       const ids = orders
         .map((order) => order.id)
         .valueSeq()
@@ -1597,7 +1607,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get all open orders and check that the orders 1, 3, 4, and 5 are missing', async () => {
+    it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 10, and 11 are missing', async () => {
       const orders = getOrders(['1', '3', '4', '5']);
       const ids = orders
         .map((order) => order.id)
@@ -1622,233 +1632,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Force the filling of order 2', async () => {
-      const order = getOrder('2');
-
-      request = {
-        id: order.id,
-        ownerAddress: ownerAddress,
-        marketId: order.marketId,
-      } as CancelOrderRequest;
-
-      logRequest(request);
-
-      response = await kujira.cancelOrder(request);
-
-      order.id = undefined;
-      order.status = undefined;
-      order.fee = undefined;
-      order.hashes = undefined;
-
-      // request = {
-      //   marketId: marketIds[2],
-      // } as GetTickerRequest;
-      //
-      // response = await kujira.getTicker(request);
-
-      request = {
-        marketIds: [marketIds[2]],
-      } as GetOrderBooksRequest;
-
-      response = await kujira.getOrderBooks(request);
-
-      const modifiedOrder = { ...order } as Order;
-
-      modifiedOrder.price = BigNumber(
-        response.first().bestBid.price.multipliedBy(0.99)
-      ).decimalPlaces(3);
-
-      modifiedOrder.amount = BigNumber(4); // Minimun amount for the order to be filled
-
-      request = { ...modifiedOrder } as PlaceOrderRequest;
-
-      logRequest(request);
-
-      response = await kujira.placeOrder(request);
-
-      order.id = response.id;
-
-      logResponse(response);
-    });
-
-    it('Check the wallet balances from the tokens 1 and 2', async () => {
-      request = {
-        tokenIds: [tokenIds[1], tokenIds[2]],
-        ownerAddress: ownerAddress,
-      } as GetBalancesRequest;
-
-      logRequest(request);
-
-      response = await kujira.getBalances(request);
-
-      logResponse(response);
-    });
-
-    it('Get the filled order 2', async () => {
-      const order = getOrder('2');
-      const id = order.id;
-
-      request = {
-        id,
-        status: OrderStatus.FILLED,
-        ownerAddress: ownerAddress,
-      } as GetOrderRequest;
-
-      logRequest(request);
-
-      response = await kujira.getOrder(request);
-
-      expect(response.id).toEqual(id);
-      expect(response.status).toEqual(OrderStatus.FILLED);
-      expect(response.connectorOrder.offer_amount).toEqual('0');
-      expect(response.connectorOrder.original_offer_amount).toEqual('4');
-      expect(response.connectorOrder.filled_amount).toEqual('4');
-      logResponse(response);
-    });
-
-    it('Get all open orders and check that the orders 1, 2, 3, 4, and 5 are missing', async () => {
-      const orders = getOrders(['1', '2', '3', '4', '5']);
-      const ids = orders
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
-
-      request = {
-        ownerAddresses: [ownerAddress],
-        status: OrderStatus.OPEN,
-      } as GetOrdersRequest;
-
-      logRequest(request);
-
-      response = await kujira.getOrders(request);
-
-      const openOrdersIds = response.keySeq().toArray();
-
-      for (const id of ids) {
-        expect(openOrdersIds.includes(id)).toBeFalsy();
-      }
-
-      logResponse(response);
-    });
-
-    it('Get all orders (open or filled) and check that the order 2 is present', async () => {
-      const order = getOrder('2');
-      const id = order.id;
-
-      request = {
-        ownerAddresses: [ownerAddress],
-      } as GetOrdersRequest;
-
-      logRequest(request);
-
-      response = await kujira.getOrders(request);
-
-      expect(response.keySeq().toArray()).toContain(id);
-      expect(response.get(id).status).toEqual(OrderStatus.FILLED);
-
-      logResponse(response);
-    });
-
-    it('Force the filling of orders 6 and 7', async () => {
-      const orders = getOrders(['6', '7']).valueSeq().toArray();
-
-      let order;
-      for (order of orders) {
-        request = {
-          id: order.id,
-          ownerAddress: ownerAddress,
-          marketId: order.marketId,
-        } as CancelOrderRequest;
-
-        logRequest(request);
-
-        response = await kujira.cancelOrder(request);
-
-        order.id = undefined;
-        order.status = undefined;
-        order.fee = undefined;
-        order.hashes = undefined;
-
-        request = {
-          marketIds: [order.marketId],
-        } as GetOrderBooksRequest;
-
-        response = await kujira.getOrderBooks(request);
-
-        const modifiedOrder = { ...order } as Order;
-
-        if (order.side === OrderSide.BUY) {
-          modifiedOrder.price = BigNumber(
-            response.first().bestAsk.price.multipliedBy(1.01)
-          ).decimalPlaces(3);
-        } else {
-          modifiedOrder.price = BigNumber(
-            response.first().bestBid.price.multipliedBy(0.99)
-          ).decimalPlaces(3);
-          modifiedOrder.amount = BigNumber(4); // Minimum amount for the order to be filled
-        }
-
-        request = { ...modifiedOrder } as PlaceOrderRequest;
-
-        logRequest(request);
-
-        response = await kujira.placeOrder(request);
-
-        order.id = response.id;
-        order.status = OrderStatus.FILLED;
-
-        logResponse(response);
-      }
-
-      logResponse(response);
-    });
-
-    it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
-      request = {
-        tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
-        ownerAddress: ownerAddress,
-      } as GetBalancesRequest;
-
-      logRequest(request);
-
-      response = await kujira.getBalances(request);
-
-      logResponse(response);
-    });
-
-    it('Get the filled orders 6 and 7', async () => {
-      const orders = getOrders(['6', '7']).valueSeq().toArray();
-
-      let order;
-      for (order of orders) {
-        request = {
-          id: order.id,
-          ownerAddress: ownerAddress,
-          status: OrderStatus.FILLED,
-        } as GetOrderRequest;
-
-        logRequest(request);
-
-        response = await kujira.getOrder(request);
-
-        expect(response.id).toEqual(order.id);
-        expect(response.status).toEqual(OrderStatus.FILLED);
-        expect(response.connectorOrder.offer_amount).toEqual('0');
-
-        if (order.side === OrderSide.BUY) {
-          expect(response.connectorOrder.filled_amount).toEqual(
-            order.amount.toNumber().toString()
-          );
-        } else {
-          expect(response.connectorOrder.original_offer_amount).toEqual('4');
-          expect(response.connectorOrder.filled_amount).toEqual('4');
-        }
-
-        logResponse(response);
-      }
-    });
-
-    it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
+    it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.FILLED,
@@ -1861,20 +1645,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, and 7 are missing', async () => {
-      request = {
-        ownerAddresses: [ownerAddress],
-        status: OrderStatus.OPEN,
-      } as GetOrdersRequest;
-
-      logRequest(request);
-
-      response = await kujira.getOrders(request);
-
-      logResponse(response);
-    });
-
-    it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
+    it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
       request = {
         ownerAddresses: [ownerAddress],
       } as GetOrdersRequest;
@@ -1886,7 +1657,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Cancel all the open orders', async () => {
+    it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
       } as CancelAllOrdersRequest;
@@ -1898,7 +1669,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the wallet balances from the tokens 2 and 3', async () => {
+    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
@@ -1924,7 +1695,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get all orders (open or filled) and check that the orders 2, 6, and 7 are present', async () => {
+    it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
       } as GetOrdersRequest;
@@ -1936,8 +1707,8 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Create orders 10 and 11 at once', async () => {
-      const candidates = getOrders(['10', '11']);
+    it('Create orders 12 and 13 at once', async () => {
+      const candidates = getOrders(['12', '13']);
 
       request = {
         orders: candidates
@@ -1961,7 +1732,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get all open orders and check that the orders 10 and 11 are present', async () => {
+    it('Get all open orders and check that the orders 12 and 13 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1974,7 +1745,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Get all orders (open or filled) and check that the orders 2, 6, 7, 10, and 11 are present', async () => {
+    it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
       } as GetOrdersRequest;
@@ -1986,7 +1757,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Cancel all the open orders', async () => {
+    it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
       } as CancelAllOrdersRequest;
@@ -1998,7 +1769,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the wallet balances from the tokens 2 and 3', async () => {
+    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
@@ -2037,7 +1808,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the wallet balances', async () => {
+    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         ownerAddress: ownerAddress,
       } as GetAllBalancesRequest;
@@ -2062,7 +1833,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    it('Check the wallet balances', async () => {
+    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         ownerAddress: ownerAddress,
       } as GetAllBalancesRequest;
