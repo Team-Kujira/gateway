@@ -656,7 +656,7 @@ describe('Kujira Full Flow', () => {
     settle funds for all markets
     */
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
