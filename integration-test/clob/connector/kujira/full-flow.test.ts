@@ -656,6 +656,7 @@ describe('Kujira Full Flow', () => {
     settle funds for all markets
     */
 
+    // TODO check and fix!!!
     it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -670,6 +671,7 @@ describe('Kujira Full Flow', () => {
       // TODO Add expect verify if we have a transaction hash!!!
     });
 
+    // TODO check and fix!!!
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
@@ -724,6 +726,7 @@ describe('Kujira Full Flow', () => {
       }
     });
 
+    // TODO check and fix!!!
     it('Create a limit buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
 
@@ -757,6 +760,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
@@ -813,6 +817,7 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
+    // TODO check and fix!!!
     it('Get the open order 1', async () => {
       const orderPlaced = getOrder('1');
       const marketName: MarketName = getMarketName(marketIds['1']);
@@ -840,6 +845,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
 
@@ -873,6 +879,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
@@ -943,6 +950,7 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
+    // TODO check and fix!!!
     it('Get the filled order 2', async () => {
       const orderPlaced = getOrder('2');
       const marketName: MarketName = getMarketName(marketIds['2']);
@@ -970,6 +978,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Create a market sell order 3 for market 3', async () => {
       const candidate = getOrder('3');
 
@@ -1003,6 +1012,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 2 and 3', async () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
@@ -1073,6 +1083,7 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
+    // TODO check and fix!!!
     it('Get the filled order 3', async () => {
       const orderFilled = getOrder('3');
       const marketName: MarketName = getMarketName(marketIds['3']);
@@ -1100,6 +1111,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
@@ -1150,6 +1162,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
@@ -1222,6 +1235,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get the open orders 8 and 9', async () => {
       const ordersPlaced = getOrders(['8', '9']);
       const ids = ordersPlaced
@@ -1262,6 +1276,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1275,6 +1290,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Cancel the order 1', async () => {
       const order = getOrder('1');
 
@@ -1301,6 +1317,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1 and 2', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
@@ -1386,6 +1403,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it("Check that it's not possible to get the cancelled order 1", async () => {
       const order = getOrder('1');
 
@@ -1405,6 +1423,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const order = getOrder('1');
 
@@ -1424,6 +1443,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Cancel the orders 4 and 5', async () => {
       const orders = getOrders(['4', '5']).valueSeq().toArray();
 
@@ -1471,6 +1491,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
@@ -1583,6 +1604,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it("Check that it's not possible to get the cancelled orders 4 and 5", async () => {
       const orders = getOrders(['4', '5']);
       const ids = orders
@@ -1607,6 +1629,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 10, and 11 are missing', async () => {
       const orders = getOrders(['1', '3', '4', '5']);
       const ids = orders
@@ -1632,6 +1655,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1645,6 +1669,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1657,6 +1682,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1669,6 +1695,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
@@ -1682,6 +1709,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1695,6 +1723,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1707,6 +1736,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Create orders 12 and 13 at once', async () => {
       const candidates = getOrders(['12', '13']);
 
@@ -1732,6 +1762,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all open orders and check that the orders 12 and 13 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1745,6 +1776,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1757,6 +1789,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Cancel all open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1769,6 +1802,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
@@ -1782,6 +1816,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
       request = {
         ownerAddresses: [ownerAddress],
@@ -1795,6 +1830,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Settle funds for market 1', async () => {
       request = {
         marketId: marketIds[1],
@@ -1808,6 +1844,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         ownerAddress: ownerAddress,
@@ -1820,6 +1857,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Settle funds for markets 2 and 3', async () => {
       request = {
         marketIds: [marketIds[2], marketIds[3]],
@@ -1833,6 +1871,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       request = {
         ownerAddress: ownerAddress,
@@ -1845,6 +1884,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    // TODO check and fix!!!
     it('Settle funds for all markets', async () => {
       request = {
         ownerAddresses: [ownerAddress],
