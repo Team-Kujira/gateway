@@ -1104,12 +1104,17 @@ export class Kujira {
         msg: Buffer.from(
           JSON.stringify({
             submit_order: {
-              price: BigNumber(candidate.price).precision(9).toString(),
+              price: BigNumber(candidate.price)
+                .precision(denom.decimals)
+                .toString(),
             },
           })
         ),
         funds: coins(
-          BigNumber(candidate.amount).integerValue().toString(),
+          BigNumber(candidate.amount)
+            .multipliedBy(BigNumber(10).pow(denom.decimals))
+            .integerValue()
+            .toString(),
           denom.reference
         ),
       });
