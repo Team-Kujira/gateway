@@ -183,7 +183,7 @@ beforeAll(async () => {
     marketId: marketIds[3],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.999),
+    price: undefined,
     amount: BigNumber(1),
     side: OrderSide.SELL,
     status: undefined,
@@ -214,7 +214,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '5',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.999),
@@ -231,10 +231,10 @@ beforeAll(async () => {
     id: undefined,
     clientId: '6',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketIds[3],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(0.001),
+    price: undefined,
     amount: BigNumber(1),
     side: OrderSide.BUY,
     status: undefined,
@@ -248,10 +248,10 @@ beforeAll(async () => {
     id: undefined,
     clientId: '7',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketIds[1],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.999),
+    price: undefined,
     amount: BigNumber(1),
     side: OrderSide.SELL,
     status: undefined,
@@ -265,7 +265,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '8',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[3],
+    marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
@@ -299,10 +299,10 @@ beforeAll(async () => {
     id: undefined,
     clientId: '10',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[3],
+    marketId: marketIds[1],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(0.001),
+    price: undefined,
     amount: BigNumber(1),
     side: OrderSide.BUY,
     status: undefined,
@@ -316,10 +316,10 @@ beforeAll(async () => {
     id: undefined,
     clientId: '11',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.999),
+    price: undefined,
     amount: BigNumber(1),
     side: OrderSide.SELL,
     status: undefined,
@@ -333,29 +333,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '12',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketIds[3],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
     amount: BigNumber(1),
     side: OrderSide.BUY,
-    status: undefined,
-    type: OrderType.LIMIT,
-    fee: undefined,
-    fillingTimestamp: undefined,
-    signatures: undefined,
-  });
-
-  orders.set('12', {
-    id: undefined,
-    clientId: '12',
-    marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
-    ownerAddress: ownerAddress,
-    payerAddress: ownerAddress,
-    price: BigNumber(999.999),
-    amount: BigNumber(1),
-    side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -367,12 +350,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '13',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketIds[1],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(0.001),
+    price: BigNumber(999.99),
     amount: BigNumber(1),
-    side: OrderSide.BUY,
+    side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
     fee: undefined,
@@ -749,7 +732,7 @@ describe('Kujira Full Flow', () => {
       expect(response.id.length).toBeGreaterThan(0);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price.toNumber().toString());
+      expect(response.price).toEqual(candidate.price?.toNumber().toString());
       expect(response.amount).toEqual(candidate.amount.toNumber().toString());
       expect(response.side).toBe(candidate.side);
 
@@ -839,7 +822,7 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['1']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
+      expect(response.price.toNumber()).toEqual(orderPlaced.price?.toNumber());
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
 
       logResponse(response);
@@ -865,7 +848,7 @@ describe('Kujira Full Flow', () => {
       expect(response['signatures']['creation'].length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price.toNumber().toString());
+      expect(response.price).toEqual(candidate.price?.toNumber().toString());
       expect(response.amount).toEqual(candidate.amount.toNumber().toString());
       expect(response.side).toBe(candidate.side);
 
@@ -969,7 +952,7 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['2']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
+      expect(response.price.toNumber()).toEqual(orderPlaced.price?.toNumber());
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
 
       logResponse(response);
@@ -995,7 +978,7 @@ describe('Kujira Full Flow', () => {
       expect(response['signatures']['creation'].length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price.toNumber().toString());
+      expect(response.price).toEqual(candidate.price?.toNumber().toString());
       expect(response.amount).toEqual(candidate.amount.toNumber().toString());
       expect(response.side).toBe(candidate.side);
 
@@ -1099,7 +1082,7 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['2']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price.toNumber()).toEqual(orderPlaced.price.toNumber());
+      expect(response.price.toNumber()).toEqual(orderPlaced.price?.toNumber());
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
 
       logResponse(response);
@@ -1143,7 +1126,7 @@ describe('Kujira Full Flow', () => {
         expect(order.id).toBeString();
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
-        expect(order.price).toEqual(candidate?.price.toNumber().toString());
+        expect(order.price).toEqual(candidate?.price?.toNumber().toString());
         expect(order.amount).toEqual(candidate?.amount.toNumber().toString());
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);

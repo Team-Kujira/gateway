@@ -239,7 +239,7 @@ export interface Order {
   marketId: OrderMarketId;
   ownerAddress?: OrderOwnerAddress;
   payerAddress?: OrderPayerAddress;
-  price: OrderPrice;
+  price?: OrderPrice;
   amount: OrderAmount;
   side: OrderSide;
   status?: OrderStatus;
