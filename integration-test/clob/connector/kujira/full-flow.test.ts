@@ -724,7 +724,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
       const request = {
         tokenIds: [tokenIds[1], tokenIds[2]],
