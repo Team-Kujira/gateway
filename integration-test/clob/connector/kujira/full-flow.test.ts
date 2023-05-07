@@ -801,7 +801,7 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it('Get the open order 1', async () => {
       const orderPlaced = getOrder('1');
       const marketName: MarketName = getMarketName(marketIds['1']);
