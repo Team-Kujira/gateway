@@ -46,6 +46,7 @@ import {
   PlaceOrderRequest,
   PlaceOrdersRequest,
   TokenId,
+  OrderFee,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, Denom, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -90,6 +91,8 @@ const orders: IMap<OrderClientId, Order> = IMap<
 >().asMutable();
 
 let userBalances: Balances;
+
+let lastPayedFeeSum: OrderFee | undefined;
 
 const getOrder = (clientId: OrderClientId): Order => {
   return getOrders([clientId]).first();
@@ -663,6 +666,15 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.cancelAllOrders(request);
 
+      let totalFeePayed = 0;
+      for (const item of response) {
+        const fee = getNotNullOrThrowError<any>(item[1]).fee.toNumber();
+        totalFeePayed += fee;
+      }
+      lastPayedFeeSum = BigNumber(totalFeePayed);
+
+      console.log(lastPayedFeeSum);
+
       logResponse(response);
     });
 
@@ -721,6 +733,8 @@ describe('Kujira Full Flow', () => {
       expect(response.payerAddress).toBe(candidate.payerAddress);
       expect(response.status).toBe(OrderStatus.OPEN);
 
+      lastPayedFeeSum = response.fee;
+
       logResponse(response);
     });
 
@@ -740,13 +754,20 @@ describe('Kujira Full Flow', () => {
         'lockedInOrders',
       ]);
 
-      expect(Object.entries(response.tokens.toJS())[0][1]).toContainKeys([
+      expect(Object.entries(response.tokens.toJS())[1][1]).toContainKeys([
         'free',
         'unsettled',
         'lockedInOrders',
       ]);
 
       logResponse(response);
+
+      // Verifying token 1 balance
+      expect(response.tokens.get(tokenIds[1])?.free).toEqual(
+        getNotNullOrThrowError<any>(
+          userBalances.tokens.get('ukuji')
+        ).free.minus(lastPayedFeeSum)
+      );
 
       const order = getOrder('1');
       const marketTokens = networkPairs[order.marketId].denoms;
