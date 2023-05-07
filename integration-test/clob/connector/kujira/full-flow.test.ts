@@ -748,6 +748,8 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getBalances(request);
 
+      logResponse(response);
+
       expect(Object.entries(response.tokens.toJS())[0][1]).toContainKeys([
         'free',
         'unsettled',
@@ -759,8 +761,6 @@ describe('Kujira Full Flow', () => {
         'unsettled',
         'lockedInOrders',
       ]);
-
-      logResponse(response);
 
       // Verifying token 1 balance
       expect(response.tokens.get(tokenIds[1])?.free).toEqual(
@@ -801,7 +801,6 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
-    // TODO check and fix!!! (WIP)
     it('Get the open order 1', async () => {
       const orderPlaced = getOrder('1');
       const marketName: MarketName = getMarketName(marketIds['1']);
@@ -817,6 +816,8 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getOrder(request);
 
+      logResponse(response);
+
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
       expect(response.id).toEqual(orderPlaced.id);
@@ -825,8 +826,6 @@ describe('Kujira Full Flow', () => {
       expect(response.ownerAddress).toEqual(ownerAddress);
       expect(response.price?.toNumber()).toEqual(orderPlaced.price?.toNumber());
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
-
-      logResponse(response);
     });
 
     // TODO check and fix!!!
