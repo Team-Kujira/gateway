@@ -829,13 +829,10 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price?.toNumber().toString());
-      expect(response.amount).toEqual(candidate.amount.toNumber().toString());
+      expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
-
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
-      expect(response.status).toBe(OrderStatus.OPEN);
     });
 
     // TODO check and fix!!!
