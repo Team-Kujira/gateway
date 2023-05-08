@@ -807,9 +807,9 @@ describe('Kujira Full Flow', () => {
 
       const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
 
-      const spread = 0.001;
+      const spread = 0.01;
       request.price = getNotNullOrThrowError<BigNumber>(
-        orderBookResponse.bestAsk?.price
+        orderBookResponse.bestBid?.price
       ).times(1 - spread);
 
       logRequest(request);
