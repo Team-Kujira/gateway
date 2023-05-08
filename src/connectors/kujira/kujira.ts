@@ -83,6 +83,7 @@ import {
   OrderPrice,
   OrderSide,
   OrderStatus,
+  OrderType,
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrderResponse,
@@ -1102,18 +1103,28 @@ export class Kujira {
         throw Error('Unrecognized order side.');
       }
 
+      let innerMessage;
+
+      if (candidate.type == OrderType.MARKET) {
+        innerMessage = {
+          swap: {},
+        };
+      } else if (candidate.type == OrderType.LIMIT) {
+        innerMessage = {
+          submit_order: {
+            price: BigNumber(candidate.price)
+              .precision(market.connectorMarket.precision.decimal_places)
+              .toString(),
+          },
+        };
+      } else {
+        throw new Error('Unrecognized order type.');
+      }
+
       const message = msg.wasm.msgExecuteContract({
         sender: ownerAddress, // We use the same owner address for all orders.
         contract: market.connectorMarket.address,
-        msg: Buffer.from(
-          JSON.stringify({
-            submit_order: {
-              price: BigNumber(candidate.price)
-                .precision(market.connectorMarket.precision.decimal_places)
-                .toString(),
-            },
-          })
-        ),
+        msg: Buffer.from(JSON.stringify(innerMessage)),
         funds: coins(
           BigNumber(candidate.amount)
             .multipliedBy(BigNumber(10).pow(denom.decimals))

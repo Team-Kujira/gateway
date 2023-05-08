@@ -926,7 +926,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!! (WIP)
     it('Create a market sell order 3 for market 3', async () => {
       const candidate = getOrder('3');
       const marketTokens = networkPairs[candidate.marketId].denoms;
@@ -951,7 +950,9 @@ describe('Kujira Full Flow', () => {
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price?.toNumber().toString());
-      expect(response.amount).toEqual(candidate.amount.toNumber().toString());
+      expect(response.amount.toNumber().toString()).toEqual(
+        candidate.amount.toNumber().toString()
+      );
       expect(response.side).toBe(candidate.side);
 
       expect(response.marketName).toBe(marketName);

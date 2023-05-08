@@ -17,8 +17,8 @@ import {
   IMap,
   KujiraEvent,
   KujiraOrderBook,
-  KujiraWithdraw,
   KujiraTicker,
+  KujiraWithdraw,
   Market,
   Order,
   OrderAmount,
@@ -30,12 +30,12 @@ import {
   OrderType,
   PlaceOrderRequest,
   PlaceOrdersRequest,
-  Withdraw,
   Ticker,
   Token,
   TokenId,
   Transaction,
   TransactionHashes,
+  Withdraw,
 } from './kujira.types';
 import {
   ClobBatchUpdateRequest,
@@ -650,8 +650,18 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         clientId: bundle.getIn(['candidate']).clientId,
         marketName: bundle.getIn(['market']).name,
         marketId: bundle.getIn(['market']).id,
-        ownerAddress: bundle.getIn(['events', 'transfer', 'sender']),
-        payerAddress: bundle.getIn(['events', 'transfer', 'sender']),
+        ownerAddress:
+          bundle.getIn(['candidate']).type == OrderType.MARKET
+            ? bundle.getIn(['events', 'message', 'sender'])
+            : bundle.getIn(['candidate']).type == OrderType.LIMIT
+            ? bundle.getIn(['events', 'transfer', 'sender'])
+            : undefined,
+        payerAddress:
+          bundle.getIn(['candidate']).type == OrderType.MARKET
+            ? bundle.getIn(['events', 'message', 'sender'])
+            : bundle.getIn(['candidate']).type == OrderType.LIMIT
+            ? bundle.getIn(['events', 'transfer', 'sender'])
+            : undefined,
         price: bundle.getIn(['events', 'wasm', 'quote_price']),
         amount: BigNumber(bundle.getIn(['events', 'wasm', 'offer_amount'])).div(
           BigNumber(10).pow(denom.decimals)
@@ -661,7 +671,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
           bundle.getIn(['market'])
         ),
         status: options.bundles.getIn(['common', 'status']),
-        type: OrderType.LIMIT,
+        type: bundle.getIn(['candidate']).type || OrderType.LIMIT,
         fee: convertKujiraFeeToFee(
           options.bundles.getIn(['common', 'events', 'tx', 'fee']) as string
         ),
