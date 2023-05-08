@@ -666,15 +666,6 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.cancelAllOrders(request);
 
-      let totalFeePayed = 0;
-      for (const item of response) {
-        const fee = getNotNullOrThrowError<any>(item[1]).fee.toNumber();
-        totalFeePayed += fee;
-      }
-      lastPayedFeeSum = BigNumber(totalFeePayed);
-
-      console.log(lastPayedFeeSum);
-
       logResponse(response);
     });
 

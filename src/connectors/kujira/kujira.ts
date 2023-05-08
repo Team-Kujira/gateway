@@ -1109,7 +1109,7 @@ export class Kujira {
           JSON.stringify({
             submit_order: {
               price: BigNumber(candidate.price)
-                .precision(denom.decimals)
+                .precision(market.connectorMarket.precision.decimal_places)
                 .toString(),
             },
           })
