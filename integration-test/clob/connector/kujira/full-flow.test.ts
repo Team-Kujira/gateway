@@ -156,7 +156,7 @@ beforeAll(async () => {
     marketId: marketIds[2],
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
-    price: BigNumber(999.999),
+    price: undefined,
     amount: BigNumber(1),
     side: OrderSide.SELL,
     status: undefined,
@@ -799,9 +799,24 @@ describe('Kujira Full Flow', () => {
 
       const request = { ...candidate } as PlaceOrderRequest;
 
+      const orderBookRequest = {
+        marketId: candidate.marketId,
+      } as GetOrderBookRequest;
+
+      logRequest(request);
+
+      const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
+
+      const spread = 0.001;
+      request.price = getNotNullOrThrowError<BigNumber>(
+        orderBookResponse.bestAsk?.price
+      ).times(1 - spread);
+
       logRequest(request);
 
       const response = await kujira.placeOrder(request);
+
+      logResponse(response);
 
       candidate.id = response.id;
       candidate.marketName = response.marketName;
@@ -821,8 +836,6 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
       expect(response.status).toBe(OrderStatus.OPEN);
-
-      logResponse(response);
     });
 
     // TODO check and fix!!!
