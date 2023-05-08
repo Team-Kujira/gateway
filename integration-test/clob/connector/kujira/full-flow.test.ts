@@ -789,7 +789,7 @@ describe('Kujira Full Flow', () => {
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
       const marketTokens = networkPairs[candidate.marketId].denoms;
