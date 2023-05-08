@@ -839,9 +839,9 @@ describe('Kujira Full Flow', () => {
     });
 
     // TODO check and fix!!!
-    it('Check the available wallet balances from the tokens 1 and 3', async () => {
+    it('Check the available wallet balances from the tokens 1 and 2', async () => {
       const request = {
-        tokenIds: [tokenIds[1], tokenIds[3]],
+        tokenIds: [tokenIds[1], tokenIds[2]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -909,7 +909,7 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (wip)
     it('Get the filled order 2', async () => {
       const orderPlaced = getOrder('2');
       const marketTokens = networkPairs[orderPlaced.marketId].denoms;
