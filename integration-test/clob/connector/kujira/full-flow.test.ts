@@ -561,7 +561,7 @@ describe('Kujira Full Flow', () => {
 
     create a limit buy order 1 for market 1
 
-    check the available wallet balances from the tokens 1 and 2
+    check the available wallet balances from the tokens 1 and 3
 
     get the open order 1
 
@@ -719,8 +719,11 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!! (wip)
+    // TODO check and fix!!!
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
+      const order = getOrder('1');
+      const marketTokens = networkPairs[order.marketId].denoms;
+
       const request = {
         tokenIds: [tokenIds[1], tokenIds[3]],
         ownerAddress: ownerAddress,
@@ -740,13 +743,11 @@ describe('Kujira Full Flow', () => {
       );
 
       // Verifying token 2 balance
-      // expect(response.tokens.get(tokenIds['3'])?.free).toEqual(
-      //   getNotNullOrThrowError<any>(userBalances.tokens.get(tokenIds['3'])).free
-      // );
-
-      const order = getOrder('1');
-
-      const marketTokens = networkPairs[order.marketId].denoms;
+      expect(response.tokens.get(tokenIds['3'])?.free).toEqual(
+        getNotNullOrThrowError<any>(
+          userBalances.tokens.get(tokenIds['3'])
+        ).free.minus(response.total.lockedInOrders)
+      );
 
       const currentBaseBalance = getNotNullOrThrowError<Balance>(
         response.tokens.get(marketTokens[0].reference)
