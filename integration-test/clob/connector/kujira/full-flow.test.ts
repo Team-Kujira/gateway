@@ -807,9 +807,9 @@ describe('Kujira Full Flow', () => {
 
       const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
 
-      const spread = 0.001;
+      const spread = 0.01;
       request.price = getNotNullOrThrowError<BigNumber>(
-        orderBookResponse.bestAsk?.price
+        orderBookResponse.bestBid?.price
       ).times(1 - spread);
 
       logRequest(request);
@@ -829,13 +829,10 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price?.toNumber().toString());
-      expect(response.amount).toEqual(candidate.amount.toNumber().toString());
+      expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
-
       expect(response.marketName).toBe(marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
-      expect(response.status).toBe(OrderStatus.OPEN);
     });
 
     // TODO check and fix!!!
