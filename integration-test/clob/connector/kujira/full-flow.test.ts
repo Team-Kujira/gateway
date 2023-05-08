@@ -926,7 +926,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it('Create a market sell order 3 for market 3', async () => {
       const candidate = getOrder('3');
       const marketTokens = networkPairs[candidate.marketId].denoms;
