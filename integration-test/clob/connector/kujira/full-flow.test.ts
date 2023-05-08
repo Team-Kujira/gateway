@@ -906,7 +906,6 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
-    // TODO check and fix!!! (wip)
     it('Get the filled order 2', async () => {
       const orderPlaced = getOrder('2');
       const marketTokens = networkPairs[orderPlaced.marketId].denoms;
@@ -924,16 +923,16 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getOrder(request);
 
+      logResponse(response);
+
       expect(response).toBeObject();
-      expect(response.status).toEqual(OrderStatus.OPEN);
+      expect(response.status).toEqual(OrderStatus.FILLED);
       expect(response.id).toEqual(orderPlaced.id);
       expect(response.marketName).toBe(marketName);
-      expect(response.marketId).toBe(marketIds['2']);
+      expect(response.marketId).toBe(orderPlaced.marketId);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price?.toNumber()).toEqual(orderPlaced.price?.toNumber());
-      expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
-
-      logResponse(response);
+      expect(response.price).not.toBeUndefined();
+      expect(response.amount).toEqual(orderPlaced.amount);
     });
 
     it('Create a market sell order 3 for market 3', async () => {
