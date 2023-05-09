@@ -816,7 +816,6 @@ describe('Kujira Full Flow', () => {
       expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
     });
 
-    // TODO check and fix!!! (WIP)
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
       const marketTokens = networkPairs[candidate.marketId].denoms;
@@ -833,10 +832,17 @@ describe('Kujira Full Flow', () => {
 
       const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
 
+      const precision = getNotNullOrThrowError<number>(
+        orderBookResponse.market.precision
+      );
+
       const spread = 0.01;
-      request.price = getNotNullOrThrowError<BigNumber>(
+      const price = getNotNullOrThrowError<BigNumber>(
         orderBookResponse.bestBid?.price
-      ).times(1 - spread);
+      )
+        .times(1 - spread)
+        .precision(precision);
+      request.price = price;
 
       logRequest(request);
 
@@ -855,6 +861,7 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
+      expect(response.price).toEqual(price.toString());
       expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
       expect(response.marketName).toBe(marketName);
@@ -1102,7 +1109,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (wip)
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 

@@ -65,6 +65,7 @@ export type TokenDecimals = number;
 
 export type MarketName = string;
 export type MarketId = Address;
+export type MarketPrecision = number;
 export type MarketProgramId = Address;
 export type MarketDeprecation = boolean;
 export type MarketMinimumOrderSize = BigNumber;
@@ -183,6 +184,7 @@ export interface Market {
   name: MarketName;
   baseToken: Token;
   quoteToken: Token;
+  precision: MarketPrecision;
 
   /**
    *

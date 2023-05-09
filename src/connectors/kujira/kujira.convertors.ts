@@ -482,21 +482,19 @@ export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
   const baseToken = convertKujiraTokenToToken(market.denoms[0]);
   const quoteToken = convertKujiraTokenToToken(market.denoms[1]);
 
-  const tickSize = BigNumber(
-    Math.pow(
-      10,
-      -1 *
-        ('decimal_places' in market.precision
-          ? market.precision?.decimal_places
-          : market.precision.significant_figures)
-    )
-  );
+  const decimalPlaces =
+    'decimal_places' in market.precision
+      ? market.precision?.decimal_places
+      : market.precision.significant_figures;
+
+  const tickSize = BigNumber(Math.pow(10, -1 * decimalPlaces));
 
   return {
     id: market.address,
     name: `${baseToken.symbol}/${quoteToken.symbol}`,
     baseToken: baseToken,
     quoteToken: quoteToken,
+    precision: decimalPlaces,
     minimumOrderSize: tickSize, // TODO check correct value!!!
     tickSize: tickSize, // TODO check correct value!!!
     minimumBaseIncrement: tickSize, // TODO check correct value!!!
