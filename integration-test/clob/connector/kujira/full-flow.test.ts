@@ -1436,7 +1436,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it("Check that it's not possible to get the cancelled order 1", async () => {
       const order = getOrder('1');
 
