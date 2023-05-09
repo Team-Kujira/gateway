@@ -552,6 +552,18 @@ export class Kujira {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  private async kujiraStargateClientGetBalanceStaked(
+    address: string
+  ): Promise<Coin | null> {
+    return await runWithRetryAndTimeout<Promise<Coin | null>>(
+      this.stargateClient,
+      this.stargateClient.getBalanceStaked,
+      [address]
+    );
+  }
+
   private async kujiraFinClientWithdrawOrders(
     finClient: fin.FinClient,
     {
@@ -932,6 +944,10 @@ export class Kujira {
       options.ownerAddress
     );
 
+    const orders = (await this.getOrders({
+      ownerAddress: options.ownerAddress,
+    })) as IMap<OrderId, Order>;
+
     let tickers: IMap<MarketId, Ticker>;
 
     try {
@@ -957,7 +973,7 @@ export class Kujira {
       tickers = IMap<string, Ticker>().asMutable();
     }
 
-    return convertKujiraBalancesToBalances(kujiraBalances, tickers);
+    return convertKujiraBalancesToBalances(kujiraBalances, orders, tickers);
   }
 
   /**

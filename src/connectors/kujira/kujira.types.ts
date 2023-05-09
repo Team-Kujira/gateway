@@ -80,6 +80,7 @@ export type OrderId = string;
 export type OrderClientId = string;
 export type OrderMarketName = MarketName;
 export type OrderMarketId = MarketId;
+export type OrderMarket = Market;
 export type OrderOwnerAddress = OwnerAddress;
 export type OrderPayerAddress = PayerAddress;
 export type OrderPrice = Price;
@@ -237,6 +238,7 @@ export interface Order {
   clientId?: OrderClientId; // Client custom id
   marketName: OrderMarketName;
   marketId: OrderMarketId;
+  market: OrderMarket;
   ownerAddress?: OrderOwnerAddress;
   payerAddress?: OrderPayerAddress;
   price?: OrderPrice;

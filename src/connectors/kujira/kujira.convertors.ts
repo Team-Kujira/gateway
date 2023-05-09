@@ -650,6 +650,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         clientId: bundle.getIn(['candidate']).clientId,
         marketName: bundle.getIn(['market']).name,
         marketId: bundle.getIn(['market']).id,
+        market: bundle.getIn(['market']),
         ownerAddress:
           bundle.getIn(['candidate']).type == OrderType.MARKET
             ? bundle.getIn(['events', 'message', 'sender'])
@@ -706,6 +707,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         clientId: undefined,
         marketName: market.name,
         marketId: market.id,
+        market: market,
         ownerAddress: bundle['owner'],
         payerAddress: bundle['owner'],
         price: BigNumber(bundle['quote_price']),
@@ -740,6 +742,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         clientId: undefined,
         marketName: bundle.getIn(['market']).name,
         marketId: bundle.getIn(['market']).id,
+        market: bundle.getIn(['market']),
         ownerAddress: bundle.getIn(['events', 'transfer', 'sender']),
         payerAddress: bundle.getIn(['events', 'transfer', 'sender']),
         price: undefined as unknown as OrderPrice,
@@ -786,6 +789,7 @@ export const convertKujiraTickerToTicker = (
 
 export const convertKujiraBalancesToBalances = (
   balances: readonly Coin[],
+  orders: IMap<OrderId, Order>,
   tickers: IMap<TokenId, Ticker>
 ): Balances => {
   const uskToken =
@@ -807,10 +811,16 @@ export const convertKujiraBalancesToBalances = (
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
     const ticker = tickers
       .valueSeq()
-      .filter((ticker) => ticker.market.baseToken.id == token.id)
+      .filter(
+        (ticker) =>
+          ticker.market.baseToken.id == token.id &&
+          ticker.market.quoteToken.id == uskToken.id
+      )
       .first();
-    const amount = BigNumber(balance.amount);
-    const price = token == uskToken ? 1 : ticker?.price || 0;
+    const amount = BigNumber(balance.amount).div(
+      BigNumber(10).pow(token.decimals)
+    );
+    const price = token.id == uskToken.id ? 1 : ticker?.price || 0;
     output.tokens.set(token.id, {
       token: token,
       ticker: ticker,
@@ -820,12 +830,51 @@ export const convertKujiraBalancesToBalances = (
     });
 
     output.total.free = output.total.free.plus(amount.multipliedBy(price));
-    output.total.lockedInOrders = output.total.lockedInOrders.plus(
-      amount.multipliedBy(price)
+  }
+
+  for (const order of orders.values()) {
+    const token =
+      order.side == OrderSide.BUY
+        ? order.market.quoteToken
+        : order.market.baseToken;
+
+    const ticker = tickers
+      .valueSeq()
+      .filter(
+        (ticker) =>
+          ticker.market.baseToken.id == token.id &&
+          ticker.market.quoteToken.id == uskToken.id
+      )
+      .first();
+
+    const amount = order.amount;
+    const price = token.id == uskToken.id ? 1 : ticker?.price || 0;
+
+    if (!output.tokens.has(token.id)) {
+      output.tokens.set(token.id, {
+        token: token,
+        ticker: ticker,
+        free: BigNumber(0),
+        lockedInOrders: BigNumber(0),
+        unsettled: BigNumber(0),
+      });
+    }
+
+    const tokenBalance = getNotNullOrThrowError<Balance>(
+      output.tokens.get(token.id)
     );
-    output.total.unsettled = output.total.unsettled.plus(
-      amount.multipliedBy(price)
-    );
+
+    if (order.status == OrderStatus.OPEN) {
+      tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
+      output.total.lockedInOrders = output.total.lockedInOrders.plus(
+        amount.multipliedBy(price)
+      );
+    } else if (order.status == OrderStatus.FILLED) {
+      tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
+      output.total.unsettled = output.total.unsettled.plus(
+        amount.multipliedBy(price)
+      );
+    }
   }
 
   return output;
