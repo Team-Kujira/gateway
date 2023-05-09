@@ -732,8 +732,8 @@ describe('Kujira Full Flow', () => {
       expect(response.id?.length).toBeGreaterThan(0);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price?.toString()).toEqual(candidate.price?.toString());
-      expect(response.amount.toString()).toEqual(candidate.amount.toString());
+      expect(response.price).toEqual(candidate.price);
+      expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
 
       expect(response.marketName).toBe(marketName);
@@ -861,7 +861,7 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(price.toString());
+      expect(response.price).toEqual(price);
       expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
       expect(response.marketName).toBe(marketName);
@@ -988,8 +988,8 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price?.toString());
-      expect(response.amount.toString()).toEqual(candidate.amount.toString());
+      expect(response.price).toEqual(candidate.price);
+      expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
 
       expect(response.marketName).toBe(marketName);
@@ -1091,8 +1091,8 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['3']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price?.toString()).toEqual(orderFilled.price?.toString());
-      expect(response.amount.toString()).toEqual(orderFilled.amount.toString());
+      expect(response.price).toEqual(orderFilled.price);
+      expect(response.amount).toEqual(orderFilled.amount);
 
       logResponse(response);
     });
@@ -1161,14 +1161,16 @@ describe('Kujira Full Flow', () => {
           candidateOrder.hashes = order.hashes;
         });
 
-      for (const [, order] of response) {
-        const clientId = getNotNullOrThrowError<Order>(order.clientId);
-        const candidate = candidates.get(clientId.toString());
-
-        expect(order.id).toBeString();
+      for (const [orderId, order] of (
+        response as IMap<OrderId, Order>
+      ).entries()) {
+        expect(order.id).toBeTruthy();
+        expect(orderId).toBe(order.id);
+        const candidate = orders.get(orderId);
+        expect(order.id).toBe(candidate?.id);
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
-        expect(order.price).toEqual(candidate?.price?.toString());
+        expect(order.price).toEqual(candidate?.price);
         expect(order.amount).toEqual(candidate?.amount);
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);
@@ -1276,19 +1278,19 @@ describe('Kujira Full Flow', () => {
       for (const [orderId, order] of (
         response as IMap<OrderId, Order>
       ).entries()) {
-        expect(order.id).toBeDefined();
+        expect(order.id).toBeTruthy();
         expect(orderId).toBe(order.id);
-        const placedOrder = orders.get(orderId);
-        expect(order.id).toBeString();
-        expect(order.marketId).toBe(placedOrder?.marketId);
-        expect(order.ownerAddress).toBe(placedOrder?.ownerAddress);
-        expect(order.price).toEqual(placedOrder?.price);
-        expect(order.amount).toEqual(placedOrder?.amount);
-        expect(order.side).toBe(placedOrder?.side);
-        expect(order.payerAddress).toBe(placedOrder?.payerAddress);
+        const candidate = orders.get(orderId);
+        expect(order.id).toBe(candidate?.id);
+        expect(order.marketId).toBe(candidate?.marketId);
+        expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+        expect(order.price).toEqual(candidate?.price);
+        expect(order.amount).toEqual(candidate?.amount);
+        expect(order.side).toBe(candidate?.side);
+        expect(order.payerAddress).toBe(candidate?.payerAddress);
         expect(order.status).toBe(OrderStatus.OPEN);
         expect(order.hashes).toBeObject();
-        expect(order.type).toBe(placedOrder?.type);
+        expect(order.type).toBe(candidate?.type);
       }
     });
 
