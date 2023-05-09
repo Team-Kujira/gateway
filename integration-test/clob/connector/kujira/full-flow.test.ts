@@ -812,8 +812,8 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['1']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price?.toNumber()).toEqual(orderPlaced.price?.toNumber());
-      expect(response.amount.toNumber()).toEqual(orderPlaced.amount.toNumber());
+      expect(response.price).toEqual(orderPlaced.price);
+      expect(response.amount).toEqual(orderPlaced.amount);
     });
 
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
@@ -927,14 +927,11 @@ describe('Kujira Full Flow', () => {
       const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
       const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
 
-      expect(
-        oldBaseBalance.free.toNumber() -
-          (orderFee.toNumber() + orderAmount.toNumber())
-      ).toEqual(newBaseBalance.free?.toNumber());
-
-      expect(oldQuoteBalance.free.toNumber()).toEqual(
-        newQuoteBalance.free.toNumber()
+      expect(oldBaseBalance.free.minus(orderFee.plus(orderAmount))).toEqual(
+        newBaseBalance.free
       );
+
+      expect(oldQuoteBalance.free).toEqual(newQuoteBalance.free);
       userBalances.tokens.set(marketTokens[0].reference, newBaseBalance);
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
@@ -991,10 +988,8 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price?.toNumber().toString());
-      expect(response.amount.toNumber().toString()).toEqual(
-        candidate.amount.toNumber().toString()
-      );
+      expect(response.price).toEqual(candidate.price?.toString());
+      expect(response.amount.toString()).toEqual(candidate.amount.toString());
       expect(response.side).toBe(candidate.side);
 
       expect(response.marketName).toBe(marketName);
@@ -1063,14 +1058,11 @@ describe('Kujira Full Flow', () => {
       const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
       const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
 
-      expect(
-        oldBaseBalance.free.toNumber() -
-          (orderFee.toNumber() + orderAmount.toNumber())
-      ).toEqual(newBaseBalance.free?.toNumber());
-
-      expect(oldQuoteBalance.free.toNumber()).toEqual(
-        newQuoteBalance.free.toNumber()
+      expect(oldBaseBalance.free.minus(orderFee.plus(orderAmount))).toEqual(
+        newBaseBalance.free
       );
+
+      expect(oldQuoteBalance.free).toEqual(newQuoteBalance.free);
       userBalances.tokens.set(marketTokens[0].reference, newBaseBalance);
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
@@ -1099,12 +1091,8 @@ describe('Kujira Full Flow', () => {
       expect(response.marketName).toBe(marketName);
       expect(response.marketId).toBe(marketIds['3']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price?.toNumber().toString()).toEqual(
-        orderFilled.price?.toNumber().toString()
-      );
-      expect(response.amount.toNumber().toString()).toEqual(
-        orderFilled.amount.toNumber().toString()
-      );
+      expect(response.price?.toString()).toEqual(orderFilled.price?.toString());
+      expect(response.amount.toString()).toEqual(orderFilled.amount.toString());
 
       logResponse(response);
     });
@@ -1264,45 +1252,44 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!! (WIP)
     it('Get the open orders 8 and 9', async () => {
-      const ordersPlaced = getOrders(['8', '9']);
-      const ids = ordersPlaced
+      const orders = getOrders(['8', '9']);
+      const ids = orders
         .map((order) => order.id)
         .valueSeq()
         .toArray();
 
-      const numOfOrders = Object.entries(ordersPlaced.toArray()).length;
-
-      console.log(numOfOrders);
-
       const request = {
         ids,
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
       logRequest(request);
 
       const response = await kujira.getOrders(request);
-      // const responseArray = response.toArray();
-      // console.log(responseArray);
-
-      // for (let i = 0; i < numOfOrders; i++) {
-      //   expect(responseArray[i][1].toArray()[i][1].status).toEqual(
-      //     OrderStatus.OPEN
-      //   );
-      //   // expect(responseArray[i].id).toEqual(ordersPlaced.toArray()[i].id);
-      //   // expect(order.marketName).toBe(marketName);
-      //   // expect(responseArray[i].marketId).toBe(marketIds['2']);
-      //   expect(responseArray[i][1].toArray().ownerAddress).toEqual(
-      //     ownerAddress
-      //   );
-      //   // expect(responseArray[i].price.toNumber()).toEqual(ordersPlaced.toArray()[i].price.toNumber());
-      //   // expect(responseArray[i].amount.toNumber()).toEqual(ordersPlaced.toArray()[i].amount.toNumber());
-      // }
 
       logResponse(response);
+
+      expect(response.size).toBe(orders.size);
+
+      for (const [orderId, order] of (
+        response as IMap<OrderId, Order>
+      ).entries()) {
+        expect(order.id).toBeDefined();
+        expect(orderId).toBe(order.id);
+        const placedOrder = orders.get(orderId);
+        expect(order.id).toBeString();
+        expect(order.marketId).toBe(placedOrder?.marketId);
+        expect(order.ownerAddress).toBe(placedOrder?.ownerAddress);
+        expect(order.price).toEqual(placedOrder?.price);
+        expect(order.amount).toEqual(placedOrder?.amount);
+        expect(order.side).toBe(placedOrder?.side);
+        expect(order.payerAddress).toBe(placedOrder?.payerAddress);
+        expect(order.status).toBe(OrderStatus.OPEN);
+        expect(order.hashes).toBeObject();
+        expect(order.type).toBe(placedOrder?.type);
+      }
     });
 
     // TODO check and fix!!! (WIP, not tested yet, waiting for the corrections of the previous tests)
