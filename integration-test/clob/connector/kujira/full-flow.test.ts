@@ -1091,7 +1091,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (wip)
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
