@@ -307,7 +307,7 @@ beforeAll(async () => {
     amount: BigNumber(1),
     side: OrderSide.BUY,
     status: undefined,
-    type: OrderType.LIMIT,
+    type: OrderType.MARKET,
     fee: undefined,
     fillingTimestamp: undefined,
     hashes: undefined,
@@ -325,7 +325,7 @@ beforeAll(async () => {
     amount: BigNumber(1),
     side: OrderSide.SELL,
     status: undefined,
-    type: OrderType.LIMIT,
+    type: OrderType.MARKET,
     fee: undefined,
     fillingTimestamp: undefined,
     hashes: undefined,
@@ -1119,6 +1119,38 @@ describe('Kujira Full Flow', () => {
           .map((candidate) => ({ ...candidate }))
           .toArray(),
       } as PlaceOrdersRequest;
+
+      const orderBookRequest = {
+        marketIds: [
+          candidates.valueSeq().toArray()[2].marketId,
+          candidates.valueSeq().toArray()[3].marketId,
+        ],
+      } as GetOrderBooksRequest;
+
+      const orderBookResponse = await kujira.getOrderBooks(orderBookRequest);
+
+      const precision: any[] = [];
+      for (const item of orderBookResponse.valueSeq().toArray()) {
+        precision.push(item.market.precision);
+      }
+
+      const spread = 0.02;
+
+      request.orders[2].price = BigNumber(
+        getNotNullOrThrowError<BigNumber>(
+          orderBookResponse.valueSeq().toArray()[0].bestAsk?.price
+        )
+          .times(1 - spread)
+          .precision(precision[0])
+      );
+
+      request.orders[3].price = BigNumber(
+        getNotNullOrThrowError<BigNumber>(
+          orderBookResponse.valueSeq().toArray()[1].bestBid?.price
+        )
+          .times(1 - spread)
+          .precision(precision[1])
+      );
 
       logRequest(request);
 
