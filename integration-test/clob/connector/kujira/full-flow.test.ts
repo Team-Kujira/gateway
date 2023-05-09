@@ -658,6 +658,18 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
+    it('Settle funds for all markets', async () => {
+      const request = {
+        ownerAddresses: [ownerAddress],
+      } as AllMarketsWithdrawsRequest;
+
+      logRequest(request);
+
+      const response = await kujira.settleAllMarketsFunds(request);
+
+      logResponse(response);
+    });
+
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       const request = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
