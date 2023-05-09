@@ -821,9 +821,13 @@ describe('Kujira Full Flow', () => {
       const precision = getNotNullOrThrowError<number>(
         orderBookResponse.market.precision
       );
+
+      const spread = 0.01;
       const price = getNotNullOrThrowError<BigNumber>(
         orderBookResponse.bestBid?.price
-      ).precision(precision);
+      )
+        .times(1 - spread)
+        .precision(precision);
       request.price = price;
 
       logRequest(request);
