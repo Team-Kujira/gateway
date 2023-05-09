@@ -1311,8 +1311,7 @@ describe('Kujira Full Flow', () => {
       const ordersMarketIds = getOrders(['2', '3', '6', '7', '10', '11'])
         .valueSeq()
         .toArray()
-        .map((order) => order.id)
-        .filter((marketId) => marketId); // remove undefined elements
+        .map((order) => order.id);
 
       const request = {
         ownerAddresses: [ownerAddress],
@@ -1328,8 +1327,7 @@ describe('Kujira Full Flow', () => {
       const responseMarketIds = response
         .valueSeq()
         .toArray()
-        .map((obj) => ('id' in obj ? obj?.id : undefined))
-        .filter((id) => id);
+        .map((obj) => ('id' in obj ? obj?.id : undefined));
       ordersMarketIds.forEach((marketId) =>
         expect(expect(responseMarketIds.includes(marketId)).toBeFalse())
       );
