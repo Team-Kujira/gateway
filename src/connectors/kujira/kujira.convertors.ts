@@ -661,7 +661,7 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
             : bundle.getIn(['candidate']).type == OrderType.LIMIT
             ? bundle.getIn(['events', 'transfer', 'sender'])
             : undefined,
-        price: bundle.getIn(['events', 'wasm', 'quote_price']),
+        price: BigNumber(bundle.getIn(['events', 'wasm', 'quote_price'])),
         amount: BigNumber(bundle.getIn(['events', 'wasm', 'offer_amount'])).div(
           BigNumber(10).pow(denom.decimals)
         ),
