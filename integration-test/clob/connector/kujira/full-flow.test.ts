@@ -1233,7 +1233,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP)
     it('Get the open orders 8 and 9', async () => {
       const ordersPlaced = getOrders(['8', '9']);
       const ids = ordersPlaced
