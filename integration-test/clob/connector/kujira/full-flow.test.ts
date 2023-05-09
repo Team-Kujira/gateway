@@ -662,7 +662,7 @@ describe('Kujira Full Flow', () => {
 
     it('Cancel all open orders', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
 
       logRequest(request);
@@ -674,7 +674,7 @@ describe('Kujira Full Flow', () => {
 
     it('Settle funds for all markets', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
 
       logRequest(request);
@@ -1300,7 +1300,7 @@ describe('Kujira Full Flow', () => {
         .map((order) => order.id);
 
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
@@ -1457,7 +1457,7 @@ describe('Kujira Full Flow', () => {
       const order = getOrder('1');
 
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
@@ -1479,7 +1479,7 @@ describe('Kujira Full Flow', () => {
       const request = {
         ids: [orders[0].id, orders[1].id],
         marketId: orders[0].marketId,
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as CancelOrdersRequest;
 
       logRequest(request);
@@ -1627,7 +1627,7 @@ describe('Kujira Full Flow', () => {
 
       const request = {
         ids,
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
@@ -1651,7 +1651,7 @@ describe('Kujira Full Flow', () => {
         .toArray();
 
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
@@ -1673,7 +1673,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.FILLED,
       } as GetOrdersRequest;
 
@@ -1687,7 +1687,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as GetOrdersRequest;
 
       logRequest(request);
@@ -1700,7 +1700,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Cancel all open orders', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
 
       logRequest(request);
@@ -1727,7 +1727,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
@@ -1741,7 +1741,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as GetOrdersRequest;
 
       logRequest(request);
@@ -1780,7 +1780,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Get all open orders and check that the orders 12 and 13 are present', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
@@ -1794,7 +1794,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as GetOrdersRequest;
 
       logRequest(request);
@@ -1807,7 +1807,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Cancel all open orders', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
 
       logRequest(request);
@@ -1834,7 +1834,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
@@ -1849,7 +1849,7 @@ describe('Kujira Full Flow', () => {
     it('Settle funds for market 1', async () => {
       const request = {
         marketId: marketIds[1],
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as MarketWithdrawRequest;
 
       logRequest(request);
@@ -1876,7 +1876,7 @@ describe('Kujira Full Flow', () => {
     it('Settle funds for markets 2 and 3', async () => {
       const request = {
         marketIds: [marketIds[2], marketIds[3]],
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as MarketsWithdrawsRequest;
 
       logRequest(request);
@@ -1902,7 +1902,7 @@ describe('Kujira Full Flow', () => {
     // TODO check and fix!!!
     it('Settle funds for all markets', async () => {
       const request = {
-        ownerAddresses: [ownerAddress],
+        ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
 
       logRequest(request);
