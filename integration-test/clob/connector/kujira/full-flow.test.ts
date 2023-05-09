@@ -841,7 +841,7 @@ describe('Kujira Full Flow', () => {
         orderBookResponse.bestBid?.price
       )
         .times(1 - spread)
-        .precision(precision);
+        .decimalPlaces(precision);
       request.price = price;
 
       logRequest(request);
@@ -1129,7 +1129,7 @@ describe('Kujira Full Flow', () => {
           orderBookResponse.valueSeq().toArray()[0].bestAsk?.price
         )
           .times(1 - spread)
-          .precision(precision[0])
+          .decimalPlaces(precision[0])
       );
 
       request.orders[3].price = BigNumber(
@@ -1137,7 +1137,7 @@ describe('Kujira Full Flow', () => {
           orderBookResponse.valueSeq().toArray()[1].bestBid?.price
         )
           .times(1 - spread)
-          .precision(precision[1])
+          .decimalPlaces(precision[1])
       );
 
       logRequest(request);

@@ -1129,7 +1129,7 @@ export class Kujira {
         innerMessage = {
           submit_order: {
             price: BigNumber(candidate.price)
-              .precision(market.connectorMarket.precision.decimal_places)
+              .decimalPlaces(market.connectorMarket.precision.decimal_places)
               .toString(),
           },
         };
