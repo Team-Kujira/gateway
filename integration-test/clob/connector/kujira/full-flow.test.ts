@@ -1101,13 +1101,6 @@ describe('Kujira Full Flow', () => {
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
-      const request = {
-        orders: candidates
-          .valueSeq()
-          .map((candidate) => ({ ...candidate }))
-          .toArray(),
-      } as PlaceOrdersRequest;
-
       const orderBookRequest = {
         marketIds: [
           candidates.valueSeq().toArray()[2].marketId,
@@ -1124,7 +1117,7 @@ describe('Kujira Full Flow', () => {
 
       const spread = 0.02;
 
-      request.orders[2].price = BigNumber(
+      getNotNullOrThrowError<Order>(candidates.get('6')).price = BigNumber(
         getNotNullOrThrowError<BigNumber>(
           orderBookResponse.valueSeq().toArray()[0].bestAsk?.price
         )
@@ -1132,7 +1125,7 @@ describe('Kujira Full Flow', () => {
           .decimalPlaces(precision[0])
       );
 
-      request.orders[3].price = BigNumber(
+      getNotNullOrThrowError<Order>(candidates.get('7')).price = BigNumber(
         getNotNullOrThrowError<BigNumber>(
           orderBookResponse.valueSeq().toArray()[1].bestBid?.price
         )
@@ -1140,9 +1133,18 @@ describe('Kujira Full Flow', () => {
           .decimalPlaces(precision[1])
       );
 
+      const request = {
+        orders: candidates
+          .valueSeq()
+          .map((candidate) => ({ ...candidate }))
+          .toArray(),
+      } as PlaceOrdersRequest;
+
       logRequest(request);
 
       const response = await kujira.placeOrders(request);
+
+      logResponse(response);
 
       response
         .valueSeq()
@@ -1166,7 +1168,9 @@ describe('Kujira Full Flow', () => {
       ).entries()) {
         expect(order.id).toBeTruthy();
         expect(orderId).toBe(order.id);
-        const candidate = orders.get(orderId);
+        const candidate = orders.get(
+          getNotNullOrThrowError<OrderClientId>(order.clientId)
+        );
         expect(order.id).toBe(candidate?.id);
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
@@ -1177,8 +1181,6 @@ describe('Kujira Full Flow', () => {
         expect(order.status).toBe(OrderStatus.OPEN);
         expect(order.hashes).toContainKey('creation');
       }
-
-      logResponse(response);
     });
 
     // TODO check and fix!!!

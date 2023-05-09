@@ -661,10 +661,14 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
             : bundle.getIn(['candidate']).type == OrderType.LIMIT
             ? bundle.getIn(['events', 'transfer', 'sender'])
             : undefined,
-        price: BigNumber(bundle.getIn(['events', 'wasm', 'quote_price'])),
-        amount: BigNumber(bundle.getIn(['events', 'wasm', 'offer_amount'])).div(
-          BigNumber(10).pow(denom.decimals)
-        ),
+        price: bundle.getIn(['events', 'wasm', 'quote_price'])
+          ? BigNumber(bundle.getIn(['events', 'wasm', 'quote_price']))
+          : undefined,
+        amount: bundle.getIn(['events', 'wasm', 'offer_amount'])
+          ? BigNumber(bundle.getIn(['events', 'wasm', 'offer_amount'])).div(
+              BigNumber(10).pow(denom.decimals)
+            )
+          : undefined,
         side: convertOfferDenomToOrderSide(
           bundle.getIn(['events', 'wasm', 'offer_denom']),
           bundle.getIn(['market'])
@@ -708,10 +712,14 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         market: market,
         ownerAddress: bundle['owner'],
         payerAddress: bundle['owner'],
-        price: BigNumber(bundle['quote_price']),
-        amount: BigNumber(bundle['original_offer_amount']).div(
-          BigNumber(10).pow(denom.decimals)
-        ),
+        price: bundle['quote_price']
+          ? BigNumber(bundle['quote_price'])
+          : undefined,
+        amount: bundle['original_offer_amount']
+          ? BigNumber(bundle['original_offer_amount']).div(
+              BigNumber(10).pow(denom.decimals)
+            )
+          : undefined,
         side: convertOfferDenomToOrderSide(
           bundle['offer_denom']['native'],
           market
