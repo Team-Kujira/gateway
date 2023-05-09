@@ -1306,8 +1306,14 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!!
+    // TODO check and fix!!! (WIP, not tested yet, waiting for the corrections of the previous tests)
     it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
+      const ordersMarketIds = getOrders(['2', '3', '6', '7', '10', '11'])
+        .valueSeq()
+        .toArray()
+        .map((order) => order.id)
+        .filter((marketId) => marketId); // remove undefined elements
+
       const request = {
         ownerAddresses: [ownerAddress],
         status: OrderStatus.OPEN,
@@ -1318,6 +1324,15 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      const responseMarketIds = response
+        .valueSeq()
+        .toArray()
+        .map((obj) => ('id' in obj ? obj?.id : undefined))
+        .filter((id) => id);
+      ordersMarketIds.forEach((marketId) =>
+        expect(expect(responseMarketIds.includes(marketId)).toBeFalse())
+      );
     });
 
     // TODO check and fix!!!
