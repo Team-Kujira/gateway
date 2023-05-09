@@ -1332,7 +1332,6 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    // TODO check and fix!!!
     it('Cancel the order 1', async () => {
       const order = getOrder('1');
 
@@ -1346,6 +1345,8 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.cancelOrder(request);
 
+      logResponse(response);
+
       expect(response).not.toBeEmpty();
       expect(response.id).toEqual(order.id);
       expect(response.marketId).toBe(order.marketId);
@@ -1354,9 +1355,8 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.cancellation?.length).toBeGreaterThan(0);
 
       order.fee = response.fee;
-      // TODO Assign the cancellation hash to the order !!!
-
-      logResponse(response);
+      order.hashes = response.hashes;
+      order.status = OrderStatus.CANCELLED;
     });
 
     // TODO check and fix!!!
