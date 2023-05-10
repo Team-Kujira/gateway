@@ -475,7 +475,13 @@ describe('Kujira Full Flow', () => {
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
       ]);
-      expect(response.precision).toEqual(networkPair.precision);
+      expect(response.precision).toEqual(
+        'decimal_places' in networkPair.precision
+          ? networkPair.precision.decimal_places
+          : 'significant_figures' in networkPair.precision
+          ? networkPair.precision.significant_figures
+          : undefined
+      );
     });
 
     it('Get markets 2 and 3', async () => {
@@ -499,11 +505,21 @@ describe('Kujira Full Flow', () => {
           response.get(marketId)
         );
 
-        expect(responseToken.id).toEqual(marketIds[1]);
-        expect([responseToken.baseToken, responseToken.quoteToken]).toEqual(
-          networkPair.denoms
+        expect(responseToken.id).toEqual(marketId);
+        expect([
+          responseToken.baseToken.id,
+          responseToken.quoteToken.id,
+        ]).toEqual([
+          networkPair.denoms[0].reference,
+          networkPair.denoms[1].reference,
+        ]);
+        expect(responseToken.precision).toEqual(
+          'decimal_places' in networkPair.precision
+            ? networkPair.precision.decimal_places
+            : 'significant_figures' in networkPair.precision
+            ? networkPair.precision.significant_figures
+            : undefined
         );
-        expect(responseToken.precision).toEqual(networkPair.precision);
       });
     });
 
@@ -523,11 +539,21 @@ describe('Kujira Full Flow', () => {
           response.get(marketId)
         );
 
-        expect(responseToken.id).toEqual(marketIds[1]);
-        expect([responseToken.baseToken, responseToken.quoteToken]).toEqual(
-          networkPair.denoms
+        expect(responseToken.id).toEqual(marketId);
+        expect([
+          responseToken.baseToken.id,
+          responseToken.quoteToken.id,
+        ]).toEqual([
+          networkPair.denoms[0].reference,
+          networkPair.denoms[1].reference,
+        ]);
+        expect(responseToken.precision).toEqual(
+          'decimal_places' in networkPair.precision
+            ? networkPair.precision.decimal_places
+            : 'significant_figures' in networkPair.precision
+            ? networkPair.precision.significant_figures
+            : undefined
         );
-        expect(responseToken.precision).toEqual(networkPair.precision);
       });
     });
   });
