@@ -1539,27 +1539,75 @@ describe('Kujira Full Flow', () => {
       const currentBalances = lodash.cloneDeep(response);
 
       for (const order of targetOrders.values()) {
-        let balance: Balance;
+        const baseBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.baseToken.id)
+        );
 
-        if (order.side == OrderSide.BUY) {
-          balance = getNotNullOrThrowError<Balance>(
-            currentBalances.tokens.get(order.market.quoteToken.id)
-          );
-        } else if (order.side == OrderSide.SELL) {
-          balance = getNotNullOrThrowError<Balance>(
-            currentBalances.tokens.get(order.market.baseToken.id)
-          );
-        } else {
-          throw new Error('Invalid order side');
-        }
-
-        balance.free = balance.free.minus(order.amount);
+        const quoteBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.quoteToken.id)
+        );
 
         if (order.type == OrderType.LIMIT) {
           if (order.status == OrderStatus.OPEN) {
-            balance.lockedInOrders = balance.lockedInOrders.minus(order.amount);
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.plus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.plus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
           } else if (order.status == OrderStatus.FILLED) {
-            balance.unsettled = balance.unsettled.minus(order.amount);
+            if (order.side == OrderSide.BUY) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              baseBalance.unsettled = baseBalance.unsettled.minus(order.amount);
+            } else if (order.side == OrderSide.SELL) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              quoteBalance.unsettled = quoteBalance.unsettled.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.CANCELLED) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          }
+        } else if (order.type == OrderType.MARKET) {
+          if (order.side == OrderSide.BUY) {
+            baseBalance.free = baseBalance.free.minus(order.amount);
+            quoteBalance.free = quoteBalance.free.plus(order.amount);
+          } else if (order.side == OrderSide.SELL) {
+            baseBalance.free = baseBalance.free.plus(order.amount);
+            quoteBalance.free = quoteBalance.free.minus(order.amount);
+          } else {
+            throw new Error('Invalid order side');
           }
         }
       }
