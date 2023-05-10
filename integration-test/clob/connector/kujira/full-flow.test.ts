@@ -1434,24 +1434,22 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO Fix!!! (WIP)
     it("Check that it's not possible to get the cancelled order 1", async () => {
-      const order = getOrder('1');
+      const target = getOrder('1');
 
       const request = {
-        id: order.id,
-        ownerAddress: order.ownerAddress,
-        marketId: order.marketId,
+        id: target.id,
+        ownerAddress: target.ownerAddress,
+        marketId: target.marketId,
       } as GetOrderRequest;
 
       logRequest(request);
 
       const response = await kujira.getOrder(request);
 
-      expect(response).not.toBeObject();
-      expect(response).toBeUndefined();
-
       logResponse(response);
+
+      expect(response.hashes).toBeUndefined();
     });
 
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
@@ -1710,8 +1708,14 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    // // TODO Fix!!!
     it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
+      const targets = getOrders(['2', '6', '7']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
       const request = {
         ownerAddress: ownerAddress,
         status: OrderStatus.FILLED,
@@ -1722,6 +1726,15 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeTrue()
+      );
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
