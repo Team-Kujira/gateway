@@ -1908,10 +1908,10 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Create orders 12 and 13 at once', async () => {
-      const targets = getOrders(['12', '13']);
+      const candidates = getOrders(['12', '13']);
 
       const request = {
-        orders: targets
+        orders: candidates
           .valueSeq()
           .map((target) => ({ ...target }))
           .toArray(),
@@ -1921,37 +1921,46 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.placeOrders(request);
 
-      response.valueSeq().map((order: Order) => {
-        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
-        const targetOrder = getNotNullOrThrowError<Order>(
-          targets.get(clientId)
-        );
-        targetOrder.id = order.id;
-      });
-
       logResponse(response);
 
-      expect(response.size).toBe(targets.size);
+      response
+        .valueSeq()
+        .toArray()
+        .map((order: Order) => {
+          const clientId = getNotNullOrThrowError<OrderClientId>(
+            order.clientId
+          );
+          const candidate = getNotNullOrThrowError<Order>(
+            candidates.get(clientId)
+          );
+          candidate.id = order.id;
+          candidate.marketName = order.marketName;
+          candidate.market = order.market;
+          candidate.status = order.status;
+          candidate.fee = order.fee;
+          candidate.hashes = order.hashes;
+        });
 
-      for (const [targetId, target] of (
+      expect(response.size).toBe(candidates.size);
+
+      for (const [orderId, order] of (
         response as IMap<OrderId, Order>
       ).entries()) {
-        const clientId = getNotNullOrThrowError<OrderClientId>(target.clientId);
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
         const candidate = orders.get(clientId);
 
-        expect(target).toBeObject();
-        expect(targetId).toBe(target.id);
-        expect(target.id?.length).toBeGreaterThan(0);
-        expect(target.id).toBe(candidate?.id);
-        expect(target.marketId).toBe(candidate?.marketId);
-        expect(target.ownerAddress).toBe(candidate?.ownerAddress);
-        expect(target.price).toEqual(candidate?.price);
-        expect(target.amount).toEqual(candidate?.amount);
-        expect(target.side).toBe(candidate?.side);
-        expect(target.payerAddress).toBe(candidate?.payerAddress);
-        expect(target.status).toBe(OrderStatus.OPEN);
-        expect(target.hashes).toBeObject();
-        expect(target.type).toBe(candidate?.type);
+        expect(order).toBeObject();
+        expect(orderId).toBe(order.id);
+        expect(order.id?.length).toBeGreaterThan(0);
+        expect(order.id).toBe(candidate?.id);
+        expect(order.marketId).toBe(candidate?.marketId);
+        expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+        expect(order.price).toEqual(candidate?.price);
+        expect(order.amount).toEqual(candidate?.amount);
+        expect(order.side).toBe(candidate?.side);
+        expect(order.payerAddress).toBe(candidate?.payerAddress);
+        expect(order.status).toBe(OrderStatus.OPEN);
+        expect(order.hashes?.creation?.length).toBeCloseTo(64);
       }
     });
 
