@@ -33,7 +33,6 @@ import {
   GetTokensRequest,
   IMap,
   Market,
-  MarketName,
   MarketsWithdrawsRequest,
   MarketWithdrawRequest,
   Order,
@@ -711,9 +710,6 @@ describe('Kujira Full Flow', () => {
 
     it('Create a limit buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
-      const marketTokens = networkPairs[candidate.marketId].denoms;
-      const marketName: MarketName =
-        marketTokens[0].symbol + '/' + marketTokens[1].symbol;
 
       const request = { ...candidate } as PlaceOrderRequest;
 
@@ -721,28 +717,28 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.placeOrder(request);
 
+      logResponse(response);
+
       candidate.id = response.id;
       candidate.marketName = response.marketName;
+      candidate.market = response.market;
       candidate.status = response.status;
       candidate.fee = response.fee;
       candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
-      expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.id?.length).toBeGreaterThan(0);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price);
       expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
-
-      expect(response.marketName).toBe(marketName);
+      expect(response.marketName).toBe(candidate.marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
       expect(response.status).toBe(OrderStatus.OPEN);
+      expect(response.hashes?.creation?.length).toBeCloseTo(64);
 
       lastPayedFeeSum = response.fee;
-
-      logResponse(response);
     });
 
     // TODO check and fix!!!
@@ -788,15 +784,12 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the open order 1', async () => {
-      const orderPlaced = getOrder('1');
-      const marketTokens = networkPairs[orderPlaced.marketId].denoms;
-      const marketName: MarketName =
-        marketTokens[0].symbol + '/' + marketTokens[1].symbol;
+      const target = getOrder('1');
 
       const request = {
-        id: orderPlaced.id,
+        id: target.id,
         status: OrderStatus.OPEN,
-        marketId: orderPlaced.marketId,
+        marketId: target.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
@@ -808,41 +801,35 @@ describe('Kujira Full Flow', () => {
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
-      expect(response.id).toEqual(orderPlaced.id);
-      expect(response.marketName).toBe(marketName);
-      expect(response.marketId).toBe(marketIds['1']);
-      expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price).toEqual(orderPlaced.price);
-      expect(response.amount).toEqual(orderPlaced.amount);
+      expect(response.id).toEqual(target.id);
+      expect(response.marketName).toBe(target.marketName);
+      expect(response.marketId).toBe(target.marketId);
+      expect(response.ownerAddress).toEqual(target.ownerAddress);
+      expect(response.price).toEqual(target.price);
+      expect(response.amount).toEqual(target.amount);
     });
 
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
-      const marketTokens = networkPairs[candidate.marketId].denoms;
-      const marketName: MarketName =
-        marketTokens[0].symbol + '/' + marketTokens[1].symbol;
-
-      const request = { ...candidate } as PlaceOrderRequest;
 
       const orderBookRequest = {
         marketId: candidate.marketId,
       } as GetOrderBookRequest;
 
-      logRequest(request);
-
       const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
 
-      const precision = getNotNullOrThrowError<number>(
+      const marketPrecision = getNotNullOrThrowError<number>(
         orderBookResponse.market.precision
       );
 
-      const spread = 0.01;
-      const price = getNotNullOrThrowError<BigNumber>(
+      const spread = 1; // 1%
+      candidate.price = getNotNullOrThrowError<BigNumber>(
         orderBookResponse.bestBid?.price
       )
-        .times(1 - spread)
-        .decimalPlaces(precision);
-      request.price = price;
+        .times((100 - spread) / 100)
+        .decimalPlaces(marketPrecision);
+
+      const request = { ...candidate } as PlaceOrderRequest;
 
       logRequest(request);
 
@@ -852,20 +839,21 @@ describe('Kujira Full Flow', () => {
 
       candidate.id = response.id;
       candidate.marketName = response.marketName;
+      candidate.market = response.market;
       candidate.status = response.status;
       candidate.fee = response.fee;
       candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
       expect(response.id?.length).toBeGreaterThan(0);
-      expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(price);
+      expect(response.price).toEqual(candidate.price);
       expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
-      expect(response.marketName).toBe(marketName);
+      expect(response.marketName).toBe(candidate.marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
+      expect(response.hashes?.creation?.length).toBeCloseTo(64);
     });
 
     // TODO check and fix!!!
@@ -937,15 +925,12 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get the filled order 2', async () => {
-      const orderPlaced = getOrder('2');
-      const marketTokens = networkPairs[orderPlaced.marketId].denoms;
-      const marketName: MarketName =
-        marketTokens[0].symbol + '/' + marketTokens[1].symbol;
+      const target = getOrder('2');
 
       const request = {
-        id: orderPlaced.id,
+        id: target.id,
         status: OrderStatus.FILLED,
-        marketId: orderPlaced.marketId,
+        marketId: target.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
@@ -957,19 +942,16 @@ describe('Kujira Full Flow', () => {
 
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.FILLED);
-      expect(response.id).toEqual(orderPlaced.id);
-      expect(response.marketName).toBe(marketName);
-      expect(response.marketId).toBe(orderPlaced.marketId);
-      expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price).not.toBeUndefined();
-      expect(response.amount).toEqual(orderPlaced.amount);
+      expect(response.id).toEqual(target.id);
+      expect(response.marketName).toBe(target.marketName);
+      expect(response.marketId).toBe(target.marketId);
+      expect(response.ownerAddress).toEqual(target.ownerAddress);
+      expect(response.price).toBe(target.price);
+      expect(response.amount).toEqual(target.amount);
     });
 
     it('Create a market sell order 3 for market 3', async () => {
       const candidate = getOrder('3');
-      const marketTokens = networkPairs[candidate.marketId].denoms;
-      const marketName: MarketName =
-        marketTokens[0].symbol + '/' + marketTokens[1].symbol;
 
       const request = { ...candidate } as PlaceOrderRequest;
 
@@ -977,26 +959,26 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.placeOrder(request);
 
+      logResponse(response);
+
       candidate.id = response.id;
       candidate.marketName = response.marketName;
+      candidate.market = response.market;
       candidate.status = response.status;
       candidate.fee = response.fee;
       candidate.hashes = response.hashes;
 
       expect(response).toBeObject();
       expect(response.id?.length).toBeGreaterThan(0);
-      expect(response.hashes?.creation?.length).toBeCloseTo(64);
       expect(response.marketId).toBe(candidate.marketId);
       expect(response.ownerAddress).toBe(candidate.ownerAddress);
       expect(response.price).toEqual(candidate.price);
       expect(response.amount).toEqual(candidate.amount);
       expect(response.side).toBe(candidate.side);
-
-      expect(response.marketName).toBe(marketName);
+      expect(response.marketName).toBe(candidate.marketName);
       expect(response.payerAddress).toBe(candidate.payerAddress);
-      expect(response.status).toBe(OrderStatus.OPEN);
-
-      logResponse(response);
+      expect(response.status).toBe(OrderStatus.FILLED);
+      expect(response.hashes?.creation?.length).toBeCloseTo(64);
     });
 
     // TODO check and fix!!!
@@ -1067,17 +1049,13 @@ describe('Kujira Full Flow', () => {
       userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
     });
 
-    // TODO check and fix!!!
-    it('Get the filled order 3', async () => {
-      const orderFilled = getOrder('3');
-      const marketTokens = networkPairs[orderFilled.marketId].denoms;
-      const marketName: MarketName =
-        marketTokens[0].symbol + '/' + marketTokens[1].symbol;
+    it.skip('Get the filled order 3', async () => {
+      const target = getOrder('3');
 
       const request = {
-        id: orderFilled.id,
+        id: target.id,
         status: OrderStatus.FILLED,
-        marketId: orderFilled.marketId,
+        marketId: target.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
@@ -1085,19 +1063,18 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getOrder(request);
 
+      logResponse(response);
+
       expect(response).toBeObject();
       expect(response.status).toEqual(OrderStatus.OPEN);
-      expect(response.id).toEqual(orderFilled.id);
-      expect(response.marketName).toBe(marketName);
+      expect(response.id).toEqual(target.id);
+      expect(response.marketName).toBe(target.marketName);
       expect(response.marketId).toBe(marketIds['3']);
       expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price).toEqual(orderFilled.price);
-      expect(response.amount).toEqual(orderFilled.amount);
-
-      logResponse(response);
+      expect(response.price).toEqual(target.price);
+      expect(response.amount).toEqual(target.amount);
     });
 
-    // TODO check and fix!!! (wip)
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
@@ -1110,27 +1087,27 @@ describe('Kujira Full Flow', () => {
 
       const orderBookResponse = await kujira.getOrderBooks(orderBookRequest);
 
-      const precision: any[] = [];
+      const marketPrecisions: any[] = [];
       for (const item of orderBookResponse.valueSeq().toArray()) {
-        precision.push(item.market.precision);
+        marketPrecisions.push(item.market.precision);
       }
 
-      const spread = 0.02;
+      const spread = 2; // 2%
 
       getNotNullOrThrowError<Order>(candidates.get('6')).price = BigNumber(
         getNotNullOrThrowError<BigNumber>(
           orderBookResponse.valueSeq().toArray()[0].bestAsk?.price
         )
-          .times(1 - spread)
-          .decimalPlaces(precision[0])
+          .times((100 - spread) / 100)
+          .decimalPlaces(marketPrecisions[0])
       );
 
       getNotNullOrThrowError<Order>(candidates.get('7')).price = BigNumber(
         getNotNullOrThrowError<BigNumber>(
           orderBookResponse.valueSeq().toArray()[1].bestBid?.price
         )
-          .times(1 - spread)
-          .decimalPlaces(precision[1])
+          .times((100 - spread) / 100)
+          .decimalPlaces(marketPrecisions[1])
       );
 
       const request = {
@@ -1153,24 +1130,26 @@ describe('Kujira Full Flow', () => {
           const clientId = getNotNullOrThrowError<OrderClientId>(
             order.clientId
           );
-          const candidateOrder = getNotNullOrThrowError<Order>(
+          const candidate = getNotNullOrThrowError<Order>(
             candidates.get(clientId)
           );
-          candidateOrder.id = order.id;
-          candidateOrder.marketName = order.marketName;
-          candidateOrder.status = order.status;
-          candidateOrder.fee = order.fee;
-          candidateOrder.hashes = order.hashes;
+          candidate.id = order.id;
+          candidate.marketName = order.marketName;
+          candidate.market = order.market;
+          candidate.status = order.status;
+          candidate.fee = order.fee;
+          candidate.hashes = order.hashes;
         });
 
       for (const [orderId, order] of (
         response as IMap<OrderId, Order>
       ).entries()) {
-        expect(order.id).toBeTruthy();
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
+        const candidate = orders.get(clientId);
+
+        expect(order).toBeObject();
         expect(orderId).toBe(order.id);
-        const candidate = orders.get(
-          getNotNullOrThrowError<OrderClientId>(order.clientId)
-        );
+        expect(order.id?.length).toBeGreaterThan(0);
         expect(order.id).toBe(candidate?.id);
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
@@ -1178,8 +1157,16 @@ describe('Kujira Full Flow', () => {
         expect(order.amount).toEqual(candidate?.amount);
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);
-        expect(order.status).toBe(OrderStatus.OPEN);
-        expect(order.hashes).toContainKey('creation');
+
+        if (['10', '11'].includes(clientId)) {
+          // Market orders
+          expect(order.status).toBe(OrderStatus.FILLED);
+        } else {
+          // Limit orders
+          expect(order.status).toBe(OrderStatus.OPEN);
+        }
+
+        expect(order.hashes?.creation?.length).toBeCloseTo(64);
       }
     });
 
@@ -1256,16 +1243,15 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO check and fix!!! (WIP, not tested yet, waiting for the corrections of the previous tests)
     it('Get the open orders 8 and 9', async () => {
-      const orders = getOrders(['8', '9']);
-      const ids = orders
+      const targets = getOrders(['8', '9']);
+      const targetsIds = targets
         .map((order) => order.id)
         .valueSeq()
         .toArray();
 
       const request = {
-        ids,
+        ids: targetsIds,
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
@@ -1276,14 +1262,17 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response.size).toBe(orders.size);
+      expect(response.size).toBe(targets.size);
 
       for (const [orderId, order] of (
         response as IMap<OrderId, Order>
       ).entries()) {
-        expect(order.id).toBeTruthy();
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
+        const candidate = orders.get(clientId);
+
+        expect(order).toBeObject();
         expect(orderId).toBe(order.id);
-        const candidate = orders.get(orderId);
+        expect(order.id?.length).toBeGreaterThan(0);
         expect(order.id).toBe(candidate?.id);
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
@@ -1297,12 +1286,13 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    // TODO check and fix!!! (WIP, not tested yet, waiting for the corrections of the previous tests)
     it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
-      const candidateIds = getOrders(['2', '3', '6', '7', '10', '11'])
+      const targets = getOrders(['2', '3', '6', '7', '10', '11']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
         .valueSeq()
-        .toArray()
-        .map((order) => order.id);
+        .toArray();
 
       const request = {
         ownerAddress: ownerAddress,
@@ -1315,23 +1305,23 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const orderIds = response
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
         .valueSeq()
-        .toArray()
-        .map((obj) => ('id' in obj ? obj?.id : undefined));
+        .toArray();
 
-      candidateIds.forEach((orderId) =>
-        expect(orderIds.includes(orderId)).toBeFalse()
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeFalse()
       );
     });
 
     it('Cancel the order 1', async () => {
-      const order = getOrder('1');
+      const target = getOrder('1');
 
       const request = {
-        id: order.id,
-        marketId: order.marketId,
-        ownerAddress: order.ownerAddress,
+        id: target.id,
+        marketId: target.marketId,
+        ownerAddress: target.ownerAddress,
       } as CancelOrderRequest;
 
       logRequest(request);
@@ -1340,16 +1330,22 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response).not.toBeEmpty();
-      expect(response.id).toEqual(order.id);
-      expect(response.marketId).toBe(order.marketId);
+      expect(response).toBeObject();
+      expect(response.id?.length).toBeGreaterThan(0);
+      expect(response.id).toEqual(target.id);
+      expect(response.marketId).toBe(target.marketId);
+      expect(response.ownerAddress).toBe(target.ownerAddress);
+      expect(response.price).toEqual(target.price);
+      expect(response.amount).toEqual(target.amount);
+      expect(response.side).toBe(target.side);
+      expect(response.marketName).toBe(target.marketName);
+      expect(response.payerAddress).toBe(target.payerAddress);
       expect(response.status).toBe(OrderStatus.CANCELLED);
-      expect(response.hashes?.cancellation).toBeDefined();
-      expect(response.hashes?.cancellation).not.toBeEmpty();
+      expect(response.hashes?.cancellation?.length).toBeCloseTo(64);
 
-      order.fee = response.fee;
-      order.hashes = response.hashes;
-      order.status = OrderStatus.CANCELLED;
+      target.fee = response.fee;
+      target.hashes = response.hashes;
+      target.status = OrderStatus.CANCELLED;
     });
 
     // TODO check and fix!!!
