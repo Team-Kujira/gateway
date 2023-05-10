@@ -539,7 +539,9 @@ export interface CancelOrdersRequest {
   ids: OrderId[];
   clientIds?: OrderClientId[]; // TODO Add support if possible!!!
   marketId: MarketId;
+  marketIds?: MarketId[];
   marketName?: MarketName;
+  marketNames?: MarketName[];
   ownerAddress?: OrderOwnerAddress;
   ownerAddresses?: OrderOwnerAddress[];
 }

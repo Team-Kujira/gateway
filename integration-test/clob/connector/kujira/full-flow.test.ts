@@ -1474,13 +1474,22 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Cancel the orders 4 and 5', async () => {
-      const orders = getOrders(['4', '5']).valueSeq().toArray();
+      const targets = getOrders(['4', '5']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const targetMarketsIds = targets
+        .map((order) => order.marketId)
+        .valueSeq()
+        .toArray();
 
       const request = {
-        ids: [orders[0].id, orders[1].id],
-        marketId: orders[0].marketId,
+        ids: targetsIds,
+        marketIds: targetMarketsIds,
         ownerAddress: ownerAddress,
       } as CancelOrdersRequest;
 
@@ -1493,17 +1502,28 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response).not.toBeEmpty();
-      for (const value of response.values()) {
-        expect(value.status).toBe(OrderStatus.CANCELLED);
-        expect(value.hashes).toHaveProperty('cancellation');
-        expect(value.hashes?.cancellation?.length).toEqual(64);
+      expect(response.size).toBe(targetsIds.length);
+      expect(response.keySeq().toArray()).toIncludeSameMembers(targetsIds);
+
+      for (const [orderId, order] of (
+        response as IMap<OrderId, Order>
+      ).entries()) {
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
+        const candidate = orders.get(clientId);
+
+        expect(order).toBeObject();
+        expect(orderId).toBe(order.id);
+        expect(order.id?.length).toBeGreaterThan(0);
+        expect(order.id).toBe(candidate?.id);
+        expect(order.marketId).toBe(candidate?.marketId);
+        expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+        expect(order.price).toEqual(candidate?.price);
+        expect(order.amount).toEqual(candidate?.amount);
+        expect(order.side).toBe(candidate?.side);
+        expect(order.payerAddress).toBe(candidate?.payerAddress);
+        expect(order.status).toBe(OrderStatus.CANCELLED);
+        expect(order.hashes?.cancellation?.length).toBeCloseTo(64);
       }
-      expect(Object.entries(response.keySeq().toArray()).length).toEqual(
-        request.ids.length
-      );
-      expect(response.keySeq().toArray()).toEqual(request.ids);
-      expect(response.first()?.marketId).toEqual(request.marketId);
     });
 
     // // TODO Fix!!!
