@@ -699,6 +699,9 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getBalance(request);
 
       logResponse(response);
+
+      expect(response).not.toBeUndefined();
+      expect((response.token as Token).id).toBe(request.tokenId);
     });
 
     it('Get balances of tokens 2 and 3', async () => {
@@ -712,6 +715,18 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getBalances(request);
 
       logResponse(response);
+
+      expect(response).toEqual(request.tokenIds?.length);
+
+      for (const tokenId of getNotNullOrThrowError<TokenId[]>(
+        request.tokenIds
+      )) {
+        const balance = getNotNullOrThrowError<Balance>(
+          response.tokens.get(tokenId)
+        );
+        expect(balance).not.toBeUndefined();
+        expect((balance.token as Token).id).toBe(tokenId);
+      }
     });
 
     it('Get all balances', async () => {
@@ -724,6 +739,14 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getAllBalances(request);
 
       logResponse(response);
+
+      for (const tokenId of getNotNullOrThrowError<TokenId[]>(tokenIds)) {
+        const balance = getNotNullOrThrowError<Balance>(
+          response.tokens.get(tokenId)
+        );
+        expect(balance).not.toBeUndefined();
+        expect((balance.token as Token).id).toBe(tokenId);
+      }
     });
   });
 
