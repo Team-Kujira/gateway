@@ -1826,7 +1826,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -1838,6 +1837,8 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      expect(response.size).toEqual(0);
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
