@@ -743,7 +743,6 @@ describe('Kujira Full Flow', () => {
       lastPayedFeeSum = response.fee;
     });
 
-    // TODO Fix!!!
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
       const order = getOrder('1');
       const marketTokens = networkPairs[order.marketId].denoms;
@@ -759,14 +758,14 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // Verifying token 1 balance
+      // Verifying token 1 (base) balance
       expect(response.tokens.get(tokenIds['1'])?.free).toEqual(
         getNotNullOrThrowError<any>(
           userBalances.tokens.get(tokenIds['1'])
         ).free.minus(lastPayedFeeSum)
       );
 
-      // Verifying token 2 balance
+      // Verifying token 3 (quote) balance
       expect(response.tokens.get(tokenIds['3'])?.free).toEqual(
         getNotNullOrThrowError<any>(
           userBalances.tokens.get(tokenIds['3'])
