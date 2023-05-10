@@ -33,6 +33,7 @@ import {
   GetTokensRequest,
   IMap,
   Market,
+  MarketId,
   MarketsWithdrawsRequest,
   MarketWithdrawRequest,
   Order,
@@ -2125,7 +2126,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Settle funds for markets 2 and 3', async () => {
       const request = {
         marketIds: [marketIds[2], marketIds[3]],
@@ -2137,6 +2137,17 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.settleMarketsFunds(request);
 
       logResponse(response);
+
+      expect(response.size).toBe(
+        getNotNullOrThrowError<MarketId[]>(request.marketIds).length
+      );
+
+      for (const [marketId, withdraw] of (
+        response as IMap<MarketId, Withdraw>
+      ).entries()) {
+        expect(request.marketIds).toInclude(marketId);
+        expect(withdraw.hash.length).toBeCloseTo(64);
+      }
     });
 
     // // TODO Fix!!!
@@ -2152,7 +2163,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Settle funds for all markets', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -2163,6 +2173,15 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.settleAllMarketsFunds(request);
 
       logResponse(response);
+
+      expect(response.size).toBe(Object.values(marketIds).length);
+
+      for (const [marketId, withdraw] of (
+        response as IMap<MarketId, Withdraw>
+      ).entries()) {
+        expect(request.marketIds).toInclude(marketId);
+        expect(withdraw.hash.length).toBeCloseTo(64);
+      }
     });
   });
 });
