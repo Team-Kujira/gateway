@@ -1832,10 +1832,11 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    // // TODO Fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+      const targetOrders = getOrders(['8', '9']);
+
       const request = {
-        tokenIds: [tokenIds[2], tokenIds[3]],
+        tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -1844,6 +1845,100 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getBalances(request);
 
       logResponse(response);
+
+      const currentBalances = lodash.cloneDeep(response);
+
+      for (const order of targetOrders.values()) {
+        const baseBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.baseToken.id)
+        );
+
+        const quoteBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.quoteToken.id)
+        );
+
+        if (order.type == OrderType.LIMIT) {
+          if (order.status == OrderStatus.OPEN) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.plus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.plus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.FILLED) {
+            if (order.side == OrderSide.BUY) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              baseBalance.unsettled = baseBalance.unsettled.minus(order.amount);
+            } else if (order.side == OrderSide.SELL) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              quoteBalance.unsettled = quoteBalance.unsettled.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.CANCELLED) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          }
+        } else if (order.type == OrderType.MARKET) {
+          if (order.side == OrderSide.BUY) {
+            baseBalance.free = baseBalance.free.minus(order.amount);
+            quoteBalance.free = quoteBalance.free.plus(order.amount);
+          } else if (order.side == OrderSide.SELL) {
+            baseBalance.free = baseBalance.free.plus(order.amount);
+            quoteBalance.free = quoteBalance.free.minus(order.amount);
+          } else {
+            throw new Error('Invalid order side');
+          }
+        }
+      }
+
+      const kujiBalance = getNotNullOrThrowError<Balance>(
+        currentBalances.tokens.get(kujiToken.reference)
+      );
+
+      kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
+
+      for (const balance of userBalances.tokens.values()) {
+        const currentBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get((balance.token as Token).id)
+        );
+
+        expect(balance.free).toBe(currentBalance.free);
+        expect(balance.lockedInOrders).toBe(currentBalance.lockedInOrders);
+        expect(balance.unsettled).toBe(currentBalance.unsettled);
+      }
+
+      userBalances = response;
     });
 
     it('Get all open orders and check that there are no open orders', async () => {
@@ -1984,6 +2079,115 @@ describe('Kujira Full Flow', () => {
       }
     });
 
+    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+      const targetOrders = getOrders(['12', '13']);
+
+      const request = {
+        tokenIds: Object.values(tokenIds),
+        ownerAddress: ownerAddress,
+      } as GetBalancesRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getBalances(request);
+
+      logResponse(response);
+
+      const currentBalances = lodash.cloneDeep(response);
+
+      for (const order of targetOrders.values()) {
+        const baseBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.baseToken.id)
+        );
+
+        const quoteBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.quoteToken.id)
+        );
+
+        if (order.type == OrderType.LIMIT) {
+          if (order.status == OrderStatus.OPEN) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.plus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.plus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.FILLED) {
+            if (order.side == OrderSide.BUY) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              baseBalance.unsettled = baseBalance.unsettled.minus(order.amount);
+            } else if (order.side == OrderSide.SELL) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              quoteBalance.unsettled = quoteBalance.unsettled.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.CANCELLED) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          }
+        } else if (order.type == OrderType.MARKET) {
+          if (order.side == OrderSide.BUY) {
+            baseBalance.free = baseBalance.free.minus(order.amount);
+            quoteBalance.free = quoteBalance.free.plus(order.amount);
+          } else if (order.side == OrderSide.SELL) {
+            baseBalance.free = baseBalance.free.plus(order.amount);
+            quoteBalance.free = quoteBalance.free.minus(order.amount);
+          } else {
+            throw new Error('Invalid order side');
+          }
+        }
+      }
+
+      const kujiBalance = getNotNullOrThrowError<Balance>(
+        currentBalances.tokens.get(kujiToken.reference)
+      );
+
+      kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
+
+      for (const balance of userBalances.tokens.values()) {
+        const currentBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get((balance.token as Token).id)
+        );
+
+        expect(balance.free).toBe(currentBalance.free);
+        expect(balance.lockedInOrders).toBe(currentBalance.lockedInOrders);
+        expect(balance.unsettled).toBe(currentBalance.unsettled);
+      }
+
+      userBalances = response;
+    });
+
     it('Get all open orders and check that the orders 12 and 13 are present', async () => {
       const targets = getOrders(['12', '13']);
 
@@ -2122,10 +2326,11 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    // // TODO Fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+      const targetOrders = getOrders(['12', '13']);
+
       const request = {
-        tokenIds: [tokenIds[2], tokenIds[3]],
+        tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -2134,6 +2339,100 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getBalances(request);
 
       logResponse(response);
+
+      const currentBalances = lodash.cloneDeep(response);
+
+      for (const order of targetOrders.values()) {
+        const baseBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.baseToken.id)
+        );
+
+        const quoteBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.quoteToken.id)
+        );
+
+        if (order.type == OrderType.LIMIT) {
+          if (order.status == OrderStatus.OPEN) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.plus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.plus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.FILLED) {
+            if (order.side == OrderSide.BUY) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              baseBalance.unsettled = baseBalance.unsettled.minus(order.amount);
+            } else if (order.side == OrderSide.SELL) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              quoteBalance.unsettled = quoteBalance.unsettled.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.CANCELLED) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          }
+        } else if (order.type == OrderType.MARKET) {
+          if (order.side == OrderSide.BUY) {
+            baseBalance.free = baseBalance.free.minus(order.amount);
+            quoteBalance.free = quoteBalance.free.plus(order.amount);
+          } else if (order.side == OrderSide.SELL) {
+            baseBalance.free = baseBalance.free.plus(order.amount);
+            quoteBalance.free = quoteBalance.free.minus(order.amount);
+          } else {
+            throw new Error('Invalid order side');
+          }
+        }
+      }
+
+      const kujiBalance = getNotNullOrThrowError<Balance>(
+        currentBalances.tokens.get(kujiToken.reference)
+      );
+
+      kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
+
+      for (const balance of userBalances.tokens.values()) {
+        const currentBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get((balance.token as Token).id)
+        );
+
+        expect(balance.free).toBe(currentBalance.free);
+        expect(balance.lockedInOrders).toBe(currentBalance.lockedInOrders);
+        expect(balance.unsettled).toBe(currentBalance.unsettled);
+      }
+
+      userBalances = response;
     });
 
     it('Get all open orders and check that there are no open orders', async () => {
@@ -2166,17 +2465,113 @@ describe('Kujira Full Flow', () => {
       expect((response as Withdraw).hash.length).toBeCloseTo(64);
     });
 
-    // // TODO Fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+      const targetOrders = getOrders(['12', '13']);
+
       const request = {
+        tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
-      } as GetAllBalancesRequest;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
-      const response = await kujira.getAllBalances(request);
+      const response = await kujira.getBalances(request);
 
       logResponse(response);
+
+      const currentBalances = lodash.cloneDeep(response);
+
+      for (const order of targetOrders.values()) {
+        const baseBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.baseToken.id)
+        );
+
+        const quoteBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.quoteToken.id)
+        );
+
+        if (order.type == OrderType.LIMIT) {
+          if (order.status == OrderStatus.OPEN) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.plus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.plus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.FILLED) {
+            if (order.side == OrderSide.BUY) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              baseBalance.unsettled = baseBalance.unsettled.minus(order.amount);
+            } else if (order.side == OrderSide.SELL) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              quoteBalance.unsettled = quoteBalance.unsettled.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.CANCELLED) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          }
+        } else if (order.type == OrderType.MARKET) {
+          if (order.side == OrderSide.BUY) {
+            baseBalance.free = baseBalance.free.minus(order.amount);
+            quoteBalance.free = quoteBalance.free.plus(order.amount);
+          } else if (order.side == OrderSide.SELL) {
+            baseBalance.free = baseBalance.free.plus(order.amount);
+            quoteBalance.free = quoteBalance.free.minus(order.amount);
+          } else {
+            throw new Error('Invalid order side');
+          }
+        }
+      }
+
+      const kujiBalance = getNotNullOrThrowError<Balance>(
+        currentBalances.tokens.get(kujiToken.reference)
+      );
+
+      kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
+
+      for (const balance of userBalances.tokens.values()) {
+        const currentBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get((balance.token as Token).id)
+        );
+
+        expect(balance.free).toBe(currentBalance.free);
+        expect(balance.lockedInOrders).toBe(currentBalance.lockedInOrders);
+        expect(balance.unsettled).toBe(currentBalance.unsettled);
+      }
+
+      userBalances = response;
     });
 
     it('Settle funds for markets 2 and 3', async () => {
@@ -2203,17 +2598,113 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    // // TODO Fix!!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+      const targetOrders = getOrders(['12', '13']);
+
       const request = {
+        tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
-      } as GetAllBalancesRequest;
+      } as GetBalancesRequest;
 
       logRequest(request);
 
-      const response = await kujira.getAllBalances(request);
+      const response = await kujira.getBalances(request);
 
       logResponse(response);
+
+      const currentBalances = lodash.cloneDeep(response);
+
+      for (const order of targetOrders.values()) {
+        const baseBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.baseToken.id)
+        );
+
+        const quoteBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get(order.market.quoteToken.id)
+        );
+
+        if (order.type == OrderType.LIMIT) {
+          if (order.status == OrderStatus.OPEN) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.plus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.plus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.FILLED) {
+            if (order.side == OrderSide.BUY) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              baseBalance.unsettled = baseBalance.unsettled.minus(order.amount);
+            } else if (order.side == OrderSide.SELL) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+
+              quoteBalance.unsettled = quoteBalance.unsettled.minus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          } else if (order.status == OrderStatus.CANCELLED) {
+            if (order.side == OrderSide.BUY) {
+              quoteBalance.free = quoteBalance.free.minus(order.amount);
+              quoteBalance.lockedInOrders = quoteBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else if (order.side == OrderSide.SELL) {
+              baseBalance.free = baseBalance.free.minus(order.amount);
+              baseBalance.lockedInOrders = baseBalance.lockedInOrders.plus(
+                order.amount
+              );
+            } else {
+              throw new Error('Invalid order side');
+            }
+          }
+        } else if (order.type == OrderType.MARKET) {
+          if (order.side == OrderSide.BUY) {
+            baseBalance.free = baseBalance.free.minus(order.amount);
+            quoteBalance.free = quoteBalance.free.plus(order.amount);
+          } else if (order.side == OrderSide.SELL) {
+            baseBalance.free = baseBalance.free.plus(order.amount);
+            quoteBalance.free = quoteBalance.free.minus(order.amount);
+          } else {
+            throw new Error('Invalid order side');
+          }
+        }
+      }
+
+      const kujiBalance = getNotNullOrThrowError<Balance>(
+        currentBalances.tokens.get(kujiToken.reference)
+      );
+
+      kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
+
+      for (const balance of userBalances.tokens.values()) {
+        const currentBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get((balance.token as Token).id)
+        );
+
+        expect(balance.free).toBe(currentBalance.free);
+        expect(balance.lockedInOrders).toBe(currentBalance.lockedInOrders);
+        expect(balance.unsettled).toBe(currentBalance.unsettled);
+      }
+
+      userBalances = response;
     });
 
     it('Settle funds for all markets', async () => {
