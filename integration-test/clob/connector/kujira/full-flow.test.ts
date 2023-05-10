@@ -37,6 +37,7 @@ import {
   MarketsWithdrawsRequest,
   MarketWithdrawRequest,
   Order,
+  OrderBook,
   OrderClientId,
   OrderFee,
   OrderId,
@@ -569,6 +570,13 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrderBook(request);
 
       logResponse(response);
+
+      expect(response).not.toBeUndefined();
+      expect(response.market.id).toBe(request.marketId);
+      expect(response.bids).not.toBeEmpty();
+      expect(response.asks).not.toBeEmpty();
+      expect(response.bestBid).not.toBeUndefined();
+      expect(response.bestAsk).not.toBeUndefined();
     });
 
     it('Get order books from the markets 2 and 3', async () => {
@@ -581,6 +589,21 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrderBooks(request);
 
       logResponse(response);
+
+      expect(response.size).toEqual(request.marketIds?.length);
+
+      for (const marketId of getNotNullOrThrowError<MarketId[]>(
+        request.marketIds
+      )) {
+        const orderBook = getNotNullOrThrowError<OrderBook>(
+          response.get(marketId)
+        );
+        expect(orderBook.market.id).toBe(marketId);
+        expect(orderBook.bids).not.toBeEmpty();
+        expect(orderBook.asks).not.toBeEmpty();
+        expect(orderBook.bestBid).not.toBeUndefined();
+        expect(orderBook.bestAsk).not.toBeUndefined();
+      }
     });
 
     it('Get all order books', async () => {
@@ -591,6 +614,19 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getAllOrderBooks(request);
 
       logResponse(response);
+
+      expect(response.size).toEqual(request.marketIds?.length);
+
+      for (const marketId of getNotNullOrThrowError<MarketId[]>(marketIds)) {
+        const orderBook = getNotNullOrThrowError<OrderBook>(
+          response.get(marketId)
+        );
+        expect(orderBook.market.id).toBe(marketId);
+        expect(orderBook.bids).not.toBeEmpty();
+        expect(orderBook.asks).not.toBeEmpty();
+        expect(orderBook.bestBid).not.toBeUndefined();
+        expect(orderBook.bestAsk).not.toBeUndefined();
+      }
     });
   });
 
