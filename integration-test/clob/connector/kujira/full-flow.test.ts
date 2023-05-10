@@ -2084,7 +2084,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Get all open orders and check that there are no open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -2096,6 +2095,8 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      expect(response.size).toEqual(0);
     });
 
     it('Settle funds for market 1', async () => {
