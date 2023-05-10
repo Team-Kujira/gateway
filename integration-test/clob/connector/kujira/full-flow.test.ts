@@ -69,8 +69,8 @@ const config = KujiraConfig.config;
 
 const tokenIds = {
   1: KUJI.reference, // KUJI
-  2: USK_TESTNET.reference, // USK
-  3: DEMO.reference, // DEMO
+  2: DEMO.reference, // DEMO
+  3: USK_TESTNET.reference, // USK
 };
 
 const networkPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
@@ -743,12 +743,14 @@ describe('Kujira Full Flow', () => {
       lastPayedFeeSum = response.fee;
     });
 
-    it('Check the available wallet balances from the tokens 1 and 3', async () => {
-      const order = getOrder('1');
-      const marketTokens = networkPairs[order.marketId].denoms;
+    it('Check the available wallet balances from the tokens 1 and 2', async () => {
+      const targetOrder = getOrder('1');
 
       const request = {
-        tokenIds: [tokenIds[1], tokenIds[3]],
+        tokenIds: [
+          targetOrder.market.baseToken.id,
+          targetOrder.market.quoteToken.id,
+        ],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -759,29 +761,36 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
 
       // Verifying token 1 (base) balance
-      expect(response.tokens.get(tokenIds['1'])?.free).toEqual(
-        getNotNullOrThrowError<any>(
-          userBalances.tokens.get(tokenIds['1'])
-        ).free.minus(lastPayedFeeSum)
+      const currentBaseBalance = getNotNullOrThrowError<any>(
+        userBalances.tokens.get(targetOrder.market.baseToken.id)
+      ).free.minus(lastPayedFeeSum);
+
+      expect(
+        response.tokens.get(targetOrder.market.baseToken.id)?.free
+      ).toEqual(currentBaseBalance);
+
+      userBalances.tokens.set(
+        targetOrder.market.baseToken.id,
+        currentBaseBalance
       );
 
-      // Verifying token 3 (quote) balance
-      expect(response.tokens.get(tokenIds['3'])?.free).toEqual(
-        getNotNullOrThrowError<any>(
-          userBalances.tokens.get(tokenIds['3'])
-        ).free.minus(response.total.lockedInOrders)
+      // Verifying token 2 (quote) balance
+      const currentQuoteBalance = getNotNullOrThrowError<any>(
+        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+      ).free.minus(
+        getNotNullOrThrowError<Balance>(
+          response.tokens.get(targetOrder.market.quoteToken.id)
+        ).lockedInOrders
       );
 
-      const currentBaseBalance = getNotNullOrThrowError<Balance>(
-        response.tokens.get(marketTokens[0].reference)
-      );
+      expect(
+        response.tokens.get(targetOrder.market.quoteToken.id)?.free
+      ).toEqual(currentQuoteBalance);
 
-      const currentQuoteBalance = getNotNullOrThrowError<Balance>(
-        response.tokens.get(marketTokens[1].reference)
+      userBalances.tokens.set(
+        targetOrder.market.quoteToken.id,
+        currentQuoteBalance
       );
-
-      userBalances.tokens.set(marketTokens[0].reference, currentBaseBalance);
-      userBalances.tokens.set(marketTokens[1].reference, currentQuoteBalance);
     });
 
     it('Get the open order 1', async () => {
