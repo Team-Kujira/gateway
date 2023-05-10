@@ -1907,14 +1907,13 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    // // TODO Fix!!!
     it('Create orders 12 and 13 at once', async () => {
-      const candidates = getOrders(['12', '13']);
+      const targets = getOrders(['12', '13']);
 
       const request = {
-        orders: candidates
+        orders: targets
           .valueSeq()
-          .map((candidate) => ({ ...candidate }))
+          .map((target) => ({ ...target }))
           .toArray(),
       } as PlaceOrdersRequest;
 
@@ -1924,13 +1923,36 @@ describe('Kujira Full Flow', () => {
 
       response.valueSeq().map((order: Order) => {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
-        const candidateOrder = getNotNullOrThrowError<Order>(
-          candidates.get(clientId)
+        const targetOrder = getNotNullOrThrowError<Order>(
+          targets.get(clientId)
         );
-        candidateOrder.id = order.id;
+        targetOrder.id = order.id;
       });
 
       logResponse(response);
+
+      expect(response.size).toBe(targets.size);
+
+      for (const [targetId, target] of (
+        response as IMap<OrderId, Order>
+      ).entries()) {
+        const clientId = getNotNullOrThrowError<OrderClientId>(target.clientId);
+        const candidate = orders.get(clientId);
+
+        expect(target).toBeObject();
+        expect(targetId).toBe(target.id);
+        expect(target.id?.length).toBeGreaterThan(0);
+        expect(target.id).toBe(candidate?.id);
+        expect(target.marketId).toBe(candidate?.marketId);
+        expect(target.ownerAddress).toBe(candidate?.ownerAddress);
+        expect(target.price).toEqual(candidate?.price);
+        expect(target.amount).toEqual(candidate?.amount);
+        expect(target.side).toBe(candidate?.side);
+        expect(target.payerAddress).toBe(candidate?.payerAddress);
+        expect(target.status).toBe(OrderStatus.OPEN);
+        expect(target.hashes).toBeObject();
+        expect(target.type).toBe(candidate?.type);
+      }
     });
 
     // // TODO Fix!!!
