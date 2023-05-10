@@ -1,6 +1,9 @@
+import fs from 'fs';
 import { NextFunction, Request, Response } from 'express';
 import { KujiraConfig } from './kujira.config';
 import { Kujira } from './kujira';
+import { parse, stringify } from 'flatted';
+import { promisify } from 'util';
 
 /**
  *
@@ -166,3 +169,23 @@ export const verifyKujiraIsAvailable = async (
 
   return next();
 };
+
+export function serialize(target: any): string {
+  return stringify(target);
+}
+
+export function deserialize<T>(target: string): T {
+  return parse(target) as T;
+}
+
+export async function serializeToFile(target: any, path: string) {
+  const serialized = serialize(target);
+
+  return await promisify(fs.writeFile)(path, serialized);
+}
+
+export async function deserializeFromFile<T>(path: string) {
+  const deserialized = (await promisify(fs.readFile)(path)).toString();
+
+  return deserialize(deserialized) as T;
+}
