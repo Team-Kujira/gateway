@@ -1011,11 +1011,7 @@ describe('Kujira Full Flow', () => {
       // Verifying token 2 (base) balance
       const currentBaseBalance = getNotNullOrThrowError<any>(
         userBalances.tokens.get(targetOrder.market.baseToken.id)
-      ).free.minus(
-        getNotNullOrThrowError<Balance>(
-          response.tokens.get(targetOrder.market.baseToken.id)
-        ).unsettled
-      );
+      ).free.minus(targetOrder.amount);
 
       expect(
         response.tokens.get(targetOrder.market.baseToken.id)?.free
@@ -1160,18 +1156,59 @@ describe('Kujira Full Flow', () => {
 
         expect(order.hashes?.creation?.length).toBeCloseTo(64);
       }
+
+      lastPayedFeeSum = BigNumber(0);
+      for (const order of (response as IMap<OrderId, Order>).values()) {
+        lastPayedFeeSum = lastPayedFeeSum.plus(
+          getNotNullOrThrowError<BigNumber>(order.fee)
+        );
+      }
     });
 
     // TODO Fix!!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
+      const targetOrders = getOrders([
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+      ]);
+
       const request = {
-        tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
+        tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
       logRequest(request);
 
       const response = await kujira.getBalances(request);
+
+      logResponse(response);
+
+      const spentBalances: Balances = {
+        tokens: IMap<TokenId, Balance>().asMutable(),
+        total: {
+          token: 'total',
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+        },
+      } as Balances;
+
+      for (const order of (response as IMap<OrderId, Order>).values()) {
+        if (order.side == OrderSide.BUY) {
+          spentBalances.tokens.get(order.market.baseTokenId)?.free =
+            BigNumber();
+        } else if (order.side == OrderSide.SELL) {
+        } else {
+          throw new Error('Invalid order side');
+        }
+      }
+
       const finalBalanceChange: Balances = {
         tokens: IMap<TokenId, Balance>().asMutable(),
         total: {
@@ -1231,8 +1268,6 @@ describe('Kujira Full Flow', () => {
       });
 
       userBalances = response;
-
-      logResponse(response);
     });
 
     it('Get the open orders 8 and 9', async () => {
