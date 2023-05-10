@@ -48,9 +48,10 @@ import {
   PlaceOrderRequest,
   PlaceOrdersRequest,
   Token,
+  TokenId,
   Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
-import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
+import { DEMO, Denom, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
@@ -392,6 +393,11 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getToken(request);
 
       logResponse(response);
+
+      expect(response).not.toBeEmpty();
+      expect(response.id).toBe(tokenIds[1]);
+      expect(response.symbol).toBe(Denom.from(tokenIds[1]).symbol);
+      expect(response.decimals).toBe(Denom.from(tokenIds[1]).decimals);
     });
 
     it('Get tokens 2 and 3', async () => {
@@ -404,6 +410,27 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getTokens(request);
 
       logResponse(response);
+
+      expect(response.size).toBe(request.ids?.length);
+
+      for (const token of response.values()) {
+        const targetToken = Denom.from(token.id);
+        expect(token).not.toBeEmpty();
+        expect(token.id).toBe(targetToken.reference);
+        expect(token.symbol).toBe(targetToken.symbol);
+        expect(token.decimals).toBe(targetToken.decimals);
+      }
+
+      for (const tokenId of getNotNullOrThrowError<TokenId[]>(request.ids)) {
+        const token = Denom.from(tokenId);
+        const targetToken = getNotNullOrThrowError<Token>(
+          response.get(tokenId)
+        );
+        expect(targetToken).not.toBeEmpty();
+        expect(targetToken.id).toBe(token.reference);
+        expect(targetToken.symbol).toBe(token.symbol);
+        expect(targetToken.decimals).toBe(token.decimals);
+      }
     });
 
     it('Get all tokens', async () => {
@@ -414,6 +441,19 @@ describe('Kujira Full Flow', () => {
       allTokens = await kujira.getAllTokens(request);
 
       logResponse(allTokens);
+
+      expect(allTokens.size).toBe(request);
+
+      for (const tokenId of getNotNullOrThrowError<TokenId[]>(tokenIds)) {
+        const token = Denom.from(tokenId);
+        const targetToken = getNotNullOrThrowError<Token>(
+          allTokens.get(tokenId)
+        );
+        expect(targetToken).not.toBeEmpty();
+        expect(targetToken.id).toBe(token.reference);
+        expect(targetToken.symbol).toBe(token.symbol);
+        expect(targetToken.decimals).toBe(token.decimals);
+      }
     });
   });
 
