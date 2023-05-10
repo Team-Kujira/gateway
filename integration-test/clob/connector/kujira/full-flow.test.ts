@@ -1701,7 +1701,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
-      const targets = getOrders(['2', '6', '7']);
+      const targets = getOrders(['2', '6', '7']); // TODO FIX !!!
 
       const targetsIds = targets
         .map((order) => order.id)
@@ -1791,7 +1791,6 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    // // TODO Fix!!!
     it('Cancel all open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -1802,6 +1801,42 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
+
+      const targets = getOrders(['3', '6', '7', '8', '9', '10', '11']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeTrue()
+      );
+
+      for (const [orderId, order] of (
+        response as IMap<OrderId, Order>
+      ).entries()) {
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
+        const candidate = orders.get(clientId);
+
+        expect(order).toBeObject();
+        expect(orderId).toBe(order.id);
+        expect(order.id?.length).toBeGreaterThan(0);
+        expect(order.id).toBe(candidate?.id);
+        expect(order.marketId).toBe(candidate?.marketId);
+        expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+        expect(order.price).toEqual(candidate?.price);
+        expect(order.amount).toEqual(candidate?.amount);
+        expect(order.side).toBe(candidate?.side);
+        expect(order.payerAddress).toBe(candidate?.payerAddress);
+        expect(order.hashes?.creation?.length).toBeCloseTo(64);
+        expect(order.status).toBe(OrderStatus.CANCELLED);
+      }
     });
 
     // // TODO Fix!!!
@@ -2047,7 +2082,6 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    // // TODO Fix!!!
     it('Cancel all open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -2058,6 +2092,41 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.cancelAllOrders(request);
 
       logResponse(response);
+      const targets = getOrders(['12', '13']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeTrue()
+      );
+
+      for (const [orderId, order] of (
+        response as IMap<OrderId, Order>
+      ).entries()) {
+        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
+        const candidate = orders.get(clientId);
+
+        expect(order).toBeObject();
+        expect(orderId).toBe(order.id);
+        expect(order.id?.length).toBeGreaterThan(0);
+        expect(order.id).toBe(candidate?.id);
+        expect(order.marketId).toBe(candidate?.marketId);
+        expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+        expect(order.price).toEqual(candidate?.price);
+        expect(order.amount).toEqual(candidate?.amount);
+        expect(order.side).toBe(candidate?.side);
+        expect(order.payerAddress).toBe(candidate?.payerAddress);
+        expect(order.hashes?.creation?.length).toBeCloseTo(64);
+        expect(order.status).toBe(OrderStatus.CANCELLED);
+      }
     });
 
     // // TODO Fix!!!
