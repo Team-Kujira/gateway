@@ -47,6 +47,7 @@ import {
   PlaceOrderRequest,
   PlaceOrdersRequest,
   TokenId,
+  Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, Denom, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
@@ -2096,7 +2097,6 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Settle funds for market 1', async () => {
       const request = {
         marketId: marketIds[1],
@@ -2108,6 +2108,8 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.settleMarketFunds(request);
 
       logResponse(response);
+
+      expect((response as Withdraw).hash.length).toBeCloseTo(64);
     });
 
     // // TODO Fix!!!
