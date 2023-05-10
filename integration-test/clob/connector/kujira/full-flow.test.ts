@@ -1027,6 +1027,8 @@ describe('Kujira Full Flow', () => {
     it.skip('Get the filled order 3', async () => {
       const target = getOrder('3');
 
+      target.status = OrderStatus.FILLED;
+
       const request = {
         id: target.id,
         status: OrderStatus.FILLED,
@@ -1132,15 +1134,7 @@ describe('Kujira Full Flow', () => {
         expect(order.amount).toEqual(candidate?.amount);
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);
-
-        if (['10', '11'].includes(clientId)) {
-          // Market orders
-          expect(order.status).toBe(OrderStatus.FILLED);
-        } else {
-          // Limit orders
-          expect(order.status).toBe(OrderStatus.OPEN);
-        }
-
+        expect(order.status).toBe(OrderStatus.OPEN);
         expect(order.hashes?.creation?.length).toBeCloseTo(64);
       }
 
@@ -1268,6 +1262,12 @@ describe('Kujira Full Flow', () => {
       }
 
       userBalances = response;
+
+      getNotNullOrThrowError<Order>(targetOrders.get('10')).status =
+        OrderStatus.FILLED;
+
+      getNotNullOrThrowError<Order>(targetOrders.get('11')).status =
+        OrderStatus.FILLED;
     });
 
     it('Get the open orders 8 and 9', async () => {
