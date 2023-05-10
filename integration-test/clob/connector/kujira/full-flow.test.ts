@@ -431,9 +431,10 @@ describe('Kujira Full Flow', () => {
 
       const networkPair = networkPairs[marketIds[1]];
       expect(response.id).toEqual(marketIds[1]);
-      expect([response.baseToken, response.quoteToken]).toEqual(
-        networkPair.denoms
-      );
+      expect([response.baseToken.id, response.quoteToken.id]).toEqual([
+        networkPair.denoms[0].reference,
+        networkPair.denoms[1].reference,
+      ]);
       expect(response.precision).toEqual(networkPair.precision);
     });
 

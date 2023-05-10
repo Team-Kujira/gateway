@@ -671,7 +671,7 @@ export class Kujira {
    * @param options
    */
   async getMarkets(options: GetMarketsRequest): Promise<GetMarketsResponse> {
-    const allMarkets = IMap<MarketId, Market>().asMutable();
+    const allMarkets = await this.getAllMarkets();
 
     const markets = allMarkets.filter(
       (market) =>
