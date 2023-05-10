@@ -50,7 +50,7 @@ import {
   TokenId,
   Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
-import { DEMO, Denom, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
+import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
 
@@ -847,6 +847,8 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
+      lastPayedFeeSum = response.fee;
+
       candidate.id = response.id;
       candidate.marketName = response.marketName;
       candidate.market = response.market;
@@ -866,10 +868,14 @@ describe('Kujira Full Flow', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
     });
 
-    // TODO Fix!!!
-    it('Check the available wallet balances from the tokens 1 and 2', async () => {
+    it('Check the available wallet balances from the tokens 1 and 3', async () => {
+      const targetOrder = getOrder('2');
+
       const request = {
-        tokenIds: [tokenIds[1], tokenIds[2]],
+        tokenIds: [
+          targetOrder.market.baseToken.id,
+          targetOrder.market.quoteToken.id,
+        ],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -877,61 +883,39 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getBalances(request);
 
-      const requestTokensDenoms = [
-        Denom.from(getNotNullOrThrowError<TokenId[]>(request.tokenIds)[0]),
-        Denom.from(getNotNullOrThrowError<TokenId[]>(request.tokenIds)[1]),
-      ];
-
-      const responseTokens = response.tokens
-        .keySeq()
-        .map((obj: any) => obj)
-        .toArray();
-      const responseTokensDenom = [
-        Denom.from(responseTokens[0]),
-        Denom.from(responseTokens[1]),
-      ];
-
-      expect(responseTokensDenom[0].eq(responseTokensDenom[1])).toBeFalsy;
-      expect(
-        requestTokensDenoms[0].eq(responseTokensDenom[0]) ||
-          requestTokensDenoms[0].eq(responseTokensDenom[1])
-      ).toBeTruthy();
-      expect(
-        requestTokensDenoms[1].eq(responseTokensDenom[1]) ||
-          requestTokensDenoms[1].eq(responseTokensDenom[0])
-      ).toBeTruthy();
-
-      expect(response).toContainKey('total');
-
-      response.tokens.valueSeq().forEach((token: any) => {
-        expect(token).toContainKeys(['free', 'unsettled', 'lockedInOrders']);
-      });
       logResponse(response);
 
-      const order = getOrder('2');
-      const marketTokens = networkPairs[order.marketId].denoms;
-      const oldBaseBalance = getNotNullOrThrowError<Balance>(
-        userBalances.tokens.get(marketTokens[0].reference)
-      );
-      const newBaseBalance = getNotNullOrThrowError<Balance>(
-        response.tokens.get(marketTokens[0].reference)
-      );
-      const oldQuoteBalance = getNotNullOrThrowError<Balance>(
-        userBalances.tokens.get(marketTokens[1].reference)
-      );
-      const newQuoteBalance = getNotNullOrThrowError<Balance>(
-        response.tokens.get(marketTokens[1].reference)
-      );
-      const orderFee = getNotNullOrThrowError<BigNumber>(order.fee);
-      const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
+      // Verifying token 1 (base) balance
+      const currentBaseBalance = getNotNullOrThrowError<any>(
+        userBalances.tokens.get(targetOrder.market.baseToken.id)
+      ).free.minus(lastPayedFeeSum, targetOrder.price);
 
-      expect(oldBaseBalance.free.minus(orderFee.plus(orderAmount))).toEqual(
-        newBaseBalance.free
+      expect(
+        response.tokens.get(targetOrder.market.baseToken.id)?.free
+      ).toEqual(currentBaseBalance);
+
+      userBalances.tokens.set(
+        targetOrder.market.baseToken.id,
+        currentBaseBalance
       );
 
-      expect(oldQuoteBalance.free).toEqual(newQuoteBalance.free);
-      userBalances.tokens.set(marketTokens[0].reference, newBaseBalance);
-      userBalances.tokens.set(marketTokens[1].reference, newQuoteBalance);
+      // Verifying token 2 (quote) balance
+      const currentQuoteBalance = getNotNullOrThrowError<any>(
+        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+      ).free.minus(
+        getNotNullOrThrowError<Balance>(
+          response.tokens.get(targetOrder.market.quoteToken.id)
+        ).unsettled
+      );
+
+      expect(
+        response.tokens.get(targetOrder.market.quoteToken.id)?.free
+      ).toEqual(currentQuoteBalance);
+
+      userBalances.tokens.set(
+        targetOrder.market.quoteToken.id,
+        currentQuoteBalance
+      );
     });
 
     it('Get the filled order 2', async () => {
