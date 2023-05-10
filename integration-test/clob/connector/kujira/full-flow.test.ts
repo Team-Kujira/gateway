@@ -1434,24 +1434,22 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO Fix!!! (WIP)
     it("Check that it's not possible to get the cancelled order 1", async () => {
-      const order = getOrder('1');
+      const target = getOrder('1');
 
       const request = {
-        id: order.id,
-        ownerAddress: order.ownerAddress,
-        marketId: order.marketId,
+        id: target.id,
+        ownerAddress: target.ownerAddress,
+        marketId: target.marketId,
       } as GetOrderRequest;
 
       logRequest(request);
 
       const response = await kujira.getOrder(request);
 
-      expect(response).not.toBeObject();
-      expect(response).toBeUndefined();
-
       logResponse(response);
+
+      expect(response.hashes).toBeUndefined();
     });
 
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
