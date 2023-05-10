@@ -1978,8 +1978,32 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present', async () => {
+      const openLimitOrdersTargets = getOrders(['12', '13']);
+      const filledLimitOrdersTargets = getOrders(['2', '6', '7']);
+      const filledMarketOrdersTargets = getOrders(['3', '10', '11']);
+      const cancelledOrdersTargets = getOrders(['1', '4', '5', '8', '9']);
+
+      const openLimitOrdersTargetsIds = openLimitOrdersTargets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const filledLimitOrdersTargetsIds = filledLimitOrdersTargets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const filledMarketOrdersTargetsIds = filledMarketOrdersTargets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const cancelledOrdersTargetsIds = cancelledOrdersTargets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
       const request = {
         ownerAddress: ownerAddress,
       } as GetOrdersRequest;
@@ -1989,6 +2013,31 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      expect(openLimitOrdersTargetsIds).toIncludeSameMembers(responseOrdersIds);
+
+      filledLimitOrdersTargetsIds.forEach((orderId) =>
+        expect(responseOrdersIds).toInclude(
+          getNotNullOrThrowError<OrderId>(orderId)
+        )
+      );
+
+      filledMarketOrdersTargetsIds.forEach((orderId) =>
+        expect(responseOrdersIds).not.toInclude(
+          getNotNullOrThrowError<OrderId>(orderId)
+        )
+      );
+
+      cancelledOrdersTargetsIds.forEach((orderId) =>
+        expect(responseOrdersIds).not.toInclude(
+          getNotNullOrThrowError<OrderId>(orderId)
+        )
+      );
     });
 
     // // TODO Fix!!!
