@@ -1639,16 +1639,16 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it("Check that it's not possible to get the cancelled orders 4 and 5", async () => {
-      const orders = getOrders(['4', '5']);
-      const ids = orders
+      const targets = getOrders(['4', '5']);
+
+      const targetsIds = targets
         .map((order) => order.id)
         .valueSeq()
         .toArray();
 
       const request = {
-        ids,
+        ids: targetsIds,
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
@@ -1657,11 +1657,9 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getOrders(request);
 
-      // expect(response).not.toBeObject();
-      // expect(response).toBeUndefined();
-      expect(response.keySeq().toArray().length).toEqual(0);
-
       logResponse(response);
+
+      expect(response.size).toEqual(0);
     });
 
     // // TODO Fix!!!
