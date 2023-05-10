@@ -1454,9 +1454,13 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // TODO Fix!!!
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
-      const order = getOrder('1');
+      const targets = getOrders(['1', '2', '3', '6', '7', '10', '11']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
 
       const request = {
         ownerAddress: ownerAddress,
@@ -1467,11 +1471,16 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getOrders(request);
 
-      expect(response.keySeq().toArray()).not.toContain(
-        getNotNullOrThrowError(order.id)
-      );
-
       logResponse(response);
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeFalse()
+      );
     });
 
     it('Cancel the orders 4 and 5', async () => {
@@ -1662,10 +1671,20 @@ describe('Kujira Full Flow', () => {
       expect(response.size).toEqual(0);
     });
 
-    // // TODO Fix!!!
     it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 10, and 11 are missing', async () => {
-      const orders = getOrders(['1', '3', '4', '5']);
-      const ids = orders
+      const targets = getOrders([
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '10',
+        '11',
+      ]);
+
+      const targetsIds = targets
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -1679,15 +1698,16 @@ describe('Kujira Full Flow', () => {
 
       const response = await kujira.getOrders(request);
 
-      const openOrdersIds = response.keySeq().toArray();
-
-      for (const id of ids) {
-        expect(
-          openOrdersIds.includes(getNotNullOrThrowError<OrderId>(id))
-        ).toBeFalsy();
-      }
-
       logResponse(response);
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeFalse()
+      );
     });
 
     // // TODO Fix!!!
