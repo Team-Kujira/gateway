@@ -47,12 +47,14 @@ import {
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrdersRequest,
+  Token,
   TokenId,
   Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
+import lodash from 'lodash';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -66,6 +68,8 @@ let allTokens: any;
 let kujira: Kujira;
 
 const config = KujiraConfig.config;
+
+const kujiToken = KUJI;
 
 const tokenIds = {
   1: KUJI.reference, // KUJI
@@ -94,7 +98,7 @@ const orders: IMap<OrderClientId, Order> = IMap<
 
 let userBalances: Balances;
 
-let lastPayedFeeSum: OrderFee | undefined;
+let lastPayedFeeSum: OrderFee = BigNumber(0);
 
 const getOrder = (clientId: OrderClientId): Order => {
   return getOrders([clientId]).first();
@@ -740,7 +744,7 @@ describe('Kujira Full Flow', () => {
       expect(response.status).toBe(OrderStatus.OPEN);
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
 
-      lastPayedFeeSum = response.fee;
+      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(response.fee);
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
@@ -847,7 +851,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      lastPayedFeeSum = response.fee;
+      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(response.fee);
 
       candidate.id = response.id;
       candidate.marketName = response.marketName;
@@ -1149,7 +1153,6 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    // TODO Fix!!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       const targetOrders = getOrders([
         '4',
@@ -1173,83 +1176,49 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const spentBalances: Balances = {
-        tokens: IMap<TokenId, Balance>().asMutable(),
-        total: {
-          token: 'total',
-          free: BigNumber(0),
-          lockedInOrders: BigNumber(0),
-          unsettled: BigNumber(0),
-        },
-      } as Balances;
+      const currentBalances = lodash.cloneDeep(response);
 
-      for (const order of (response as IMap<OrderId, Order>).values()) {
+      for (const order of targetOrders.values()) {
+        let balance: Balance;
+
         if (order.side == OrderSide.BUY) {
-          spentBalances.tokens.get(order.market.baseTokenId)?.free =
-            BigNumber();
+          balance = getNotNullOrThrowError<Balance>(
+            currentBalances.tokens.get(order.market.quoteToken.id)
+          );
         } else if (order.side == OrderSide.SELL) {
+          balance = getNotNullOrThrowError<Balance>(
+            currentBalances.tokens.get(order.market.baseToken.id)
+          );
         } else {
           throw new Error('Invalid order side');
         }
-      }
 
-      const finalBalanceChange: Balances = {
-        tokens: IMap<TokenId, Balance>().asMutable(),
-        total: {
-          token: 'total',
-          free: BigNumber(0),
-          lockedInOrders: BigNumber(0),
-          unsettled: BigNumber(0),
-        },
-      } as Balances;
+        balance.free = balance.free.plus(order.amount);
 
-      for (const [key, balance] of userBalances.tokens.entries()) {
-        finalBalanceChange.tokens.set(key, {
-          token: balance.token,
-          ticker: balance.ticker,
-          free: BigNumber(0),
-          lockedInOrders: BigNumber(0),
-          unsettled: BigNumber(0),
-        } as Balance);
-      }
-
-      const orders = getOrders(['3', '4', '5', '6', '7', '8', '9']);
-      const kujiBalanceChange = getNotNullOrThrowError<Balance>(
-        finalBalanceChange.tokens.get(KUJI.reference)
-      );
-      const orderFee = getNotNullOrThrowError<BigNumber>(orders.first()?.fee);
-      kujiBalanceChange.free = kujiBalanceChange.free.plus(orderFee);
-      orders.map((order) => {
-        const orderAmount = getNotNullOrThrowError<BigNumber>(order.amount);
-        const marketTokens = networkPairs[order.marketId].denoms;
-        const oldBaseBalance = getNotNullOrThrowError<Balance>(
-          finalBalanceChange.tokens.get(marketTokens[0].reference)
-        );
-        const oldQuoteBalance = getNotNullOrThrowError<Balance>(
-          finalBalanceChange.tokens.get(marketTokens[1].reference)
-        );
-
-        if (order.side == OrderSide.BUY) {
-          oldQuoteBalance.free = oldQuoteBalance.free.plus(orderAmount);
-        } else if (order.side == OrderSide.SELL) {
-          oldBaseBalance.free = oldBaseBalance.free.plus(orderAmount);
+        if (order.type == OrderType.LIMIT) {
+          if (order.status == OrderStatus.OPEN) {
+            balance.lockedInOrders = balance.lockedInOrders.minus(order.amount);
+          } else if (order.status == OrderStatus.FILLED) {
+            balance.unsettled = balance.unsettled.minus(order.amount);
+          }
         }
-      });
+      }
 
-      userBalances.tokens.keySeq().forEach((key) => {
-        const oldBalance = getNotNullOrThrowError<Balance>(
-          userBalances.tokens.get(key)
+      const kujiBalance = getNotNullOrThrowError<Balance>(
+        currentBalances.tokens.get(kujiToken.reference)
+      );
+
+      kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
+
+      for (const balance of userBalances.tokens.values()) {
+        const currentBalance = getNotNullOrThrowError<Balance>(
+          currentBalances.tokens.get((balance.token as Token).id)
         );
-        const balanceChange = getNotNullOrThrowError<Balance>(
-          finalBalanceChange.tokens.get(key)
-        );
-        const newBalance = getNotNullOrThrowError<Balance>(
-          response.tokens.get(key)
-        );
-        expect(oldBalance.free.minus(balanceChange.free)).toEqual(
-          newBalance.free
-        );
-      });
+
+        expect(balance.free).toBe(currentBalance.free);
+        expect(balance.lockedInOrders).toBe(currentBalance.lockedInOrders);
+        expect(balance.unsettled).toBe(currentBalance.unsettled);
+      }
 
       userBalances = response;
     });
