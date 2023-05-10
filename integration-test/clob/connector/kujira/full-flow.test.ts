@@ -1327,7 +1327,7 @@ describe('Kujira Full Flow', () => {
       target.hashes = response.hashes;
       target.status = OrderStatus.CANCELLED;
 
-      lastPayedFeeSum = response.fee;
+      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(response.fee);
     });
 
     it('Check the wallet balances from the tokens 1 and 2', async () => {
