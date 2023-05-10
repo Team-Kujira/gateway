@@ -1710,8 +1710,14 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    // // TODO Fix!!!
     it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
+      const targets = getOrders(['2', '6', '7']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
       const request = {
         ownerAddress: ownerAddress,
         status: OrderStatus.FILLED,
@@ -1722,6 +1728,15 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeTrue()
+      );
     });
 
     // // TODO Fix!!!
