@@ -1964,8 +1964,14 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    // // TODO Fix!!!
     it('Get all open orders and check that the orders 12 and 13 are present', async () => {
+      const targets = getOrders(['12', '13']);
+
+      const targetsIds = targets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
       const request = {
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
@@ -1976,6 +1982,15 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      targetsIds.forEach((orderId) =>
+        expect(responseOrdersIds.includes(orderId)).toBeTrue()
+      );
     });
 
     // // TODO Fix!!!
