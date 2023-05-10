@@ -888,7 +888,7 @@ describe('Kujira Full Flow', () => {
       // Verifying token 1 (base) balance
       const currentBaseBalance = getNotNullOrThrowError<any>(
         userBalances.tokens.get(targetOrder.market.baseToken.id)
-      ).free.minus(lastPayedFeeSum, targetOrder.price);
+      ).free.minus(lastPayedFeeSum, targetOrder.amount);
 
       expect(
         response.tokens.get(targetOrder.market.baseToken.id)?.free
