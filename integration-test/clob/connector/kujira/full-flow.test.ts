@@ -428,11 +428,20 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getMarket(request);
 
       logResponse(response);
+
+      const networkPair = networkPairs[marketIds[1]];
+      expect(response.id).toEqual(marketIds[1]);
+      expect([response.baseToken, response.quoteToken]).toEqual(
+        networkPair.denoms
+      );
+      expect(response.precision).toEqual(networkPair.precision);
     });
 
     it('Get markets 2 and 3', async () => {
+      const targetMarketIds = [marketIds[2], marketIds[3]];
+
       const request = {
-        ids: [marketIds[2], marketIds[3]],
+        ids: targetMarketIds,
       } as GetMarketsRequest;
 
       logRequest(request);
@@ -440,9 +449,25 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getMarkets(request);
 
       logResponse(response);
+
+      expect(targetMarketIds.length).toEqual(response.size);
+
+      targetMarketIds.forEach((marketId) => {
+        const networkPair = networkPairs[marketId];
+        const responseToken = getNotNullOrThrowError<Market>(
+          response.get(marketId)
+        );
+
+        expect(responseToken.id).toEqual(marketIds[1]);
+        expect([responseToken.baseToken, responseToken.quoteToken]).toEqual(
+          networkPair.denoms
+        );
+        expect(responseToken.precision).toEqual(networkPair.precision);
+      });
     });
 
     it('Get all markets', async () => {
+      const targetMarketIds = [marketIds[1], marketIds[2], marketIds[3]];
       const request = {} as GetAllMarketsRequest;
 
       logRequest(request);
@@ -450,6 +475,19 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getAllMarkets(request);
 
       logResponse(response);
+
+      targetMarketIds.forEach((marketId) => {
+        const networkPair = networkPairs[marketId];
+        const responseToken = getNotNullOrThrowError<Market>(
+          response.get(marketId)
+        );
+
+        expect(responseToken.id).toEqual(marketIds[1]);
+        expect([responseToken.baseToken, responseToken.quoteToken]).toEqual(
+          networkPair.denoms
+        );
+        expect(responseToken.precision).toEqual(networkPair.precision);
+      });
     });
   });
 
