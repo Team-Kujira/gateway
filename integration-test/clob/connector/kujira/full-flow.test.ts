@@ -48,6 +48,7 @@ import {
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrdersRequest,
+  Ticker,
   Token,
   TokenId,
   Withdraw,
@@ -443,7 +444,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(allTokens);
 
-      expect(allTokens.size).toBe(request);
+      expect(allTokens.size).toBe(Object.values(tokenIds).length);
 
       for (const tokenId of getNotNullOrThrowError<TokenId[]>(tokenIds)) {
         const token = Denom.from(tokenId);
@@ -641,11 +642,16 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getTicker(request);
 
       logResponse(response);
+
+      expect(response.market.id).toEqual(marketIds[1]);
+      expect(response.price.gt(0)).toBeTrue();
+      expect(response.timestamp).toBeGreaterThan(0);
     });
 
     it('Get tickers from markets 2 and 3', async () => {
+      const targetMarketsIds = [marketIds[2], marketIds[3]];
       const request = {
-        marketIds: [marketIds[2], marketIds[3]],
+        marketIds: targetMarketsIds,
       } as GetTickersRequest;
 
       logRequest(request);
@@ -653,9 +659,17 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getTickers(request);
 
       logResponse(response);
+
+      targetMarketsIds.forEach((marketId) => {
+        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketId));
+        expect(ticker.market.id).toEqual(marketId);
+        expect(ticker.price.gt(0)).toBeTrue();
+        expect(ticker.timestamp).toBeGreaterThan(0);
+      });
     });
 
     it('Get all tickers', async () => {
+      const targetMarketsIds = [marketIds[1], marketIds[2], marketIds[3]];
       const request = {} as GetAllTickersRequest;
 
       logRequest(request);
@@ -663,6 +677,13 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getAllTickers(request);
 
       logResponse(response);
+
+      targetMarketsIds.forEach((marketId) => {
+        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketId));
+        expect(ticker.market.id).toEqual(marketId);
+        expect(ticker.price.gt(0)).toBeTrue();
+        expect(ticker.timestamp).toBeGreaterThan(0);
+      });
     });
   });
 
