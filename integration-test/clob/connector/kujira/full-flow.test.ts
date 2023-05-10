@@ -37,6 +37,7 @@ import {
   MarketsWithdrawsRequest,
   MarketWithdrawRequest,
   Order,
+  OrderBook,
   OrderClientId,
   OrderFee,
   OrderId,
@@ -47,6 +48,7 @@ import {
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrdersRequest,
+  Ticker,
   Token,
   TokenId,
   Withdraw,
@@ -442,7 +444,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(allTokens);
 
-      expect(allTokens.size).toBe(request);
+      expect(allTokens.size).toBe(Object.values(tokenIds).length);
 
       for (const tokenId of getNotNullOrThrowError<TokenId[]>(tokenIds)) {
         const token = Denom.from(tokenId);
@@ -569,6 +571,13 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrderBook(request);
 
       logResponse(response);
+
+      expect(response).not.toBeUndefined();
+      expect(response.market.id).toBe(request.marketId);
+      expect(response.bids).not.toBeEmpty();
+      expect(response.asks).not.toBeEmpty();
+      expect(response.bestBid).not.toBeUndefined();
+      expect(response.bestAsk).not.toBeUndefined();
     });
 
     it('Get order books from the markets 2 and 3', async () => {
@@ -581,6 +590,21 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrderBooks(request);
 
       logResponse(response);
+
+      expect(response.size).toEqual(request.marketIds?.length);
+
+      for (const marketId of getNotNullOrThrowError<MarketId[]>(
+        request.marketIds
+      )) {
+        const orderBook = getNotNullOrThrowError<OrderBook>(
+          response.get(marketId)
+        );
+        expect(orderBook.market.id).toBe(marketId);
+        expect(orderBook.bids).not.toBeEmpty();
+        expect(orderBook.asks).not.toBeEmpty();
+        expect(orderBook.bestBid).not.toBeUndefined();
+        expect(orderBook.bestAsk).not.toBeUndefined();
+      }
     });
 
     it('Get all order books', async () => {
@@ -591,6 +615,19 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getAllOrderBooks(request);
 
       logResponse(response);
+
+      expect(response.size).toEqual(request.marketIds?.length);
+
+      for (const marketId of getNotNullOrThrowError<MarketId[]>(marketIds)) {
+        const orderBook = getNotNullOrThrowError<OrderBook>(
+          response.get(marketId)
+        );
+        expect(orderBook.market.id).toBe(marketId);
+        expect(orderBook.bids).not.toBeEmpty();
+        expect(orderBook.asks).not.toBeEmpty();
+        expect(orderBook.bestBid).not.toBeUndefined();
+        expect(orderBook.bestAsk).not.toBeUndefined();
+      }
     });
   });
 
@@ -605,11 +642,16 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getTicker(request);
 
       logResponse(response);
+
+      expect(response.market.id).toEqual(marketIds[1]);
+      expect(response.price.gt(0)).toBeTrue();
+      expect(response.timestamp).toBeGreaterThan(0);
     });
 
     it('Get tickers from markets 2 and 3', async () => {
+      const targetMarketsIds = [marketIds[2], marketIds[3]];
       const request = {
-        marketIds: [marketIds[2], marketIds[3]],
+        marketIds: targetMarketsIds,
       } as GetTickersRequest;
 
       logRequest(request);
@@ -617,9 +659,17 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getTickers(request);
 
       logResponse(response);
+
+      targetMarketsIds.forEach((marketId) => {
+        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketId));
+        expect(ticker.market.id).toEqual(marketId);
+        expect(ticker.price.gt(0)).toBeTrue();
+        expect(ticker.timestamp).toBeGreaterThan(0);
+      });
     });
 
     it('Get all tickers', async () => {
+      const targetMarketsIds = [marketIds[1], marketIds[2], marketIds[3]];
       const request = {} as GetAllTickersRequest;
 
       logRequest(request);
@@ -627,6 +677,13 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getAllTickers(request);
 
       logResponse(response);
+
+      targetMarketsIds.forEach((marketId) => {
+        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketId));
+        expect(ticker.market.id).toEqual(marketId);
+        expect(ticker.price.gt(0)).toBeTrue();
+        expect(ticker.timestamp).toBeGreaterThan(0);
+      });
     });
   });
 
