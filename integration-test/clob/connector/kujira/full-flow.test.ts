@@ -1724,8 +1724,26 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
     });
 
-    // // TODO Fix!!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
+      const limitOrdersTargets = getOrders(['2', '6', '7']);
+      const marketOrdersTargets = getOrders(['3', '10', '11']);
+      const cancelledOrdersTargets = getOrders(['1', '4', '5']);
+
+      const limitOrdersTargetsIds = limitOrdersTargets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const marketOrdersTargetsIds = marketOrdersTargets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      const cancelledOrdersTargetsIds = cancelledOrdersTargets
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
       const request = {
         ownerAddress: ownerAddress,
       } as GetOrdersRequest;
@@ -1735,6 +1753,29 @@ describe('Kujira Full Flow', () => {
       const response = await kujira.getOrders(request);
 
       logResponse(response);
+
+      const responseOrdersIds = (response as IMap<OrderId, Order>)
+        .map((order) => order.id)
+        .valueSeq()
+        .toArray();
+
+      limitOrdersTargetsIds.forEach((orderId) =>
+        expect(responseOrdersIds).toInclude(
+          getNotNullOrThrowError<OrderId>(orderId)
+        )
+      );
+
+      marketOrdersTargetsIds.forEach((orderId) =>
+        expect(responseOrdersIds).not.toInclude(
+          getNotNullOrThrowError<OrderId>(orderId)
+        )
+      );
+
+      cancelledOrdersTargetsIds.forEach((orderId) =>
+        expect(responseOrdersIds).not.toInclude(
+          getNotNullOrThrowError<OrderId>(orderId)
+        )
+      );
     });
 
     // // TODO Fix!!!
