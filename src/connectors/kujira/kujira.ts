@@ -722,7 +722,10 @@ export class Kujira {
   async getOrderBook(
     options: GetOrderBookRequest
   ): Promise<GetOrderBookResponse> {
-    const market = await this.getMarket({ id: options.marketId });
+    const market = await this.getMarket({
+      id: options.marketId,
+      name: options.marketName,
+    });
 
     const orderBook = await this.kujiraQueryClientWasmQueryContractSmart(
       market.connectorMarket.address,

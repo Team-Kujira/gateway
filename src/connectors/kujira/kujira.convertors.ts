@@ -92,7 +92,7 @@ export const convertClobOrderbookRequestToGetOrderBookOptions = (
   request: ClobOrderbookRequest
 ): GetOrderBookRequest => {
   return {
-    marketId: request.market,
+    marketName: request.market.replace('-', '/'),
   } as GetOrderBookRequest;
 };
 
