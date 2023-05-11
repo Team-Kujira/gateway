@@ -421,11 +421,21 @@ export const convertToClobDeleteOrderResponseForCancellation = (
 
 // TODO fix!!!
 export const convertToBalancesResponse = (
-  _response: Balances
+  response: Balances
 ): BalancesResponse => {
+  const balances = response.tokens
+    .valueSeq()
+    .toArray()
+    .map((balance) => {
+      return {
+        token: balance.token !== 'total' ? balance.token.id : 'total',
+        amount: balance.free.toString(),
+      } as BankBalance;
+    });
+
   return {
     injectiveAddress: undefined as unknown as string,
-    balances: [] as Array<BankBalance>,
+    balances: balances as Array<BankBalance>,
     subaccounts: [] as Array<SubaccountBalancesWithId>,
   } as BalancesResponse;
 };
