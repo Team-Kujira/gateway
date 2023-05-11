@@ -75,7 +75,7 @@ export class KujiraConnector {
   }
 
   ready(): boolean {
-    return this.kujira.isReady;
+    return this.kujira && this.kujira.isReady;
   }
 
   public async markets(
