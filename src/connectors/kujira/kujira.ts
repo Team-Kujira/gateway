@@ -1220,7 +1220,10 @@ export class Kujira {
     options: CancelOrdersRequest
   ): Promise<CancelOrdersResponse> {
     // TODO Make this method to support multiple markets!!!
-    const market = await this.getMarket({ id: options.marketId });
+    const market = await this.getMarket({
+      id: options.marketId,
+      name: options.marketName,
+    });
 
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 

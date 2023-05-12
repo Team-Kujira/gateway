@@ -200,7 +200,8 @@ export const convertClobDeleteOrderRequestToCancelOrderOptions = (
   return {
     id: request.orderId,
     ownerAddress: 'address' in request ? request.address : undefined,
-    marketId: 'market' in request ? request.market : undefined,
+    marketName:
+      'market' in request ? request.market.replace('-', '/') : undefined,
   } as CancelOrderRequest;
 };
 
