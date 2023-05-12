@@ -352,10 +352,11 @@ export const convertToClobTickerResponse = (
 
 export const convertToClobPostOrderResponse = (
   response: Order
-): { txHash: string } => {
+): { txHash: string; id: string } => {
   return {
     txHash: response.hashes?.creation,
-  } as { txHash: string };
+    id: response.id,
+  } as { txHash: string; id: string };
 };
 
 // TODO fix!!!
