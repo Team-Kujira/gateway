@@ -1,10 +1,12 @@
+import { isKujiraPrivateKey } from '../../connectors/kujira/kujira.helpers';
 import {
-  mkValidator,
   mkRequestValidator,
+  mkSelectingValidator,
+  mkValidator,
   RequestValidator,
   Validator,
-  mkSelectingValidator,
 } from '../validators';
+
 const { fromBase64 } = require('@cosmjs/encoding');
 
 export const invalidEthPrivateKeyError: string =
@@ -40,13 +42,6 @@ export const isCosmosPrivateKey = (str: string): boolean => {
   }
 };
 
-export const isKujiraPrivateKey = (str: string): boolean => {
-  return /^(?:\b[a-z]+\b(?:\s|$)){12}(?:(?:\b[a-z]+\b(?:\s|$)){12})?$/.test(
-    str
-  );
-};
-
-// given a request, look for a key called privateKey that is an Ethereum private key
 export const validatePrivateKey: Validator = mkSelectingValidator(
   'chain',
   (req, key) => req[key],

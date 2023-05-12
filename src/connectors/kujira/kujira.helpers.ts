@@ -170,6 +170,16 @@ export const verifyKujiraIsAvailable = async (
   return next();
 };
 
+export const isValidKujiraPublicKey = (publicKey: string): boolean => {
+  return /^kujira([a-z0-9]){39}$/.test(publicKey);
+};
+
+export const isKujiraPrivateKey = (privateKey: string): boolean => {
+  return /^(?:\b[a-z]+\b(?:\s|$)){12}(?:(?:\b[a-z]+\b(?:\s|$)){12})?$/.test(
+    privateKey
+  );
+};
+
 export function serialize(target: any): string {
   return stringify(target);
 }
