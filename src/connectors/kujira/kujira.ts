@@ -1207,6 +1207,7 @@ export class Kujira {
         ids: [options.id],
         ownerAddresses: [options.ownerAddress],
         marketId: options.marketId,
+        marketName: options.marketName,
       })) as IMap<OrderId, Order>
     ) // Cast because we only have one ownerAddress.
       .first();

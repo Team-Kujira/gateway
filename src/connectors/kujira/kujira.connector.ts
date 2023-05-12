@@ -118,7 +118,7 @@ export class KujiraConnector {
 
   public async postOrder(
     req: ClobPostOrderRequest
-  ): Promise<{ txHash: string }> {
+  ): Promise<{ txHash: string; id: string }> {
     return convertToClobPostOrderResponse(
       await this.kujira.placeOrder(
         convertClobPostOrderRequestToPlaceOrderOptions(req)
