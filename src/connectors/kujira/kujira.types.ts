@@ -499,7 +499,7 @@ export type GetOrdersResponse =
   | IMap<OwnerAddress, IMap<OrderId, Order>>;
 
 export interface PlaceOrderRequest {
-  marketId: MarketId;
+  marketId?: MarketId;
   marketName?: MarketName;
   ownerAddress?: OrderOwnerAddress;
   side: OrderSide;

@@ -1110,7 +1110,10 @@ export class Kujira {
     for (const candidate of options.orders) {
       bundles.setIn(['orders', bundleIndex, 'candidate'], candidate);
 
-      const market = await this.getMarket({ id: candidate.marketId });
+      const market = await this.getMarket({
+        id: candidate.marketId,
+        name: candidate.marketName,
+      });
       bundles.setIn(['orders', bundleIndex, 'market'], market);
 
       let denom: Denom;

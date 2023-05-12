@@ -130,7 +130,7 @@ export const convertClobOrderTypeToOrderType = (
   if (request == 'LIMIT') {
     return OrderType.LIMIT;
   } else if (request == 'LIMIT_MAKER') {
-    return OrderType.POST_ONLY;
+    return OrderType.LIMIT;
   } else {
     throw new Error('Error in conversion between order type');
   }
@@ -141,7 +141,8 @@ export const convertClobPostOrderRequestToPlaceOrderOptions = (
 ): PlaceOrderRequest => {
   return {
     waitUntilIncludedInBlock: false,
-    marketId: request.market,
+    marketId: undefined,
+    marketName: request.market.replace('-', '/'),
     ownerAddress: 'address' in request ? request.address : undefined,
     side: convertClobSideToOrderSide(request.side),
     price: BigNumber(request.price),
