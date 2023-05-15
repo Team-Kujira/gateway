@@ -15,10 +15,10 @@ import {
   convertToGetTokensResponse,
   convertToPollResponse,
 } from '../../connectors/kujira/kujira.convertors';
-import { getNotNullOrThrowError } from '../../connectors/kujira/kujira.helpers';
 import { KujiraConfig } from '../../connectors/kujira/kujira.config';
 import { Address } from '../../connectors/kujira/kujira.types';
 import { TokenInfo } from '../ethereum/ethereum-base';
+import { MAINNET, NETWORKS, TESTNET } from 'kujira.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -52,11 +52,24 @@ export class KujiraChain {
   public static async getConnectedInstances(): Promise<{
     [name: string]: KujiraChain;
   }> {
-    return {
-      mainnet: getNotNullOrThrowError<KujiraChain>(
-        await caches.instances.getItem('mainnet')
-      ),
-    };
+    const connectedInstances: { [name: string]: KujiraChain } = {};
+
+    for (let network of [NETWORKS[MAINNET], NETWORKS[TESTNET]]) {
+      network = network.toLowerCase();
+
+      let instance: KujiraChain = (await caches.instances.getItem(
+        network
+      )) as KujiraChain;
+
+      if (!instance) {
+        instance = await this.getInstance(network);
+        await instance.init();
+      }
+
+      connectedInstances[network] = instance as KujiraChain;
+    }
+
+    return connectedInstances;
   }
 
   ready(): boolean {
