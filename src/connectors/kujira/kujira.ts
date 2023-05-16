@@ -1008,8 +1008,11 @@ export class Kujira {
     for (const ownerAddress of ownerAddresses) {
       let orders: IMap<OrderId, Order>;
 
-      if (options.marketId) {
-        const market = await this.getMarket({ id: options.marketId });
+      if (options.marketId || options.marketName) {
+        const market = await this.getMarket({
+          id: options.marketId,
+          name: options.marketName,
+        });
 
         const response = await this.kujiraQueryClientWasmQueryContractSmart(
           market.connectorMarket.address,
