@@ -37,6 +37,11 @@ export namespace KujiraConfig {
         Object.entries(configManager.get(`kujira.tickers.sources`))
       ),
     },
+    fees: {
+      maker: BigNumber(0.075), // Percentual value (%)
+      taker: BigNumber(0.15), // Percentual value (%)
+      serviceProvider: BigNumber(0), // Percentual value (%)
+    },
     orders: {
       create: {
         fee: configManager.get(`kujira.orders.create.fee`),
