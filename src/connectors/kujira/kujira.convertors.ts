@@ -268,10 +268,10 @@ export const convertToClobMarketResponse = (
       cw20s: undefined,
       erc20: undefined,
     },
-    takerFeeRate: response.fee.maker, // TODO what is the difference between maker to taker? !!!
+    takerFeeRate: response.fees.maker,
     serviceProviderFee: undefined, // TODO resolve this one as well !!!
-    minPriceTickSize: response.minimumOrderSize,
-    minQuantityTickSize: response.minimumBaseIncrement,
+    minPriceTickSize: response.minimumPriceIncrement,
+    minQuantityTickSize: response.minimumOrderSize,
   } as CLOBMarkets;
 
   return { markets: resp };
@@ -500,7 +500,7 @@ export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
       ? market.precision?.decimal_places
       : market.precision.significant_figures;
 
-  const tickSize = BigNumber(Math.pow(10, -1 * decimalPlaces));
+  const minimumPriceIncrement = BigNumber(Math.pow(10, -1 * decimalPlaces));
 
   return {
     id: market.address,
@@ -508,10 +508,15 @@ export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
     baseToken: baseToken,
     quoteToken: quoteToken,
     precision: decimalPlaces,
-    minimumOrderSize: tickSize, // TODO check correct value!!!
-    tickSize: tickSize, // TODO check correct value!!!
-    minimumBaseIncrement: tickSize, // TODO check correct value!!!
-    fee: { taker: BigNumber(0), maker: BigNumber(0) }, // TODO check correct value!!!
+    minimumOrderSize: minimumPriceIncrement, // TODO Check for the correct values!!!
+    minimumPriceIncrement: minimumPriceIncrement, // TODO Check for the correct values!!!
+    minimumBaseAmountIncrement: minimumPriceIncrement, // TODO Check for the correct values!!!
+    minimumQuoteAmountIncrement: minimumPriceIncrement, // TODO Check for the correct values!!!
+    fees: {
+      maker: KujiraConfig.config.fees.maker,
+      taker: KujiraConfig.config.fees.taker,
+      serviceProvider: KujiraConfig.config.fees.serviceProvider,
+    },
     programId: undefined,
     deprecated: false,
     connectorMarket: market,
