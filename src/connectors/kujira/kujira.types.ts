@@ -69,8 +69,9 @@ export type MarketPrecision = number;
 export type MarketProgramId = Address;
 export type MarketDeprecation = boolean;
 export type MarketMinimumOrderSize = BigNumber;
-export type MarketTickSize = BigNumber;
+export type MarketMinimumPriceIncrement = BigNumber;
 export type MarketMinimumBaseIncrement = BigNumber;
+export type MarketMinimumQuoteIncrement = BigNumber;
 
 export type TickerPrice = Price;
 export type TickerTimestamp = Timestamp;
@@ -98,6 +99,7 @@ export type Withdraw = {
 
 export type FeeMaker = Fee;
 export type FeeTaker = Fee;
+export type FeeServiceProvider = Fee;
 
 export type EstimatedFeesToken = string;
 export type EstimatedFeesPrice = Price;
@@ -185,22 +187,11 @@ export interface Market {
   baseToken: Token;
   quoteToken: Token;
   precision: MarketPrecision;
-
-  /**
-   *
-   */
   minimumOrderSize: MarketMinimumOrderSize;
-
-  /**
-   *
-   */
-  tickSize: MarketTickSize;
-
-  /**
-   *
-   */
-  minimumBaseIncrement?: MarketMinimumBaseIncrement;
-  fee: MarketFee;
+  minimumPriceIncrement: MarketMinimumPriceIncrement; // Also called tickSize
+  minimumBaseAmountIncrement: MarketMinimumBaseIncrement;
+  minimumQuoteAmountIncrement: MarketMinimumQuoteIncrement;
+  fees: MarketFee;
   programId?: MarketProgramId;
   deprecated?: MarketDeprecation;
   connectorMarket: ConnectorMarket;
@@ -267,6 +258,7 @@ export interface TransactionHashes {
 export interface MarketFee {
   maker: FeeMaker;
   taker: FeeTaker;
+  serviceProvider: FeeServiceProvider;
 }
 
 export interface EstimatedFees {
