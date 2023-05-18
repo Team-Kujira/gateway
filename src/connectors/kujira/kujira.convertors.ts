@@ -913,6 +913,7 @@ export const convertKujiraTransactionToTransaction = (
     gasUsed: input.gasUsed,
     gasWanted: input.gasWanted,
     code: input.code,
+    data: new TextDecoder('utf-8').decode(input.tx),
   };
 };
 

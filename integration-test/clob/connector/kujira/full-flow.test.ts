@@ -31,6 +31,8 @@ import {
   GetTickersRequest,
   GetTokenRequest,
   GetTokensRequest,
+  GetTransactionRequest,
+  GetTransactionsRequest,
   IMap,
   Market,
   MarketId,
@@ -51,6 +53,7 @@ import {
   Ticker,
   Token,
   TokenId,
+  Transaction,
   Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
 import { DEMO, Denom, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
@@ -79,18 +82,24 @@ const tokenIds = {
   3: USK_TESTNET.reference, // USK
 };
 
-const networkPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
+const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
 
-const marketIds = {
-  1: networkPairs[
+const marketsIds = {
+  1: networksPairs[
     'kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh'
   ].address, // KUJI/DEMO
-  2: networkPairs[
+  2: networksPairs[
     'kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6'
   ].address, // KUJI/USK
-  3: networkPairs[
+  3: networksPairs[
     'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg'
   ].address, // DEMO/USK
+};
+
+const transactionsHashes = {
+  1: 'D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9',
+  2: '50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91',
+  3: '66DBF37EAE15E28AD70E3292216DEE3D6B61E5C5913EBCE584E4971D2A6A2F2B',
 };
 
 const orders: IMap<OrderClientId, Order> = IMap<
@@ -144,7 +153,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '1',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketsIds[1],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -162,7 +171,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '2',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketsIds[2],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -180,7 +189,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '3',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[3],
+    marketId: marketsIds[3],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -198,7 +207,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '4',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketsIds[1],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -216,7 +225,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '5',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketsIds[2],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -234,7 +243,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '6',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[3],
+    marketId: marketsIds[3],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -252,7 +261,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '7',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketsIds[1],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -270,7 +279,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '8',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketsIds[2],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -288,7 +297,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '9',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[3],
+    marketId: marketsIds[3],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -306,7 +315,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '10',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketsIds[1],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -324,7 +333,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '11',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[2],
+    marketId: marketsIds[2],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -342,7 +351,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '12',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[3],
+    marketId: marketsIds[3],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -360,7 +369,7 @@ beforeAll(async () => {
     id: undefined,
     clientId: '13',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketIds[1],
+    marketId: marketsIds[1],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
@@ -462,7 +471,7 @@ describe('Kujira Full Flow', () => {
   describe('Markets', () => {
     it('Get market 1', async () => {
       const request = {
-        id: marketIds[1],
+        id: marketsIds[1],
       } as GetMarketRequest;
 
       logRequest(request);
@@ -471,8 +480,8 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      const networkPair = networkPairs[marketIds[1]];
-      expect(response.id).toEqual(marketIds[1]);
+      const networkPair = networksPairs[marketsIds[1]];
+      expect(response.id).toEqual(marketsIds[1]);
       expect([response.baseToken.id, response.quoteToken.id]).toEqual([
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
@@ -487,7 +496,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get markets 2 and 3', async () => {
-      const targetMarketIds = [marketIds[2], marketIds[3]];
+      const targetMarketIds = [marketsIds[2], marketsIds[3]];
 
       const request = {
         ids: targetMarketIds,
@@ -502,7 +511,7 @@ describe('Kujira Full Flow', () => {
       expect(targetMarketIds.length).toEqual(response.size);
 
       targetMarketIds.forEach((marketId) => {
-        const networkPair = networkPairs[marketId];
+        const networkPair = networksPairs[marketId];
         const responseToken = getNotNullOrThrowError<Market>(
           response.get(marketId)
         );
@@ -526,7 +535,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all markets', async () => {
-      const targetMarketIds = [marketIds[1], marketIds[2], marketIds[3]];
+      const targetMarketIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
       const request = {} as GetAllMarketsRequest;
 
       logRequest(request);
@@ -536,7 +545,7 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
 
       targetMarketIds.forEach((marketId) => {
-        const networkPair = networkPairs[marketId];
+        const networkPair = networksPairs[marketId];
         const responseToken = getNotNullOrThrowError<Market>(
           response.get(marketId)
         );
@@ -563,7 +572,7 @@ describe('Kujira Full Flow', () => {
   describe('Order books', () => {
     it('Get order book from market 1', async () => {
       const request = {
-        marketId: marketIds[1],
+        marketId: marketsIds[1],
       } as GetOrderBookRequest;
 
       logRequest(request);
@@ -582,7 +591,7 @@ describe('Kujira Full Flow', () => {
 
     it('Get order books from the markets 2 and 3', async () => {
       const request = {
-        marketIds: [marketIds[2], marketIds[3]],
+        marketIds: [marketsIds[2], marketsIds[3]],
       } as GetOrderBooksRequest;
 
       logRequest(request);
@@ -618,7 +627,7 @@ describe('Kujira Full Flow', () => {
 
       expect(response.size).toEqual(request.marketIds?.length);
 
-      for (const marketId of getNotNullOrThrowError<MarketId[]>(marketIds)) {
+      for (const marketId of getNotNullOrThrowError<MarketId[]>(marketsIds)) {
         const orderBook = getNotNullOrThrowError<OrderBook>(
           response.get(marketId)
         );
@@ -634,7 +643,7 @@ describe('Kujira Full Flow', () => {
   describe('Tickers', () => {
     it('Get ticker from market 1', async () => {
       const request = {
-        marketId: marketIds[1],
+        marketId: marketsIds[1],
       } as GetTickerRequest;
 
       logRequest(request);
@@ -643,13 +652,13 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response.market.id).toEqual(marketIds[1]);
+      expect(response.market.id).toEqual(marketsIds[1]);
       expect(response.price.gt(0)).toBeTrue();
       expect(response.timestamp).toBeGreaterThan(0);
     });
 
     it('Get tickers from markets 2 and 3', async () => {
-      const targetMarketsIds = [marketIds[2], marketIds[3]];
+      const targetMarketsIds = [marketsIds[2], marketsIds[3]];
       const request = {
         marketIds: targetMarketsIds,
       } as GetTickersRequest;
@@ -669,7 +678,7 @@ describe('Kujira Full Flow', () => {
     });
 
     it('Get all tickers', async () => {
-      const targetMarketsIds = [marketIds[1], marketIds[2], marketIds[3]];
+      const targetMarketsIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
       const request = {} as GetAllTickersRequest;
 
       logRequest(request);
@@ -747,6 +756,52 @@ describe('Kujira Full Flow', () => {
         expect(balance).not.toBeUndefined();
         expect((balance.token as Token).id).toBe(tokenId);
       }
+    });
+  });
+
+  describe('Transactions', () => {
+    it('Get transaction 1', async () => {
+      const request = {
+        hash: transactionsHashes[1],
+      } as GetTransactionRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getTransaction(request);
+
+      logResponse(response);
+
+      expect(response.hash).toEqual(request.hash);
+      expect(response.blockNumber).toBeGreaterThan(0);
+      expect(response.gasUsed).toBeGreaterThan(0);
+      expect(response.gasWanted).toBeGreaterThan(0);
+      expect(response.code).toBe(0);
+      expect(response.data).toContain('retract_orders');
+    });
+
+    it('Get transactions 2 and 3', async () => {
+      const request = {
+        hashes: [transactionsHashes[2], transactionsHashes[3]],
+      } as GetTransactionsRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getTransactions(request);
+
+      logResponse(response);
+
+      request.hashes.forEach((hash) => {
+        const transaction = getNotNullOrThrowError<Transaction>(
+          response.get(hash)
+        );
+
+        expect(transaction.hash).toEqual(hash);
+        expect(transaction.blockNumber).toBeGreaterThan(0);
+        expect(transaction.gasUsed).toBeGreaterThan(0);
+        expect(transaction.gasWanted).toBeGreaterThan(0);
+        expect(transaction.code).toBe(0);
+        expect(transaction.data).toContain('submit_order');
+      });
     });
   });
 
@@ -1231,7 +1286,7 @@ describe('Kujira Full Flow', () => {
       expect(response.status).toEqual(OrderStatus.OPEN);
       expect(response.id).toEqual(target.id);
       expect(response.marketName).toBe(target.marketName);
-      expect(response.marketId).toBe(marketIds['3']);
+      expect(response.marketId).toBe(marketsIds['3']);
       expect(response.ownerAddress).toEqual(ownerAddress);
       expect(response.price).toEqual(target.price);
       expect(response.amount).toEqual(target.amount);
@@ -2637,7 +2692,7 @@ describe('Kujira Full Flow', () => {
 
     it('Settle funds for market 1', async () => {
       const request = {
-        marketId: marketIds[1],
+        marketId: marketsIds[1],
         ownerAddress: ownerAddress,
       } as MarketWithdrawRequest;
 
@@ -2761,7 +2816,7 @@ describe('Kujira Full Flow', () => {
 
     it('Settle funds for markets 2 and 3', async () => {
       const request = {
-        marketIds: [marketIds[2], marketIds[3]],
+        marketIds: [marketsIds[2], marketsIds[3]],
         ownerAddress: ownerAddress,
       } as MarketsWithdrawsRequest;
 
@@ -2903,7 +2958,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response.size).toBe(Object.values(marketIds).length);
+      expect(response.size).toBe(Object.values(marketsIds).length);
 
       for (const [marketId, withdraw] of (
         response as IMap<MarketId, Withdraw>

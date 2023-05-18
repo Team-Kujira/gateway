@@ -274,6 +274,7 @@ export interface Transaction {
   gasUsed: number;
   gasWanted: number;
   code: number;
+  data: any;
 }
 
 export interface BasicWallet {
