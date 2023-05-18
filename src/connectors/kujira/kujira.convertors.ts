@@ -508,10 +508,10 @@ export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
     baseToken: baseToken,
     quoteToken: quoteToken,
     precision: decimalPlaces,
-    minimumOrderSize: minimumPriceIncrement, // TODO Check for the correct values!!!
-    minimumPriceIncrement: minimumPriceIncrement, // TODO Check for the correct values!!!
-    minimumBaseAmountIncrement: minimumPriceIncrement, // TODO Check for the correct values!!!
-    minimumQuoteAmountIncrement: minimumPriceIncrement, // TODO Check for the correct values!!!
+    minimumOrderSize: minimumPriceIncrement, // Considering the market precision as the minimum value
+    minimumPriceIncrement: minimumPriceIncrement, // Considering the market precision as the minimum value
+    minimumBaseAmountIncrement: minimumPriceIncrement, // Considering the market precision as the minimum value
+    minimumQuoteAmountIncrement: minimumPriceIncrement, // Considering the market precision as the minimum value
     fees: {
       maker: KujiraConfig.config.fees.maker,
       taker: KujiraConfig.config.fees.taker,
