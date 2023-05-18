@@ -351,7 +351,6 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         address: response['address'],
         chainID: response['chainID'],
@@ -380,7 +379,6 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {};
 
       logOutput(output);
@@ -397,7 +395,6 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {};
 
       logOutput(output);
@@ -426,7 +423,6 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         market: null,
         asks: response['base'],
@@ -467,7 +463,6 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         price:
           (Number(response['base'][0]['quote_price']) +
@@ -684,7 +679,6 @@ describe('Kujira Full Flow', () => {
         throw new Error("Can't define the order side, implementation error");
       }
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         id: null,
         exchangeId: exchangeOrderId,
@@ -710,7 +704,7 @@ describe('Kujira Full Flow', () => {
       const targetOrderOrdinal = 1;
       const targetOrder = getOrder(targetOrderOrdinal);
       const marketId = targetOrder.marketId;
-      let output = {}; // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
+      let output = {};
       let filled: number;
 
       request = [
@@ -746,8 +740,8 @@ describe('Kujira Full Flow', () => {
           original_offer_amount: result.original_offer_amount,
           filled_amount: result.filled_amount,
           filled_percentage: filled,
-          side: '', // TODO !!!
-          price: 0, // TODO !!!
+          side: '',
+          price: 0,
           status: 'open',
         };
       }
@@ -832,7 +826,6 @@ describe('Kujira Full Flow', () => {
         throw new Error("Can't define the order side, implementation error");
       }
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         id: null,
         exchangeId: exchangeOrderId,
@@ -897,7 +890,6 @@ describe('Kujira Full Flow', () => {
         //   return parseFloat(it['offer_amount']) > 0;
         // });
 
-        // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
         output = { ...output };
       }
 
@@ -953,7 +945,6 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       const output = {
         id: null,
         exchangeId: targetOrderOrdinal,
@@ -1113,7 +1104,6 @@ describe('Kujira Full Flow', () => {
 
         logResponse(response);
 
-        // TODO fill with the correct value!!!
         ordersIds.push(response['order_idx']);
 
         const amount = 1000;
@@ -1149,7 +1139,6 @@ describe('Kujira Full Flow', () => {
 
         logResponse(response);
 
-        // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
         output = { ...output };
       }
 
@@ -1250,7 +1239,6 @@ describe('Kujira Full Flow', () => {
       //   throw new Error("Can't define the order side, implementation error");
       // }
       //
-      // // TODO Fill all fields properly using the response as much as possible and/or retrieving extra info from other calls!!!
       // const output = {
       //   id: null,
       //   exchangeId: exchangeOrderId,
@@ -1304,7 +1292,7 @@ describe('Kujira Full Flow', () => {
       );
 
       request = {
-        orderIdxs: [57324], // TODO Hard code to fast test. Change it.!!!
+        orderIdxs: [57324],
         fee: 'auto',
       };
 
