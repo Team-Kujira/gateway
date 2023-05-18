@@ -721,7 +721,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response).toEqual(request.tokenIds?.length);
+      expect(response.tokens.size).toEqual(request.tokenIds?.length);
 
       for (const tokenId of getNotNullOrThrowError<TokenId[]>(
         request.tokenIds
@@ -745,13 +745,13 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      for (const tokenId of getNotNullOrThrowError<TokenId[]>(tokenIds)) {
+      Object.values(tokenIds).forEach((tokenId) => {
         const balance = getNotNullOrThrowError<Balance>(
           response.tokens.get(tokenId)
         );
         expect(balance).not.toBeUndefined();
         expect((balance.token as Token).id).toBe(tokenId);
-      }
+      });
     });
   });
 
