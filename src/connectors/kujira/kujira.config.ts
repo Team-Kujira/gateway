@@ -6,6 +6,7 @@ const configManager = ConfigManagerV2.getInstance();
 
 export namespace KujiraConfig {
   export const config = {
+    chainType: 'KUJIRA',
     tradingTypes: ['CLOB_SPOT'],
     chain: 'kujira',
     network: configManager.get('kujira.network') || 'mainnet',
