@@ -1933,8 +1933,8 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    it('Get all filled orders and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
-      const targets = getOrders(['2', '6', '7']); // TODO FIX !!!
+    it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
+      const targets = getOrders(['2', '6', '7']);
 
       const targetsIds = targets
         .map((order) => order.id)
