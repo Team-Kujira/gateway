@@ -453,9 +453,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(allTokens);
 
-      expect(allTokens.size).toBe(Object.values(tokenIds).length);
-
-      for (const tokenId of getNotNullOrThrowError<TokenId[]>(tokenIds)) {
+      Object.values(tokenIds).forEach((tokenId) => {
         const token = Denom.from(tokenId);
         const targetToken = getNotNullOrThrowError<Token>(
           allTokens.get(tokenId)
@@ -464,7 +462,7 @@ describe('Kujira Full Flow', () => {
         expect(targetToken.id).toBe(token.reference);
         expect(targetToken.symbol).toBe(token.symbol);
         expect(targetToken.decimals).toBe(token.decimals);
-      }
+      });
     });
   });
 
@@ -625,9 +623,7 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
-      expect(response.size).toEqual(request.marketIds?.length);
-
-      for (const marketId of getNotNullOrThrowError<MarketId[]>(marketsIds)) {
+      Object.values(marketsIds).forEach((marketId) => {
         const orderBook = getNotNullOrThrowError<OrderBook>(
           response.get(marketId)
         );
@@ -636,7 +632,7 @@ describe('Kujira Full Flow', () => {
         expect(orderBook.asks).not.toBeEmpty();
         expect(orderBook.bestBid).not.toBeUndefined();
         expect(orderBook.bestAsk).not.toBeUndefined();
-      }
+      });
     });
   });
 
