@@ -605,7 +605,7 @@ export class Kujira {
     const getToken = async (id: TokenId): Promise<void> => {
       const token = await this.getToken({ id });
 
-      tokens.set(id, token);
+      tokens.set(token.id, token);
     };
 
     await promiseAllInBatches(getToken, options.ids);
