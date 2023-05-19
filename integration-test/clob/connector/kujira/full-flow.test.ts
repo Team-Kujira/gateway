@@ -77,7 +77,7 @@ const config = KujiraConfig.config;
 const kujiToken = KUJI;
 
 const tokenIds = {
-  1: KUJI.reference, // KUJI
+  1: 'ibc/338D2DB6F58921A72BD9F7B834AA9E05A3FC40D4FCCBEF3DB90EBACB230CCE96', // KUJI
   2: 'ibc/398F30542FBA4EDE0FCAB48931FB2DA9F45AABD68658409014538FC9986EB47D', // DEMO
   3: 'ibc/C879260708F93601E8C0CCFC0BDBD5F059CD68066601FDECC9511032D17A8641', // USK
 };
@@ -394,7 +394,7 @@ beforeEach(async () => {
 // TODO Add tests to test the retrieval of the estimated fees, current block, and one or more transactions or wallet public keys.
 describe('Kujira Full Flow', () => {
   describe('Tokens', () => {
-    it('Get token 1', async () => {
+    it('Get token 1 by id', async () => {
       const request = {
         id: tokenIds[1],
       } as GetTokenRequest;
@@ -405,10 +405,31 @@ describe('Kujira Full Flow', () => {
 
       logResponse(response);
 
+      const targetDenom = Denom.from(tokenIds[1]);
+
       expect(response).not.toBeEmpty();
-      expect(response.id).toBe(tokenIds[1]);
-      expect(response.symbol).toBe(Denom.from(tokenIds[1]).symbol);
-      expect(response.decimals).toBe(Denom.from(tokenIds[1]).decimals);
+      expect(response.id).toBe(request.id);
+      expect(response.symbol).toBe(targetDenom.symbol);
+      expect(response.decimals).toBe(targetDenom.decimals);
+    });
+
+    it('Get token 1 by name', async () => {
+      const target = Denom.from(tokenIds[1]);
+      const request = {
+        name: target.symbol,
+      } as GetTokenRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getToken(request);
+
+      logResponse(response);
+
+      expect(response).not.toBeEmpty();
+      expect(response.id).toBe(target.reference);
+      expect(response.name).toBe(request.name);
+      expect(response.symbol).toBe(target.symbol);
+      expect(response.decimals).toBe(target.decimals);
     });
 
     it('Get tokens 2 and 3', async () => {
