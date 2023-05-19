@@ -1,19 +1,7 @@
 import {
   Balance,
   Balances,
-  Block,
-  CancelOrderRequest,
-  CancelOrdersRequest,
   ConvertOrderType,
-  EstimatedFees,
-  EstimatedGasResponse,
-  GetAllBalancesRequest,
-  GetEstimatedFeesRequest,
-  GetMarketRequest,
-  GetOrderBookRequest,
-  GetOrderRequest,
-  GetTickerRequest,
-  GetTransactionRequest,
   IMap,
   KujiraEvent,
   KujiraOrderBook,
@@ -28,8 +16,6 @@ import {
   OrderSide,
   OrderStatus,
   OrderType,
-  PlaceOrderRequest,
-  PlaceOrdersRequest,
   Ticker,
   Token,
   TokenId,
@@ -37,20 +23,6 @@ import {
   TransactionHashes,
   Withdraw,
 } from './kujira.types';
-import {
-  ClobBatchUpdateRequest,
-  ClobDeleteOrderRequest,
-  ClobDeleteOrderRequestExtract,
-  ClobGetOrderRequest,
-  ClobGetOrderResponse,
-  CLOBMarkets,
-  ClobMarketsRequest,
-  ClobOrderbookRequest,
-  ClobPostOrderRequest,
-  ClobTickerRequest,
-  CreateOrderParam,
-} from '../../clob/clob.requests';
-import { OrderType as ClobOrderType, Side } from '../../amm/amm.requests';
 import { KujiraConfig } from './kujira.config';
 import {
   Denom,
@@ -63,402 +35,14 @@ import {
 } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import { Orderbook, PriceLevel, SpotOrderHistory } from '@injectivelabs/sdk-ts';
 import { getNotNullOrThrowError } from './kujira.helpers';
-import {
-  BalancesRequest,
-  BalancesResponse,
-  BankBalance,
-  PollRequest,
-  PollResponse,
-  SubaccountBalancesWithId,
-} from '../../chains/kujira/kujira.requests';
 import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
-import { TokenInfo } from '../../chains/ethereum/ethereum-base';
 import { parseCoins } from '@cosmjs/stargate';
+import { TokenInfo } from '../../services/base';
 
 const config = KujiraConfig.config;
 
-export const convertClobMarketsRequestToGetMarketOptions = (
-  request: ClobMarketsRequest
-): GetMarketRequest => {
-  return {
-    id: request.market,
-  } as GetMarketRequest;
-};
-
-export const convertClobOrderbookRequestToGetOrderBookOptions = (
-  request: ClobOrderbookRequest
-): GetOrderBookRequest => {
-  return {
-    marketName: request.market.replace('-', '/'),
-  } as GetOrderBookRequest;
-};
-
-export const convertClobTickerRequestToGetTickerOptions = (
-  request: ClobTickerRequest
-): GetTickerRequest => {
-  return {
-    marketId: request.market,
-  } as GetTickerRequest;
-};
-
-export const convertClobSideToOrderSide = (request: Side): OrderSide => {
-  if (request == 'BUY') {
-    return OrderSide.BUY;
-  } else if (request == 'SELL') {
-    return OrderSide.SELL;
-  } else {
-    throw new Error('Error converting Side to OrderSide');
-  }
-};
-
-export const convertOrderSideToClobSide = (request: OrderSide): Side => {
-  if (request == OrderSide.BUY) {
-    return 'BUY';
-  } else if (request == OrderSide.SELL) {
-    return 'SELL';
-  } else {
-    throw new Error('Error converting OrderSide to Side');
-  }
-};
-
-export const convertClobOrderTypeToOrderType = (
-  request: ClobOrderType
-): OrderType => {
-  if (request == 'LIMIT') {
-    return OrderType.LIMIT;
-  } else if (request == 'LIMIT_MAKER') {
-    return OrderType.LIMIT;
-  } else {
-    throw new Error('Error in conversion between order type');
-  }
-};
-
-export const convertClobPostOrderRequestToPlaceOrderOptions = (
-  request: ClobPostOrderRequest | CreateOrderParam
-): PlaceOrderRequest => {
-  return {
-    waitUntilIncludedInBlock: false,
-    marketId: undefined,
-    marketName: request.market.replace('-', '/'),
-    ownerAddress: 'address' in request ? request.address : undefined,
-    side: convertClobSideToOrderSide(request.side),
-    price: BigNumber(request.price),
-    amount: BigNumber(request.amount),
-    type: convertClobOrderTypeToOrderType(request.orderType),
-    payerAddress: 'address' in request ? request.address : undefined,
-  } as PlaceOrderRequest;
-};
-
-export const convertClobGetOrderRequestToGetOrderOptions = (
-  request: ClobGetOrderRequest
-): GetOrderRequest => {
-  return {
-    id: request.orderId,
-    marketId: request.market,
-    marketIds: undefined,
-    ownerAddress: request.address,
-    status: OrderStatus.OPEN,
-    statuses: undefined,
-  } as GetOrderRequest;
-};
-
-export const convertClobBatchUpdateRequestToPlaceOrdersOptions = (
-  request: ClobBatchUpdateRequest
-): PlaceOrdersRequest => {
-  return {
-    waitUntilIncludedInBlock: false,
-    orders: request.createOrderParams?.map((order) => {
-      return convertClobPostOrderRequestToPlaceOrderOptions(order);
-    }),
-  } as PlaceOrdersRequest;
-};
-
-export const convertClobBatchUpdateRequestToDeleteOrdersOptions = (
-  request: ClobBatchUpdateRequest
-): CancelOrdersRequest => {
-  const marketId = convertClobDeleteOrderRequestToCancelOrderOptions(
-    getNotNullOrThrowError<ClobDeleteOrderRequestExtract[]>(
-      request.cancelOrderParams
-    )[0]
-  ).marketId;
-
-  return {
-    ids: request.cancelOrderParams?.map((order) => {
-      return convertClobDeleteOrderRequestToCancelOrderOptions(order).id;
-    }),
-    marketId: marketId,
-    ownerAddresses: [request.address],
-  } as CancelOrdersRequest;
-};
-
-export const convertClobDeleteOrderRequestToCancelOrderOptions = (
-  request: ClobDeleteOrderRequest | ClobDeleteOrderRequestExtract
-): CancelOrderRequest => {
-  return {
-    id: request.orderId,
-    ownerAddress: 'address' in request ? request.address : undefined,
-    marketName:
-      'market' in request ? request.market.replace('-', '/') : undefined,
-  } as CancelOrderRequest;
-};
-
-export const convertBalanceRequestToGetAllBalancesOptions = (
-  request: BalancesRequest
-): GetAllBalancesRequest => {
-  return {
-    ownerAddress: request.address,
-  } as GetAllBalancesRequest;
-};
-
-export const convertPollRequestToGetTransactionOptions = (
-  request: PollRequest
-): GetTransactionRequest => {
-  return {
-    hash: request.txHash,
-  } as GetTransactionRequest;
-};
-
-export const convertEstimateGasRequestToGetMarketEstimatedFeesOptions = (
-  _gasPrice: number,
-  _gasPriceToken: string,
-  _gasLimit: number,
-  _gasCost: number
-): GetEstimatedFeesRequest => {
-  return {} as GetEstimatedFeesRequest;
-};
-
-// TODO fix!!!
-export const convertToClobMarketResponse = (
-  response: Market
-): { markets: CLOBMarkets } => {
-  const resp: CLOBMarkets = {};
-  resp[response.name] = {
-    marketId: response.id,
-    marketStatus: 'active',
-    ticker: undefined,
-    baseDenom: undefined,
-    quoteDenom: undefined,
-    makerFeeRate: undefined,
-    quoteToken: {
-      name: response.quoteToken.name,
-      logo: undefined,
-      symbol: response.quoteToken.symbol,
-      decimals: undefined,
-      tokenType: undefined,
-      coinGeckoId: undefined,
-      ibc: undefined,
-      spl: undefined,
-      cw20: undefined,
-      cw20s: undefined,
-      erc20: undefined,
-    },
-    baseToken: {
-      name: response.baseToken.name,
-      logo: undefined,
-      symbol: response.baseToken.symbol,
-      decimals: undefined,
-      tokenType: undefined,
-      coinGeckoId: undefined,
-      ibc: undefined,
-      spl: undefined,
-      cw20: undefined,
-      cw20s: undefined,
-      erc20: undefined,
-    },
-    takerFeeRate: response.fees.maker,
-    serviceProviderFee: undefined, // TODO resolve this one as well !!!
-    minPriceTickSize: response.minimumPriceIncrement,
-    minQuantityTickSize: response.minimumOrderSize,
-  } as CLOBMarkets;
-
-  return { markets: resp };
-};
-
-export const convertOrderToClobPriceLevel = (response: Order): PriceLevel => {
-  return {
-    price: response.price?.toString(),
-    quantity: response.amount.toString(),
-    timestamp: Date.now(), // TODO Check if it is needed to retrieve this info (probably from the transaction)!!!
-  } as PriceLevel;
-};
-
-export const convertToClobOrderbookResponse = (
-  response: OrderBook
-): Orderbook => {
-  return {
-    buys: response.bids
-      .valueSeq()
-      .map((obj) => {
-        return convertOrderToClobPriceLevel(obj);
-      })
-      .toArray() as PriceLevel[],
-    sells: response.asks
-      .valueSeq()
-      .map((obj) => {
-        return convertOrderToClobPriceLevel(obj);
-      })
-      .toArray() as PriceLevel[],
-  } as Orderbook;
-};
-
-// TODO fix!!!
-export const convertToClobTickerResponse = (
-  response: Ticker
-): { markets: CLOBMarkets } => {
-  const resp: CLOBMarkets = {};
-  resp[response.ticker.toString()] = {
-    marketId: undefined,
-    marketStatus: undefined,
-    ticker: response.ticker.toString(),
-    baseDenom: undefined,
-    quoteDenom: undefined,
-    makerFeeRate: undefined,
-    quoteToken: {
-      name: undefined,
-      logo: undefined,
-      symbol: undefined,
-      decimals: undefined,
-      tokenType: undefined,
-      coinGeckoId: undefined,
-      ibc: undefined,
-      spl: undefined,
-      cw20: undefined,
-      cw20s: undefined,
-      erc20: undefined,
-    },
-    baseToken: {
-      name: undefined,
-      logo: undefined,
-      symbol: undefined,
-      decimals: undefined,
-      tokenType: undefined,
-      coinGeckoId: undefined,
-      ibc: undefined,
-      spl: undefined,
-      cw20: undefined,
-      cw20s: undefined,
-      erc20: undefined,
-    },
-    takerFeeRate: undefined,
-    serviceProviderFee: undefined,
-    minPriceTickSize: undefined,
-    minQuantityTickSize: undefined,
-  } as CLOBMarkets;
-  return { markets: resp };
-};
-
-export const convertToClobPostOrderResponse = (
-  response: Order
-): { txHash: string; id: string } => {
-  return {
-    txHash: response.hashes?.creation,
-    id: response.id,
-  } as { txHash: string; id: string };
-};
-
-// TODO fix!!!
-export const convertToClobGetOrderResponse = (
-  response: Order
-): ClobGetOrderResponse => {
-  return {
-    network: config.network,
-    timestamp: Date.now(),
-    latency: 0,
-    orders: [
-      {
-        orderHash: response.hashes?.creation?.toString(),
-        marketId: response.marketId,
-        // active: true,
-        subaccountId: response.ownerAddress,
-        executionType: response.type?.toLowerCase(),
-        orderType: convertOrderSideToClobSide(response.side).toLowerCase(),
-        price: response.price?.toString(),
-        // triggerPrice: 'None',
-        quantity: response.amount.toString(),
-        // filledQuantity: 'None',
-        state: response.status?.toLowerCase(),
-        // createdAt: response.fillingTimestamp,
-        // updatedAt: response.fillingTimestamp, //TODO there is no mention to update into order type !!!
-        direction: convertOrderSideToClobSide(response.side).toLowerCase(),
-      },
-    ] as SpotOrderHistory[],
-  } as ClobGetOrderResponse;
-};
-
-export const convertToClobDeleteOrderResponse = (
-  response: Order
-): { txHash: string } => {
-  return {
-    txHash: getNotNullOrThrowError<string>(
-      response.hashes?.cancellation ||
-        response.hashes?.cancellations?.values().next().value
-    ),
-  };
-};
-
-export const convertToClobDeleteOrderResponseForCreation = (
-  response: IMap<OrderId, Order>
-): { txHash: string } => {
-  return {
-    txHash: getNotNullOrThrowError<string>(
-      response.values().next().value.hashes?.creation ||
-        response.values().next().value.hashes?.creations.values().next().value
-    ),
-  };
-};
-
-export const convertToClobDeleteOrderResponseForCancellation = (
-  response: IMap<OrderId, Order>
-): { txHash: string } => {
-  return {
-    txHash: getNotNullOrThrowError<string>(
-      response.values().next().value.hashes?.cancellation ||
-        response.values().next().value.hashes?.cancellations.values().next()
-          .value
-    ),
-  };
-};
-
-// TODO fix!!!
-export const convertToBalancesResponse = (
-  response: Balances
-): BalancesResponse => {
-  const balances = response.tokens
-    .valueSeq()
-    .toArray()
-    .map((balance) => {
-      return {
-        token: balance.token !== 'total' ? balance.token.id : 'total',
-        amount: balance.free.toString(),
-      } as BankBalance;
-    });
-
-  return {
-    injectiveAddress: undefined as unknown as string,
-    balances: balances as Array<BankBalance>,
-    subaccounts: [] as Array<SubaccountBalancesWithId>,
-  } as BalancesResponse;
-};
-
-// TODO fix!!!
-export const convertToPollResponse = (
-  _transaction: Transaction,
-  _currentBlockNumber: Block
-): PollResponse => {
-  return {
-    blockNumber: undefined,
-    hash: undefined,
-    gasWanted: undefined,
-    gasLimit: undefined,
-    gasUsed: undefined,
-    sequences: [] as Array<number>,
-  } as unknown as PollResponse;
-};
-
-// TODO fix!!!
 export const convertToGetTokensResponse = (_tokens: Token): TokenInfo => {
   return {
     chainId: undefined,
@@ -467,18 +51,6 @@ export const convertToGetTokensResponse = (_tokens: Token): TokenInfo => {
     symbol: undefined,
     decimals: undefined,
   } as unknown as TokenInfo;
-};
-
-// TODO fix!!!
-export const convertToEstimatedFeesResponse = (
-  _response: EstimatedFees
-): EstimatedGasResponse => {
-  return {
-    gasPrice: undefined,
-    gasPriceToken: undefined,
-    gasLimit: undefined,
-    gasCost: undefined,
-  } as unknown as EstimatedGasResponse;
 };
 
 export const convertKujiraTokenToToken = (token: Denom): Token => {
@@ -490,7 +62,6 @@ export const convertKujiraTokenToToken = (token: Denom): Token => {
   };
 };
 
-// TODO fix!!!
 export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
   const baseToken = convertKujiraTokenToToken(market.denoms[0]);
   const quoteToken = convertKujiraTokenToToken(market.denoms[1]);
@@ -523,7 +94,6 @@ export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
   } as Market;
 };
 
-// TODO fix!!!
 export const convertKujiraOrderBookToOrderBook = (
   market: Market,
   kujiraOrderBook: KujiraOrderBook

@@ -1,20 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
-import {
-  BalancesRequest,
-  BalancesResponse,
-  PollRequest,
-  PollResponse,
-} from './kujira.requests';
 import { Kujira } from '../../connectors/kujira/kujira';
-import {
-  convertBalanceRequestToGetAllBalancesOptions,
-  convertPollRequestToGetTransactionOptions,
-  convertToBalancesResponse,
-  convertToGetTokensResponse,
-  convertToPollResponse,
-} from '../../connectors/kujira/kujira.convertors';
+import { convertToGetTokensResponse } from '../../connectors/kujira/kujira.convertors';
 import { KujiraConfig } from '../../connectors/kujira/kujira.config';
 import { Address } from '../../connectors/kujira/kujira.types';
 import { TokenInfo } from '../ethereum/ethereum-base';
@@ -98,23 +86,6 @@ export class KujiraChain {
         publicKey,
       },
     });
-  }
-
-  async balances(body: BalancesRequest): Promise<BalancesResponse> {
-    return convertToBalancesResponse(
-      await this.kujira.getAllBalances(
-        convertBalanceRequestToGetAllBalancesOptions(body)
-      )
-    );
-  }
-
-  async poll(body: PollRequest): Promise<PollResponse> {
-    return convertToPollResponse(
-      await this.kujira.getTransaction(
-        convertPollRequestToGetTransactionOptions(body)
-      ),
-      await this.kujira.getCurrentBlock({})
-    );
   }
 
   async getTokenForSymbol(symbol: string): Promise<TokenInfo> {

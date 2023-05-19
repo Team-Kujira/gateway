@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import express from 'express';
-import { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { ConfigRoutes } from './services/config/config.routes';
 import { CosmosRoutes } from './chains/cosmos/cosmos.routes';
 import { WalletRoutes } from './services/wallet/wallet.routes';
@@ -8,19 +7,18 @@ import { logger } from './services/logger';
 import { addHttps } from './https';
 import {
   asyncHandler,
+  gatewayErrorMiddleware,
   HttpException,
   NodeError,
-  gatewayErrorMiddleware,
 } from './services/error-handler';
 import { ConfigManagerV2 } from './services/config-manager-v2';
 import { SwaggerManager } from './services/swagger-manager';
 import { NetworkRoutes } from './network/network.routes';
 import { ConnectorsRoutes } from './connectors/connectors.routes';
 import { EVMRoutes } from './evm/evm.routes';
-import { AmmRoutes, AmmLiquidityRoutes, PerpAmmRoutes } from './amm/amm.routes';
+import { AmmLiquidityRoutes, AmmRoutes, PerpAmmRoutes } from './amm/amm.routes';
 import { InjectiveRoutes } from './chains/injective/injective.routes';
 import { KujiraRoutes as KujiraConnectorRoutes } from './connectors/kujira/kujira.routes';
-import { KujiraRoutes as KujiraChainRoutes } from './chains/kujira/kujira.routes';
 import { NearRoutes } from './chains/near/near.routes';
 import { CLOBRoutes, PerpClobRoutes } from './clob/clob.routes';
 
@@ -53,7 +51,6 @@ gatewayApp.use('/network', NetworkRoutes.router);
 gatewayApp.use('/evm', EVMRoutes.router);
 gatewayApp.use('/injective', InjectiveRoutes.router);
 gatewayApp.use('/kujira', KujiraConnectorRoutes.router);
-gatewayApp.use('/kujira/injective', KujiraChainRoutes.router);
 gatewayApp.use('/connectors', ConnectorsRoutes.router);
 
 gatewayApp.use('/amm', AmmRoutes.router);

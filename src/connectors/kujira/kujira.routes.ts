@@ -101,18 +101,6 @@ import {
   PlaceOrdersResponse,
 } from './kujira.types';
 import { RequestWrapper } from '../../services/common-interfaces';
-import {
-  BalancesRequest,
-  BalancesResponse,
-  PollRequest,
-  PollResponse,
-} from '../../chains/injective/injective.requests';
-import {
-  validateBalanceRequest,
-  validatePollRequest,
-} from '../../chains/injective/injective.validators';
-import { getChain } from '../../services/connection-manager';
-import { KujiraChain } from '../../chains/kujira/kujira.chain';
 
 export namespace KujiraRoutes {
   export const router = Router();
@@ -641,48 +629,6 @@ export namespace KujiraRoutes {
         const result = await getEstimatedFees(controller, request.body);
 
         return await response.status(result.status).json(result.body);
-      }
-    )
-  );
-
-  router.post(
-    '/balances',
-    asyncHandler(
-      async (
-        req: Request<any, any, RequestWrapper<BalancesRequest>>,
-        res: Response<BalancesResponse, any>
-      ) => {
-        validateBalanceRequest(req.body);
-
-        const kujira = await getChain<KujiraChain>(
-          req.body.chain,
-          req.body.network
-        );
-
-        const result = await kujira.balances(req.body);
-
-        res.status(200).json(result);
-      }
-    )
-  );
-
-  router.post(
-    '/poll',
-    asyncHandler(
-      async (
-        req: Request<any, any, RequestWrapper<PollRequest>>,
-        res: Response<PollResponse, any>
-      ) => {
-        validatePollRequest(req.body);
-
-        const kujira = await getChain<KujiraChain>(
-          req.body.chain,
-          req.body.network
-        );
-
-        const result = await kujira.poll(req.body);
-
-        res.status(200).json(result);
       }
     )
   );
