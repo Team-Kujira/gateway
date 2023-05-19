@@ -53,6 +53,7 @@ import {
   Ticker,
   Token,
   TokenId,
+  TokenName,
   Transaction,
   Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
@@ -432,7 +433,25 @@ describe('Kujira Full Flow', () => {
       expect(response.decimals).toBe(target.decimals);
     });
 
-    it('Get tokens 2 and 3', async () => {
+    it('Get token 1 by symbol', async () => {
+      const target = Denom.from(tokenIds[1]);
+      const request = {
+        symbol: target.symbol,
+      } as GetTokenRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getToken(request);
+
+      logResponse(response);
+
+      expect(response).not.toBeEmpty();
+      expect(response.id).toBe(target.reference);
+      expect(response.symbol).toBe(request.symbol);
+      expect(response.decimals).toBe(target.decimals);
+    });
+
+    it('Get tokens 2 and 3 by ids', async () => {
       const request = {
         ids: [tokenIds[2], tokenIds[3]],
       } as GetTokensRequest;
@@ -461,6 +480,46 @@ describe('Kujira Full Flow', () => {
         expect(targetToken).not.toBeEmpty();
         expect(targetToken.id).toBe(token.reference);
         expect(targetToken.symbol).toBe(token.symbol);
+        expect(targetToken.decimals).toBe(token.decimals);
+      }
+    });
+
+    it('Get tokens 2 and 3 by names', async () => {
+      const targetsIds = [tokenIds[2], tokenIds[3]];
+      const targetsDenoms: Denom[] = [];
+      for (const targetId of targetsIds) {
+        targetsDenoms.push(Denom.from(targetId));
+      }
+
+      const request = {
+        names: [targetsDenoms[0].symbol, targetsDenoms[1].symbol],
+      } as GetTokensRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getTokens(request);
+
+      logResponse(response);
+
+      expect(response.size).toBe(request.names?.length);
+
+      for (const token of response.values()) {
+        const targetToken = Denom.from(token.id);
+        expect(token).not.toBeEmpty();
+        expect(token.id).toBe(targetToken.reference);
+        expect(token.symbol).toBe(targetToken.symbol);
+        expect(token.decimals).toBe(targetToken.decimals);
+      }
+
+      for (const tokenName of getNotNullOrThrowError<TokenName[]>(
+        request.names
+      )) {
+        const token = Denom.from(tokenName);
+        const targetToken = getNotNullOrThrowError<Token>(
+          response.filter((item: Token) => item.name == tokenName).first()
+        );
+        expect(targetToken).not.toBeEmpty();
+        expect(targetToken.symbol).toBe(token.reference);
         expect(targetToken.decimals).toBe(token.decimals);
       }
     });
