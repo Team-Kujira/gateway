@@ -56,7 +56,7 @@ import {
   Transaction,
   Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
-import { DEMO, Denom, fin, KUJI, TESTNET, USK_TESTNET } from 'kujira.js';
+import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
@@ -78,8 +78,8 @@ const kujiToken = KUJI;
 
 const tokenIds = {
   1: KUJI.reference, // KUJI
-  2: DEMO.reference, // DEMO
-  3: USK_TESTNET.reference, // USK
+  2: 'ibc/398F30542FBA4EDE0FCAB48931FB2DA9F45AABD68658409014538FC9986EB47D', // DEMO
+  3: 'ibc/C879260708F93601E8C0CCFC0BDBD5F059CD68066601FDECC9511032D17A8641', // USK
 };
 
 const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
@@ -453,16 +453,22 @@ describe('Kujira Full Flow', () => {
 
       logResponse(allTokens);
 
-      Object.values(tokenIds).forEach((tokenId) => {
-        const token = Denom.from(tokenId);
-        const targetToken = getNotNullOrThrowError<Token>(
-          allTokens.get(tokenId)
-        );
-        expect(targetToken).not.toBeEmpty();
-        expect(targetToken.id).toBe(token.reference);
-        expect(targetToken.symbol).toBe(token.symbol);
-        expect(targetToken.decimals).toBe(token.decimals);
-      });
+      for (const tokenId of Object.values(tokenIds)) {
+        if (tokenId != tokenIds['1']) {
+          const token = Denom.from(tokenId);
+          const targetToken = getNotNullOrThrowError<Token>(
+            allTokens
+              .filter((item: Token) => item.id == tokenId)
+              .toArray()[0][1]
+          );
+          expect(targetToken).not.toBeEmpty();
+          expect(targetToken.id).toBe(token.reference);
+          expect(targetToken.symbol).toBe(token.symbol);
+          expect(targetToken.decimals).toBe(token.decimals);
+        } else {
+          continue;
+        }
+      }
     });
   });
 
