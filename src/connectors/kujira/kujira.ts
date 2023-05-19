@@ -803,7 +803,6 @@ export class Kujira {
 
           const result = {
             price: simpleAveragePrice,
-            timestamp: Date.now(),
           };
 
           return convertKujiraTickerToTicker(result, market);

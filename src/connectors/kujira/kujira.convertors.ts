@@ -801,7 +801,7 @@ export const convertKujiraTickerToTicker = (
   market: Market
 ): Ticker => {
   const price = BigNumber(input.price);
-  const timestamp = Date.now(); // TODO check if there's a timestamp available!!!
+  const timestamp = Date.now();
 
   return {
     market: market,

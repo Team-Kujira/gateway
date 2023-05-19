@@ -501,7 +501,7 @@ export interface PlaceOrderRequest {
   amount: OrderAmount;
   type: OrderType;
   payerAddress?: OrderPayerAddress;
-  replaceIfExists?: boolean; // TODO Add support for this!!!
+  replaceIfExists?: boolean;
   waitUntilIncludedInBlock?: boolean;
 }
 
@@ -512,7 +512,7 @@ export interface PlaceOrdersRequest {
   ownerAddress?: OrderOwnerAddress;
   orders: PlaceOrderRequest[];
   waitUntilIncludedInBlock?: boolean;
-  replaceIfExists?: boolean; // TODO Add support for this!!!
+  replaceIfExists?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -520,7 +520,7 @@ export interface PlaceOrdersResponse extends IMap<OrderId, Order> {}
 
 export interface CancelOrderRequest {
   id: OrderId;
-  clientId?: OrderClientId; // TODO Add support if possible!!!
+  clientId?: OrderClientId;
   ownerAddress: OrderOwnerAddress;
   marketId: MarketId;
   marketName?: MarketName;
@@ -531,7 +531,7 @@ export interface CancelOrderResponse extends Order {}
 
 export interface CancelOrdersRequest {
   ids: OrderId[];
-  clientIds?: OrderClientId[]; // TODO Add support if possible!!!
+  clientIds?: OrderClientId[];
   marketId: MarketId;
   marketIds?: MarketId[];
   marketName?: MarketName;
