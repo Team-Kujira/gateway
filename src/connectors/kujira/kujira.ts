@@ -587,7 +587,7 @@ export class Kujira {
    * @param options
    */
   async getToken(options: GetTokenRequest): Promise<GetTokenResponse> {
-    if (!options.id) {
+    if (options.id) {
       return convertKujiraTokenToToken(
         Denom.from(getNotNullOrThrowError<TokenId>(options.id))
       );
