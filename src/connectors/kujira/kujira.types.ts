@@ -650,3 +650,9 @@ export interface EstimatedGasResponse {
   gasLimit: number;
   gasCost: number;
 }
+
+export interface LatencyData {
+  endpoint: string;
+  latency: number;
+  latestBlockTime: Date;
+}
