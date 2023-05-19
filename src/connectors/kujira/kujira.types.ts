@@ -331,6 +331,7 @@ export class WalletPublicKeyNotFoundError extends CLOBishError {}
 
 export interface GetTokenRequest {
   id?: TokenId;
+  name?: TokenName;
   symbol?: TokenSymbol;
 }
 
@@ -339,7 +340,7 @@ export interface GetTokenResponse extends Token {}
 
 export interface GetTokensRequest {
   ids?: TokenId[];
-
+  names?: TokenName[];
   symbols?: TokenSymbol[];
 }
 

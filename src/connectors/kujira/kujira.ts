@@ -587,10 +587,30 @@ export class Kujira {
    * @param options
    */
   async getToken(options: GetTokenRequest): Promise<GetTokenResponse> {
-    if (!options.id) throw new TokenNotFoundError(`No token informed.`);
+    if (!options.id) {
+      return convertKujiraTokenToToken(
+        Denom.from(getNotNullOrThrowError<TokenId>(options.id))
+      );
+    } else {
+      const allTokens = await this.getAllTokens({});
 
-    // TODO Consider the id (aka reference) and the symbol!!!
-    return convertKujiraTokenToToken(Denom.from(options.id));
+      let token: Token | undefined;
+
+      if (options.symbol) {
+        token = allTokens
+          .valueSeq()
+          .find((token) => token.symbol == options.symbol);
+      } else if (options.name) {
+        token = allTokens
+          .valueSeq()
+          .find((token) => token.name == options.name);
+      }
+
+      if (!token)
+        throw new TokenNotFoundError(`Token ${options.symbol} not found.`);
+
+      return token;
+    }
   }
 
   /**
@@ -598,19 +618,35 @@ export class Kujira {
    * @param options
    */
   async getTokens(options: GetTokensRequest): Promise<GetTokensResponse> {
-    if (!options.ids) throw new TokenNotFoundError(`No token informed.`);
-
     const tokens = IMap<TokenId, Token>().asMutable();
 
-    const getToken = async (id: TokenId): Promise<void> => {
-      const token = await this.getToken({ id });
+    if (options.ids) {
+      for (const id of options.ids) {
+        const token = await this.getToken({ id });
 
-      tokens.set(token.id, token);
-    };
+        tokens.set(token.id, token);
+      }
 
-    await promiseAllInBatches(getToken, options.ids);
+      return tokens;
+    } else if (options.names) {
+      for (const name of options.names) {
+        const token = await this.getToken({ name });
 
-    return tokens;
+        tokens.set(token.id, token);
+      }
+
+      return tokens;
+    } else if (options.symbols) {
+      for (const symbol of options.symbols) {
+        const token = await this.getToken({ symbol });
+
+        tokens.set(token.id, token);
+      }
+
+      return tokens;
+    } else {
+      throw new Error('No token identifiers provided.');
+    }
   }
 
   /**
