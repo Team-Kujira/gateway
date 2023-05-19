@@ -5,8 +5,6 @@ import { Injective } from '../../src/chains/injective/injective';
 import { InjectiveCLOB } from '../../src/connectors/injective/injective';
 import { InjectiveClobPerp } from '../../src/connectors/injective_perpetual/injective.perp';
 
-// TODO Add Kujira tests!!!
-
 let inj: Injective;
 let injCLOB: InjectiveCLOB;
 let injClobPerp: InjectiveClobPerp;
