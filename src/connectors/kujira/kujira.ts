@@ -99,6 +99,7 @@ import {
   Transaction,
   TransactionHash,
   Withdraw,
+  LatencyData,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -278,9 +279,8 @@ export class Kujira {
   private async getRPCEndpoint(): Promise<string> {
     let rpcEndpoint = config.rpcEndpoint;
 
-    // TODO implement a mechanism to get the RPC with the lowest latency!!!
     if (!rpcEndpoint) {
-      rpcEndpoint = RPCS[this.kujiraNetwork][0];
+      rpcEndpoint = this.getFastestRpc();
     }
 
     return rpcEndpoint;
@@ -1716,5 +1716,44 @@ export class Kujira {
     const decryptedString = dec.decode(decrypted);
 
     return JSON.parse(decryptedString);
+  }
+
+  async toClient(endpoint: string): Promise<[Tendermint34Client, string]> {
+    const client = await Tendermint34Client.create(
+      new HttpBatchClient(endpoint, {
+        dispatchInterval: 100,
+        batchSizeLimit: 200,
+      })
+    );
+    return [client, endpoint];
+  }
+
+  async getFastestRpc(): Promise<string | null> {
+    const latencies: LatencyData[] = [];
+
+    await Promise.all(
+      RPCS[this.kujiraNetwork].map(async (endpoint) => {
+        try {
+          const start = new Date().getTime();
+          const [client] = await this.toClient(endpoint);
+          const status = await client.status();
+          const latency = new Date().getTime() - start;
+          const latestBlockTime = new Date(
+            status.syncInfo.latestBlockTime.toISOString()
+          );
+          latencies.push({ endpoint, latency, latestBlockTime });
+        } catch (error) {
+          console.error(`Failed to connect to RPC endpoint ${endpoint}`);
+        }
+      })
+    );
+
+    if (latencies.length === 0) {
+      return null;
+    }
+
+    latencies.sort((a, b) => a.latency - b.latency);
+
+    return latencies[0].endpoint;
   }
 }
