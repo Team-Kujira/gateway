@@ -731,14 +731,19 @@ export class Kujira {
     let marketsData: IMap<MarketId, BasicKujiraMarket> =
       await this.kujiraGetBasicMarkets();
 
-    // TODO Consider the market contract address and the market name too (base/quote)!!!
     marketsData = marketsData.filter(
       (item) =>
         (config.markets.disallowed?.length
-          ? !config.markets.disallowed.includes(item.address)
+          ? !config.markets.disallowed.includes(item.address) &&
+            !config.markets.disallowed.includes(
+              `${item.denoms[0].symbol}/${item.denoms[1].symbol}`
+            )
           : true) &&
         (config.markets.allowed?.length
-          ? config.markets.allowed.includes(item.address)
+          ? config.markets.allowed.includes(item.address) ||
+            config.markets.allowed.includes(
+              `${item.denoms[0].symbol}/${item.denoms[1].symbol}`
+            )
           : true)
     );
 
