@@ -586,15 +586,13 @@ describe('Kujira Full Flow', () => {
           expect(targetToken.id).toBe(token.reference);
           expect(targetToken.symbol).toBe(token.symbol);
           expect(targetToken.decimals).toBe(token.decimals);
-        } else {
-          continue;
         }
       }
     });
   });
 
   describe('Markets', () => {
-    it('Get market 1', async () => {
+    it('Get market 1 by id', async () => {
       const request = {
         id: marketsIds[1],
       } as GetMarketRequest;
@@ -620,7 +618,34 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    it('Get markets 2 and 3', async () => {
+    it('Get market 1 by name', async () => {
+      const networkPair = networksPairs[marketsIds[1]];
+
+      const request = {
+        name: networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
+      } as GetMarketRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getMarket(request);
+
+      logResponse(response);
+
+      expect(response.id).toEqual(marketsIds[1]);
+      expect([response.baseToken.id, response.quoteToken.id]).toEqual([
+        networkPair.denoms[0].reference,
+        networkPair.denoms[1].reference,
+      ]);
+      expect(response.precision).toEqual(
+        'decimal_places' in networkPair.precision
+          ? networkPair.precision.decimal_places
+          : 'significant_figures' in networkPair.precision
+          ? networkPair.precision.significant_figures
+          : undefined
+      );
+    });
+
+    it('Get markets 2 and 3 by ids', async () => {
       const targetMarketIds = [marketsIds[2], marketsIds[3]];
 
       const request = {
@@ -657,6 +682,54 @@ describe('Kujira Full Flow', () => {
             : undefined
         );
       });
+    });
+
+    it('Get markets 2 and 3 by names', async () => {
+      const targetMarketIds = [marketsIds[2], marketsIds[3]];
+      const targetNames = [];
+
+      for (const target of targetMarketIds.values()) {
+        targetNames.push(
+          networksPairs[target].denoms[0].symbol +
+            '/' +
+            networksPairs[target].denoms[1].symbol
+        );
+      }
+
+      const request = {
+        names: targetNames,
+      } as GetMarketsRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getMarkets(request);
+
+      logResponse(response);
+
+      expect(targetMarketIds.length).toEqual(response.size);
+
+      for (const target of targetMarketIds) {
+        const networkPair = networksPairs[target];
+        const responseToken = getNotNullOrThrowError<Market>(
+          response.get(target)
+        );
+
+        expect(responseToken.id).toEqual(target);
+        expect([
+          responseToken.baseToken.id,
+          responseToken.quoteToken.id,
+        ]).toEqual([
+          networkPair.denoms[0].reference,
+          networkPair.denoms[1].reference,
+        ]);
+        expect(responseToken.precision).toEqual(
+          'decimal_places' in networkPair.precision
+            ? networkPair.precision.decimal_places
+            : 'significant_figures' in networkPair.precision
+            ? networkPair.precision.significant_figures
+            : undefined
+        );
+      }
     });
 
     it('Get all markets', async () => {
