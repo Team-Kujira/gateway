@@ -839,7 +839,9 @@ export class Kujira {
    * @param options
    */
   async getTicker(options: GetTickerRequest): Promise<GetTickerResponse> {
-    const market = await this.getMarket({ id: options.marketId });
+    const market = await this.getMarket(
+      options.marketId ? { id: options.marketId } : { name: options.marketName }
+    );
 
     for (const [source, configuration] of config.tickers.sources) {
       try {
@@ -909,17 +911,31 @@ export class Kujira {
    */
   async getTickers(options: GetTickersRequest): Promise<GetTickersResponse> {
     if (!options.marketIds)
-      throw new MarketNotFoundError(`No market informed.`);
+      if (!options.marketNames)
+        throw new MarketNotFoundError(`No market informed.`);
 
     const tickers = IMap<string, Ticker>().asMutable();
 
-    const getTicker = async (marketId: string): Promise<void> => {
-      const ticker = await this.getTicker({ marketId });
+    if (options.marketIds) {
+      const getTicker = async (marketId: string): Promise<void> => {
+        const ticker = await this.getTicker({ marketId });
 
-      tickers.set(marketId, ticker);
-    };
+        tickers.set(marketId, ticker);
+      };
 
-    await promiseAllInBatches(getTicker, options.marketIds);
+      await promiseAllInBatches(getTicker, options.marketIds);
+    } else {
+      const getTicker = async (marketName: string): Promise<void> => {
+        const ticker = await this.getTicker({ marketName });
+
+        tickers.set(marketName, ticker);
+      };
+
+      await promiseAllInBatches(
+        getTicker,
+        getNotNullOrThrowError<MarketName[]>(options.marketNames)
+      );
+    }
 
     return tickers;
   }

@@ -899,7 +899,7 @@ describe('Kujira Full Flow', () => {
   });
 
   describe('Tickers', () => {
-    it('Get ticker from market 1', async () => {
+    it('Get ticker from market 1 by id', async () => {
       const request = {
         marketId: marketsIds[1],
       } as GetTickerRequest;
@@ -915,7 +915,27 @@ describe('Kujira Full Flow', () => {
       expect(response.timestamp).toBeGreaterThan(0);
     });
 
-    it('Get tickers from markets 2 and 3', async () => {
+    it('Get ticker from market 1 by name', async () => {
+      const networkPair = networksPairs[marketsIds[1]];
+
+      const request = {
+        marketName:
+          networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
+      } as GetTickerRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getTicker(request);
+
+      logResponse(response);
+
+      expect(response.market.name).toEqual(request.marketName);
+      expect(response.market.id).toEqual(marketsIds[1]);
+      expect(response.price.gt(0)).toBeTrue();
+      expect(response.timestamp).toBeGreaterThan(0);
+    });
+
+    it('Get tickers from markets 2 and 3 by ids', async () => {
       const targetMarketsIds = [marketsIds[2], marketsIds[3]];
       const request = {
         marketIds: targetMarketsIds,
@@ -933,6 +953,35 @@ describe('Kujira Full Flow', () => {
         expect(ticker.price.gt(0)).toBeTrue();
         expect(ticker.timestamp).toBeGreaterThan(0);
       });
+    });
+
+    it('Get tickers from markets 2 and 3 by names', async () => {
+      const targetMarketIds = [marketsIds[2], marketsIds[3]];
+      const targetNames = [];
+
+      for (const target of targetMarketIds.values()) {
+        targetNames.push(
+          networksPairs[target].denoms[0].symbol +
+            '/' +
+            networksPairs[target].denoms[1].symbol
+        );
+      }
+      const request = {
+        marketNames: targetNames,
+      } as GetTickersRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getTickers(request);
+
+      logResponse(response);
+
+      for (const marketName of targetNames.values()) {
+        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketName));
+        expect(ticker.market.name).toEqual(marketName);
+        expect(ticker.price.gt(0)).toBeTrue();
+        expect(ticker.timestamp).toBeGreaterThan(0);
+      }
     });
 
     it('Get all tickers', async () => {
