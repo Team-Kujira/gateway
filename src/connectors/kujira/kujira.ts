@@ -100,6 +100,7 @@ import {
   TransactionHash,
   Withdraw,
   LatencyData,
+  MarketName,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -789,17 +790,34 @@ export class Kujira {
     options: GetOrderBooksRequest
   ): Promise<GetOrderBooksResponse> {
     if (!options.marketIds)
-      throw new MarketNotFoundError(`No market informed.`);
+      if (!options.marketNames)
+        throw new MarketNotFoundError(`No market informed.`);
 
     const orderBooks = IMap<string, OrderBook>().asMutable();
 
-    const getOrderBook = async (marketId: string): Promise<void> => {
-      const orderBook = await this.getOrderBook({ marketId });
+    if (options.marketIds) {
+      const getOrderBook = async (marketId: string): Promise<void> => {
+        const orderBook = await this.getOrderBook({ marketId });
 
-      orderBooks.set(marketId, orderBook);
-    };
+        orderBooks.set(marketId, orderBook);
+      };
 
-    await promiseAllInBatches(getOrderBook, options.marketIds);
+      await promiseAllInBatches(
+        getOrderBook,
+        getNotNullOrThrowError<MarketId[]>(options.marketIds)
+      );
+    } else {
+      const getOrderBook = async (marketName: MarketName): Promise<void> => {
+        const orderBook = await this.getOrderBook({ marketName });
+
+        orderBooks.set(marketName, orderBook);
+      };
+
+      await promiseAllInBatches(
+        getOrderBook,
+        getNotNullOrThrowError<MarketId[]>(options.marketNames)
+      );
+    }
 
     return orderBooks;
   }

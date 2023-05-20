@@ -36,6 +36,7 @@ import {
   IMap,
   Market,
   MarketId,
+  MarketName,
   MarketsWithdrawsRequest,
   MarketWithdrawRequest,
   Order,
@@ -768,7 +769,7 @@ describe('Kujira Full Flow', () => {
   });
 
   describe('Order books', () => {
-    it('Get order book from market 1', async () => {
+    it('Get order book from market 1 by id', async () => {
       const request = {
         marketId: marketsIds[1],
       } as GetOrderBookRequest;
@@ -787,7 +788,30 @@ describe('Kujira Full Flow', () => {
       expect(response.bestAsk).not.toBeUndefined();
     });
 
-    it('Get order books from the markets 2 and 3', async () => {
+    it('Get order book from market 1 by name', async () => {
+      const networkPair = networksPairs[marketsIds[1]];
+
+      const request = {
+        marketName:
+          networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
+      } as GetOrderBookRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getOrderBook(request);
+
+      logResponse(response);
+
+      expect(response).not.toBeUndefined();
+      expect(response.market.name).toBe(request.marketName);
+      expect(response.market.id).toBe(marketsIds[1]);
+      expect(response.bids).not.toBeEmpty();
+      expect(response.asks).not.toBeEmpty();
+      expect(response.bestBid).not.toBeUndefined();
+      expect(response.bestAsk).not.toBeUndefined();
+    });
+
+    it('Get order books from the markets 2 and 3 by ids', async () => {
       const request = {
         marketIds: [marketsIds[2], marketsIds[3]],
       } as GetOrderBooksRequest;
@@ -807,6 +831,44 @@ describe('Kujira Full Flow', () => {
           response.get(marketId)
         );
         expect(orderBook.market.id).toBe(marketId);
+        expect(orderBook.bids).not.toBeEmpty();
+        expect(orderBook.asks).not.toBeEmpty();
+        expect(orderBook.bestBid).not.toBeUndefined();
+        expect(orderBook.bestAsk).not.toBeUndefined();
+      }
+    });
+
+    it('Get order books from the markets 2 and 3 by names', async () => {
+      const targetMarketIds = [marketsIds[2], marketsIds[3]];
+      const targetNames = [];
+
+      for (const target of targetMarketIds.values()) {
+        targetNames.push(
+          networksPairs[target].denoms[0].symbol +
+            '/' +
+            networksPairs[target].denoms[1].symbol
+        );
+      }
+
+      const request = {
+        marketNames: targetNames,
+      } as GetOrderBooksRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getOrderBooks(request);
+
+      logResponse(response);
+
+      expect(response.size).toEqual(request.marketNames?.length);
+
+      for (const marketName of getNotNullOrThrowError<MarketName[]>(
+        request.marketNames
+      )) {
+        const orderBook = getNotNullOrThrowError<OrderBook>(
+          response.get(marketName)
+        );
+        expect(orderBook.market.name).toBe(marketName);
         expect(orderBook.bids).not.toBeEmpty();
         expect(orderBook.asks).not.toBeEmpty();
         expect(orderBook.bestBid).not.toBeUndefined();
