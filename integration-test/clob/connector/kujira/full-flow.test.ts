@@ -54,6 +54,7 @@ import {
   Token,
   TokenId,
   TokenName,
+  TokenSymbol,
   Transaction,
   Withdraw,
 } from '../../../../src/connectors/kujira/kujira.types';
@@ -513,6 +514,46 @@ describe('Kujira Full Flow', () => {
 
       for (const tokenName of getNotNullOrThrowError<TokenName[]>(
         request.names
+      )) {
+        const token = Denom.from(tokenName);
+        const targetToken = getNotNullOrThrowError<Token>(
+          response.filter((item: Token) => item.name == tokenName).first()
+        );
+        expect(targetToken).not.toBeEmpty();
+        expect(targetToken.symbol).toBe(token.reference);
+        expect(targetToken.decimals).toBe(token.decimals);
+      }
+    });
+
+    it('Get tokens 2 and 3 by symbols', async () => {
+      const targetsIds = [tokenIds[2], tokenIds[3]];
+      const targetsDenoms: Denom[] = [];
+      for (const targetId of targetsIds) {
+        targetsDenoms.push(Denom.from(targetId));
+      }
+
+      const request = {
+        symbols: [targetsDenoms[0].symbol, targetsDenoms[1].symbol],
+      } as GetTokensRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getTokens(request);
+
+      logResponse(response);
+
+      expect(response.size).toBe(request.symbols?.length);
+
+      for (const token of response.values()) {
+        const targetToken = Denom.from(token.id);
+        expect(token).not.toBeEmpty();
+        expect(token.id).toBe(targetToken.reference);
+        expect(token.symbol).toBe(targetToken.symbol);
+        expect(token.decimals).toBe(targetToken.decimals);
+      }
+
+      for (const tokenName of getNotNullOrThrowError<TokenSymbol[]>(
+        request.symbols
       )) {
         const token = Denom.from(tokenName);
         const targetToken = getNotNullOrThrowError<Token>(
