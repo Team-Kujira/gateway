@@ -1004,9 +1004,14 @@ describe('Kujira Full Flow', () => {
   });
 
   describe('User', () => {
-    it('Get balance of token 1', async () => {
+    const tokensDenoms: Denom[] = [];
+    for (const tokenId of Object.values(tokenIds)) {
+      tokensDenoms.push(Denom.from(tokenId));
+    }
+
+    it('Get balance of token 1 by id', async () => {
       const request = {
-        tokenId: tokenIds[1],
+        tokenId: tokensDenoms[0].reference,
         ownerAddress: ownerAddress,
       } as GetBalanceRequest;
 
@@ -1018,6 +1023,24 @@ describe('Kujira Full Flow', () => {
 
       expect(response).not.toBeUndefined();
       expect((response.token as Token).id).toBe(request.tokenId);
+    });
+
+    it('Get balance of token 1 by symbol', async () => {
+      const request = {
+        tokenSymbol: tokensDenoms[0].symbol,
+        ownerAddress: ownerAddress,
+      } as GetBalanceRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getBalance(request);
+
+      logResponse(response);
+
+      expect(response).not.toBeUndefined();
+      expect(getNotNullOrThrowError<any>(response.token).symbol).toBe(
+        request.tokenSymbol
+      );
     });
 
     it('Get balances of tokens 2 and 3', async () => {

@@ -670,9 +670,21 @@ export class Kujira {
   async getTokenSymbolsToTokenIdsMap(
     options?: GetTokenSymbolsToTokenIdsMapRequest
   ): Promise<GetTokenSymbolsToTokenIdsMapResponse> {
-    const tokens = await this.getAllTokens({});
+    const tokens = (await this.getAllTokens({})).asMutable();
 
     let output = IMap<TokenSymbol, TokenId>().asMutable();
+
+    for (const token of tokens.valueSeq()) {
+      const base_denom = Denom.from(token.id).trace?.base_denom;
+      if (base_denom) {
+        const law = /:/g;
+        if (base_denom.includes(':')) {
+          token.id = base_denom.replace(law, '/');
+        } else {
+          token.id = base_denom;
+        }
+      }
+    }
 
     tokens.map((token) => output.set(token.symbol, token.id));
 
@@ -953,19 +965,39 @@ export class Kujira {
   }
 
   async getBalance(options: GetBalanceRequest): Promise<GetBalanceResponse> {
+    if (!options.tokenSymbol && options.tokenId) {
+      if (options.tokenId.startsWith('ibc')) {
+        const tokenDenom = Denom.from(options.tokenId);
+        options.tokenId = getNotNullOrThrowError<string>(
+          tokenDenom.trace?.base_denom
+        ).replace(':', '/');
+      }
+    }
+
     const balances = await this.getBalances({
       ownerAddress: options.ownerAddress,
       tokenIds: options.tokenId ? [options.tokenId] : undefined,
       tokenSymbols: options.tokenSymbol ? [options.tokenSymbol] : undefined,
     });
 
-    if (balances.tokens.has(options.tokenId)) {
-      return getNotNullOrThrowError<Balance>(
-        balances.tokens.get(options.tokenId)
-      );
-    }
+    if (options.tokenId) {
+      if (balances.tokens.has(options.tokenId)) {
+        return getNotNullOrThrowError<Balance>(
+          balances.tokens.get(options.tokenId)
+        );
+      }
 
-    throw new Error(`Token "${options.tokenId}" not found.`);
+      throw new Error(`Token "${options.tokenId}" not found.`);
+    } else {
+      if (
+        getNotNullOrThrowError<any>(balances.tokens.valueSeq().first()).token
+          ?.symbol == options.tokenSymbol
+      ) {
+        return getNotNullOrThrowError<any>(balances.tokens.valueSeq().first());
+      }
+
+      throw new Error(`Token "${options.tokenSymbol}" not found.`);
+    }
   }
 
   async getBalances(options: GetBalancesRequest): Promise<GetBalancesResponse> {
