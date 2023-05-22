@@ -101,7 +101,7 @@ export async function getInitializedChain<T>(
 export async function getChainInstance(
   chain: string,
   network: string
-): ChainUnion | undefined {
+): Promise<ChainUnion | undefined> {
   let connection: ChainUnion | undefined;
 
   if (chain === 'algorand') {
