@@ -9,6 +9,9 @@ import {
 
 const { fromBase64 } = require('@cosmjs/encoding');
 
+export const invalidAlgorandPrivateKeyOrMnemonicError: string =
+  'The privateKey param is not a valid Algorand private key or mnemonic.';
+
 export const invalidEthPrivateKeyError: string =
   'The privateKey param is not a valid Ethereum private key (64 hexadecimal characters).';
 
@@ -17,6 +20,11 @@ export const invalidNearPrivateKeyError: string =
 
 export const invalidCosmosPrivateKeyError: string =
   'The privateKey param is not a valid Cosmos private key.';
+
+export const isAlgorandPrivateKeyOrMnemonic = (str: string): boolean => {
+  const parts = str.split(' ');
+  return parts.length === 25;
+};
 
 export const invalidKujiraPrivateKeyError: string =
   'The privateKey param is not a valid Kujira private key.';
@@ -46,6 +54,11 @@ export const validatePrivateKey: Validator = mkSelectingValidator(
   'chain',
   (req, key) => req[key],
   {
+    algorand: mkValidator(
+      'privateKey',
+      invalidAlgorandPrivateKeyOrMnemonicError,
+      (val) => typeof val === 'string' && isAlgorandPrivateKeyOrMnemonic(val)
+    ),
     ethereum: mkValidator(
       'privateKey',
       invalidEthPrivateKeyError,
@@ -122,7 +135,8 @@ export const validateChain: Validator = mkValidator(
   invalidChainError,
   (val) =>
     typeof val === 'string' &&
-    (val === 'ethereum' ||
+    (val === 'algorand' ||
+      val === 'ethereum' ||
       val === 'avalanche' ||
       val === 'polygon' ||
       val === 'xdc' ||
