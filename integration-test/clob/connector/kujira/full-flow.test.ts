@@ -1069,7 +1069,7 @@ describe('Kujira Full Flow', () => {
       }
     });
 
-    it('Get balances of tokens 2 and 3 by tokenSymbols', async () => {
+    it('Get balances of tokens 2 and 3 by symbols', async () => {
       const targetsSymbols: TokenSymbol[] = [
         tokensDenoms[2].symbol,
         tokensDenoms[3].symbol,

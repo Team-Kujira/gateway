@@ -687,11 +687,11 @@ export class Kujira {
   async getTokenSymbolsToTokenIdsMap(
     options?: GetTokenSymbolsToTokenIdsMapRequest
   ): Promise<GetTokenSymbolsToTokenIdsMapResponse> {
-    const tokens = (await this.getAllTokens({})).asMutable();
+    const tokens = await this.getAllTokens({});
 
     let output = IMap<TokenSymbol, TokenId>().asMutable();
 
-    tokens.map((token) => output.set(token.symbol, token.id));
+    tokens.valueSeq().forEach((token) => output.set(token.symbol, token.id));
 
     if (options?.symbols) {
       const symbols = getNotNullOrThrowError<TokenSymbol[]>(options.symbols);
@@ -1021,11 +1021,7 @@ export class Kujira {
     };
 
     if (options.tokenIds) {
-      if (
-        options.tokenIds.filter((item) => item.startsWith('ibc')).length != 0
-      ) {
-        convertNonStandardKujiraTokenIds(options.tokenIds);
-      }
+      options.tokenIds = convertNonStandardKujiraTokenIds(options.tokenIds);
     }
 
     const tokenIds =
