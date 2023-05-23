@@ -1068,6 +1068,44 @@ describe('Kujira Full Flow', () => {
       }
     });
 
+    it('Get balances of tokens 2 and 3 by tokenSymbols', async () => {
+      const targetsSymbols: TokenSymbol[] = [
+        tokensDenoms[1].symbol,
+        tokensDenoms[2].symbol,
+      ];
+
+      const request = {
+        tokenSymbols: targetsSymbols,
+        ownerAddress: ownerAddress,
+      } as GetBalancesRequest;
+
+      logRequest(request);
+
+      const response = await kujira.getBalances(request);
+
+      logResponse(response);
+
+      expect(response.tokens.size).toEqual(request.tokenSymbols?.length);
+
+      for (const tokenSymbol of getNotNullOrThrowError<TokenSymbol[]>(
+        request.tokenSymbols
+      )) {
+        const balance = getNotNullOrThrowError<Balance>(
+          response.tokens
+            .filter(
+              (token) =>
+                getNotNullOrThrowError<Token>(token.token)?.symbol ==
+                tokenSymbol
+            )
+            .first()
+        );
+        expect(balance).not.toBeUndefined();
+        expect(getNotNullOrThrowError<Token>(balance.token)?.symbol).toBe(
+          tokenSymbol
+        );
+      }
+    });
+
     it('Get all balances', async () => {
       const request = {
         ownerAddress: ownerAddress,

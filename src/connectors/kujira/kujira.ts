@@ -690,14 +690,8 @@ export class Kujira {
     let output = IMap<TokenSymbol, TokenId>().asMutable();
 
     for (const token of tokens.valueSeq()) {
-      const base_denom = Denom.from(token.id).trace?.base_denom;
-      if (base_denom) {
-        const law = /:/g;
-        if (base_denom.includes(':')) {
-          token.id = base_denom.replace(law, '/');
-        } else {
-          token.id = base_denom;
-        }
+      if (token.id) {
+        convertTokenIds([token.id]);
       }
     }
 
@@ -1030,11 +1024,12 @@ export class Kujira {
       },
     };
 
-    if (
-      options.tokenIds &&
-      options.tokenIds.filter((item) => item.startsWith('ibc')).length != 0
-    ) {
-      convertTokenIds(options.tokenIds);
+    if (options.tokenIds) {
+      if (
+        options.tokenIds.filter((item) => item.startsWith('ibc')).length != 0
+      ) {
+        convertTokenIds(options.tokenIds);
+      }
     }
 
     const tokenIds =
