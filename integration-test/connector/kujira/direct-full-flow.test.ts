@@ -1,23 +1,19 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import 'jest-extended';
 import {
-  getNotNullOrThrowError,
-  logOutput as helperLogOutput,
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
-} from '../../../helpers';
+} from '../../helpers';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
-import { Slip10RawIndex } from '@cosmjs/crypto';
+import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { AccountData } from '@cosmjs/proto-signing/build/signer';
 import {
-  fin,
   Denom,
+  fin,
   KujiraQueryClient,
   kujiraQueryClient,
   msg,
+  NETWORK,
   registry,
   TESTNET,
 } from 'kujira.js';
@@ -26,6 +22,7 @@ import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingco
 import assert from 'assert';
 
 import { Map as ImmutableMap } from 'immutable';
+import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -60,7 +57,7 @@ const getMarket = (ordinal: number) =>
 const getOrder = (ordinal: number) =>
   getNotNullOrThrowError<Record<any, any>>(orders.get(ordinal));
 
-const getOrders = (ordinal: [number]) => {
+const getOrders = (ordinal: number[]) => {
   const ordersArray = [];
   for (const o in ordinal) {
     ordersArray.push(
@@ -110,8 +107,8 @@ beforeAll(async () => {
           Slip10RawIndex.hardened(0),
           Slip10RawIndex.normal(0),
           Slip10RawIndex.normal(accountNumber),
-        ],
-      ],
+        ] as readonly Slip10RawIndex[],
+      ] as readonly HdPath[] as any[],
     });
 
   [account] = await signer.getAccounts();
@@ -128,7 +125,7 @@ beforeAll(async () => {
     rpcEndpoint,
     signer,
     {
-      registry,
+      registry: registry as any,
       gasPrice: GasPrice.fromString(gasPrice),
     }
   );
@@ -138,13 +135,13 @@ beforeAll(async () => {
     signer,
     {
       registry,
-      gasPrice: GasPrice.fromString(gasPrice),
+      gasPrice: GasPrice.fromString(gasPrice) as any,
     }
   );
 
   for (const [order, marketAddress] of Object.entries(marketsAddresses)) {
     const pair = getNotNullOrThrowError<fin.Pair>(
-      Object.values(fin.PAIRS[network]).find(
+      Object.values(fin.PAIRS[network as NETWORK]).find(
         (it) => it.address == marketAddress
       )
     );
@@ -329,7 +326,7 @@ beforeEach(async () => {
   testTitle = expect.getState().currentTestName;
   logRequest = (target: any) => helperLogRequest(target, testTitle);
   logResponse = (target: any) => helperLogResponse(target, testTitle);
-  logOutput = (target: any) => helperLogOutput(target, testTitle);
+  // logOutput = (target: any) => helperLogOutput(target, testTitle);
 });
 
 describe('Kujira Full Flow', () => {
@@ -346,7 +343,9 @@ describe('Kujira Full Flow', () => {
       logRequest(request);
 
       response = getNotNullOrThrowError<fin.Pair>(
-        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
+        Object.values(fin.PAIRS[network as NETWORK]).find(
+          (it) => it.address == marketId
+        )
       );
 
       logResponse(response);
@@ -375,7 +374,9 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = fin.PAIRS.filter((it) => marketIds.includes(it.address));
+      response = (fin.PAIRS as any).filter((it: any) =>
+        marketIds.includes(it.address)
+      );
 
       logResponse(response);
 
@@ -389,7 +390,7 @@ describe('Kujira Full Flow', () => {
 
       logRequest(request);
 
-      response = fin.PAIRS.filter((it) =>
+      response = (fin.PAIRS as any).filter((it: any) =>
         allowedMarketsIds.includes(it.address)
       );
 
@@ -588,7 +589,7 @@ describe('Kujira Full Flow', () => {
       // const marketId = getNotNullOrThrowError<fin.Pair>(allowedMarkets.get(1));
       //
       // const pair = getNotNullOrThrowError<fin.Pair>(
-      //   fin.PAIRS.find(
+      //   (fin.PAIRS as any).find(
       //     (it) => it.address == marketId.address && it.chainID == network
       //   )
       // );
@@ -611,7 +612,9 @@ describe('Kujira Full Flow', () => {
       const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
+        Object.values(fin.PAIRS[network as NETWORK]).find(
+          (it) => it.address == marketId
+        )
       );
 
       let denom: Denom;
@@ -758,7 +761,9 @@ describe('Kujira Full Flow', () => {
       const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
+        Object.values(fin.PAIRS[network as NETWORK]).find(
+          (it) => it.address == marketId
+        )
       );
 
       let denom: Denom;
@@ -903,7 +908,9 @@ describe('Kujira Full Flow', () => {
       const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        fin.PAIRS.find((it) => it.address == marketId && it.chainID == network)
+        (fin.PAIRS as any).find(
+          (it: any) => it.address == marketId && it.chainID == network
+        )
       );
       const amount = 1000;
 
@@ -1038,7 +1045,7 @@ describe('Kujira Full Flow', () => {
     it('Get all orders (open or filled) and check that the order 2 is present', async () => {
       console.log('Not implemented.');
       request = [
-        markets[1],
+        allowedMarketsIds[1],
         {
           orders_by_user: { address: account.address, limit: 100 },
         },
@@ -1051,7 +1058,10 @@ describe('Kujira Full Flow', () => {
       logResponse(response);
 
       const output: [any] = response.orders.filter((it: any) => {
-        return parseInt(it['idx']) == ordersMap.get(2);
+        return (
+          parseInt(it['idx']) ==
+          getNotNullOrThrowError<Record<any, any>>(orders.get(2)).id
+        );
       });
 
       logOutput(output);
@@ -1108,8 +1118,8 @@ describe('Kujira Full Flow', () => {
 
         const amount = 1000;
         const pair = getNotNullOrThrowError<fin.Pair>(
-          fin.PAIRS.find(
-            (it) => it.address == marketId && it.chainID == network
+          (fin.PAIRS as any).find(
+            (it: any) => it.address == marketId && it.chainID == network
           )
         );
         const denom = pair.denoms[1];
@@ -1166,8 +1176,8 @@ describe('Kujira Full Flow', () => {
       for (const targetOrder of targetOrders) {
         const marketId = targetOrder.marketId;
         const market = getNotNullOrThrowError<fin.Pair>(
-          fin.PAIRS.find(
-            (it) => it.address == marketId && it.chainID == network
+          (fin.PAIRS as any).find(
+            (it: any) => it.address == marketId && it.chainID == network
           )
         );
 
@@ -1282,7 +1292,9 @@ describe('Kujira Full Flow', () => {
       const marketId = targetOrder.marketId;
 
       const market = getNotNullOrThrowError<fin.Pair>(
-        Object.values(fin.PAIRS[network]).find((it) => it.address == marketId)
+        Object.values(fin.PAIRS[network as NETWORK]).find(
+          (it: any) => it.address == marketId
+        )
       );
 
       const finClient = new fin.FinClient(
