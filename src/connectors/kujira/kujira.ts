@@ -1018,7 +1018,7 @@ export class Kujira {
 
     if (
       options.tokenIds &&
-      options.tokenIds.filter((item) => item.startsWith('ibc'))
+      options.tokenIds.filter((item) => item.startsWith('ibc')).length != 0
     ) {
       convertTokenIds(options.tokenIds);
     }

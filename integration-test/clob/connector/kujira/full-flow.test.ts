@@ -80,9 +80,9 @@ const config = KujiraConfig.config;
 const kujiToken = KUJI;
 
 const tokenIds = {
-  1: 'ibc/338D2DB6F58921A72BD9F7B834AA9E05A3FC40D4FCCBEF3DB90EBACB230CCE96', // KUJI
-  2: 'ibc/398F30542FBA4EDE0FCAB48931FB2DA9F45AABD68658409014538FC9986EB47D', // DEMO
-  3: 'ibc/C879260708F93601E8C0CCFC0BDBD5F059CD68066601FDECC9511032D17A8641', // USK
+  1: 'ukuji', // KUJI
+  2: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo', // DEMO
+  3: 'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk', // USK
 };
 
 const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
