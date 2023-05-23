@@ -1107,6 +1107,7 @@ describe('Kujira Full Flow', () => {
       expect(response.gasWanted).toBeGreaterThan(0);
       expect(response.code).toBe(0);
       expect(response.data).toContain('retract_orders');
+      expect(response.data).toContain('order_idxs');
     });
 
     it('Get transactions 2 and 3', async () => {
@@ -1131,6 +1132,7 @@ describe('Kujira Full Flow', () => {
         expect(transaction.gasWanted).toBeGreaterThan(0);
         expect(transaction.code).toBe(0);
         expect(transaction.data).toContain('submit_order');
+        expect(transaction.data).toContain('price');
       });
     });
   });
