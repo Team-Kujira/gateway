@@ -113,6 +113,12 @@
         },
         "disallowed": {
           "type": ["array", "null"]
+        },
+        "resolutionStrategy": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     },

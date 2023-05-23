@@ -25,6 +25,8 @@ export namespace KujiraConfig {
         'https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/tokens.json',
       disallowed: configManager.get(`kujira.tokens.disallowed`),
       allowed: configManager.get(`kujira.tokens.allowed`),
+      resolutionStrategy:
+        configManager.get(`kujira.tokens.resolutionStrategy`) || 'markets', // Can be 'markets' or 'tokens'
     },
     markets: {
       url:

@@ -349,32 +349,46 @@ export class Kujira {
 
   @Cache(caches.tokens, { ttl: config.cache.tokensData })
   async kujiraGetBasicTokens(): Promise<IMap<TokenId, BasicKujiraToken>> {
-    const tokensURL = config.tokens.url;
-
     const basicTokens: IMap<TokenId, BasicKujiraToken> = IMap<
       TokenId,
       BasicKujiraToken
     >().asMutable();
 
-    if (tokensURL.startsWith('https')) {
-      const rawBasicTokens = (
-        await runWithRetryAndTimeout<any>(axios, axios.get, [tokensURL])
-      ).data;
+    if (config.tokens.resolutionStrategy == 'tokens') {
+      const tokensURL = config.tokens.url;
 
-      Object.keys(rawBasicTokens).map((key: string) => {
-        const basicToken = Denom.from(key);
+      if (tokensURL.startsWith('https')) {
+        const rawBasicTokens = (
+          await runWithRetryAndTimeout<any>(axios, axios.get, [tokensURL])
+        ).data;
 
-        basicTokens.set(basicToken.reference, basicToken);
-      });
-    } else {
-      // kujira.js/src/resources/tokens.json
-      const rawBasicTokens = require(tokensURL);
+        Object.keys(rawBasicTokens).map((key: string) => {
+          const basicToken = Denom.from(key);
 
-      Object.keys(rawBasicTokens).map((key: string) => {
-        const basicToken = Denom.from(key);
+          basicTokens.set(basicToken.reference, basicToken);
+        });
+      } else {
+        // kujira.js/src/resources/tokens.json
+        const rawBasicTokens = require(tokensURL);
 
-        basicTokens.set(basicToken.reference, basicToken);
-      });
+        Object.keys(rawBasicTokens).map((key: string) => {
+          const basicToken = Denom.from(key);
+
+          basicTokens.set(basicToken.reference, basicToken);
+        });
+      }
+
+      return basicTokens;
+    } else if (config.tokens.resolutionStrategy == 'markets') {
+      const basicMarkets = await this.kujiraGetBasicMarkets();
+
+      for (const basicMarket of basicMarkets.values()) {
+        const basicBaseToken = Denom.from(basicMarket.denoms[0].reference);
+        const basicQuoteToken = Denom.from(basicMarket.denoms[1].reference);
+
+        basicTokens.set(basicBaseToken.reference, basicBaseToken);
+        basicTokens.set(basicQuoteToken.reference, basicQuoteToken);
+      }
     }
 
     return basicTokens;
