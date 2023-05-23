@@ -5,6 +5,7 @@ import {
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
 } from '../../../helpers';
+import { GetTokenSymbolsToTokenIdsMapRequest } from '../../../../src/connectors/kujira/kujira.types';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -37,6 +38,18 @@ describe('Playground', () => {
     logRequest(request);
 
     const response = await kujira.kujiraGetBasicTokens();
+
+    logResponse(response);
+  });
+
+  it('Playground 02', async () => {
+    const request = {
+      symbols: ['KUJI', 'DEMO'],
+    } as GetTokenSymbolsToTokenIdsMapRequest;
+
+    logRequest(request);
+
+    const response = await kujira.getTokenSymbolsToTokenIdsMap(request);
 
     logResponse(response);
   });
