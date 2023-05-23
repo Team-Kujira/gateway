@@ -68,8 +68,10 @@ import {
   IMap,
   KujiraOrder,
   KujiraWalletArtifacts,
+  LatencyData,
   Market,
   MarketId,
+  MarketName,
   MarketNotFoundError,
   MarketsWithdrawsFundsResponse,
   MarketsWithdrawsRequest,
@@ -99,8 +101,6 @@ import {
   Transaction,
   TransactionHash,
   Withdraw,
-  LatencyData,
-  MarketName,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -108,7 +108,6 @@ import {
   getNotNullOrThrowError,
   promiseAllInBatches,
   runWithRetryAndTimeout,
-  convertTokenIds,
 } from './kujira.helpers';
 import {
   Denom,
@@ -137,6 +136,7 @@ import {
   convertKujiraTokenToToken,
   convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
+  convertNonStandardKujiraTokenIds,
 } from './kujira.convertors';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
@@ -678,6 +678,8 @@ export class Kujira {
       .map((token) => token.reference)
       .toArray();
 
+    convertNonStandardKujiraTokenIds(tokenIds);
+
     return await this.getTokens({ ids: tokenIds });
   }
 
@@ -688,12 +690,6 @@ export class Kujira {
     const tokens = (await this.getAllTokens({})).asMutable();
 
     let output = IMap<TokenSymbol, TokenId>().asMutable();
-
-    for (const token of tokens.valueSeq()) {
-      if (token.id) {
-        convertTokenIds([token.id]);
-      }
-    }
 
     tokens.map((token) => output.set(token.symbol, token.id));
 
@@ -1028,7 +1024,7 @@ export class Kujira {
       if (
         options.tokenIds.filter((item) => item.startsWith('ibc')).length != 0
       ) {
-        convertTokenIds(options.tokenIds);
+        convertNonStandardKujiraTokenIds(options.tokenIds);
       }
     }
 

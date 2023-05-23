@@ -560,3 +560,20 @@ export const convertToResponseBody = (input: any): any => {
 
   return output;
 };
+
+export function convertNonStandardKujiraTokenIds(
+  tokensIds: TokenId[]
+): TokenId[] {
+  return tokensIds.map((tokenId) => {
+    if (tokenId.startsWith('ibc')) {
+      const denom = Denom.from(tokenId);
+
+      return getNotNullOrThrowError<string>(denom.trace?.base_denom).replace(
+        ':',
+        '/'
+      );
+    }
+
+    return tokenId;
+  });
+}
