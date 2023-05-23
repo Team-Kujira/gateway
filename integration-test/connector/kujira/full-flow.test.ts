@@ -1,12 +1,12 @@
 import 'jest-extended';
 import { BigNumber } from 'bignumber.js';
-import { Kujira } from '../../../../src/connectors/kujira/kujira';
-import { KujiraConfig } from '../../../../src/connectors/kujira/kujira.config';
+import { Kujira } from '../../../src/connectors/kujira/kujira';
+import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
   getNotNullOrThrowError,
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
-} from '../../../helpers';
+} from '../../helpers';
 import {
   AllMarketsWithdrawsRequest,
   Balance,
@@ -58,10 +58,10 @@ import {
   TokenSymbol,
   Transaction,
   Withdraw,
-} from '../../../../src/connectors/kujira/kujira.types';
+} from '../../../src/connectors/kujira/kujira.types';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
-import { addWallet } from '../../../../src/services/wallet/wallet.controllers';
-import { AddWalletRequest } from '../../../../src/services/wallet/wallet.requests';
+import { addWallet } from '../../../src/services/wallet/wallet.controllers';
+import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
 
 jest.setTimeout(30 * 60 * 1000);

@@ -1,11 +1,11 @@
 import 'jest-extended';
-import { Kujira } from '../../../../src/connectors/kujira/kujira';
-import { KujiraConfig } from '../../../../src/connectors/kujira/kujira.config';
+import { Kujira } from '../../../src/connectors/kujira/kujira';
+import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
-} from '../../../helpers';
-import { GetTokenSymbolsToTokenIdsMapRequest } from '../../../../src/connectors/kujira/kujira.types';
+} from '../../helpers';
+import { GetTokenSymbolsToTokenIdsMapRequest } from '../../../src/connectors/kujira/kujira.types';
 
 jest.setTimeout(30 * 60 * 1000);
 
