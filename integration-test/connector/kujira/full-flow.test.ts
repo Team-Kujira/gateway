@@ -3,7 +3,6 @@ import { BigNumber } from 'bignumber.js';
 import { Kujira } from '../../../src/connectors/kujira/kujira';
 import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
-  getNotNullOrThrowError,
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
 } from '../../helpers';
@@ -63,6 +62,7 @@ import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
+import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
 
 jest.setTimeout(30 * 60 * 1000);
 
