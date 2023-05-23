@@ -85,6 +85,12 @@ const tokenIds = {
   3: 'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk', // USK
 };
 
+const tokensDenoms = {
+  1: Denom.from(tokenIds[1]),
+  2: Denom.from(tokenIds[2]),
+  3: Denom.from(tokenIds[3]),
+};
+
 const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
 
 const marketsIds = {
@@ -1004,14 +1010,9 @@ describe('Kujira Full Flow', () => {
   });
 
   describe('User', () => {
-    const tokensDenoms: Denom[] = [];
-    for (const tokenId of Object.values(tokenIds)) {
-      tokensDenoms.push(Denom.from(tokenId));
-    }
-
     it('Get balance of token 1 by id', async () => {
       const request = {
-        tokenId: tokensDenoms[0].reference,
+        tokenId: tokensDenoms[1].reference,
         ownerAddress: ownerAddress,
       } as GetBalanceRequest;
 
@@ -1027,7 +1028,7 @@ describe('Kujira Full Flow', () => {
 
     it('Get balance of token 1 by symbol', async () => {
       const request = {
-        tokenSymbol: tokensDenoms[0].symbol,
+        tokenSymbol: tokensDenoms[1].symbol,
         ownerAddress: ownerAddress,
       } as GetBalanceRequest;
 
@@ -1070,8 +1071,8 @@ describe('Kujira Full Flow', () => {
 
     it('Get balances of tokens 2 and 3 by tokenSymbols', async () => {
       const targetsSymbols: TokenSymbol[] = [
-        tokensDenoms[1].symbol,
         tokensDenoms[2].symbol,
+        tokensDenoms[3].symbol,
       ];
 
       const request = {
