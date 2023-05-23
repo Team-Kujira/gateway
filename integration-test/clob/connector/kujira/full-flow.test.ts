@@ -1043,7 +1043,7 @@ describe('Kujira Full Flow', () => {
       );
     });
 
-    it('Get balances of tokens 2 and 3', async () => {
+    it('Get balances of tokens 2 and 3 by ids', async () => {
       const request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,

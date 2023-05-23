@@ -4,6 +4,8 @@ import { KujiraConfig } from './kujira.config';
 import { Kujira } from './kujira';
 import { parse, stringify } from 'flatted';
 import { promisify } from 'util';
+import { TokenId } from './kujira.types';
+import { Denom } from 'kujira.js';
 
 /**
  *
@@ -198,4 +200,15 @@ export async function deserializeFromFile<T>(path: string) {
   const deserialized = (await promisify(fs.readFile)(path)).toString();
 
   return deserialize(deserialized) as T;
+}
+
+export function convertTokenIds(tokensIds: TokenId[]): void {
+  for (let tokenId of tokensIds.values()) {
+    if (tokenId.startsWith('ibc')) {
+      const tokenDenom = Denom.from(tokenId);
+      tokenId = getNotNullOrThrowError<string>(
+        tokenDenom.trace?.base_denom
+      ).replace(':', '/');
+    }
+  }
 }

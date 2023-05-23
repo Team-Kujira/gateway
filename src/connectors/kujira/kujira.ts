@@ -108,6 +108,7 @@ import {
   getNotNullOrThrowError,
   promiseAllInBatches,
   runWithRetryAndTimeout,
+  convertTokenIds,
 } from './kujira.helpers';
 import {
   Denom,
@@ -1014,6 +1015,13 @@ export class Kujira {
         unsettled: BigNumber(0),
       },
     };
+
+    if (
+      options.tokenIds &&
+      options.tokenIds.filter((item) => item.startsWith('ibc'))
+    ) {
+      convertTokenIds(options.tokenIds);
+    }
 
     const tokenIds =
       options.tokenIds ||
