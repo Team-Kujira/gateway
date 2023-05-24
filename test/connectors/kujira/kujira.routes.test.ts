@@ -12,6 +12,7 @@ import {
 } from '../helpers';
 import {
   AllMarketsWithdrawsRequest,
+  AsyncFunctionType,
   Balance,
   Balances,
   CancelAllOrdersRequest,
@@ -71,8 +72,9 @@ import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
 import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
 import {
-  default as patchesCreator,
+  createPatches,
   enablePatches,
+  getPatch as helperGetPatch,
 } from './fixtures/patches/patches';
 import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
@@ -82,9 +84,11 @@ import { Express } from 'express-serve-static-core';
 enablePatches();
 // disablePatches();
 
-let patches: IMap<string, any>;
+let patches: IMap<string, AsyncFunctionType<any, any>>;
 
 jest.setTimeout(30 * 60 * 1000);
+
+let getPatch: any;
 
 let sendRequest: SendRequestFunction;
 
@@ -192,10 +196,20 @@ beforeAll(async () => {
 
   kujira = await Kujira.getInstance(config.chain, config.network);
 
-  patches = await patchesCreator(kujira);
+  patches = await createPatches(kujira);
 
-  patches.get('kujira/kujiraGetBasicMarkets')();
-  patches.get('kujira/kujiraGetBasicTokens')();
+  getPatch = async <R>(keyPath: string[]): Promise<R> =>
+    helperGetPatch<R>(patches, keyPath);
+
+  (await getPatch(['kujira', 'kujiraFinClientWithdrawOrders']))();
+  (await getPatch(['kujira', 'kujiraGetBasicMarkets']))();
+  (await getPatch(['kujira', 'kujiraGetBasicTokens']))();
+  (await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart']))();
+  (await getPatch(['kujira', 'kujiraSigningStargateClientSignAndBroadcast']))();
+  (await getPatch(['kujira', 'kujiraStargateClientGetAllBalances']))();
+  (await getPatch(['kujira', 'kujiraStargateClientGetBalanceStaked']))();
+  (await getPatch(['kujira', 'kujiraStargateClientGetHeight']))();
+  (await getPatch(['kujira', 'kujiraStargateClientGetTx']))();
 
   await kujira.init();
 
