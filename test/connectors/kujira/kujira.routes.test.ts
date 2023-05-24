@@ -76,7 +76,6 @@ import {
   createPatches,
   enablePatches,
   getPatch as helperGetPatch,
-  // disablePatches,
 } from './fixtures/patches/patches';
 import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
@@ -498,7 +497,7 @@ describe('/kujira', () => {
         controllerFunction: kujira.getToken,
       });
 
-      const responseBody = response.body as GetTokenResponse;
+      const responseBody = response as unknown as GetTokenResponse;
 
       logResponse(responseBody);
 
@@ -1441,7 +1440,7 @@ describe('/kujira', () => {
         controllerFunction: kujira.placeOrder,
       });
 
-      const responseBody = response.body as PlaceOrderResponse;
+      const responseBody = response as unknown as PlaceOrderResponse;
 
       candidate.id = responseBody.id;
       candidate.marketName = responseBody.marketName;

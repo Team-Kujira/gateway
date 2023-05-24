@@ -1,8 +1,8 @@
 import { default as supertest } from 'supertest';
+import { Response } from 'express';
 import { Express } from 'express-serve-static-core';
 import { StatusCodes } from 'http-status-codes';
 import { getNotNullOrThrowError } from '../../src/connectors/kujira/kujira.helpers';
-import * as superagent from 'superagent';
 import { RESTfulMethods } from '../../src/connectors/kujira/kujira.types';
 
 export type SendRequestOptions<R> = {
@@ -22,13 +22,13 @@ export type SendRequestOptions<R> = {
 
 export type SendRequestFunction = <R>(
   options: SendRequestOptions<R>
-) => Promise<Response | superagent.Response>;
+) => Promise<Response<R, any>>;
 
 export const sendRequest: SendRequestFunction = async <R>(
   options: SendRequestOptions<R>
-): Promise<Response | superagent.Response> => {
+): Promise<Response<R, any>> => {
   if (options.strategy == 'RESTful') {
-    return (await (
+    const result = (await (
       (supertest(options.RESTExpress) as any)[
         options.RESTMethod.toLowerCase()
       ] as any
@@ -39,16 +39,20 @@ export const sendRequest: SendRequestFunction = async <R>(
       .expect(
         'Content-Type',
         options.RESTContentType || 'application/json; charset=utf-8'
-      )) as any;
+      )) as Response<R, any>;
+
+    return result;
   } else if (options.strategy == 'controller') {
-    return {
+    const result = {
       body: (await getNotNullOrThrowError<any>(
         options.controllerFunction
       ).apply(
         options.controller,
         options.controllerFunctionParameters || options.RESTRequest
       )) as R,
-    } as any;
+    } as unknown as Response<R, any>;
+
+    return result;
   } else {
     throw new Error(`Unknown strategy: ${options.strategy}`);
   }
