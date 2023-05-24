@@ -21,10 +21,13 @@ import { Attribute, Event } from '@cosmjs/stargate/build/events';
 export type KujiraOrder = DeliverTxResponse;
 export type KujiraEvent = Event;
 export type KujiraEventAttribute = Attribute;
-export type FunctionType<Arguments, Return> = (...args: Arguments[]) => Return;
 
-export type AsyncFunctionType<Arguments, Return> = (
-  ...args: Arguments[]
+export type FunctionType<Arguments extends any[], Return> = (
+  ...args: Arguments
+) => Return;
+
+export type AsyncFunctionType<Arguments extends any[], Return> = (
+  ...args: Arguments
 ) => Promise<Return>;
 
 export type IList<V> = ImmutableList<V>;

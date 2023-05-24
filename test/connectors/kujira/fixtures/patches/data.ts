@@ -1,3 +1,5 @@
-const data = new Map<string, any>();
+import { IMap } from '../../../../../src/connectors/kujira/kujira.types';
+
+const data = IMap<string, any>().asMutable();
 
 export default data;

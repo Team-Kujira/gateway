@@ -78,8 +78,9 @@ import express from 'express';
 import { Express } from 'express-serve-static-core';
 
 enablePatches();
+// disablePatches();
 
-let patches: Map<string, any>;
+let patches: IMap<string, any>;
 
 jest.setTimeout(30 * 60 * 1000);
 
