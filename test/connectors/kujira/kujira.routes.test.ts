@@ -75,6 +75,7 @@ import lodash from 'lodash';
 import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
 import {
   createPatches,
+  disablePatches,
   enablePatches,
   getPatch as helperGetPatch,
 } from './fixtures/patches/patches';
@@ -84,7 +85,8 @@ import express from 'express';
 import { Express } from 'express-serve-static-core';
 
 enablePatches();
-// disablePatches();
+disablePatches();
+// enablePatches();
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -498,7 +500,7 @@ describe('/kujira', () => {
         controllerFunction: kujira.getToken,
       });
 
-      const responseBody = response as unknown as GetTokenResponse;
+      const responseBody = response.body as GetTokenResponse;
 
       logResponse(responseBody);
 
