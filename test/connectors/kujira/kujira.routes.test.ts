@@ -13,6 +13,7 @@ import {
 import {
   AllMarketsWithdrawsRequest,
   AsyncFunctionType,
+  AllMarketsWithdrawsResponse,
   Balance,
   Balances,
   CancelAllOrdersRequest,
@@ -26,6 +27,7 @@ import {
   GetAllTokensRequest,
   GetBalanceRequest,
   GetBalancesRequest,
+  GetBalancesResponse,
   GetMarketRequest,
   GetMarketsRequest,
   GetOrderBookRequest,
@@ -1388,40 +1390,62 @@ describe('/kujira', () => {
     });
 
     it.skip('Settle funds for all markets', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.settleAllMarketsFunds(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      const response = await sendRequest<AllMarketsWithdrawsResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/market/withdraws/all',
+        RESTRequest: request,
+        controllerFunction: kujira.settleAllMarketsFunds,
+      });
 
       logResponse(response);
     });
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
-      const request = {
+      const requestBody = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.getBalances(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
       logResponse(response);
 
-      expect(response.total.free.gte(0)).toBeTrue();
-      expect(response.total.unsettled.gte(0)).toBeTrue();
-      expect(response.total.lockedInOrders.gte(0)).toBeTrue();
+      const responseBody = response.body as GetBalancesResponse;
 
-      for (const balance of response.tokens.values()) {
+      expect(responseBody.total.free.gte(0)).toBeTrue();
+      expect(responseBody.total.unsettled.gte(0)).toBeTrue();
+      expect(responseBody.total.lockedInOrders.gte(0)).toBeTrue();
+
+      for (const balance of responseBody.tokens.values()) {
         expect(balance.free.gte(0)).toBeTrue();
         expect(balance.unsettled.gte(0)).toBeTrue();
         expect(balance.lockedInOrders.gte(0)).toBeTrue();
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
     it('Create a limit buy order 1 for market 1', async () => {
@@ -1474,7 +1498,7 @@ describe('/kujira', () => {
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
       const targetOrder = getOrder('1');
 
-      const request = {
+      const requestBody = {
         tokenIds: [
           targetOrder.market.baseToken.id,
           targetOrder.market.quoteToken.id,
@@ -1482,11 +1506,25 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.getBalances(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
       logResponse(response);
+
+      const responseBody = response.body as GetBalancesResponse;
+
+      logResponse(responseBody);
 
       // Verifying token 1 (base) balance
       const currentBaseBalance = getNotNullOrThrowError<any>(
@@ -1494,7 +1532,7 @@ describe('/kujira', () => {
       ).free.minus(lastPayedFeeSum);
 
       expect(
-        response.tokens.get(targetOrder.market.baseToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
       ).toEqual(currentBaseBalance);
 
       userBalances.tokens.set(
@@ -1507,12 +1545,12 @@ describe('/kujira', () => {
         userBalances.tokens.get(targetOrder.market.quoteToken.id)
       ).free.minus(
         getNotNullOrThrowError<Balance>(
-          response.tokens.get(targetOrder.market.quoteToken.id)
+          responseBody.tokens.get(targetOrder.market.quoteToken.id)
         ).lockedInOrders
       );
 
       expect(
-        response.tokens.get(targetOrder.market.quoteToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
       ).toEqual(currentQuoteBalance);
 
       userBalances.tokens.set(
@@ -1559,6 +1597,7 @@ describe('/kujira', () => {
       expect(responseBody.amount.toString()).toEqual(target.amount.toString());
     });
 
+    // TODO !!!
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
 
@@ -1608,6 +1647,7 @@ describe('/kujira', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
     });
 
+    // TODO !!!
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
       const targetOrder = getOrder('2');
 
@@ -1658,6 +1698,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Get the filled order 2', async () => {
       const target = getOrder('2');
 
@@ -1684,6 +1725,7 @@ describe('/kujira', () => {
       expect(response.amount).toEqual(target.amount);
     });
 
+    // TODO !!!
     it('Create a market sell order 3 for market 3', async () => {
       const candidate = getOrder('3');
 
@@ -1715,6 +1757,7 @@ describe('/kujira', () => {
       expect(response.hashes?.creation?.length).toBeCloseTo(64);
     });
 
+    // TODO !!!
     it('Check the available wallet balances from the tokens 2 and 3', async () => {
       const targetOrder = getOrder('3');
 
@@ -1761,6 +1804,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it.skip('Get the filled order 3', async () => {
       const target = getOrder('3');
 
@@ -1789,6 +1833,7 @@ describe('/kujira', () => {
       expect(response.amount).toEqual(target.amount);
     });
 
+    // TODO !!!
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
@@ -1883,6 +1928,7 @@ describe('/kujira', () => {
       }
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       const targetOrders = getOrders([
         '4',
@@ -2007,6 +2053,7 @@ describe('/kujira', () => {
         OrderStatus.FILLED;
     });
 
+    // TODO !!!
     it('Get the open orders 8 and 9', async () => {
       const targets = getOrders(['8', '9']);
       const targetsIds = targets
@@ -2050,6 +2097,7 @@ describe('/kujira', () => {
       }
     });
 
+    // TODO !!!
     it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders(['2', '3', '6', '7', '10', '11']);
 
@@ -2079,6 +2127,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Cancel the order 1', async () => {
       const target = getOrder('1');
 
@@ -2114,6 +2163,7 @@ describe('/kujira', () => {
       lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(response.fee);
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1 and 2', async () => {
       const targetOrder = getOrder('1');
 
@@ -2160,6 +2210,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it("Check that it's not possible to get the cancelled order 1", async () => {
       const target = getOrder('1');
 
@@ -2178,6 +2229,7 @@ describe('/kujira', () => {
       expect(response.hashes).toBeUndefined();
     });
 
+    // TODO !!!
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders(['1', '2', '3', '6', '7', '10', '11']);
 
@@ -2207,6 +2259,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Cancel the orders 4 and 5', async () => {
       const targets = getOrders(['4', '5']);
 
@@ -2259,6 +2312,7 @@ describe('/kujira', () => {
       }
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       const targetOrders = getOrders(['4', '5']);
 
@@ -2368,6 +2422,7 @@ describe('/kujira', () => {
       userBalances = response;
     });
 
+    // TODO !!!
     it("Check that it's not possible to get the cancelled orders 4 and 5", async () => {
       const targets = getOrders(['4', '5']);
 
@@ -2391,6 +2446,7 @@ describe('/kujira', () => {
       expect(response.size).toEqual(0);
     });
 
+    // TODO !!!
     it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders([
         '1',
@@ -2430,6 +2486,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
       const targets = getOrders(['2', '6', '7']);
 
@@ -2459,6 +2516,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
       const openLimitOrdersTargets = getOrders(['8', '9']);
       const filledLimitOrdersTargets = getOrders(['2', '6', '7']);
@@ -2521,6 +2579,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Cancel all open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -2569,6 +2628,7 @@ describe('/kujira', () => {
       }
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['8', '9']);
 
@@ -2678,6 +2738,7 @@ describe('/kujira', () => {
       userBalances = response;
     });
 
+    // TODO !!!
     it('Get all open orders and check that there are no open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -2693,6 +2754,7 @@ describe('/kujira', () => {
       expect(response.size).toEqual(0);
     });
 
+    // TODO !!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       const openLimitOrdersTargets = getOrders(['8', '9']);
       const filledLimitOrdersTargets = getOrders(['2', '6', '7']);
@@ -2759,6 +2821,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Create orders 12 and 13 at once', async () => {
       const candidates = getOrders(['12', '13']);
 
@@ -2816,6 +2879,7 @@ describe('/kujira', () => {
       }
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
@@ -2925,6 +2989,7 @@ describe('/kujira', () => {
       userBalances = response;
     });
 
+    // TODO !!!
     it('Get all open orders and check that the orders 12 and 13 are present', async () => {
       const targets = getOrders(['12', '13']);
 
@@ -2954,6 +3019,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present', async () => {
       const openLimitOrdersTargets = getOrders(['12', '13']);
       const filledLimitOrdersTargets = getOrders(['2', '6', '7']);
@@ -3016,6 +3082,7 @@ describe('/kujira', () => {
       );
     });
 
+    // TODO !!!
     it('Cancel all open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -3063,6 +3130,7 @@ describe('/kujira', () => {
       }
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
@@ -3172,6 +3240,7 @@ describe('/kujira', () => {
       userBalances = response;
     });
 
+    // TODO !!!
     it('Get all open orders and check that there are no open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
@@ -3187,6 +3256,7 @@ describe('/kujira', () => {
       expect(response.size).toEqual(0);
     });
 
+    // TODO !!!
     it('Settle funds for market 1', async () => {
       const request = {
         marketId: marketsIds[1],
@@ -3202,6 +3272,7 @@ describe('/kujira', () => {
       expect((response as Withdraw).hash.length).toBeCloseTo(64);
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
@@ -3311,6 +3382,7 @@ describe('/kujira', () => {
       userBalances = response;
     });
 
+    // TODO !!!
     it('Settle funds for markets 2 and 3', async () => {
       const request = {
         marketIds: [marketsIds[2], marketsIds[3]],
@@ -3335,6 +3407,7 @@ describe('/kujira', () => {
       }
     });
 
+    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
@@ -3444,6 +3517,7 @@ describe('/kujira', () => {
       userBalances = response;
     });
 
+    // TODO !!!
     it('Settle funds for all markets', async () => {
       const request = {
         ownerAddress: ownerAddress,
