@@ -31,6 +31,7 @@ import {
   GetOrderBookRequest,
   GetOrderBooksRequest,
   GetOrderRequest,
+  GetOrderResponse,
   GetOrdersRequest,
   GetTickerRequest,
   GetTickersRequest,
@@ -1522,27 +1523,39 @@ describe('/kujira', () => {
     it('Get the open order 1', async () => {
       const target = getOrder('1');
 
-      const request = {
+      const requestBody = {
         id: target.id,
         status: OrderStatus.OPEN,
         marketId: target.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.getOrder(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
-      logResponse(response);
+      const response = await sendRequest<GetOrderResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrder,
+      });
 
-      expect(response).toBeObject();
-      expect(response.status).toEqual(OrderStatus.OPEN);
-      expect(response.id).toEqual(target.id);
-      expect(response.marketName).toBe(target.marketName);
-      expect(response.marketId).toBe(target.marketId);
-      expect(response.ownerAddress).toEqual(target.ownerAddress);
-      expect(response.price).toEqual(target.price);
-      expect(response.amount).toEqual(target.amount);
+      const responseBody = response.body as GetOrderResponse;
+
+      logResponse(responseBody);
+
+      expect(responseBody).toBeObject();
+      expect(responseBody.status).toEqual(OrderStatus.OPEN);
+      expect(responseBody.id).toEqual(target.id);
+      expect(responseBody.marketName).toBe(target.marketName);
+      expect(responseBody.marketId).toBe(target.marketId);
+      expect(responseBody.ownerAddress).toEqual(target.ownerAddress);
+      expect(responseBody.price?.toString()).toEqual(target.price?.toString());
+      expect(responseBody.amount.toString()).toEqual(target.amount.toString());
     });
 
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
