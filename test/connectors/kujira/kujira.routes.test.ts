@@ -1496,7 +1496,7 @@ describe('/kujira', () => {
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
       const targetOrder = getOrder('1');
 
-      const request = {
+      const requestBody = {
         tokenIds: [
           targetOrder.market.baseToken.id,
           targetOrder.market.quoteToken.id,
@@ -1504,11 +1504,25 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.getBalances(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
       logResponse(response);
+
+      const responseBody = response.body as GetBalancesResponse;
+
+      logResponse(responseBody);
 
       // Verifying token 1 (base) balance
       const currentBaseBalance = getNotNullOrThrowError<any>(
@@ -1516,7 +1530,7 @@ describe('/kujira', () => {
       ).free.minus(lastPayedFeeSum);
 
       expect(
-        response.tokens.get(targetOrder.market.baseToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
       ).toEqual(currentBaseBalance);
 
       userBalances.tokens.set(
@@ -1529,12 +1543,12 @@ describe('/kujira', () => {
         userBalances.tokens.get(targetOrder.market.quoteToken.id)
       ).free.minus(
         getNotNullOrThrowError<Balance>(
-          response.tokens.get(targetOrder.market.quoteToken.id)
+          responseBody.tokens.get(targetOrder.market.quoteToken.id)
         ).lockedInOrders
       );
 
       expect(
-        response.tokens.get(targetOrder.market.quoteToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
       ).toEqual(currentQuoteBalance);
 
       userBalances.tokens.set(
