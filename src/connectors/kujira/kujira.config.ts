@@ -10,6 +10,7 @@ export namespace KujiraConfig {
     tradingTypes: ['CLOB_SPOT'],
     chain: 'kujira',
     network: configManager.get('kujira.network') || 'mainnet',
+    connector: 'kujira',
     rpcEndpoint: configManager.get(`kujira.rpcEndpoint`),
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,

@@ -4,7 +4,7 @@ import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
-} from '../../helpers';
+} from '../../../test/connectors/helpers';
 import { GetTokenSymbolsToTokenIdsMapRequest } from '../../../src/connectors/kujira/kujira.types';
 
 jest.setTimeout(30 * 60 * 1000);

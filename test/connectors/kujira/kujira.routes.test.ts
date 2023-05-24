@@ -1,10 +1,14 @@
 import 'jest-extended';
 import { BigNumber } from 'bignumber.js';
+import { unpatch } from '../../services/patch';
 import { Kujira } from '../../../src/connectors/kujira/kujira';
 import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
+  sendRequest as helperSendRequest,
+  SendRequestFunction,
+  SendRequestOptions,
 } from '../helpers';
 import {
   AllMarketsWithdrawsRequest,
@@ -29,6 +33,7 @@ import {
   GetTickerRequest,
   GetTickersRequest,
   GetTokenRequest,
+  GetTokenResponse,
   GetTokensRequest,
   GetTransactionRequest,
   GetTransactionsRequest,
@@ -63,8 +68,22 @@ import { addWallet } from '../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
 import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
+import {
+  default as patchesCreator,
+  enablePatches,
+} from './fixtures/patches/patches';
+import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
+import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
+import express from 'express';
+import { Express } from 'express-serve-static-core';
+
+enablePatches();
+
+let patches: Map<string, any>;
 
 jest.setTimeout(30 * 60 * 1000);
+
+let sendRequest: SendRequestFunction;
 
 let testTitle: string;
 let logRequest: (target: any) => void;
@@ -135,7 +154,21 @@ const getOrders = (clientIds: OrderClientId[]): IMap<OrderClientId, Order> => {
 
 let ownerAddress: OwnerAddress;
 
+let expressApp: Express;
+
 beforeAll(async () => {
+  const configManager = ConfigManagerV2.getInstance();
+  configManager.set('kujira.timeout.all', 1);
+  configManager.set('kujira.retry.all.maxNumberOfRetries', 1);
+  configManager.set('kujira.retry.all.delayBetweenRetries', 1);
+  configManager.set('kujira.parallel.all.batchSize', 100);
+  configManager.set('kujira.parallel.all.delayBetweenBatches', 1);
+
+  expressApp = express();
+  expressApp.use(express.json());
+
+  expressApp.use('/kujira', KujiraRoutes.router);
+
   const mnemonic: string = getNotNullOrThrowError<string>(
     process.env.TEST_KUJIRA_MNEMONIC
   );
@@ -155,6 +188,11 @@ beforeAll(async () => {
   ).address;
 
   kujira = await Kujira.getInstance(config.chain, config.network);
+
+  patches = await patchesCreator(kujira);
+
+  patches.get('kujira/kujiraGetBasicMarkets')();
+  patches.get('kujira/kujiraGetBasicTokens')();
 
   await kujira.init();
 
@@ -394,32 +432,61 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  sendRequest = <R>(options: SendRequestOptions<R>) => {
+    options.strategy = options.strategy || 'RESTful';
+    options.RESTExpress = options.RESTExpress || expressApp;
+    options.controller = options.controller || kujira;
+
+    return helperSendRequest(options);
+  };
+
   testTitle = expect.getState().currentTestName;
   logRequest = (target: any) => helperLogRequest(target, testTitle);
   logResponse = (target: any) => helperLogResponse(target, testTitle);
   // logOutput = (target: any) => helperLogOutput(target, testTitle);
 });
 
+afterEach(() => {
+  unpatch();
+});
+
 // TODO Add tests to test the retrieval of the estimated fees, current block, and one or more transactions or wallet public keys.
-describe('Kujira Full Flow', () => {
-  describe('Tokens', () => {
+describe('/kujira', () => {
+  const commonRequestBody = {
+    chain: config.chain,
+    network: config.network,
+    connector: config.connector,
+  };
+
+  describe('/kujira/tokens', () => {
     it('Get token 1 by id', async () => {
-      const request = {
+      const requestBody = {
         id: tokenIds[1],
       } as GetTokenRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.getToken(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
-      logResponse(response);
+      const response = await sendRequest<GetTokenResponse>({
+        RESTMethod: 'GET',
+        RESTRoute: '/kujira/token',
+        RESTRequest: request,
+      });
+
+      const responseBody = response.body as GetTokenResponse;
+
+      logResponse(responseBody);
 
       const targetDenom = Denom.from(tokenIds[1]);
 
-      expect(response).not.toBeEmpty();
-      expect(response.id).toBe(request.id);
-      expect(response.symbol).toBe(targetDenom.symbol);
-      expect(response.decimals).toBe(targetDenom.decimals);
+      expect(responseBody).not.toBeEmpty();
+      expect(responseBody.id).toBe(request.id);
+      expect(responseBody.symbol).toBe(targetDenom.symbol);
+      expect(responseBody.decimals).toBe(targetDenom.decimals);
     });
 
     it('Get token 1 by name', async () => {

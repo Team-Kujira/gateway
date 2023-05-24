@@ -3,10 +3,6 @@ import { BigNumber } from 'bignumber.js';
 import { Kujira } from '../../../src/connectors/kujira/kujira';
 import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
-  logRequest as helperLogRequest,
-  logResponse as helperLogResponse,
-} from '../../helpers';
-import {
   AllMarketsWithdrawsRequest,
   Balance,
   Balances,
@@ -58,6 +54,10 @@ import {
   Transaction,
   Withdraw,
 } from '../../../src/connectors/kujira/kujira.types';
+import {
+  logRequest as helperLogRequest,
+  logResponse as helperLogResponse,
+} from '../../../test/connectors/helpers';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';

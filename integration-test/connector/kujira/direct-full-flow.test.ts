@@ -2,7 +2,7 @@ import 'jest-extended';
 import {
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
-} from '../../helpers';
+} from '../../../test/connectors/helpers';
 import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
 import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
