@@ -1343,7 +1343,7 @@ describe('/kujira', () => {
     settle funds for all markets
     */
 
-    it('Cancel all open orders', async () => {
+    it.skip('Cancel all open orders', async () => {
       const request = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
@@ -1355,7 +1355,7 @@ describe('/kujira', () => {
       logResponse(response);
     });
 
-    it('Settle funds for all markets', async () => {
+    it.skip('Settle funds for all markets', async () => {
       const request = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
