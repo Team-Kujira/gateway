@@ -55,6 +55,7 @@ import {
   OrderType,
   OwnerAddress,
   PlaceOrderRequest,
+  PlaceOrderResponse,
   PlaceOrdersRequest,
   RESTfulMethods,
   Ticker,
@@ -73,6 +74,7 @@ import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.he
 import {
   default as patchesCreator,
   enablePatches,
+  // disablePatches,
 } from './fixtures/patches/patches';
 import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
@@ -1409,34 +1411,48 @@ describe('/kujira', () => {
     it('Create a limit buy order 1 for market 1', async () => {
       const candidate = getOrder('1');
 
-      const request = { ...candidate } as PlaceOrderRequest;
+      const requestBody = { ...candidate } as PlaceOrderRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.placeOrder(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
-      logResponse(response);
+      const response = await sendRequest<PlaceOrderResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.placeOrder,
+      });
 
-      candidate.id = response.id;
-      candidate.marketName = response.marketName;
-      candidate.market = response.market;
-      candidate.status = response.status;
-      candidate.fee = response.fee;
-      candidate.hashes = response.hashes;
+      const responseBody = response.body as PlaceOrderResponse;
 
-      expect(response).toBeObject();
-      expect(response.id?.length).toBeGreaterThan(0);
-      expect(response.marketId).toBe(candidate.marketId);
-      expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price);
-      expect(response.amount).toEqual(candidate.amount);
-      expect(response.side).toBe(candidate.side);
-      expect(response.marketName).toBe(candidate.marketName);
-      expect(response.payerAddress).toBe(candidate.payerAddress);
-      expect(response.status).toBe(OrderStatus.OPEN);
-      expect(response.hashes?.creation?.length).toBeCloseTo(64);
+      candidate.id = responseBody.id;
+      candidate.marketName = responseBody.marketName;
+      candidate.market = responseBody.market;
+      candidate.status = responseBody.status;
+      candidate.fee = responseBody.fee;
+      candidate.hashes = responseBody.hashes;
 
-      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(response.fee);
+      expect(responseBody).toBeObject();
+      expect(responseBody.id?.length).toBeGreaterThan(0);
+      expect(responseBody.marketId).toBe(candidate.marketId);
+      expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
+      expect(responseBody.price?.toString()).toEqual(
+        candidate.price?.toString()
+      );
+      expect(responseBody.amount.toString()).toEqual(
+        candidate.amount.toString()
+      );
+      expect(responseBody.side).toBe(candidate.side);
+      expect(responseBody.marketName).toBe(candidate.marketName);
+      expect(responseBody.payerAddress).toBe(candidate.payerAddress);
+      expect(responseBody.status).toBe(OrderStatus.OPEN);
+      expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
+
+      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
