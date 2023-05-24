@@ -15,7 +15,7 @@ export type SendRequestOptions<R> = {
   RESTAccept?: string;
   RESTContentType?: string;
   controller?: any;
-  controllerFunction?: (...args: any[]) => R;
+  controllerFunction?: (...args: any[]) => Promise<R>;
   controllerFunctionParameters?: any[];
 };
 
@@ -43,7 +43,10 @@ export const sendRequest: SendRequestFunction = async <R>(
     return {
       body: (await getNotNullOrThrowError<any>(
         options.controllerFunction
-      ).apply(options.controller, options.controllerFunctionParameters)) as R,
+      ).apply(
+        options.controller,
+        options.controllerFunctionParameters || options.RESTRequest
+      )) as R,
     } as any;
   } else {
     throw new Error(`Unknown strategy: ${options.strategy}`);

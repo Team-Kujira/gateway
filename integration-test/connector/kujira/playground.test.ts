@@ -5,7 +5,15 @@ import {
   logRequest as helperLogRequest,
   logResponse as helperLogResponse,
 } from '../../../test/connectors/helpers';
-import { GetTokenSymbolsToTokenIdsMapRequest } from '../../../src/connectors/kujira/kujira.types';
+import {
+  GetAllMarketsRequest,
+  GetAllMarketsResponse,
+  GetTokenSymbolsToTokenIdsMapRequest,
+} from '../../../src/connectors/kujira/kujira.types';
+import {
+  deserializeFromFile,
+  serializeToFile,
+} from '../../../src/connectors/kujira/kujira.helpers';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -52,5 +60,23 @@ describe('Playground', () => {
     const response = await kujira.getTokenSymbolsToTokenIdsMap(request);
 
     logResponse(response);
+  });
+
+  it('Playground 03', async () => {
+    const request = {} as GetAllMarketsRequest;
+
+    logRequest(request);
+
+    const response: GetAllMarketsResponse = await kujira.getAllMarkets(request);
+
+    logResponse(response);
+
+    const filepath = '/tmp/playground-03.dat';
+
+    await serializeToFile(response, filepath);
+    const newResponse: GetAllMarketsResponse =
+      await deserializeFromFile<GetAllMarketsResponse>(filepath);
+
+    console.log(newResponse);
   });
 });

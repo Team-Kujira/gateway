@@ -475,6 +475,8 @@ describe('/kujira', () => {
         RESTMethod: 'GET',
         RESTRoute: '/kujira/token',
         RESTRequest: request,
+        controller: kujira,
+        controllerFunction: kujira.getToken,
       });
 
       const responseBody = response.body as GetTokenResponse;

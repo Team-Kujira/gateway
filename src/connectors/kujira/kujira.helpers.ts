@@ -2,7 +2,7 @@ import fs from 'fs';
 import { NextFunction, Request, Response } from 'express';
 import { KujiraConfig } from './kujira.config';
 import { Kujira } from './kujira';
-import { parse, stringify } from 'flatted';
+// import { parse, stringify } from 'flatted';
 import { promisify } from 'util';
 
 /**
@@ -181,11 +181,19 @@ export const isKujiraPrivateKey = (privateKey: string): boolean => {
 };
 
 export function serialize(target: any): string {
-  return stringify(target);
+  // console.log(JSON.stringify(target, getCircularReplacer()));
+  // console.log(stringify(target));
+
+  // return stringify(target);
+  return JSON.stringify(target, getCircularAndFunctionReplacer());
 }
 
 export function deserialize<T>(target: string): T {
-  return parse(target) as T;
+  // console.log(JSON.parse(target, getReviver()) as T);
+  // console.log(parse(target) as T);
+
+  // return parse(target) as T;
+  return JSON.parse(target, getReviver()) as T;
 }
 
 export async function serializeToFile(target: any, path: string) {
@@ -195,7 +203,35 @@ export async function serializeToFile(target: any, path: string) {
 }
 
 export async function deserializeFromFile<T>(path: string) {
-  const deserialized = (await promisify(fs.readFile)(path)).toString();
+  const deserialized = (await promisify(fs.readFile)(path, 'utf8')).toString();
 
   return deserialize(deserialized) as T;
+}
+
+function getCircularAndFunctionReplacer(): (key: string, value: any) => any {
+  const seen = new WeakSet();
+  return function (_key: string, value: any) {
+    if (typeof value === 'object' && value !== null) {
+      if (seen.has(value)) {
+        return '[Circular]';
+      }
+
+      seen.add(value);
+    } else if (typeof value === 'function') {
+      return `function ${value.toString()}`;
+    }
+
+    return value;
+  };
+}
+
+function getReviver(): (key: string, value: any) => any {
+  return function (_key: string, value: any) {
+    if (typeof value === 'string' && value.startsWith('function')) {
+      const functionString = value.substring(8);
+      return new Function(`return ${functionString}`)();
+    }
+
+    return value;
+  };
 }
