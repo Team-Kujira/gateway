@@ -670,7 +670,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('Markets', () => {
+  describe('/kujira/markets', () => {
     it('Get market 1 by id', async () => {
       const request = {
         id: marketsIds[1],
@@ -846,7 +846,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('Order books', () => {
+  describe('/kujira/orderBooks', () => {
     it('Get order book from market 1 by id', async () => {
       const request = {
         marketId: marketsIds[1],
@@ -976,7 +976,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('Tickers', () => {
+  describe('/kujira/tickers', () => {
     it('Get ticker from market 1 by id', async () => {
       const request = {
         marketId: marketsIds[1],
@@ -1081,7 +1081,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('User', () => {
+  describe('/kujira/balances', () => {
     it('Get balance of token 1 by id', async () => {
       const request = {
         tokenId: tokensDenoms[1].reference,
@@ -1200,7 +1200,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('Transactions', () => {
+  describe('/kujira/transactions', () => {
     it('Get transaction 1', async () => {
       const request = {
         hash: transactionsHashes[1],
@@ -1248,7 +1248,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('Orders', () => {
+  describe('/kujira/orders', () => {
     /*
     Full flow for testing orders
     =============================
