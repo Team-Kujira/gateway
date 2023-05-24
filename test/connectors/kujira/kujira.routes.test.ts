@@ -13,6 +13,7 @@ import {
 import {
   AllMarketsWithdrawsRequest,
   AsyncFunctionType,
+  AllMarketsWithdrawsResponse,
   Balance,
   Balances,
   CancelAllOrdersRequest,
@@ -26,6 +27,7 @@ import {
   GetAllTokensRequest,
   GetBalanceRequest,
   GetBalancesRequest,
+  GetBalancesResponse,
   GetMarketRequest,
   GetMarketsRequest,
   GetOrderBookRequest,
@@ -1386,40 +1388,62 @@ describe('/kujira', () => {
     });
 
     it.skip('Settle funds for all markets', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.settleAllMarketsFunds(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      const response = await sendRequest<AllMarketsWithdrawsResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/market/withdraws/all',
+        RESTRequest: request,
+        controllerFunction: kujira.settleAllMarketsFunds,
+      });
 
       logResponse(response);
     });
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
-      const request = {
+      const requestBody = {
         tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.getBalances(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
       logResponse(response);
 
-      expect(response.total.free.gte(0)).toBeTrue();
-      expect(response.total.unsettled.gte(0)).toBeTrue();
-      expect(response.total.lockedInOrders.gte(0)).toBeTrue();
+      const responseBody = response.body as GetBalancesResponse;
 
-      for (const balance of response.tokens.values()) {
+      expect(responseBody.total.free.gte(0)).toBeTrue();
+      expect(responseBody.total.unsettled.gte(0)).toBeTrue();
+      expect(responseBody.total.lockedInOrders.gte(0)).toBeTrue();
+
+      for (const balance of responseBody.tokens.values()) {
         expect(balance.free.gte(0)).toBeTrue();
         expect(balance.unsettled.gte(0)).toBeTrue();
         expect(balance.lockedInOrders.gte(0)).toBeTrue();
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
     it('Create a limit buy order 1 for market 1', async () => {
