@@ -152,6 +152,14 @@ export enum ConvertOrderType {
   CANCELLED_ORDERS = 'cancelledOrders',
 }
 
+export enum RESTfulMethods {
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  PATCH = 'PATCH',
+  DELETE = 'DELETE',
+}
+
 //
 //  Interfaces
 //

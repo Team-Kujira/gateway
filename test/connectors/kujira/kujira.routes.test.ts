@@ -15,6 +15,7 @@ import {
   Balance,
   Balances,
   CancelAllOrdersRequest,
+  CancelAllOrdersResponse,
   CancelOrderRequest,
   CancelOrdersRequest,
   GetAllBalancesRequest,
@@ -55,6 +56,7 @@ import {
   OwnerAddress,
   PlaceOrderRequest,
   PlaceOrdersRequest,
+  RESTfulMethods,
   Ticker,
   Token,
   TokenId,
@@ -435,6 +437,7 @@ beforeEach(async () => {
   sendRequest = <R>(options: SendRequestOptions<R>) => {
     options.strategy = options.strategy || 'RESTful';
     options.RESTExpress = options.RESTExpress || expressApp;
+    options.RESTRoute = `/kujira${options.RESTRoute}`;
     options.controller = options.controller || kujira;
 
     return helperSendRequest(options);
@@ -472,8 +475,8 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<GetTokenResponse>({
-        RESTMethod: 'GET',
-        RESTRoute: '/kujira/token',
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/token',
         RESTRequest: request,
         controllerFunction: kujira.getToken,
       });
@@ -1344,13 +1347,23 @@ describe('/kujira', () => {
     */
 
     it.skip('Cancel all open orders', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
 
-      logRequest(request);
+      logRequest(requestBody);
 
-      const response = await kujira.cancelAllOrders(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      const response = await sendRequest<CancelAllOrdersResponse>({
+        RESTMethod: RESTfulMethods.DELETE,
+        RESTRoute: '/orders/all',
+        RESTRequest: request,
+        controllerFunction: kujira.cancelAllOrders,
+      });
 
       logResponse(response);
     });

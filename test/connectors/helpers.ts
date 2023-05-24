@@ -3,12 +3,13 @@ import { Express } from 'express-serve-static-core';
 import { StatusCodes } from 'http-status-codes';
 import { getNotNullOrThrowError } from '../../src/connectors/kujira/kujira.helpers';
 import * as superagent from 'superagent';
+import { RESTfulMethods } from '../../src/connectors/kujira/kujira.types';
 
 export type SendRequestOptions<R> = {
   strategy?: 'RESTful' | 'controller';
   isMock?: boolean;
   RESTExpress?: Express;
-  RESTMethod: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  RESTMethod: RESTfulMethods;
   RESTRoute: string;
   RESTRequest: any;
   RESTStatusCode?: StatusCodes;
