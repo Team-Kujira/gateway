@@ -69,6 +69,7 @@ import {
   TokenSymbol,
   Transaction,
   Withdraw,
+  PlaceOrdersResponse,
 } from '../../../src/connectors/kujira/kujira.types';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
@@ -1597,7 +1598,6 @@ describe('/kujira', () => {
       expect(responseBody.amount.toString()).toEqual(target.amount.toString());
     });
 
-    // TODO !!!
     it('Create a limit sell order 2 for market 2 (slightly better than the market price)', async () => {
       const candidate = getOrder('2');
 
@@ -1618,40 +1618,51 @@ describe('/kujira', () => {
         .times((100 - spread) / 100)
         .decimalPlaces(marketPrecision);
 
-      const request = { ...candidate } as PlaceOrderRequest;
+      const orderRequestBody = { ...candidate } as PlaceOrderRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...orderRequestBody,
+      };
 
       logRequest(request);
 
-      const response = await kujira.placeOrder(request);
+      const response = await sendRequest<PlaceOrderResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.placeOrder,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as PlaceOrderResponse;
 
-      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(response.fee);
+      logResponse(responseBody);
 
-      candidate.id = response.id;
-      candidate.marketName = response.marketName;
-      candidate.market = response.market;
-      candidate.status = response.status;
-      candidate.fee = response.fee;
-      candidate.hashes = response.hashes;
+      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
 
-      expect(response).toBeObject();
-      expect(response.id?.length).toBeGreaterThan(0);
-      expect(response.marketId).toBe(candidate.marketId);
-      expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price);
-      expect(response.amount).toEqual(candidate.amount);
-      expect(response.side).toBe(candidate.side);
-      expect(response.marketName).toBe(candidate.marketName);
-      expect(response.payerAddress).toBe(candidate.payerAddress);
-      expect(response.hashes?.creation?.length).toBeCloseTo(64);
+      candidate.id = responseBody.id;
+      candidate.marketName = responseBody.marketName;
+      candidate.market = responseBody.market;
+      candidate.status = responseBody.status;
+      candidate.fee = responseBody.fee;
+      candidate.hashes = responseBody.hashes;
+
+      expect(responseBody).toBeObject();
+      expect(responseBody.id?.length).toBeGreaterThan(0);
+      expect(responseBody.marketId).toBe(candidate.marketId);
+      expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
+      expect(responseBody.price).toEqual(candidate.price);
+      expect(responseBody.amount).toEqual(candidate.amount);
+      expect(responseBody.side).toBe(candidate.side);
+      expect(responseBody.marketName).toBe(candidate.marketName);
+      expect(responseBody.payerAddress).toBe(candidate.payerAddress);
+      expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
     });
 
-    // TODO !!!
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
       const targetOrder = getOrder('2');
 
-      const request = {
+      const requestBody = {
         tokenIds: [
           targetOrder.market.baseToken.id,
           targetOrder.market.quoteToken.id,
@@ -1659,11 +1670,23 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
+
+      logResponse(responseBody);
 
       // Verifying token 1 (base) balance
       const currentBaseBalance = getNotNullOrThrowError<any>(
@@ -1671,7 +1694,7 @@ describe('/kujira', () => {
       ).free.minus(lastPayedFeeSum, targetOrder.amount);
 
       expect(
-        response.tokens.get(targetOrder.market.baseToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
       ).toEqual(currentBaseBalance);
 
       userBalances.tokens.set(
@@ -1684,12 +1707,12 @@ describe('/kujira', () => {
         userBalances.tokens.get(targetOrder.market.quoteToken.id)
       ).free.minus(
         getNotNullOrThrowError<Balance>(
-          response.tokens.get(targetOrder.market.quoteToken.id)
+          responseBody.tokens.get(targetOrder.market.quoteToken.id)
         ).unsettled
       );
 
       expect(
-        response.tokens.get(targetOrder.market.quoteToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
       ).toEqual(currentQuoteBalance);
 
       userBalances.tokens.set(
@@ -1698,70 +1721,91 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
-    it('Get the filled order 2', async () => {
+    it.skip('Get the filled order 2', async () => {
       const target = getOrder('2');
 
-      const request = {
+      const requestBody = {
         id: target.id,
         status: OrderStatus.FILLED,
         marketId: target.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrder(request);
+      const response = await sendRequest<GetOrderResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrder,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrderResponse;
 
-      expect(response).toBeObject();
-      expect(response.status).toEqual(OrderStatus.FILLED);
-      expect(response.id).toEqual(target.id);
-      expect(response.marketName).toBe(target.marketName);
-      expect(response.marketId).toBe(target.marketId);
-      expect(response.ownerAddress).toEqual(target.ownerAddress);
-      expect(response.price).toBe(target.price);
-      expect(response.amount).toEqual(target.amount);
+      logResponse(responseBody);
+
+      expect(responseBody).toBeObject();
+      expect(responseBody.status).toEqual(OrderStatus.FILLED);
+      expect(responseBody.id).toEqual(target.id);
+      expect(responseBody.marketName).toBe(target.marketName);
+      expect(responseBody.marketId).toBe(target.marketId);
+      expect(responseBody.ownerAddress).toEqual(target.ownerAddress);
+      expect(responseBody.price).toBe(target.price);
+      expect(responseBody.amount).toEqual(target.amount);
     });
 
-    // TODO !!!
     it('Create a market sell order 3 for market 3', async () => {
       const candidate = getOrder('3');
 
-      const request = { ...candidate } as PlaceOrderRequest;
+      const requestBody = { ...candidate } as PlaceOrderRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
       logRequest(request);
 
-      const response = await kujira.placeOrder(request);
+      const response = await sendRequest<PlaceOrderResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.placeOrder,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as PlaceOrderResponse;
 
-      candidate.id = response.id;
-      candidate.marketName = response.marketName;
-      candidate.market = response.market;
-      candidate.status = response.status;
-      candidate.fee = response.fee;
-      candidate.hashes = response.hashes;
+      logResponse(responseBody);
 
-      expect(response).toBeObject();
-      expect(response.id?.length).toBeGreaterThan(0);
-      expect(response.marketId).toBe(candidate.marketId);
-      expect(response.ownerAddress).toBe(candidate.ownerAddress);
-      expect(response.price).toEqual(candidate.price);
-      expect(response.amount).toEqual(candidate.amount);
-      expect(response.side).toBe(candidate.side);
-      expect(response.marketName).toBe(candidate.marketName);
-      expect(response.payerAddress).toBe(candidate.payerAddress);
-      expect(response.status).toBe(OrderStatus.FILLED);
-      expect(response.hashes?.creation?.length).toBeCloseTo(64);
+      candidate.id = responseBody.id;
+      candidate.marketName = responseBody.marketName;
+      candidate.market = responseBody.market;
+      candidate.status = responseBody.status;
+      candidate.fee = responseBody.fee;
+      candidate.hashes = responseBody.hashes;
+
+      expect(responseBody).toBeObject();
+      expect(responseBody.id?.length).toBeGreaterThan(0);
+      expect(responseBody.marketId).toBe(candidate.marketId);
+      expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
+      expect(responseBody.price).toEqual(candidate.price);
+      expect(responseBody.amount).toEqual(candidate.amount);
+      expect(responseBody.side).toBe(candidate.side);
+      expect(responseBody.marketName).toBe(candidate.marketName);
+      expect(responseBody.payerAddress).toBe(candidate.payerAddress);
+      expect(responseBody.status).toBe(OrderStatus.FILLED);
+      expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
     });
 
-    // TODO !!!
     it('Check the available wallet balances from the tokens 2 and 3', async () => {
       const targetOrder = getOrder('3');
 
-      const request = {
+      const requestBody = {
         tokenIds: [
           targetOrder.market.baseToken.id,
           targetOrder.market.quoteToken.id,
@@ -1769,11 +1813,23 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
+
+      logResponse(responseBody);
 
       // Verifying token 2 (base) balance
       const currentBaseBalance = getNotNullOrThrowError<any>(
@@ -1781,7 +1837,7 @@ describe('/kujira', () => {
       ).free.minus(targetOrder.amount);
 
       expect(
-        response.tokens.get(targetOrder.market.baseToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
       ).toEqual(currentBaseBalance);
 
       userBalances.tokens.set(
@@ -1795,7 +1851,7 @@ describe('/kujira', () => {
       );
 
       expect(
-        response.tokens.get(targetOrder.market.quoteToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
       ).toEqual(currentQuoteBalance);
 
       userBalances.tokens.set(
@@ -1804,36 +1860,46 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it.skip('Get the filled order 3', async () => {
       const target = getOrder('3');
 
       target.status = OrderStatus.FILLED;
 
-      const request = {
+      const requestBody = {
         id: target.id,
         status: OrderStatus.FILLED,
         marketId: target.marketId,
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrder(request);
+      const response = await sendRequest<GetOrderResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrder,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrderResponse;
 
-      expect(response).toBeObject();
-      expect(response.status).toEqual(OrderStatus.OPEN);
-      expect(response.id).toEqual(target.id);
-      expect(response.marketName).toBe(target.marketName);
-      expect(response.marketId).toBe(marketsIds['3']);
-      expect(response.ownerAddress).toEqual(ownerAddress);
-      expect(response.price).toEqual(target.price);
-      expect(response.amount).toEqual(target.amount);
+      logResponse(responseBody);
+
+      expect(responseBody).toBeObject();
+      expect(responseBody.status).toEqual(OrderStatus.OPEN);
+      expect(responseBody.id).toEqual(target.id);
+      expect(responseBody.marketName).toBe(target.marketName);
+      expect(responseBody.marketId).toBe(marketsIds['3']);
+      expect(responseBody.ownerAddress).toEqual(ownerAddress);
+      expect(responseBody.price).toEqual(target.price);
+      expect(responseBody.amount).toEqual(target.amount);
     });
 
-    // TODO !!!
     it('Create 8 orders at once', async () => {
       const candidates = getOrders(['4', '5', '6', '7', '8', '9', '10', '11']);
 
@@ -1869,20 +1935,32 @@ describe('/kujira', () => {
           .decimalPlaces(marketPrecisions[1])
       );
 
-      const request = {
+      const requestBody = {
         orders: candidates
           .valueSeq()
           .map((candidate) => ({ ...candidate }))
           .toArray(),
       } as PlaceOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.placeOrders(request);
+      const response = await sendRequest<PlaceOrdersResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.placeOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as PlaceOrdersResponse;
 
-      response
+      logResponse(responseBody);
+
+      responseBody
         .valueSeq()
         .toArray()
         .map((order: Order) => {
@@ -1901,7 +1979,7 @@ describe('/kujira', () => {
         });
 
       for (const [orderId, order] of (
-        response as IMap<OrderId, Order>
+        responseBody as IMap<OrderId, Order>
       ).entries()) {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
         const candidate = orders.get(clientId);
@@ -1921,7 +1999,7 @@ describe('/kujira', () => {
       }
 
       lastPayedFeeSum = BigNumber(0);
-      for (const order of (response as IMap<OrderId, Order>).values()) {
+      for (const order of (responseBody as IMap<OrderId, Order>).values()) {
         lastPayedFeeSum = lastPayedFeeSum.plus(
           getNotNullOrThrowError<BigNumber>(order.fee)
         );
