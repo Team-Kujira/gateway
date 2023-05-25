@@ -1379,12 +1379,12 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
 
-      logRequest(requestBody);
-
       const request = {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      logRequest(request);
 
       const response = await sendRequest<CancelAllOrdersResponse>({
         RESTMethod: RESTfulMethod.DELETE,
@@ -1393,7 +1393,9 @@ describe('/kujira', () => {
         controllerFunction: kujira.cancelAllOrders,
       });
 
-      logResponse(response);
+      const responseBody = response.body as CancelAllOrdersResponse;
+
+      logResponse(responseBody);
     });
 
     it.skip('Settle funds for all markets', async () => {
@@ -1401,12 +1403,12 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
 
-      logRequest(requestBody);
-
       const request = {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      logRequest(request);
 
       const response = await sendRequest<AllMarketsWithdrawsResponse>({
         RESTMethod: RESTfulMethod.POST,
@@ -1415,7 +1417,9 @@ describe('/kujira', () => {
         controllerFunction: kujira.settleAllMarketsFunds,
       });
 
-      logResponse(response);
+      const responseBody = response.body as AllMarketsWithdrawsResponse;
+
+      logResponse(responseBody);
     });
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
@@ -1424,12 +1428,12 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
-      logRequest(requestBody);
-
       const request = {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      logRequest(request);
 
       const response = await sendRequest<GetBalancesResponse>({
         RESTMethod: RESTfulMethod.GET,
@@ -1438,9 +1442,9 @@ describe('/kujira', () => {
         controllerFunction: kujira.getBalances,
       });
 
-      logResponse(response);
-
       const responseBody = response.body as GetBalancesResponse;
+
+      logResponse(responseBody);
 
       expect(BigNumber(responseBody.total.free).gte(0)).toBeTrue();
       expect(BigNumber(responseBody.total.unsettled).gte(0)).toBeTrue();
@@ -1465,12 +1469,12 @@ describe('/kujira', () => {
 
       const requestBody = { ...candidate } as PlaceOrderRequest;
 
-      logRequest(requestBody);
-
       const request = {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      logRequest(request);
 
       const response = await sendRequest<PlaceOrderResponse>({
         RESTMethod: RESTfulMethod.POST,
@@ -1480,6 +1484,8 @@ describe('/kujira', () => {
       });
 
       const responseBody = response.body as PlaceOrderResponse;
+
+      logResponse(responseBody);
 
       candidate.id = responseBody.id;
       candidate.marketName = responseBody.marketName;
@@ -1504,7 +1510,9 @@ describe('/kujira', () => {
       expect(responseBody.status).toBe(OrderStatus.OPEN);
       expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
 
-      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
+      lastPayedFeeSum = BigNumber(
+        getNotNullOrThrowError<BigNumber>(responseBody.fee)
+      );
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
@@ -1518,12 +1526,12 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
-      logRequest(requestBody);
-
       const request = {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      logRequest(request);
 
       const response = await sendRequest<GetBalancesResponse>({
         RESTMethod: RESTfulMethod.GET,
@@ -1531,8 +1539,6 @@ describe('/kujira', () => {
         RESTRequest: request,
         controllerFunction: kujira.getBalances,
       });
-
-      logResponse(response);
 
       const responseBody = {
         ...response.body,
@@ -1586,12 +1592,12 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetOrderRequest;
 
-      logRequest(requestBody);
-
       const request = {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      logRequest(request);
 
       const response = await sendRequest<GetOrderResponse>({
         RESTMethod: RESTfulMethod.GET,
@@ -2418,7 +2424,7 @@ describe('/kujira', () => {
 
       const responseBody = response.body as GetOrdersResponse;
 
-      logResponse(response);
+      logResponse(responseBody);
 
       const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)

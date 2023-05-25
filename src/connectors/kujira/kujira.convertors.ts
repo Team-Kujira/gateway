@@ -32,6 +32,7 @@ import {
   TESTNET,
   USK,
   USK_TESTNET,
+  KUJI,
 } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
@@ -211,7 +212,9 @@ export const convertKujiraOrderToStatus = (kujiraOrder: any): OrderStatus => {
 
 export const convertKujiraFeeToFee = (kujiraFee: string) => {
   const fee = parseCoins(kujiraFee)[0];
-  return BigNumber(fee.amount);
+  return BigNumber(fee.amount).multipliedBy(
+    BigNumber('1e-' + KUJI.decimals.toString())
+  );
 };
 
 export const convertKujiraOrdersToMapOfOrders = (options: {
