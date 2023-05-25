@@ -70,6 +70,8 @@ import {
   Transaction,
   Withdraw,
   PlaceOrdersResponse,
+  GetOrdersResponse,
+  CancelOrderResponse,
 } from '../../../src/connectors/kujira/kujira.types';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
@@ -2007,7 +2009,6 @@ describe('/kujira', () => {
       }
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       const targetOrders = getOrders([
         '4',
@@ -2020,18 +2021,30 @@ describe('/kujira', () => {
         '11',
       ]);
 
-      const request = {
+      const requestBody = {
         tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      const currentBalances = lodash.cloneDeep(response);
+      logResponse(responseBody);
+
+      const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
         const baseBalance = getNotNullOrThrowError<Balance>(
@@ -2123,7 +2136,7 @@ describe('/kujira', () => {
         expect(balance.unsettled).toBe(currentBalance.unsettled);
       }
 
-      userBalances = response;
+      userBalances = responseBody;
 
       getNotNullOrThrowError<Order>(targetOrders.get('10')).status =
         OrderStatus.FILLED;
@@ -2132,7 +2145,6 @@ describe('/kujira', () => {
         OrderStatus.FILLED;
     });
 
-    // TODO !!!
     it('Get the open orders 8 and 9', async () => {
       const targets = getOrders(['8', '9']);
       const targetsIds = targets
@@ -2140,22 +2152,34 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ids: targetsIds,
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      expect(response.size).toBe(targets.size);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toBe(targets.size);
 
       for (const [orderId, order] of (
-        response as IMap<OrderId, Order>
+        responseBody as IMap<OrderId, Order>
       ).entries()) {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
         const candidate = orders.get(clientId);
@@ -2176,7 +2200,6 @@ describe('/kujira', () => {
       }
     });
 
-    // TODO !!!
     it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders(['2', '3', '6', '7', '10', '11']);
 
@@ -2185,18 +2208,30 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      logResponse(responseBody);
+
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -2206,47 +2241,57 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Cancel the order 1', async () => {
       const target = getOrder('1');
 
-      const request = {
+      const requestBody = {
         id: target.id,
         marketId: target.marketId,
         ownerAddress: target.ownerAddress,
       } as CancelOrderRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.cancelOrder(request);
+      const response = await sendRequest<CancelOrderResponse>({
+        RESTMethod: RESTfulMethods.DELETE,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.cancelOrder,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as CancelOrderResponse;
 
-      expect(response).toBeObject();
-      expect(response.id?.length).toBeGreaterThan(0);
-      expect(response.id).toEqual(target.id);
-      expect(response.marketId).toBe(target.marketId);
-      expect(response.ownerAddress).toBe(target.ownerAddress);
-      expect(response.price).toEqual(target.price);
-      expect(response.amount).toEqual(target.amount);
-      expect(response.side).toBe(target.side);
-      expect(response.marketName).toBe(target.marketName);
-      expect(response.payerAddress).toBe(target.payerAddress);
-      expect(response.status).toBe(OrderStatus.CANCELLED);
-      expect(response.hashes?.cancellation?.length).toBeCloseTo(64);
+      logResponse(responseBody);
 
-      target.fee = response.fee;
-      target.hashes = response.hashes;
+      expect(responseBody).toBeObject();
+      expect(responseBody.id?.length).toBeGreaterThan(0);
+      expect(responseBody.id).toEqual(target.id);
+      expect(responseBody.marketId).toBe(target.marketId);
+      expect(responseBody.ownerAddress).toBe(target.ownerAddress);
+      expect(responseBody.price).toEqual(target.price);
+      expect(responseBody.amount).toEqual(target.amount);
+      expect(responseBody.side).toBe(target.side);
+      expect(responseBody.marketName).toBe(target.marketName);
+      expect(responseBody.payerAddress).toBe(target.payerAddress);
+      expect(responseBody.status).toBe(OrderStatus.CANCELLED);
+      expect(responseBody.hashes?.cancellation?.length).toBeCloseTo(64);
+
+      target.fee = responseBody.fee;
+      target.hashes = responseBody.hashes;
       target.status = OrderStatus.CANCELLED;
 
-      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(response.fee);
+      lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1 and 2', async () => {
       const targetOrder = getOrder('1');
 
-      const request = {
+      const requestBody = {
         tokenIds: [
           targetOrder.market.baseToken.id,
           targetOrder.market.quoteToken.id,
@@ -2254,11 +2299,23 @@ describe('/kujira', () => {
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
+
+      logResponse(responseBody);
 
       // Verifying token 1 (base) balance
       const currentBaseBalance = getNotNullOrThrowError<any>(
@@ -2266,7 +2323,7 @@ describe('/kujira', () => {
       ).free.minus(lastPayedFeeSum);
 
       expect(
-        response.tokens.get(targetOrder.market.baseToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
       ).toEqual(currentBaseBalance);
 
       userBalances.tokens.set(
@@ -2280,7 +2337,7 @@ describe('/kujira', () => {
       ).free.add(targetOrder.amount);
 
       expect(
-        response.tokens.get(targetOrder.market.quoteToken.id)?.free
+        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
       ).toEqual(currentQuoteBalance);
 
       userBalances.tokens.set(
@@ -2289,23 +2346,34 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it("Check that it's not possible to get the cancelled order 1", async () => {
       const target = getOrder('1');
 
-      const request = {
+      const requestBody = {
         id: target.id,
         ownerAddress: target.ownerAddress,
         marketId: target.marketId,
       } as GetOrderRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrder(request);
+      const response = await sendRequest<GetOrderResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/order',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrder,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrderResponse;
 
-      expect(response.hashes).toBeUndefined();
+      logResponse(responseBody);
+
+      expect(responseBody.hashes).toBeUndefined();
     });
 
     // TODO !!!
