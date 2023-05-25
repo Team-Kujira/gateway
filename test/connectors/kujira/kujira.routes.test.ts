@@ -1449,7 +1449,11 @@ describe('/kujira', () => {
         expect(BigNumber(balance.lockedInOrders).gte(0)).toBeTrue();
       }
 
-      userBalances = responseBody;
+      userBalances = {
+        ...responseBody,
+        tokens: IMap(responseBody.tokens).asMutable(),
+      };
+      // userBalances.tokens = IMap(responseBody.tokens).asMutable();
     });
 
     it('Create a limit buy order 1 for market 1', async () => {
@@ -1526,23 +1530,28 @@ describe('/kujira', () => {
 
       logResponse(response);
 
-      const responseBody = response.body as GetBalancesResponse;
+      const responseBody = {
+        ...response.body,
+        tokens: IMap(response.body.tokens),
+      } as GetBalancesResponse;
 
       logResponse(responseBody);
 
       // Verifying token 1 (base) balance
-      const currentBaseBalance = getNotNullOrThrowError<any>(
-        userBalances.tokens.get(targetOrder.market.baseToken.id)
-      ).free.minus(lastPayedFeeSum);
+      const currentBaseBalance = BigNumber(
+        getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.baseToken.id)
+        ).free
+      ).minus(lastPayedFeeSum);
 
       expect(
         responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
       ).toEqual(currentBaseBalance);
 
-      userBalances.tokens.set(
-        targetOrder.market.baseToken.id,
-        currentBaseBalance
+      const userBalancesSetter = getNotNullOrThrowError<Balance>(
+        userBalances.tokens.get(targetOrder.market.baseToken.id)
       );
+      userBalancesSetter.free = currentBaseBalance;
 
       // Verifying token 2 (quote) balance
       const currentQuoteBalance = getNotNullOrThrowError<any>(
