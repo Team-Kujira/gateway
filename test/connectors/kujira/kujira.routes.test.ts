@@ -1513,6 +1513,27 @@ describe('/kujira', () => {
       lastPayedFeeSum = BigNumber(
         getNotNullOrThrowError<BigNumber>(responseBody.fee)
       );
+
+      // Updating Quote Balance
+      // userBalances.tokens.set(candidate.market.quoteToken.id, {
+      //   token: candidate.market.quoteToken,
+      //   free: BigNumber(
+      //     getNotNullOrThrowError<any>(
+      //       userBalances.tokens.get(candidate.market.quoteToken.id)?.free
+      //     )
+      //   ).minus(candidate.amount),
+      //   lockedInOrders: BigNumber(
+      //     getNotNullOrThrowError<any>(
+      //       userBalances.tokens.get(candidate.market.quoteToken.id)
+      //         ?.lockedInOrders
+      //     )
+      //   ).plus(candidate.amount),
+      //   unsettled: BigNumber(
+      //     getNotNullOrThrowError<any>(
+      //       userBalances.tokens.get(candidate.market.quoteToken.id)?.unsettled
+      //     )
+      //   ),
+      // });
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
@@ -1555,7 +1576,11 @@ describe('/kujira', () => {
       ).minus(lastPayedFeeSum);
 
       expect(
-        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
+        BigNumber(
+          getNotNullOrThrowError(
+            responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
+          )
+        )
       ).toEqual(currentBaseBalance);
 
       const userBalancesSetter = getNotNullOrThrowError<Balance>(
@@ -1564,22 +1589,36 @@ describe('/kujira', () => {
       userBalancesSetter.free = currentBaseBalance;
 
       // Verifying token 2 (quote) balance
-      const currentQuoteBalance = getNotNullOrThrowError<any>(
-        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-      ).free.minus(
-        getNotNullOrThrowError<Balance>(
-          responseBody.tokens.get(targetOrder.market.quoteToken.id)
-        ).lockedInOrders
-      );
+      const currentQuoteBalance = BigNumber(
+        getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)
+        ).free
+      ).minus(getNotNullOrThrowError<any>(targetOrder.amount));
 
       expect(
-        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
+        BigNumber(
+          getNotNullOrThrowError(
+            responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
+          )
+        )
       ).toEqual(currentQuoteBalance);
 
-      userBalances.tokens.set(
-        targetOrder.market.quoteToken.id,
-        currentQuoteBalance
-      );
+      // Updating Quote Balances (free and lockedInOrders)
+      userBalances.tokens.set(targetOrder.market.quoteToken.id, {
+        token: targetOrder.market.quoteToken,
+        free: currentQuoteBalance,
+        lockedInOrders: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+              ?.lockedInOrders
+          )
+        ).plus(targetOrder.amount),
+        unsettled: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
+          )
+        ),
+      });
     });
 
     it('Get the open order 1', async () => {
