@@ -155,7 +155,12 @@ export enum ConvertOrderType {
   CANCELLED_ORDERS = 'cancelledOrders',
 }
 
-export enum RESTfulMethods {
+export enum RequestStrategy {
+  RESTful = 'RESTful',
+  Controller = 'Controller',
+}
+
+export enum RESTfulMethod {
   GET = 'GET',
   POST = 'POST',
   PUT = 'PUT',

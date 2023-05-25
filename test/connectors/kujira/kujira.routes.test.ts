@@ -61,7 +61,7 @@ import {
   PlaceOrderRequest,
   PlaceOrderResponse,
   PlaceOrdersRequest,
-  RESTfulMethods,
+  RESTfulMethod,
   Ticker,
   Token,
   TokenId,
@@ -72,6 +72,7 @@ import {
   PlaceOrdersResponse,
   GetOrdersResponse,
   CancelOrderResponse,
+  RequestStrategy,
 } from '../../../src/connectors/kujira/kujira.types';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
@@ -459,7 +460,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   sendRequest = <R>(options: SendRequestOptions<R>) => {
-    options.strategy = options.strategy || 'RESTful';
+    options.strategy = options.strategy || RequestStrategy.RESTful;
     options.RESTExpress = options.RESTExpress || expressApp;
     options.RESTRoute = `/kujira${options.RESTRoute}`;
     options.controller = options.controller || kujira;
@@ -499,7 +500,7 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<GetTokenResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/token',
         RESTRequest: request,
         controllerFunction: kujira.getToken,
@@ -1383,7 +1384,7 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<CancelAllOrdersResponse>({
-        RESTMethod: RESTfulMethods.DELETE,
+        RESTMethod: RESTfulMethod.DELETE,
         RESTRoute: '/orders/all',
         RESTRequest: request,
         controllerFunction: kujira.cancelAllOrders,
@@ -1405,7 +1406,7 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<AllMarketsWithdrawsResponse>({
-        RESTMethod: RESTfulMethods.POST,
+        RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/market/withdraws/all',
         RESTRequest: request,
         controllerFunction: kujira.settleAllMarketsFunds,
@@ -1428,7 +1429,7 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<GetBalancesResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
         controllerFunction: kujira.getBalances,
@@ -1469,7 +1470,7 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<PlaceOrderResponse>({
-        RESTMethod: RESTfulMethods.POST,
+        RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.placeOrder,
@@ -1522,7 +1523,7 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<GetBalancesResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
         controllerFunction: kujira.getBalances,
@@ -1590,7 +1591,7 @@ describe('/kujira', () => {
       };
 
       const response = await sendRequest<GetOrderResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.getOrder,
@@ -1640,7 +1641,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<PlaceOrderResponse>({
-        RESTMethod: RESTfulMethods.POST,
+        RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.placeOrder,
@@ -1690,7 +1691,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetBalancesResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
         controllerFunction: kujira.getBalances,
@@ -1751,7 +1752,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetOrderResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.getOrder,
@@ -1784,7 +1785,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<PlaceOrderResponse>({
-        RESTMethod: RESTfulMethods.POST,
+        RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.placeOrder,
@@ -1833,7 +1834,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetBalancesResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
         controllerFunction: kujira.getBalances,
@@ -1892,7 +1893,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetOrderResponse>({
-        RESTMethod: RESTfulMethods.POST,
+        RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.getOrder,
@@ -1962,7 +1963,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<PlaceOrdersResponse>({
-        RESTMethod: RESTfulMethods.POST,
+        RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/orders',
         RESTRequest: request,
         controllerFunction: kujira.placeOrders,
@@ -2043,7 +2044,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetBalancesResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
         controllerFunction: kujira.getBalances,
@@ -2175,7 +2176,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetOrdersResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
         controllerFunction: kujira.getOrders,
@@ -2230,7 +2231,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetOrdersResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
         controllerFunction: kujira.getOrders,
@@ -2267,7 +2268,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<CancelOrderResponse>({
-        RESTMethod: RESTfulMethods.DELETE,
+        RESTMethod: RESTfulMethod.DELETE,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.cancelOrder,
@@ -2316,7 +2317,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetBalancesResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
         controllerFunction: kujira.getBalances,
@@ -2372,7 +2373,7 @@ describe('/kujira', () => {
       logRequest(request);
 
       const response = await sendRequest<GetOrderResponse>({
-        RESTMethod: RESTfulMethods.GET,
+        RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/order',
         RESTRequest: request,
         controllerFunction: kujira.getOrder,

@@ -2,13 +2,16 @@ import supertest from 'supertest';
 import { Express } from 'express-serve-static-core';
 import { StatusCodes } from 'http-status-codes';
 import { getNotNullOrThrowError } from '../../src/connectors/kujira/kujira.helpers';
-import { RESTfulMethods } from '../../src/connectors/kujira/kujira.types';
+import {
+  RequestStrategy,
+  RESTfulMethod,
+} from '../../src/connectors/kujira/kujira.types';
 
 export type SendRequestOptions<R> = {
-  strategy?: 'RESTful' | 'controller';
+  strategy?: RequestStrategy;
   isMock?: boolean;
   RESTExpress?: Express;
-  RESTMethod: RESTfulMethods;
+  RESTMethod: RESTfulMethod;
   RESTRoute: string;
   RESTRequest: any;
   RESTStatusCode?: StatusCodes;
@@ -41,7 +44,7 @@ export const sendRequest: SendRequestFunction = async <R>(
       )) as supertest.Response;
 
     return result;
-  } else if (options.strategy == 'controller') {
+  } else if (options.strategy == RequestStrategy.Controller) {
     const result = await getNotNullOrThrowError<any>(
       options.controllerFunction
     ).apply(options.controller, [
