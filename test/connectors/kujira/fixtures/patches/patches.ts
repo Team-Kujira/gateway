@@ -19,9 +19,12 @@ import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import { serialize } from '../../../../../src/connectors/kujira/kujira.helpers';
 
 let usePatches = true;
+let useInputOutputWrapper = true;
 
 export const enablePatches = () => (usePatches = true);
 export const disablePatches = () => (usePatches = false);
+export const enableInputOutputWrapper = () => (useInputOutputWrapper = true);
+export const disableInputOutputWrapper = () => (useInputOutputWrapper = false);
 
 export const createPatches = (
   kujira: Kujira
@@ -31,6 +34,8 @@ export const createPatches = (
   patches.setIn(
     ['kujira', 'kujiraFinClientWithdrawOrders'],
     async (ordinal: number = 1) => {
+      if (!usePatches) return;
+
       patch(
         kujira,
         'kujiraFinClientWithdrawOrders',
@@ -43,7 +48,7 @@ export const createPatches = (
           _memo?: string,
           _funds?: readonly Coin[]
         ): Promise<ExecuteResult> => {
-          if (!usePatches) {
+          if (useInputOutputWrapper) {
             return await inputOutputWrapper<ExecuteResult>(
               kujira,
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -74,11 +79,20 @@ export const createPatches = (
         kujira,
         'kujiraGetBasicMarkets',
         async (): Promise<IMap<MarketId, BasicKujiraMarket>> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<IMap<MarketId, BasicKujiraMarket>>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraGetBasicMarkets
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraGetBasicMarkets',
             serializedArguments,
             ordinal,
           ]) as IMap<MarketId, BasicKujiraMarket>;
@@ -96,11 +110,20 @@ export const createPatches = (
         kujira,
         'kujiraGetBasicTokens',
         async (): Promise<IMap<TokenId, BasicKujiraToken>> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<IMap<TokenId, BasicKujiraToken>>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraGetBasicTokens
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraGetBasicTokens',
             serializedArguments,
             ordinal,
           ]) as IMap<TokenId, BasicKujiraToken>;
@@ -118,11 +141,20 @@ export const createPatches = (
         kujira,
         'kujiraQueryClientWasmQueryContractSmart',
         async (_address: string, _query: JsonObject): Promise<JsonObject> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<JsonObject>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraQueryClientWasmQueryContractSmart
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraQueryClientWasmQueryContractSmart',
             serializedArguments,
             ordinal,
           ]) as JsonObject;
@@ -146,11 +178,20 @@ export const createPatches = (
           _fee: StdFee | 'auto' | number,
           _memo?: string
         ): Promise<KujiraOrder> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<KujiraOrder>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraSigningStargateClientSignAndBroadcast
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraSigningStargateClientSignAndBroadcast',
             serializedArguments,
             ordinal,
           ]) as KujiraOrder;
@@ -168,11 +209,20 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetAllBalances',
         async (_address: string): Promise<readonly Coin[]> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<readonly Coin[]>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraStargateClientGetAllBalances
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraStargateClientGetAllBalances',
             serializedArguments,
             ordinal,
           ]) as readonly Coin[];
@@ -190,11 +240,20 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetBalanceStaked',
         async (_address: string): Promise<Coin | null> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<Coin | null>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraStargateClientGetBalanceStaked
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraStargateClientGetBalanceStaked',
             serializedArguments,
             ordinal,
           ]) as Coin | null;
@@ -212,11 +271,20 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetHeight',
         async (): Promise<number> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<number>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraStargateClientGetHeight
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraStargateClientGetHeight',
             serializedArguments,
             ordinal,
           ]) as number;
@@ -234,11 +302,20 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetTx',
         async (_id: string): Promise<IndexedTx | null> => {
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<IndexedTx | null>(
+              kujira,
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              kujira.kujiraStargateClientGetTx
+            );
+          }
+
           const serializedArguments = (...args: any[]) => serialize(args);
 
           return data.getIn([
             'kujira',
-            'kujiraFinClientWithdrawOrders',
+            'kujiraStargateClientGetTx',
             serializedArguments,
             ordinal,
           ]) as IndexedTx | null;
