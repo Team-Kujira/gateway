@@ -489,7 +489,7 @@ describe('/kujira', () => {
     connector: config.connector,
   };
 
-  describe('/kujira/tokens', () => {
+  describe('Tokens', () => {
     it('Get token 1 by id', async () => {
       const requestBody = {
         id: tokenIds[1],
@@ -697,7 +697,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('/kujira/markets', () => {
+  describe('Markets', () => {
     it('Get market 1 by id', async () => {
       const request = {
         id: marketsIds[1],
@@ -873,7 +873,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('/kujira/orderBooks', () => {
+  describe('Order books', () => {
     it('Get order book from market 1 by id', async () => {
       const request = {
         marketId: marketsIds[1],
@@ -1003,7 +1003,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('/kujira/tickers', () => {
+  describe('Tickers', () => {
     it('Get ticker from market 1 by id', async () => {
       const request = {
         marketId: marketsIds[1],
@@ -1108,7 +1108,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('/kujira/balances', () => {
+  describe('User', () => {
     it('Get balance of token 1 by id', async () => {
       const request = {
         tokenId: tokensDenoms[1].reference,
@@ -1227,7 +1227,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('/kujira/transactions', () => {
+  describe('Transactions', () => {
     it('Get transaction 1', async () => {
       const request = {
         hash: transactionsHashes[1],
@@ -1275,7 +1275,7 @@ describe('/kujira', () => {
     });
   });
 
-  describe('/kujira/orders', () => {
+  describe('Orders', () => {
     /*
     Full flow for testing orders
     =============================
