@@ -51,13 +51,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<ExecuteResult>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraFinClientWithdrawOrders
+              'kujiraFinClientWithdrawOrders'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -82,13 +80,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<IMap<MarketId, BasicKujiraMarket>>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraGetBasicMarkets
+              'kujiraGetBasicMarkets'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -113,13 +109,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<IMap<TokenId, BasicKujiraToken>>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraGetBasicTokens
+              'kujiraGetBasicTokens'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -144,13 +138,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<JsonObject>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraQueryClientWasmQueryContractSmart
+              'kujiraQueryClientWasmQueryContractSmart'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -181,13 +173,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<KujiraOrder>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraSigningStargateClientSignAndBroadcast
+              'kujiraSigningStargateClientSignAndBroadcast'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -212,13 +202,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<readonly Coin[]>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraStargateClientGetAllBalances
+              'kujiraStargateClientGetAllBalances'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -243,13 +231,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<Coin | null>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraStargateClientGetBalanceStaked
+              'kujiraStargateClientGetBalanceStaked'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -274,13 +260,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<number>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraStargateClientGetHeight
+              'kujiraStargateClientGetHeight'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -305,13 +289,11 @@ export const createPatches = (
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<IndexedTx | null>(
               kujira,
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              kujira.kujiraStargateClientGetTx
+              'kujiraStargateClientGetTx'
             );
           }
 
-          const serializedArguments = (...args: any[]) => serialize(args);
+          const serializedArguments = ((...args: any[]) => serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -336,13 +318,16 @@ export const getPatch = async <R>(
 
 const inputOutputWrapper = async <R>(
   targetObject: any,
-  targetFunction: any
-) => {
-  const args = {};
+  targetFunctionName: string
+): Promise<R> => {
+  const args = ((...args: any[]) => args)();
 
   console.log('input', args);
 
-  const result = await targetFunction.apply(targetObject, args);
+  const originalTargetFunction =
+    targetObject[`__original__${targetFunctionName}`];
+
+  const result = await originalTargetFunction.value.apply(targetObject, args);
 
   console.log('output', result);
 
