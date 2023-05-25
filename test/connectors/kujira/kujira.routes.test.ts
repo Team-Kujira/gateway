@@ -1436,14 +1436,15 @@ describe('/kujira', () => {
 
       const responseBody = response.body as GetBalancesResponse;
 
-      expect(responseBody.total.free.gte(0)).toBeTrue();
-      expect(responseBody.total.unsettled.gte(0)).toBeTrue();
-      expect(responseBody.total.lockedInOrders.gte(0)).toBeTrue();
+      expect(BigNumber(responseBody.total.free).gte(0)).toBeTrue();
+      expect(BigNumber(responseBody.total.unsettled).gte(0)).toBeTrue();
+      expect(BigNumber(responseBody.total.lockedInOrders).gte(0)).toBeTrue();
 
-      for (const balance of responseBody.tokens.values()) {
-        expect(balance.free.gte(0)).toBeTrue();
-        expect(balance.unsettled.gte(0)).toBeTrue();
-        expect(balance.lockedInOrders.gte(0)).toBeTrue();
+      const tokens = IMap(responseBody.tokens);
+      for (const balance of tokens.values()) {
+        expect(BigNumber(balance.free).gte(0)).toBeTrue();
+        expect(BigNumber(balance.unsettled).gte(0)).toBeTrue();
+        expect(BigNumber(balance.lockedInOrders).gte(0)).toBeTrue();
       }
 
       userBalances = responseBody;
@@ -1468,7 +1469,7 @@ describe('/kujira', () => {
         controllerFunction: kujira.placeOrder,
       });
 
-      const responseBody = response as unknown as PlaceOrderResponse;
+      const responseBody = response.body as PlaceOrderResponse;
 
       candidate.id = responseBody.id;
       candidate.marketName = responseBody.marketName;
