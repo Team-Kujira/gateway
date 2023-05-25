@@ -72,7 +72,12 @@ import {
   PlaceOrdersResponse,
   GetOrdersResponse,
   CancelOrderResponse,
+<<<<<<< Updated upstream
   RequestStrategy,
+=======
+  CancelOrdersResponse,
+  MarketsWithdrawsFundsResponse, MarketWithdrawResponse,
+>>>>>>> Stashed changes
 } from '../../../src/connectors/kujira/kujira.types';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
@@ -2386,7 +2391,6 @@ describe('/kujira', () => {
       expect(responseBody.hashes).toBeUndefined();
     });
 
-    // TODO !!!
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders(['1', '2', '3', '6', '7', '10', '11']);
 
@@ -2395,18 +2399,30 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
+
+      const responseBody = response.body as GetOrdersResponse;
 
       logResponse(response);
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -2416,7 +2432,6 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Cancel the orders 4 and 5', async () => {
       const targets = getOrders(['4', '5']);
 
@@ -2430,26 +2445,38 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ids: targetsIds,
         marketIds: targetMarketsIds,
         ownerAddress: ownerAddress,
       } as CancelOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = (await kujira.cancelOrders(request)) as IMap<
+      const response = await sendRequest<CancelOrdersResponse>({
+        RESTMethod: RESTfulMethods.DELETE,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.cancelOrders,
+      });
+
+      const responseBody = response.body as CancelOrdersResponse as IMap<
         OrderId,
         Order
       >;
 
-      logResponse(response);
+      logResponse(responseBody);
 
-      expect(response.size).toBe(targetsIds.length);
-      expect(response.keySeq().toArray()).toIncludeSameMembers(targetsIds);
+      expect(responseBody.size).toBe(targetsIds.length);
+      expect(responseBody.keySeq().toArray()).toIncludeSameMembers(targetsIds);
 
       for (const [orderId, order] of (
-        response as IMap<OrderId, Order>
+        responseBody as IMap<OrderId, Order>
       ).entries()) {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
         const candidate = orders.get(clientId);
@@ -2469,22 +2496,33 @@ describe('/kujira', () => {
       }
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       const targetOrders = getOrders(['4', '5']);
 
-      const request = {
+      const requestBody = {
         tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      const currentBalances = lodash.cloneDeep(response);
+      logResponse(responseBody);
+
+      const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
         const baseBalance = getNotNullOrThrowError<Balance>(
@@ -2576,10 +2614,9 @@ describe('/kujira', () => {
         expect(balance.unsettled).toBe(currentBalance.unsettled);
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
-    // TODO !!!
     it("Check that it's not possible to get the cancelled orders 4 and 5", async () => {
       const targets = getOrders(['4', '5']);
 
@@ -2588,22 +2625,33 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ids: targetsIds,
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      expect(response.size).toEqual(0);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toEqual(0);
     });
 
-    // TODO !!!
     it('Get all open orders and check that the orders 1, 2, 3, 4, 5, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders([
         '1',
@@ -2622,18 +2670,30 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      logResponse(responseBody);
+
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -2643,7 +2703,6 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
       const targets = getOrders(['2', '6', '7']);
 
@@ -2652,18 +2711,30 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
         status: OrderStatus.FILLED,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      logResponse(responseBody);
+
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -2673,7 +2744,6 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
       const openLimitOrdersTargets = getOrders(['8', '9']);
       const filledLimitOrdersTargets = getOrders(['2', '6', '7']);
@@ -2700,17 +2770,29 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      logResponse(responseBody);
+
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -2736,17 +2818,28 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Cancel all open orders', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.cancelAllOrders(request);
+      const response = await sendRequest<CancelAllOrdersResponse>({
+        RESTMethod: RESTfulMethods.DELETE,
+        RESTRoute: '/orders/all',
+        RESTRequest: request,
+        controllerFunction: kujira.cancelAllOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as CancelAllOrdersResponse;
+
+      logResponse(responseBody);
 
       const targets = getOrders(['3', '6', '7', '8', '9', '10', '11']);
 
@@ -2755,7 +2848,7 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -2765,7 +2858,7 @@ describe('/kujira', () => {
       );
 
       for (const [orderId, order] of (
-        response as IMap<OrderId, Order>
+        responseBody as IMap<OrderId, Order>
       ).entries()) {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
         const candidate = orders.get(clientId);
@@ -2785,22 +2878,33 @@ describe('/kujira', () => {
       }
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['8', '9']);
 
-      const request = {
+      const requestBody = {
         tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      const currentBalances = lodash.cloneDeep(response);
+      logResponse(responseBody);
+
+      const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
         const baseBalance = getNotNullOrThrowError<Balance>(
@@ -2892,26 +2996,36 @@ describe('/kujira', () => {
         expect(balance.unsettled).toBe(currentBalance.unsettled);
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
-    // TODO !!!
     it('Get all open orders and check that there are no open orders', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      expect(response.size).toEqual(0);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toEqual(0);
     });
 
-    // TODO !!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present', async () => {
       const openLimitOrdersTargets = getOrders(['8', '9']);
       const filledLimitOrdersTargets = getOrders(['2', '6', '7']);
@@ -2938,17 +3052,29 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      logResponse(responseBody);
+
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -2978,24 +3104,35 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Create orders 12 and 13 at once', async () => {
       const candidates = getOrders(['12', '13']);
 
-      const request = {
+      const requestBody = {
         orders: candidates
           .valueSeq()
           .map((target) => ({ ...target }))
           .toArray(),
       } as PlaceOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.placeOrders(request);
+      const response = await sendRequest<PlaceOrdersResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.placeOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as PlaceOrdersResponse;
 
-      response
+      logResponse(responseBody);
+
+      responseBody
         .valueSeq()
         .toArray()
         .map((order: Order) => {
@@ -3013,10 +3150,10 @@ describe('/kujira', () => {
           candidate.hashes = order.hashes;
         });
 
-      expect(response.size).toBe(candidates.size);
+      expect(responseBody.size).toBe(candidates.size);
 
       for (const [orderId, order] of (
-        response as IMap<OrderId, Order>
+        responseBody as IMap<OrderId, Order>
       ).entries()) {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
         const candidate = orders.get(clientId);
@@ -3036,22 +3173,33 @@ describe('/kujira', () => {
       }
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
-      const request = {
+      const requestBody = {
         tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      const currentBalances = lodash.cloneDeep(response);
+      logResponse(responseBody);
+
+      const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
         const baseBalance = getNotNullOrThrowError<Balance>(
@@ -3143,10 +3291,9 @@ describe('/kujira', () => {
         expect(balance.unsettled).toBe(currentBalance.unsettled);
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
-    // TODO !!!
     it('Get all open orders and check that the orders 12 and 13 are present', async () => {
       const targets = getOrders(['12', '13']);
 
@@ -3155,18 +3302,30 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      logResponse(responseBody);
+
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -3176,7 +3335,6 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, 11, 12, and 13 are present', async () => {
       const openLimitOrdersTargets = getOrders(['12', '13']);
       const filledLimitOrdersTargets = getOrders(['2', '6', '7']);
@@ -3203,17 +3361,29 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      logResponse(responseBody);
+
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -3239,17 +3409,28 @@ describe('/kujira', () => {
       );
     });
 
-    // TODO !!!
     it('Cancel all open orders', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.cancelAllOrders(request);
+      const response = await sendRequest<CancelAllOrdersResponse>({
+        RESTMethod: RESTfulMethods.DELETE,
+        RESTRoute: '/orders/all',
+        RESTRequest: request,
+        controllerFunction: kujira.cancelAllOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as CancelAllOrdersResponse;
+
+      logResponse(responseBody);
       const targets = getOrders(['12', '13']);
 
       const targetsIds = targets
@@ -3257,7 +3438,7 @@ describe('/kujira', () => {
         .valueSeq()
         .toArray();
 
-      const responseOrdersIds = (response as IMap<OrderId, Order>)
+      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
         .map((order) => order.id)
         .valueSeq()
         .toArray();
@@ -3267,7 +3448,7 @@ describe('/kujira', () => {
       );
 
       for (const [orderId, order] of (
-        response as IMap<OrderId, Order>
+        responseBody as IMap<OrderId, Order>
       ).entries()) {
         const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
         const candidate = orders.get(clientId);
@@ -3287,22 +3468,33 @@ describe('/kujira', () => {
       }
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
-      const request = {
+      const requestBody = {
         tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      const currentBalances = lodash.cloneDeep(response);
+      logResponse(responseBody);
+
+      const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
         const baseBalance = getNotNullOrThrowError<Balance>(
@@ -3394,57 +3586,90 @@ describe('/kujira', () => {
         expect(balance.unsettled).toBe(currentBalance.unsettled);
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
-    // TODO !!!
     it('Get all open orders and check that there are no open orders', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
         status: OrderStatus.OPEN,
       } as GetOrdersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrders(request);
+      const response = await sendRequest<GetOrdersResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/orders',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrders,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrdersResponse;
 
-      expect(response.size).toEqual(0);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toEqual(0);
     });
 
-    // TODO !!!
     it('Settle funds for market 1', async () => {
-      const request = {
+      const requestBody = {
         marketId: marketsIds[1],
         ownerAddress: ownerAddress,
       } as MarketWithdrawRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.settleMarketFunds(request);
+      const response = await sendRequest<MarketWithdrawResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/market/withdraw',
+        RESTRequest: request,
+        controllerFunction: kujira.settleMarketFunds,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as MarketWithdrawResponse;
 
-      expect((response as Withdraw).hash.length).toBeCloseTo(64);
+      logResponse(responseBody);
+
+      expect((responseBody as Withdraw).hash.length).toBeCloseTo(64);
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
-      const request = {
+      const requestBody = {
         tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      const currentBalances = lodash.cloneDeep(response);
+      logResponse(responseBody);
+
+      const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
         const baseBalance = getNotNullOrThrowError<Balance>(
@@ -3536,50 +3761,72 @@ describe('/kujira', () => {
         expect(balance.unsettled).toBe(currentBalance.unsettled);
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
-    // TODO !!!
     it('Settle funds for markets 2 and 3', async () => {
-      const request = {
+      const requestBody = {
         marketIds: [marketsIds[2], marketsIds[3]],
         ownerAddress: ownerAddress,
       } as MarketsWithdrawsRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.settleMarketsFunds(request);
+      const response = await sendRequest<MarketsWithdrawsFundsResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/market/withdraws',
+        RESTRequest: request,
+        controllerFunction: kujira.settleMarketsFunds,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as MarketsWithdrawsFundsResponse;
 
-      expect(response.size).toBe(
+      logResponse(responseBody);
+
+      expect(responseBody.size).toBe(
         getNotNullOrThrowError<MarketId[]>(request.marketIds).length
       );
 
       for (const [marketId, withdraw] of (
-        response as IMap<MarketId, Withdraw>
+        responseBody as IMap<MarketId, Withdraw>
       ).entries()) {
         expect(request.marketIds).toInclude(marketId);
         expect(withdraw.hash.length).toBeCloseTo(64);
       }
     });
 
-    // TODO !!!
     it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
-      const request = {
+      const requestBody = {
         tokenIds: Object.values(tokenIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethods.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      const currentBalances = lodash.cloneDeep(response);
+      logResponse(responseBody);
+
+      const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
         const baseBalance = getNotNullOrThrowError<Balance>(
@@ -3671,25 +3918,36 @@ describe('/kujira', () => {
         expect(balance.unsettled).toBe(currentBalance.unsettled);
       }
 
-      userBalances = response;
+      userBalances = responseBody;
     });
 
-    // TODO !!!
     it('Settle funds for all markets', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.settleAllMarketsFunds(request);
+      const response = await sendRequest<AllMarketsWithdrawsResponse>({
+        RESTMethod: RESTfulMethods.POST,
+        RESTRoute: '/market/withdraws/all',
+        RESTRequest: request,
+        controllerFunction: kujira.settleAllMarketsFunds,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as AllMarketsWithdrawsResponse;
 
-      expect(response.size).toBe(Object.values(marketsIds).length);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toBe(Object.values(marketsIds).length);
 
       for (const [marketId, withdraw] of (
-        response as IMap<MarketId, Withdraw>
+        responseBody as IMap<MarketId, Withdraw>
       ).entries()) {
         expect(request.marketIds).toInclude(marketId);
         expect(withdraw.hash.length).toBeCloseTo(64);
