@@ -40,6 +40,8 @@ import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
+import { promisify } from 'util';
+import fs from 'fs';
 
 enablePatches();
 disablePatches();
@@ -60,9 +62,18 @@ let getPatch: any;
 let sendRequest: SendRequestFunction;
 
 let testTitle: string;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let logRequest: (target: any) => void;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let logResponse: (target: any) => void;
-// let logOutput: (target: any) => void;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let logOutput: (target: any) => void;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -450,9 +461,18 @@ beforeEach(async () => {
   };
 
   testTitle = expect.getState().currentTestName;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   logRequest = (target: any) => helperLogRequest(target, testTitle);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   logResponse = (target: any) => helperLogResponse(target, testTitle);
-  // logOutput = (target: any) => helperLogOutput(target, testTitle);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  logOutput = (target: any) => helperLogOutput(target, testTitle);
 });
 
 afterEach(() => {
@@ -461,12 +481,20 @@ afterEach(() => {
 
 describe('Playground', () => {
   it('Playground 01', async () => {
-    const request = {};
+    const gserializer =
+      await require('../../../src/connectors/kujira/libraries/gserializer/gserializer.ts');
 
-    logRequest(request);
+    // const response = (await kujira.kujiraGetBasicMarkets()).asMutable();
 
-    const response = await kujira.kujiraGetBasicMarkets();
+    // const serialized = gserializer.serialize(response);
+    const serialized: string = (
+      await promisify(fs.readFile)(
+        '/Users/danilo/Library/Application Support/JetBrains/IntelliJIdea2023.1/scratches/scratch_137.xml',
+        'utf8'
+      )
+    ).toString();
+    const deserialized = gserializer.deserialize(serialized);
 
-    logResponse(response);
+    console.log(deserialized);
   });
 });
