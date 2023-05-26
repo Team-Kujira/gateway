@@ -85,7 +85,7 @@ import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.he
 import {
   createPatches,
   disablePatches,
-  enablePatches,
+  // enablePatches,
   getPatch as helperGetPatch,
 } from './fixtures/patches/patches';
 import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
@@ -93,7 +93,7 @@ import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
 
-enablePatches();
+// enablePatches();
 disablePatches();
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
@@ -1497,10 +1497,10 @@ describe('/kujira', () => {
       expect(responseBody.id?.length).toBeGreaterThan(0);
       expect(responseBody.marketId).toBe(candidate.marketId);
       expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price?.toString()).toEqual(
-        candidate.price?.toString()
-      );
-      expect(responseBody.amount.toString()).toEqual(
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(candidate.price?.toString());
+      expect(BigNumber(responseBody.amount).toString()).toEqual(
         candidate.amount.toString()
       );
       expect(responseBody.side).toBe(candidate.side);
@@ -1654,7 +1654,9 @@ describe('/kujira', () => {
       expect(responseBody.marketName).toBe(target.marketName);
       expect(responseBody.marketId).toBe(target.marketId);
       expect(responseBody.ownerAddress).toEqual(target.ownerAddress);
-      expect(responseBody.price?.toString()).toEqual(target.price?.toString());
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(target.price?.toString());
       expect(responseBody.amount.toString()).toEqual(target.amount.toString());
     });
 
@@ -1704,8 +1706,12 @@ describe('/kujira', () => {
       expect(responseBody.id?.length).toBeGreaterThan(0);
       expect(responseBody.marketId).toBe(candidate.marketId);
       expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price).toEqual(candidate.price.toString());
-      expect(responseBody.amount).toEqual(candidate.amount.toString());
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(candidate.price.toString());
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.amount)).toString()
+      ).toEqual(candidate.amount.toString());
       expect(responseBody.side).toBe(candidate.side);
       expect(responseBody.marketName).toBe('KUJI/USK');
       expect(responseBody.payerAddress).toBe(candidate.payerAddress);
@@ -1815,7 +1821,9 @@ describe('/kujira', () => {
       expect(responseBody.marketName).toBe(target.marketName);
       expect(responseBody.marketId).toBe(target.marketId);
       expect(responseBody.ownerAddress).toEqual(target.ownerAddress);
-      expect(responseBody.price).toBe(target.price);
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toBe(target.price?.toString());
       expect(responseBody.amount).toEqual(target.amount);
     });
 
@@ -1828,6 +1836,12 @@ describe('/kujira', () => {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      const orderBookRequest = {
+        marketId: candidate.marketId,
+      } as GetOrderBookRequest;
+
+      const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
 
       logRequest(request);
 
@@ -1853,8 +1867,13 @@ describe('/kujira', () => {
       expect(responseBody.id?.length).toBeGreaterThan(0);
       expect(responseBody.marketId).toBe(candidate.marketId);
       expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price).toEqual(candidate.price?.toString());
-      expect(responseBody.amount).toEqual(candidate.amount.toString());
+
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(orderBookResponse.bestBid?.price?.toString());
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.amount)).toString()
+      ).toEqual(candidate.amount.toString());
       expect(responseBody.side).toBe(candidate.side);
       expect(responseBody.marketName).toBe(candidate.marketName);
       expect(responseBody.payerAddress).toBe(candidate.payerAddress);
