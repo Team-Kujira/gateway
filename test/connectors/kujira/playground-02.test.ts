@@ -3,6 +3,7 @@ import { parse as flattedParse, stringify as flattedStringify } from 'flatted';
 import { promisify } from 'util';
 import fs from 'fs';
 import { Map as ImmutableMap } from 'immutable';
+import { BigNumber } from 'bignumber.js';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -241,7 +242,21 @@ export namespace Serializer {
         }
 
         try {
+          const prototype = Object.getPrototypeOf(object);
+
+          let originalSetter;
+          if (Object.getOwnPropertyDescriptor(prototype, key)) {
+            originalSetter = object[key];
+          } else {
+            // special case for getters and setters
+            originalSetter = Object.getOwnPropertyDescriptor(prototype, key);
+          }
+
           object[key] = revive(value) as T;
+
+          Object.defineProperty(prototype, key, {
+            set: originalSetter,
+          });
         } catch (exception) {
           if (
             exception instanceof TypeError &&
@@ -350,6 +365,8 @@ describe('Playground', () => {
       // { prop: 'Hello' }, // Simple object
 
       // new MyClass(), // Instance of a class
+
+      BigNumber('123.456'),
 
       // myObject, // Object with cyclic reference
 
