@@ -1824,7 +1824,9 @@ describe('/kujira', () => {
       expect(
         BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
       ).toBe(target.price?.toString());
-      expect(responseBody.amount).toEqual(target.amount);
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.amount)).toString()
+      ).toEqual(target.amount.toString());
     });
 
     it('Create a market sell order 3 for market 3', async () => {

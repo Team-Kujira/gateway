@@ -1133,9 +1133,9 @@ export class Kujira {
         let partialResponse: JsonObject;
 
         while (
-          !partialResponse ||
-          partialResponse.orders.length >=
-            KujiraConfig.config.orders.open.paginationLimit ||
+          (!partialResponse ||
+            partialResponse.orders.length >=
+              KujiraConfig.config.orders.open.paginationLimit) &&
           response.orders.length <= KujiraConfig.config.orders.open.limit
         ) {
           partialResponse = await this.kujiraQueryClientWasmQueryContractSmart(
@@ -1147,13 +1147,13 @@ export class Kujira {
                 start_after: partialResponse
                   ? partialResponse.orders[
                       partialResponse.orders.length - 1
-                    ].toString()
+                    ].idx.toString()
                   : null,
               },
             }
           );
 
-          response.orders = [...response.orders, partialResponse.orders];
+          response.orders = [...response.orders, ...partialResponse.orders];
         }
 
         const bundles = IMap<string, any>().asMutable();
