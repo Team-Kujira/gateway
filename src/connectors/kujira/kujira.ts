@@ -1129,15 +1129,31 @@ export class Kujira {
           name: options.marketName,
         });
 
-        const response = await this.kujiraQueryClientWasmQueryContractSmart(
-          market.connectorMarket.address,
-          {
-            orders_by_user: {
-              address: ownerAddress,
-              limit: KujiraConfig.config.orders.open.limit,
-            },
-          }
-        );
+        const response: JsonObject = { orders: [] };
+        let partialResponse: JsonObject;
+
+        while (
+          !partialResponse ||
+          partialResponse.orders.length >=
+            KujiraConfig.config.orders.open.paginationLimit
+        ) {
+          partialResponse = await this.kujiraQueryClientWasmQueryContractSmart(
+            market.connectorMarket.address,
+            {
+              orders_by_user: {
+                address: ownerAddress,
+                limit: KujiraConfig.config.orders.open.limit,
+                start_after: partialResponse
+                  ? partialResponse.orders[
+                      partialResponse.orders.length - 1
+                    ].toString()
+                  : null,
+              },
+            }
+          );
+
+          response.orders = [...response.orders, partialResponse.orders];
+        }
 
         const bundles = IMap<string, any>().asMutable();
 

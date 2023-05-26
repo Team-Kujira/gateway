@@ -55,6 +55,8 @@ export namespace KujiraConfig {
       },
       open: {
         limit: configManager.get(`kujira.orders.open.limit`) | 255,
+        paginationLimit:
+          configManager.get(`kujira.orders.open.paginationLimit`) | 31,
       },
       filled: {
         limit: configManager.get(`kujira.orders.filled.limit`) | 255,
