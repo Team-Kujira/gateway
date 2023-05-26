@@ -2,6 +2,7 @@ import 'jest-extended';
 import { parse as flattedParse, stringify as flattedStringify } from 'flatted';
 import { promisify } from 'util';
 import fs from 'fs';
+import { Map as ImmutableMap } from 'immutable';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -239,7 +240,16 @@ export namespace Serializer {
           continue;
         }
 
-        object[key] = revive(value) as T;
+        try {
+          object[key] = revive(value) as T;
+        } catch (exception) {
+          if (
+            exception instanceof TypeError &&
+            exception.message.includes('which has only a getter')
+          ) {
+            console.warn(exception.message);
+          }
+        }
       }
 
       seen.set(input.value, object);
@@ -298,6 +308,14 @@ describe('Playground', () => {
     // @ts-ignore
     myObject.prop3 = myObject; // Create a cyclic reference
 
+    const planify = (target: any) => {
+      try {
+        return JSON.stringify(target);
+      } catch (exception) {
+        return Serializer.deflate(target);
+      }
+    };
+
     const targets = [
       // // Primitive types
 
@@ -331,9 +349,11 @@ describe('Playground', () => {
       // // Object types
       // { prop: 'Hello' }, // Simple object
 
-      new MyClass(), // Instance of a class
+      // new MyClass(), // Instance of a class
 
       // myObject, // Object with cyclic reference
+
+      ImmutableMap(myObject), // ImmutableJS object
     ];
 
     let serialized: any = undefined;
@@ -355,13 +375,13 @@ describe('Playground', () => {
       } finally {
         console.log(`
 target:
-${target}
+${planify(target)}
 
 serialized:
 ${serialized}
 
 deserialized:
-${deserialized}
+${planify(deserialized)}
 
 error:
 ${error && error.stack}
