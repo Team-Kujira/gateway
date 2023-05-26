@@ -1750,41 +1750,83 @@ describe('/kujira', () => {
         controllerFunction: kujira.getBalances,
       });
 
-      const responseBody = response.body as GetBalancesResponse;
+      const responseBody = {
+        ...response.body,
+        tokens: IMap(response.body.tokens),
+      } as GetBalancesResponse;
 
       logResponse(responseBody);
 
       // Verifying token 1 (base) balance
-      const currentBaseBalance = getNotNullOrThrowError<any>(
-        userBalances.tokens.get(targetOrder.market.baseToken.id)
-      ).free.minus(lastPayedFeeSum, targetOrder.amount);
-
-      expect(
-        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
-      ).toEqual(currentBaseBalance);
-
-      userBalances.tokens.set(
-        targetOrder.market.baseToken.id,
-        currentBaseBalance
+      const currentBaseBalance = BigNumber(
+        getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.baseToken.id)
+        ).free
+      ).minus(
+        getNotNullOrThrowError<any>(
+          BigNumber(lastPayedFeeSum).plus(targetOrder.amount)
+        )
       );
 
+      expect(
+        BigNumber(
+          getNotNullOrThrowError<any>(
+            responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
+          )
+        )
+      ).toEqual(currentBaseBalance);
+
+      // Updating Base Balances (free and lockedInOrders)
+      userBalances.tokens.set(targetOrder.market.baseToken.id, {
+        token: targetOrder.market.baseToken,
+        free: currentBaseBalance,
+        lockedInOrders: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.baseToken.id)
+              ?.lockedInOrders
+          )
+        ).plus(targetOrder.amount),
+        unsettled: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.baseToken.id)?.unsettled
+          )
+        ),
+      });
+
       // Verifying token 2 (quote) balance
-      const currentQuoteBalance = getNotNullOrThrowError<any>(
-        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-      ).free.minus(
+      const currentQuoteBalance = BigNumber(
+        getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)
+        ).free
+      ).minus(
         getNotNullOrThrowError<Balance>(
           responseBody.tokens.get(targetOrder.market.quoteToken.id)
         ).unsettled
       );
 
       expect(
-        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
+        BigNumber(
+          getNotNullOrThrowError<any>(
+            responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
+          )
+        )
       ).toEqual(currentQuoteBalance);
 
-      userBalances.tokens.set(
-        targetOrder.market.quoteToken.id,
-        currentQuoteBalance
-      );
+      userBalances.tokens.set(targetOrder.market.quoteToken.id, {
+        token: targetOrder.market.quoteToken,
+        free: currentQuoteBalance,
+        lockedInOrders: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+              ?.lockedInOrders
+          )
+        ),
+        unsettled: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
+          )
+        ).plus(getNotNullOrThrowError<any>(targetOrder.price)),
+      });
     });
 
     it('Get the filled order 2', async () => {

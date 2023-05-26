@@ -3,7 +3,7 @@ rpcEndpoint: # Empty or null means using the default for the chosen network
 prefix: 'kujira'
 accountNumber: 0
 gasPrice: 0.00125
-gasPriceSuffix: 'ukuji'
+gasPriceSuffix: 'ukuji' # TODO - Add support for other currencies that can be configured in Fin to pay Fee
 gasLimitEstimate: 0.009147
 orderBook:
   offset: 0
