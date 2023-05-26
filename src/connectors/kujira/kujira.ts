@@ -1489,21 +1489,29 @@ export class Kujira {
         ownerAddress,
       });
 
-      let finClient: fin.FinClient;
+      // let finClient: fin.FinClient;
 
-      if (walletArtifacts.finClients.has(ownerAddress)) {
-        finClient = getNotNullOrThrowError<fin.FinClient>(
-          walletArtifacts.finClients.get(ownerAddress)
-        );
-      } else {
-        finClient = new fin.FinClient(
-          walletArtifacts.signingCosmWasmClient,
-          ownerAddress,
-          market.id
-        );
+      // if (walletArtifacts.finClients.has(ownerAddress)) {
+      //   finClient = getNotNullOrThrowError<fin.FinClient>(
+      //     walletArtifacts.finClients.get(ownerAddress)
+      //   );
+      // } else {
+      //   finClient = new fin.FinClient(
+      //     walletArtifacts.signingCosmWasmClient,
+      //     ownerAddress,
+      //     market.id
+      //   );
+      //
+      //   walletArtifacts.finClients.set(ownerAddress, finClient);
+      // }
 
-        walletArtifacts.finClients.set(ownerAddress, finClient);
-      }
+      const finClient: fin.FinClient = new fin.FinClient(
+        walletArtifacts.signingCosmWasmClient,
+        ownerAddress,
+        market.id
+      );
+
+      walletArtifacts.finClients.set(ownerAddress, finClient);
 
       const filledOrdersIds = getNotNullOrThrowError<IMap<OrderId, Order>>(
         (await this.getOrders({
@@ -1563,7 +1571,7 @@ export class Kujira {
       };
 
       for (const marketId of options.marketIds) {
-        settleMarketFunds({
+        await settleMarketFunds({
           marketId: marketId,
           ownerAddresses: [ownerAddress],
         });
