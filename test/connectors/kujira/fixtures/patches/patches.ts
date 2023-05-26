@@ -16,7 +16,7 @@ import { StdFee } from '@cosmjs/amino';
 import { Coin, EncodeObject } from '@cosmjs/proto-signing';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
-import { serialize } from '../../../../../src/connectors/kujira/kujira.helpers';
+import { Serializer } from '../../../../../src/connectors/kujira/kujira.helpers';
 
 let usePatches = true;
 let useInputOutputWrapper = true;
@@ -55,7 +55,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -84,7 +85,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -113,7 +115,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -142,7 +145,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -177,7 +181,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -206,7 +211,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -235,7 +241,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -264,7 +271,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
@@ -293,7 +301,8 @@ export const createPatches = (
             );
           }
 
-          const serializedArguments = ((...args: any[]) => serialize(args))();
+          const serializedArguments = ((...args: any[]) =>
+            Serializer.serialize(args))();
 
           return data.getIn([
             'kujira',
