@@ -85,7 +85,7 @@ import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.he
 import {
   createPatches,
   disablePatches,
-  enablePatches,
+  // enablePatches,
   getPatch as helperGetPatch,
 } from './fixtures/patches/patches';
 import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
@@ -93,9 +93,8 @@ import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
 
-enablePatches();
-disablePatches();
 // enablePatches();
+disablePatches();
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -1374,7 +1373,7 @@ describe('/kujira', () => {
     settle funds for all markets
     */
 
-    it.skip('Cancel all open orders', async () => {
+    it('Cancel all open orders', async () => {
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
@@ -1398,7 +1397,7 @@ describe('/kujira', () => {
       logResponse(responseBody);
     });
 
-    it.skip('Settle funds for all markets', async () => {
+    it('Settle funds for all markets', async () => {
       const requestBody = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
@@ -1498,10 +1497,10 @@ describe('/kujira', () => {
       expect(responseBody.id?.length).toBeGreaterThan(0);
       expect(responseBody.marketId).toBe(candidate.marketId);
       expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price?.toString()).toEqual(
-        candidate.price?.toString()
-      );
-      expect(responseBody.amount.toString()).toEqual(
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(candidate.price?.toString());
+      expect(BigNumber(responseBody.amount).toString()).toEqual(
         candidate.amount.toString()
       );
       expect(responseBody.side).toBe(candidate.side);
@@ -1513,6 +1512,27 @@ describe('/kujira', () => {
       lastPayedFeeSum = BigNumber(
         getNotNullOrThrowError<BigNumber>(responseBody.fee)
       );
+
+      // Updating Quote Balance
+      // userBalances.tokens.set(candidate.market.quoteToken.id, {
+      //   token: candidate.market.quoteToken,
+      //   free: BigNumber(
+      //     getNotNullOrThrowError<any>(
+      //       userBalances.tokens.get(candidate.market.quoteToken.id)?.free
+      //     )
+      //   ).minus(candidate.amount),
+      //   lockedInOrders: BigNumber(
+      //     getNotNullOrThrowError<any>(
+      //       userBalances.tokens.get(candidate.market.quoteToken.id)
+      //         ?.lockedInOrders
+      //     )
+      //   ).plus(candidate.amount),
+      //   unsettled: BigNumber(
+      //     getNotNullOrThrowError<any>(
+      //       userBalances.tokens.get(candidate.market.quoteToken.id)?.unsettled
+      //     )
+      //   ),
+      // });
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {
@@ -1555,7 +1575,11 @@ describe('/kujira', () => {
       ).minus(lastPayedFeeSum);
 
       expect(
-        responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
+        BigNumber(
+          getNotNullOrThrowError(
+            responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
+          )
+        )
       ).toEqual(currentBaseBalance);
 
       const userBalancesSetter = getNotNullOrThrowError<Balance>(
@@ -1564,22 +1588,36 @@ describe('/kujira', () => {
       userBalancesSetter.free = currentBaseBalance;
 
       // Verifying token 2 (quote) balance
-      const currentQuoteBalance = getNotNullOrThrowError<any>(
-        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-      ).free.minus(
-        getNotNullOrThrowError<Balance>(
-          responseBody.tokens.get(targetOrder.market.quoteToken.id)
-        ).lockedInOrders
-      );
+      const currentQuoteBalance = BigNumber(
+        getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)
+        ).free
+      ).minus(getNotNullOrThrowError<any>(targetOrder.amount));
 
       expect(
-        responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
+        BigNumber(
+          getNotNullOrThrowError(
+            responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
+          )
+        )
       ).toEqual(currentQuoteBalance);
 
-      userBalances.tokens.set(
-        targetOrder.market.quoteToken.id,
-        currentQuoteBalance
-      );
+      // Updating Quote Balances (free and lockedInOrders)
+      userBalances.tokens.set(targetOrder.market.quoteToken.id, {
+        token: targetOrder.market.quoteToken,
+        free: currentQuoteBalance,
+        lockedInOrders: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+              ?.lockedInOrders
+          )
+        ).plus(targetOrder.amount),
+        unsettled: BigNumber(
+          getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
+          )
+        ),
+      });
     });
 
     it('Get the open order 1', async () => {
@@ -1616,7 +1654,9 @@ describe('/kujira', () => {
       expect(responseBody.marketName).toBe(target.marketName);
       expect(responseBody.marketId).toBe(target.marketId);
       expect(responseBody.ownerAddress).toEqual(target.ownerAddress);
-      expect(responseBody.price?.toString()).toEqual(target.price?.toString());
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(target.price?.toString());
       expect(responseBody.amount.toString()).toEqual(target.amount.toString());
     });
 
@@ -1662,23 +1702,27 @@ describe('/kujira', () => {
 
       lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
 
+      expect(responseBody).toBeObject();
+      expect(responseBody.id?.length).toBeGreaterThan(0);
+      expect(responseBody.marketId).toBe(candidate.marketId);
+      expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(candidate.price.toString());
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.amount)).toString()
+      ).toEqual(candidate.amount.toString());
+      expect(responseBody.side).toBe(candidate.side);
+      expect(responseBody.marketName).toBe('KUJI/USK');
+      expect(responseBody.payerAddress).toBe(candidate.payerAddress);
+      expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
+
       candidate.id = responseBody.id;
       candidate.marketName = responseBody.marketName;
       candidate.market = responseBody.market;
       candidate.status = responseBody.status;
       candidate.fee = responseBody.fee;
       candidate.hashes = responseBody.hashes;
-
-      expect(responseBody).toBeObject();
-      expect(responseBody.id?.length).toBeGreaterThan(0);
-      expect(responseBody.marketId).toBe(candidate.marketId);
-      expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price).toEqual(candidate.price);
-      expect(responseBody.amount).toEqual(candidate.amount);
-      expect(responseBody.side).toBe(candidate.side);
-      expect(responseBody.marketName).toBe(candidate.marketName);
-      expect(responseBody.payerAddress).toBe(candidate.payerAddress);
-      expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
     });
 
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
@@ -1743,7 +1787,7 @@ describe('/kujira', () => {
       );
     });
 
-    it.skip('Get the filled order 2', async () => {
+    it('Get the filled order 2', async () => {
       const target = getOrder('2');
 
       const requestBody = {
@@ -1777,7 +1821,9 @@ describe('/kujira', () => {
       expect(responseBody.marketName).toBe(target.marketName);
       expect(responseBody.marketId).toBe(target.marketId);
       expect(responseBody.ownerAddress).toEqual(target.ownerAddress);
-      expect(responseBody.price).toBe(target.price);
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toBe(target.price?.toString());
       expect(responseBody.amount).toEqual(target.amount);
     });
 
@@ -1790,6 +1836,12 @@ describe('/kujira', () => {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      const orderBookRequest = {
+        marketId: candidate.marketId,
+      } as GetOrderBookRequest;
+
+      const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
 
       logRequest(request);
 
@@ -1815,12 +1867,17 @@ describe('/kujira', () => {
       expect(responseBody.id?.length).toBeGreaterThan(0);
       expect(responseBody.marketId).toBe(candidate.marketId);
       expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price).toEqual(candidate.price);
-      expect(responseBody.amount).toEqual(candidate.amount);
+
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.price)).toString()
+      ).toEqual(orderBookResponse.bestBid?.price?.toString());
+      expect(
+        BigNumber(getNotNullOrThrowError(responseBody.amount)).toString()
+      ).toEqual(candidate.amount.toString());
       expect(responseBody.side).toBe(candidate.side);
       expect(responseBody.marketName).toBe(candidate.marketName);
       expect(responseBody.payerAddress).toBe(candidate.payerAddress);
-      expect(responseBody.status).toBe(OrderStatus.FILLED);
+      expect(responseBody.status).toBe(OrderStatus.OPEN);
       expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
     });
 
@@ -1882,7 +1939,7 @@ describe('/kujira', () => {
       );
     });
 
-    it.skip('Get the filled order 3', async () => {
+    it('Get the filled order 3', async () => {
       const target = getOrder('3');
 
       target.status = OrderStatus.FILLED;
@@ -1978,14 +2035,16 @@ describe('/kujira', () => {
         controllerFunction: kujira.placeOrders,
       });
 
-      const responseBody = response.body as PlaceOrdersResponse;
+      const responseBody = IMap<OrderId, Order>(
+        response.body
+      ) as PlaceOrdersResponse;
 
       logResponse(responseBody);
 
       responseBody
         .valueSeq()
         .toArray()
-        .map((order: Order) => {
+        .forEach((order: Order) => {
           const clientId = getNotNullOrThrowError<OrderClientId>(
             order.clientId
           );
@@ -2012,8 +2071,8 @@ describe('/kujira', () => {
         expect(order.id).toBe(candidate?.id);
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
-        expect(order.price).toEqual(candidate?.price);
-        expect(order.amount).toEqual(candidate?.amount);
+        expect(order.price).toEqual(candidate?.price?.toString());
+        expect(order.amount).toEqual(candidate?.amount.toString());
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);
         expect(order.status).toBe(OrderStatus.OPEN);

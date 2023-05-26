@@ -254,7 +254,11 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
             : undefined,
         price: bundle.getIn(['events', 'wasm', 'quote_price'])
           ? BigNumber(bundle.getIn(['events', 'wasm', 'quote_price']))
-          : undefined,
+          : BigNumber(bundle.getIn(['events', 'wasm-trade', 'quote_amount']))
+              .div(
+                BigNumber(bundle.getIn(['events', 'wasm-trade', 'base_amount']))
+              )
+              .decimalPlaces(bundle.getIn(['market', 'precision'])),
         amount: bundle.getIn(['events', 'wasm', 'offer_amount'])
           ? BigNumber(bundle.getIn(['events', 'wasm', 'offer_amount'])).div(
               BigNumber(10).pow(denom.decimals)
