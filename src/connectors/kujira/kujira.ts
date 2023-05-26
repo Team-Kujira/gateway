@@ -1135,7 +1135,8 @@ export class Kujira {
         while (
           !partialResponse ||
           partialResponse.orders.length >=
-            KujiraConfig.config.orders.open.paginationLimit
+            KujiraConfig.config.orders.open.paginationLimit ||
+          response.orders.length <= KujiraConfig.config.orders.open.limit
         ) {
           partialResponse = await this.kujiraQueryClientWasmQueryContractSmart(
             market.connectorMarket.address,
