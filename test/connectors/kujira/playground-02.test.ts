@@ -279,15 +279,15 @@ export namespace Serializer {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+class MyClass {
+  prop: string = 'Hello, world!';
+}
+
 describe('Playground', () => {
   it('Playground 01', async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    class MyClass {
-      prop: string = 'Hello, world!';
-    }
-
     const myObject = {
       prop1: 'Hello',
       prop2: 42,
