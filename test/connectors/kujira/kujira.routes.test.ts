@@ -95,7 +95,6 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-// enablePatches();
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -1374,7 +1373,7 @@ describe('/kujira', () => {
     settle funds for all markets
     */
 
-    it.skip('Cancel all open orders', async () => {
+    it('Cancel all open orders', async () => {
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
@@ -1398,7 +1397,7 @@ describe('/kujira', () => {
       logResponse(responseBody);
     });
 
-    it.skip('Settle funds for all markets', async () => {
+    it('Settle funds for all markets', async () => {
       const requestBody = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
@@ -1701,23 +1700,23 @@ describe('/kujira', () => {
 
       lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
 
+      expect(responseBody).toBeObject();
+      expect(responseBody.id?.length).toBeGreaterThan(0);
+      expect(responseBody.marketId).toBe(candidate.marketId);
+      expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
+      expect(responseBody.price).toEqual(candidate.price.toString());
+      expect(responseBody.amount).toEqual(candidate.amount.toString());
+      expect(responseBody.side).toBe(candidate.side);
+      expect(responseBody.marketName).toBe('KUJI/USK');
+      expect(responseBody.payerAddress).toBe(candidate.payerAddress);
+      expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
+
       candidate.id = responseBody.id;
       candidate.marketName = responseBody.marketName;
       candidate.market = responseBody.market;
       candidate.status = responseBody.status;
       candidate.fee = responseBody.fee;
       candidate.hashes = responseBody.hashes;
-
-      expect(responseBody).toBeObject();
-      expect(responseBody.id?.length).toBeGreaterThan(0);
-      expect(responseBody.marketId).toBe(candidate.marketId);
-      expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price).toEqual(candidate.price);
-      expect(responseBody.amount).toEqual(candidate.amount);
-      expect(responseBody.side).toBe(candidate.side);
-      expect(responseBody.marketName).toBe(candidate.marketName);
-      expect(responseBody.payerAddress).toBe(candidate.payerAddress);
-      expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
     });
 
     it('Check the available wallet balances from the tokens 1 and 3', async () => {
@@ -1782,7 +1781,7 @@ describe('/kujira', () => {
       );
     });
 
-    it.skip('Get the filled order 2', async () => {
+    it('Get the filled order 2', async () => {
       const target = getOrder('2');
 
       const requestBody = {
@@ -1854,12 +1853,12 @@ describe('/kujira', () => {
       expect(responseBody.id?.length).toBeGreaterThan(0);
       expect(responseBody.marketId).toBe(candidate.marketId);
       expect(responseBody.ownerAddress).toBe(candidate.ownerAddress);
-      expect(responseBody.price).toEqual(candidate.price);
-      expect(responseBody.amount).toEqual(candidate.amount);
+      expect(responseBody.price).toEqual(candidate.price?.toString());
+      expect(responseBody.amount).toEqual(candidate.amount.toString());
       expect(responseBody.side).toBe(candidate.side);
       expect(responseBody.marketName).toBe(candidate.marketName);
       expect(responseBody.payerAddress).toBe(candidate.payerAddress);
-      expect(responseBody.status).toBe(OrderStatus.FILLED);
+      expect(responseBody.status).toBe(OrderStatus.OPEN);
       expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
     });
 
@@ -1921,7 +1920,7 @@ describe('/kujira', () => {
       );
     });
 
-    it.skip('Get the filled order 3', async () => {
+    it('Get the filled order 3', async () => {
       const target = getOrder('3');
 
       target.status = OrderStatus.FILLED;
@@ -2017,14 +2016,16 @@ describe('/kujira', () => {
         controllerFunction: kujira.placeOrders,
       });
 
-      const responseBody = response.body as PlaceOrdersResponse;
+      const responseBody = IMap<OrderId, Order>(
+        response.body
+      ) as PlaceOrdersResponse;
 
       logResponse(responseBody);
 
       responseBody
         .valueSeq()
         .toArray()
-        .map((order: Order) => {
+        .forEach((order: Order) => {
           const clientId = getNotNullOrThrowError<OrderClientId>(
             order.clientId
           );
@@ -2051,8 +2052,8 @@ describe('/kujira', () => {
         expect(order.id).toBe(candidate?.id);
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
-        expect(order.price).toEqual(candidate?.price);
-        expect(order.amount).toEqual(candidate?.amount);
+        expect(order.price).toEqual(candidate?.price?.toString());
+        expect(order.amount).toEqual(candidate?.amount.toString());
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);
         expect(order.status).toBe(OrderStatus.OPEN);
