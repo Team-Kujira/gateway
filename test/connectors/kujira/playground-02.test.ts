@@ -5,65 +5,6 @@ import fs from 'fs';
 
 jest.setTimeout(30 * 60 * 1000);
 
-describe('Playground', () => {
-  it('Playground 01', async () => {
-    class MyClass {
-      prop: string = 'Hello, world!';
-    }
-
-    const myObject = {
-      prop1: 'Hello',
-      prop2: 42,
-      prop3: undefined,
-    };
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    myObject.prop3 = myObject; // Create a cyclic reference
-
-    const targets = [
-      // Primitive types
-      123, // number
-      'Hello, world!', // string
-      true, // boolean
-      Symbol('symbol'), // symbol
-      null, // null
-      undefined, // undefined
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      100n, // bigint
-
-      // Function types
-      function hello() {
-        return 'Hello, world!';
-      }, // Common function
-      function () {
-        return 'Hello, world!';
-      }, // Anonymous function
-      () => 'Hello, world!', // Arrow function
-
-      // Object types
-      { prop: 'Hello' }, // Simple object
-      new MyClass(), // Instance of a class
-      myObject, // Object with cyclic reference
-    ];
-
-    for (const target of targets) {
-      try {
-        console.log('target:\n', target);
-
-        const serialized = Serializer.serialize(target);
-        console.log('serialized:\n', serialized);
-
-        const deserialized = Serializer.deserialize(serialized);
-        console.log('deserialized:\n', deserialized);
-      } catch (error) {
-        console.log('error:\n', error);
-      }
-    }
-  });
-});
-
 export namespace Serializer {
   enum Category {
     PRIMITIVE = 'primitive',
@@ -88,9 +29,10 @@ export namespace Serializer {
   interface SerializedObject {
     name: string;
     type: any;
+    value?: any;
     category: Category;
-    value: any;
-    class: string;
+    primitiveType?: PrimitiveType;
+    class?: string;
   }
 
   export function createInstance<T>(className: string, ...args: any[]): T {
@@ -110,6 +52,10 @@ export namespace Serializer {
   export function getCategory(target: any): Category {
     const type = typeof target;
 
+    if (target === null || target === undefined) {
+      return Category.PRIMITIVE;
+    }
+
     if (isPrimitive(type)) {
       return Category.PRIMITIVE;
     }
@@ -126,6 +72,14 @@ export namespace Serializer {
   export function getPrimitiveType(target: any): PrimitiveType {
     const type = typeof target;
 
+    if (target === null) {
+      return PrimitiveType.NULL;
+    }
+
+    if (target === undefined) {
+      return PrimitiveType.UNDEFINED;
+    }
+
     for (const primitiveType of Object.values(PrimitiveType)) {
       if (type === primitiveType) {
         return primitiveType;
@@ -138,7 +92,7 @@ export namespace Serializer {
   export function parse(
     input: any,
     name: string = 'root',
-    seen: Set<string> = new Set()
+    seen: Map<any, any> = new Map<any, any>()
   ): SerializedObject {
     const type = typeof input;
 
@@ -148,8 +102,10 @@ export namespace Serializer {
       return {
         name: name,
         type: type,
-        category: category,
         value: input,
+        category: category,
+        primitiveType: getPrimitiveType(input),
+        class: undefined,
       } as SerializedObject;
     }
 
@@ -157,8 +113,10 @@ export namespace Serializer {
       return {
         name: name,
         type: type,
+        value: input.toString(),
         category: category,
-        value: input,
+        primitiveType: undefined,
+        class: undefined,
       } as SerializedObject;
     }
 
@@ -172,35 +130,88 @@ export namespace Serializer {
       return {
         name: name,
         type: type,
-        category: category,
         value: parsed,
+        category: category,
+        primitiveType: undefined,
+        class: undefined,
       } as SerializedObject;
     }
 
     if (seen.has(input)) {
-      throw new Error('Cyclic object value');
+      return seen.get(input);
     }
-
-    seen.add(input);
 
     const parsed: any = {};
 
     for (const [key, value] of Object.entries(input)) {
+      if (value === input) {
+        parsed[key] = parsed;
+        continue;
+      }
+
       parsed[key] = parse(value, key, seen);
     }
 
-    return {
+    const output = {
       name: name,
       type: type,
-      category: category,
       value: parsed,
+      category: category,
+      primitiveType: undefined,
       class: input.constructor.name,
     } as SerializedObject;
+
+    seen.set(input, output);
+
+    return output;
   }
 
-  export function revive<T>(input: SerializedObject): T {
+  export function revive<T>(
+    input: SerializedObject,
+    seen: Map<any, any> = new Map<any, any>()
+  ): T {
     if (input.category === Category.PRIMITIVE) {
-      return input.value as T;
+      if (input.primitiveType === PrimitiveType.SYMBOL) {
+        return Symbol(input.value) as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.BIGINT) {
+        return BigInt(input.value) as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.UNDEFINED) {
+        return undefined as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.NULL) {
+        return null as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.VOID) {
+        return undefined as void as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.UNKNOWN) {
+        return undefined as unknown as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.ANY) {
+        return undefined as any;
+      }
+
+      if (input.primitiveType === PrimitiveType.NUMBER) {
+        return Number(input.value) as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.STRING) {
+        return String(input.value) as T;
+      }
+
+      if (input.primitiveType === PrimitiveType.BOOLEAN) {
+        return Boolean(input.value) as T;
+      }
+
+      throw new Error(`Unknown primitive type: ${input.type}`);
     }
 
     if (input.category === Category.FUNCTION) {
@@ -214,26 +225,45 @@ export namespace Serializer {
     }
 
     if (input.category === Category.OBJECT) {
-      const object: any = createInstance<T>(input.class);
+      if (seen.has(input.value)) {
+        return seen.get(input);
+      }
+
+      const object: any = createInstance<T>(String(input.class));
 
       for (const [key, value] of Object.entries<SerializedObject>(
         input.value
       )) {
+        if (value === input.value) {
+          object[key] = object;
+          continue;
+        }
+
         object[key] = revive(value) as T;
       }
+
+      seen.set(input.value, object);
 
       return object as T;
     }
 
-    throw new Error(`Unknown category: ${input.category}`);
+    return input as T;
+  }
+
+  export function inflate(target: any): any {
+    return flattedParse(target);
+  }
+
+  export function deflate(target: any): any {
+    return flattedStringify(target);
   }
 
   export function serialize(target: any): string {
-    return flattedStringify(parse(target));
+    return deflate(parse(target));
   }
 
   export function deserialize<T>(target: string): T {
-    return revive(flattedParse(target)) as T;
+    return revive(inflate(target)) as T;
   }
 
   export async function serializeToFile(target: any, path: string) {
@@ -248,3 +278,97 @@ export namespace Serializer {
     return deserialize(deserializedString) as T;
   }
 }
+
+describe('Playground', () => {
+  it('Playground 01', async () => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    class MyClass {
+      prop: string = 'Hello, world!';
+    }
+
+    const myObject = {
+      prop1: 'Hello',
+      prop2: 42,
+      prop3: undefined,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    myObject.prop3 = myObject; // Create a cyclic reference
+
+    const targets = [
+      // // Primitive types
+
+      // 123, // number
+
+      // 'Hello, world!', // string
+
+      // true, // boolean
+
+      // Symbol('symbol'), // symbol
+
+      // null, // null
+
+      // undefined, // undefined
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      // 100n, // bigint
+
+      // // Function types
+      // function hello() {
+      //   return 'Hello, world!';
+      // }, // Common function
+
+      // function () {
+      //   return 'Hello, world!';
+      // }, // Anonymous function
+
+      // () => 'Hello, world!', // Arrow function
+
+      // // Object types
+      // { prop: 'Hello' }, // Simple object
+
+      new MyClass(), // Instance of a class
+
+      // myObject, // Object with cyclic reference
+    ];
+
+    let serialized: any = undefined;
+    let deserialized: any = undefined;
+    let error: any = undefined;
+
+    for (const target of targets) {
+      serialized = undefined;
+      deserialized = undefined;
+      error = undefined;
+
+      try {
+        console.log('target:\n', target);
+
+        serialized = Serializer.serialize(target);
+        deserialized = Serializer.deserialize(serialized);
+      } catch (exception) {
+        error = exception;
+      } finally {
+        console.log(`
+target:
+${target}
+
+serialized:
+${serialized}
+
+deserialized:
+${deserialized}
+
+error:
+${error && error.stack}
+      `);
+
+        console.log('');
+      }
+    }
+  });
+});
