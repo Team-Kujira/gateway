@@ -497,4 +497,19 @@ describe('Playground', () => {
 
     console.log(deserialized);
   });
+
+  it('Playground 02', async () => {
+    const targetClass = IMap;
+
+    function createInstance<T>(
+      ctor: new (...args: any[]) => T,
+      ...args: any[]
+    ): T {
+      return new ctor(...args);
+    }
+
+    const instance = createInstance<typeof targetClass>(targetClass as any, []);
+
+    console.log(instance);
+  });
 });

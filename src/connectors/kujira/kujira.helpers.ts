@@ -2,7 +2,7 @@ import fs from 'fs';
 import { NextFunction, Request, Response } from 'express';
 import { KujiraConfig } from './kujira.config';
 import { Kujira } from './kujira';
-// import { parse, stringify } from 'flatted';
+import { parse as flattedParse, stringify as flattedStringify } from 'flatted';
 import { promisify } from 'util';
 
 /**
@@ -180,58 +180,187 @@ export const isKujiraPrivateKey = (privateKey: string): boolean => {
   );
 };
 
-export function serialize(target: any): string {
-  // console.log(JSON.stringify(target, getCircularReplacer()));
-  // console.log(stringify(target));
+export namespace Serializer {
+  enum Category {
+    PRIMITIVE = 'primitive',
+    FUNCTION = 'function',
+    ARRAY = 'array',
+    OBJECT = 'object',
+  }
 
-  // return stringify(target);
-  return JSON.stringify(target, getCircularAndFunctionReplacer());
-}
+  enum PrimitiveType {
+    ANY = 'any',
+    BIGINT = 'bigint',
+    BOOLEAN = 'boolean',
+    NULL = 'null',
+    NUMBER = 'number',
+    STRING = 'string',
+    SYMBOL = 'symbol',
+    UNDEFINED = 'undefined',
+    UNKNOWN = 'unknown',
+    VOID = 'void',
+  }
 
-export function deserialize<T>(target: string): T {
-  // console.log(JSON.parse(target, getReviver()) as T);
-  // console.log(parse(target) as T);
+  interface SerializedObject {
+    name: string;
+    type: any;
+    category: Category;
+    value: any;
+    class: string;
+  }
 
-  // return parse(target) as T;
-  return JSON.parse(target, getReviver()) as T;
-}
+  export function createInstance<T>(className: string, ...args: any[]): T {
+    const constructor = eval(className);
 
-export async function serializeToFile(target: any, path: string) {
-  const serialized = serialize(target);
+    return new constructor(...args) as T;
+  }
 
-  return await promisify(fs.writeFile)(path, serialized);
-}
+  export function isPrimitive(type: string): boolean {
+    return Object.values(PrimitiveType).includes(type as PrimitiveType);
+  }
 
-export async function deserializeFromFile<T>(path: string) {
-  const deserialized = (await promisify(fs.readFile)(path, 'utf8')).toString();
+  export function getClass(target: any): string {
+    return target.constructor.name;
+  }
 
-  return deserialize(deserialized) as T;
-}
+  export function getCategory(target: any): Category {
+    const type = typeof target;
 
-function getCircularAndFunctionReplacer(): (key: string, value: any) => any {
-  const seen = new WeakSet();
-  return function (_key: string, value: any) {
-    if (typeof value === 'object' && value !== null) {
-      if (seen.has(value)) {
-        return '[Circular]';
+    if (isPrimitive(type)) {
+      return Category.PRIMITIVE;
+    }
+
+    for (const category of Object.values(Category)) {
+      if (type === category) {
+        return category;
+      }
+    }
+
+    throw new Error(`Unknown type: ${type}`);
+  }
+
+  export function getPrimitiveType(target: any): PrimitiveType {
+    const type = typeof target;
+
+    for (const primitiveType of Object.values(PrimitiveType)) {
+      if (type === primitiveType) {
+        return primitiveType;
+      }
+    }
+
+    throw new Error(`Unknown primitive type: ${target}`);
+  }
+
+  export function parse(
+    input: any,
+    name: string = 'root',
+    seen: Set<string> = new Set()
+  ): SerializedObject {
+    const type = typeof input;
+
+    const category = getCategory(input);
+
+    if (category === Category.PRIMITIVE) {
+      return {
+        name,
+        type,
+        category,
+        value: input,
+      } as SerializedObject;
+    }
+
+    if (category === Category.FUNCTION) {
+      return {
+        name,
+        type,
+        category,
+        value: input.toString(),
+      } as SerializedObject;
+    }
+
+    if (category === Category.ARRAY) {
+      const parsed: any = [];
+
+      for (const [index, element] of input.entries()) {
+        parsed[index] = parse(element, index.toString(), seen);
       }
 
-      seen.add(value);
-    } else if (typeof value === 'function') {
-      return `function ${value.toString()}`;
+      return {
+        name,
+        type,
+        category,
+        value: parsed,
+      } as SerializedObject;
     }
 
-    return value;
-  };
-}
-
-function getReviver(): (key: string, value: any) => any {
-  return function (_key: string, value: any) {
-    if (typeof value === 'string' && value.startsWith('function')) {
-      const functionString = value.substring(8);
-      return new Function(`return ${functionString}`)();
+    if (seen.has(input)) {
+      throw new Error('Cyclic object value');
     }
 
-    return value;
-  };
+    seen.add(input);
+
+    const parsed: any = {};
+
+    for (const [key, value] of Object.entries(input)) {
+      parsed[key] = parse(value, key, seen);
+    }
+
+    return {
+      name,
+      type,
+      category,
+      value: parsed,
+      class: input.constructor.name,
+    } as SerializedObject;
+  }
+
+  export function revive<T>(input: SerializedObject): T {
+    if (input.category === Category.PRIMITIVE) {
+      return input.value as T;
+    }
+
+    if (input.category === Category.FUNCTION) {
+      return new Function(`return ${input.value}`)() as T;
+    }
+
+    if (input.category === Category.ARRAY) {
+      return input.value.map((element: SerializedObject) =>
+        revive(element)
+      ) as T;
+    }
+
+    if (input.category === Category.OBJECT) {
+      const object: any = createInstance<T>(input.class);
+
+      for (const [key, value] of Object.entries<SerializedObject>(
+        input.value
+      )) {
+        object[key] = revive(value) as T;
+      }
+
+      return object as T;
+    }
+
+    throw new Error(`Unknown category: ${input.category}`);
+  }
+
+  export function serialize(target: any): string {
+    return flattedStringify(parse(target));
+  }
+
+  export function deserialize<T>(target: string): T {
+    return revive(flattedParse(target)) as T;
+  }
+
+  export async function serializeToFile(target: any, path: string) {
+    const serializedString = serialize(target);
+
+    return await promisify(fs.writeFile)(path, serializedString);
+  }
+
+  export async function deserializeFromFile<T>(path: string) {
+    const deserializedString = await promisify(fs.readFile)(path, 'utf8');
+
+    return deserialize(deserializedString) as T;
+  }
 }
