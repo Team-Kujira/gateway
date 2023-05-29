@@ -80,3 +80,23 @@ export function logResponse(target: any, title: string) {
 // export function logOutput(target: any, title: string) {
 //   log(target, title, 'output');
 // }
+
+export function printStackTrace() {
+  const error = new Error();
+  const stackTrace = error.stack || '';
+  const stackLines = stackTrace.split('\n').slice(1); // Ignoring this function itself
+
+  let output = '';
+
+  stackLines.forEach((line) => {
+    const match = line.match(/at\s+(.*)\s+\((.*):(\d+):\d+\)/);
+    if (match) {
+      const functionName = match[1];
+      const filePath = match[2];
+      const lineNumber = match[3];
+      output += `${filePath}:${lineNumber} (${functionName})\n`;
+    }
+  });
+
+  console.log(output);
+}

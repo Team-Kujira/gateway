@@ -31,6 +31,29 @@ export const createPatches = (
 ): IMap<string, AsyncFunctionType<any, any>> => {
   const patches = IMap<string, AsyncFunctionType<any, any>>().asMutable();
 
+  patches.setIn(['global', 'fetch'], async (ordinal: number = 1) => {
+    if (!usePatches) return;
+
+    patch(global, 'fetch', async (..._any: any[]) => {
+      const inputArguments = ((...args: any[]) => args)();
+
+      const serializedArguments = Serializer.serialize(inputArguments);
+
+      const dataKey = ['global', 'fetch', serializedArguments, `${ordinal}`];
+
+      if (useInputOutputWrapper) {
+        return await inputOutputWrapper<any>(
+          dataKey,
+          global,
+          'fetch',
+          inputArguments
+        );
+      }
+
+      return data.getIn(dataKey) as any;
+    });
+  });
+
   patches.setIn(
     ['kujira', 'kujiraFinClientWithdrawOrders'],
     async (ordinal: number = 1) => {
@@ -48,22 +71,27 @@ export const createPatches = (
           _memo?: string,
           _funds?: readonly Coin[]
         ): Promise<ExecuteResult> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<ExecuteResult>(
-              kujira,
-              'kujiraFinClientWithdrawOrders'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraFinClientWithdrawOrders',
             serializedArguments,
-            ordinal,
-          ]) as ExecuteResult;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<ExecuteResult>(
+              dataKey,
+              kujira,
+              'kujiraFinClientWithdrawOrders',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as ExecuteResult;
         }
       );
     }
@@ -78,22 +106,27 @@ export const createPatches = (
         kujira,
         'kujiraGetBasicMarkets',
         async (): Promise<IMap<MarketId, BasicKujiraMarket>> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<IMap<MarketId, BasicKujiraMarket>>(
-              kujira,
-              'kujiraGetBasicMarkets'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraGetBasicMarkets',
             serializedArguments,
-            ordinal,
-          ]) as IMap<MarketId, BasicKujiraMarket>;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<IMap<MarketId, BasicKujiraMarket>>(
+              dataKey,
+              kujira,
+              'kujiraGetBasicMarkets',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as IMap<MarketId, BasicKujiraMarket>;
         }
       );
     }
@@ -108,22 +141,27 @@ export const createPatches = (
         kujira,
         'kujiraGetBasicTokens',
         async (): Promise<IMap<TokenId, BasicKujiraToken>> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<IMap<TokenId, BasicKujiraToken>>(
-              kujira,
-              'kujiraGetBasicTokens'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraGetBasicTokens',
             serializedArguments,
-            ordinal,
-          ]) as IMap<TokenId, BasicKujiraToken>;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<IMap<TokenId, BasicKujiraToken>>(
+              dataKey,
+              kujira,
+              'kujiraGetBasicTokens',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as IMap<TokenId, BasicKujiraToken>;
         }
       );
     }
@@ -138,22 +176,27 @@ export const createPatches = (
         kujira,
         'kujiraQueryClientWasmQueryContractSmart',
         async (_address: string, _query: JsonObject): Promise<JsonObject> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<JsonObject>(
-              kujira,
-              'kujiraQueryClientWasmQueryContractSmart'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraQueryClientWasmQueryContractSmart',
             serializedArguments,
-            ordinal,
-          ]) as JsonObject;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<JsonObject>(
+              dataKey,
+              kujira,
+              'kujiraQueryClientWasmQueryContractSmart',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as JsonObject;
         }
       );
     }
@@ -174,22 +217,27 @@ export const createPatches = (
           _fee: StdFee | 'auto' | number,
           _memo?: string
         ): Promise<KujiraOrder> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<KujiraOrder>(
-              kujira,
-              'kujiraSigningStargateClientSignAndBroadcast'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraSigningStargateClientSignAndBroadcast',
             serializedArguments,
-            ordinal,
-          ]) as KujiraOrder;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<KujiraOrder>(
+              dataKey,
+              kujira,
+              'kujiraSigningStargateClientSignAndBroadcast',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as KujiraOrder;
         }
       );
     }
@@ -204,22 +252,27 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetAllBalances',
         async (_address: string): Promise<readonly Coin[]> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<readonly Coin[]>(
-              kujira,
-              'kujiraStargateClientGetAllBalances'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraStargateClientGetAllBalances',
             serializedArguments,
-            ordinal,
-          ]) as readonly Coin[];
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<readonly Coin[]>(
+              dataKey,
+              kujira,
+              'kujiraStargateClientGetAllBalances',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as readonly Coin[];
         }
       );
     }
@@ -234,22 +287,27 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetBalanceStaked',
         async (_address: string): Promise<Coin | null> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<Coin | null>(
-              kujira,
-              'kujiraStargateClientGetBalanceStaked'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraStargateClientGetBalanceStaked',
             serializedArguments,
-            ordinal,
-          ]) as Coin | null;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<Coin | null>(
+              dataKey,
+              kujira,
+              'kujiraStargateClientGetBalanceStaked',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as Coin | null;
         }
       );
     }
@@ -264,22 +322,27 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetHeight',
         async (): Promise<number> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<number>(
-              kujira,
-              'kujiraStargateClientGetHeight'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraStargateClientGetHeight',
             serializedArguments,
-            ordinal,
-          ]) as number;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<number>(
+              dataKey,
+              kujira,
+              'kujiraStargateClientGetHeight',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as number;
         }
       );
     }
@@ -294,22 +357,27 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetTx',
         async (_id: string): Promise<IndexedTx | null> => {
-          if (useInputOutputWrapper) {
-            return await inputOutputWrapper<IndexedTx | null>(
-              kujira,
-              'kujiraStargateClientGetTx'
-            );
-          }
+          const inputArguments = ((...args: any[]) => args)();
 
-          const serializedArguments = ((...args: any[]) =>
-            Serializer.serialize(args))();
+          const serializedArguments = Serializer.serialize(inputArguments);
 
-          return data.getIn([
+          const dataKey = [
             'kujira',
             'kujiraStargateClientGetTx',
             serializedArguments,
-            ordinal,
-          ]) as IndexedTx | null;
+            `${ordinal}`,
+          ];
+
+          if (useInputOutputWrapper) {
+            return await inputOutputWrapper<IndexedTx | null>(
+              dataKey,
+              kujira,
+              'kujiraStargateClientGetTx',
+              inputArguments
+            );
+          }
+
+          return data.getIn(dataKey) as IndexedTx | null;
         }
       );
     }
@@ -318,25 +386,30 @@ export const createPatches = (
   return patches;
 };
 
-export const getPatch = async <R>(
+export const getPatch = <R = AsyncFunctionType<any, any>>(
   patches: IMap<string, AsyncFunctionType<any, any>>,
   keyPath: string[]
-): Promise<R> => {
+): R => {
   return patches.getIn(keyPath) as R;
 };
 
 const inputOutputWrapper = async <R>(
+  dataKey: string[],
   targetObject: any,
-  targetFunctionName: string
+  targetFunctionName: string,
+  targetFunctionArguments: any[] = []
 ): Promise<R> => {
-  const args = ((...args: any[]) => args)();
+  console.log('key', dataKey);
 
-  console.log('input', args);
+  console.log('input', targetFunctionArguments);
 
   const originalTargetFunction =
     targetObject[`__original__${targetFunctionName}`];
 
-  const result = await originalTargetFunction.value.apply(targetObject, args);
+  const result = await originalTargetFunction.value.apply(
+    targetObject,
+    targetFunctionArguments
+  );
 
   console.log('output', result);
 
