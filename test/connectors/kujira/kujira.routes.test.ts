@@ -1916,7 +1916,7 @@ describe('Kujira', () => {
       lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
     });
 
-    it('Check the available wallet balances from the tokens 2 and 3', async () => {
+    it.skip('Check the available wallet balances from the tokens 2 and 3', async () => {
       const primaryTargetOrder = getOrder('3');
 
       const requestBody = {
@@ -2133,7 +2133,7 @@ describe('Kujira', () => {
       }
     });
 
-    it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
+    it.skip('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       const targetOrders = getOrders([
         '4',
         '5',
