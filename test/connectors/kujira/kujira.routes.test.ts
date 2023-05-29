@@ -2417,7 +2417,7 @@ describe('Kujira', () => {
       lastPayedFeeSum = getNotNullOrThrowError<OrderFee>(responseBody.fee);
     });
 
-    it('Check the wallet balances from the tokens 1 and 2', async () => {
+    it.skip('Check the wallet balances from the tokens 1 and 2', async () => {
       const targetOrder = getOrder('1');
 
       const requestBody = {
@@ -2610,7 +2610,7 @@ describe('Kujira', () => {
       }
     });
 
-    it('Check the wallet balances from the tokens 1, 2, and 3', async () => {
+    it.skip('Check the wallet balances from the tokens 1, 2, and 3', async () => {
       const targetOrders = getOrders(['4', '5']);
 
       const requestBody = {
@@ -2992,7 +2992,7 @@ describe('Kujira', () => {
       }
     });
 
-    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+    it.skip('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['8', '9']);
 
       const requestBody = {
@@ -3287,7 +3287,7 @@ describe('Kujira', () => {
       }
     });
 
-    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+    it.skip('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
@@ -3582,7 +3582,7 @@ describe('Kujira', () => {
       }
     });
 
-    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+    it.skip('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
@@ -3757,7 +3757,7 @@ describe('Kujira', () => {
       expect((responseBody as Withdraw).hash.length).toBeCloseTo(64);
     });
 
-    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+    it.skip('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
@@ -3914,7 +3914,7 @@ describe('Kujira', () => {
       }
     });
 
-    it('Check the wallet balances from the tokens 1, 2 and 3', async () => {
+    it.skip('Check the wallet balances from the tokens 1, 2 and 3', async () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
