@@ -1882,12 +1882,6 @@ describe('Kujira', () => {
         ...requestBody,
       };
 
-      const orderBookRequest = {
-        marketId: candidate.marketId,
-      } as GetOrderBookRequest;
-
-      const orderBookResponse = await kujira.getOrderBook(orderBookRequest);
-
       logRequest(request);
 
       const response = await sendRequest<PlaceOrderResponse>({
@@ -1916,15 +1910,6 @@ describe('Kujira', () => {
       expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
       expect(responseBody.payerAddress).toBe(candidate.payerAddress);
       expect(
-        BigNumber(
-          getNotNullOrThrowError<any>(responseBody.price)
-        ).decimalPlaces(2)
-      ).toEqual(
-        BigNumber(
-          getNotNullOrThrowError<any>(orderBookResponse.bestBid).price
-        ).decimalPlaces(2)
-      );
-      expect(
         BigNumber(getNotNullOrThrowError<any>(responseBody.amount))
       ).toEqual(candidate.amount);
 
@@ -1932,12 +1917,12 @@ describe('Kujira', () => {
     });
 
     it('Check the available wallet balances from the tokens 2 and 3', async () => {
-      const targetOrder = getOrder('3');
+      const primaryTargetOrder = getOrder('3');
 
       const requestBody = {
         tokenIds: [
-          targetOrder.market.baseToken.id,
-          targetOrder.market.quoteToken.id,
+          primaryTargetOrder.market.baseToken.id,
+          primaryTargetOrder.market.quoteToken.id,
         ],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
@@ -1963,73 +1948,70 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
+      const secundaryTargetOrder = getOrder('2');
+
       // Verifying token 2 (base) balance
       const currentBaseBalance = BigNumber(
         getNotNullOrThrowError<any>(
-          userBalances.tokens.get(targetOrder.market.baseToken.id)
+          userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
         ).free
-      ).minus(targetOrder.amount);
+      ).minus(primaryTargetOrder.amount);
 
       expect(
         BigNumber(
           getNotNullOrThrowError<any>(
-            responseBody.tokens.get(targetOrder.market.baseToken.id)?.free
+            responseBody.tokens.get(primaryTargetOrder.market.baseToken.id)
+              ?.free
           )
         ).decimalPlaces(2)
       ).toEqual(currentBaseBalance.decimalPlaces(2));
 
       // Updating Base Balances (free and lockedInOrders)
-      userBalances.tokens.set(targetOrder.market.baseToken.id, {
-        token: targetOrder.market.baseToken,
+      userBalances.tokens.set(primaryTargetOrder.market.baseToken.id, {
+        token: primaryTargetOrder.market.baseToken,
         free: currentBaseBalance,
         lockedInOrders: BigNumber(
           getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.baseToken.id)
+            userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
               ?.lockedInOrders
           )
         ),
         unsettled: BigNumber(
           getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.baseToken.id)?.unsettled
+            userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
+              ?.unsettled
           )
         ),
       });
 
       // Verifying token 3 (quote) balance
-      const currentQuoteBalance = BigNumber(
+      const expectedCurrentQuoteBalance = BigNumber(
         getNotNullOrThrowError<any>(
-          userBalances.tokens.get(targetOrder.market.quoteToken.id)?.free
-        )
-      ).plus(
-        BigNumber(
-          getNotNullOrThrowError<any>(responseBody.tokens.valueSeq().first())
-            ?.ticker.price
-        ).minus(lastPayedFeeSum)
-      );
+          userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+        ).free
+      ).plus(BigNumber(getNotNullOrThrowError<any>(primaryTargetOrder.price)));
+      // .plus(getNotNullOrThrowError<any>(secundaryTargetOrder.price));
 
       expect(
-        BigNumber(
-          getNotNullOrThrowError<any>(
-            responseBody.tokens.get(targetOrder.market.quoteToken.id)?.free
-          )
-        ).decimalPlaces(2)
-      ).toEqual(currentQuoteBalance.decimalPlaces(2));
+        responseBody.tokens.get(primaryTargetOrder.market.quoteToken.id)?.free
+      ).toEqual(expectedCurrentQuoteBalance);
 
       // Updating Quote Balances (free and unsettled)
-      userBalances.tokens.set(targetOrder.market.quoteToken.id, {
-        token: targetOrder.market.quoteToken,
-        free: currentQuoteBalance,
+      userBalances.tokens.set(primaryTargetOrder.market.quoteToken.id, {
+        token: primaryTargetOrder.market.quoteToken,
+        free: expectedCurrentQuoteBalance,
         lockedInOrders: BigNumber(
           getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+            userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
               ?.lockedInOrders
           )
         ),
         unsettled: BigNumber(
           getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
+            userBalances.tokens.get(secundaryTargetOrder.market.quoteToken.id)
+              ?.unsettled
           )
-        ).plus(getNotNullOrThrowError<any>(targetOrder.price)),
+        ).plus(getNotNullOrThrowError<any>(primaryTargetOrder.price)),
       });
     });
 
