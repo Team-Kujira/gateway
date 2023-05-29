@@ -34,8 +34,8 @@ export const createPatches = (
   patches.setIn(['global', 'fetch'], async (ordinal: number = 1) => {
     if (!usePatches) return;
 
-    patch(global, 'fetch', async (..._any: any[]) => {
-      const inputArguments = ((...args: any[]) => args)();
+    patch(global, 'fetch', async (...any: any[]) => {
+      const inputArguments = any;
 
       const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -63,15 +63,15 @@ export const createPatches = (
         kujira,
         'kujiraFinClientWithdrawOrders',
         async (
-          _finClient: fin.FinClient,
-          _orderIdxs: {
+          finClient: fin.FinClient,
+          orderIdxs: {
             orderIdxs?: string[];
           },
-          _fee: number | StdFee | 'auto' = 'auto',
-          _memo?: string,
-          _funds?: readonly Coin[]
+          fee: number | StdFee | 'auto' = 'auto',
+          memo?: string,
+          funds?: readonly Coin[]
         ): Promise<ExecuteResult> => {
-          const inputArguments = ((...args: any[]) => args)();
+          const inputArguments = [finClient, orderIdxs, fee, memo, funds];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -106,7 +106,7 @@ export const createPatches = (
         kujira,
         'kujiraGetBasicMarkets',
         async (): Promise<IMap<MarketId, BasicKujiraMarket>> => {
-          const inputArguments = ((...args: any[]) => args)();
+          const inputArguments: any[] = [];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -141,7 +141,7 @@ export const createPatches = (
         kujira,
         'kujiraGetBasicTokens',
         async (): Promise<IMap<TokenId, BasicKujiraToken>> => {
-          const inputArguments = ((...args: any[]) => args)();
+          const inputArguments: any[] = [];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -175,8 +175,8 @@ export const createPatches = (
       patch(
         kujira,
         'kujiraQueryClientWasmQueryContractSmart',
-        async (_address: string, _query: JsonObject): Promise<JsonObject> => {
-          const inputArguments = ((...args: any[]) => args)();
+        async (address: string, query: JsonObject): Promise<JsonObject> => {
+          const inputArguments = [address, query];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -211,13 +211,19 @@ export const createPatches = (
         kujira,
         'kujiraSigningStargateClientSignAndBroadcast',
         async (
-          _signingStargateClient: SigningStargateClient,
-          _signerAddress: string,
-          _messages: readonly EncodeObject[],
-          _fee: StdFee | 'auto' | number,
-          _memo?: string
+          signingStargateClient: SigningStargateClient,
+          signerAddress: string,
+          messages: readonly EncodeObject[],
+          fee: StdFee | 'auto' | number,
+          memo?: string
         ): Promise<KujiraOrder> => {
-          const inputArguments = ((...args: any[]) => args)();
+          const inputArguments = [
+            signingStargateClient,
+            signerAddress,
+            messages,
+            fee,
+            memo,
+          ];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -251,8 +257,8 @@ export const createPatches = (
       patch(
         kujira,
         'kujiraStargateClientGetAllBalances',
-        async (_address: string): Promise<readonly Coin[]> => {
-          const inputArguments = ((...args: any[]) => args)();
+        async (address: string): Promise<readonly Coin[]> => {
+          const inputArguments = [address];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -286,8 +292,8 @@ export const createPatches = (
       patch(
         kujira,
         'kujiraStargateClientGetBalanceStaked',
-        async (_address: string): Promise<Coin | null> => {
-          const inputArguments = ((...args: any[]) => args)();
+        async (address: string): Promise<Coin | null> => {
+          const inputArguments = [address];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -322,7 +328,7 @@ export const createPatches = (
         kujira,
         'kujiraStargateClientGetHeight',
         async (): Promise<number> => {
-          const inputArguments = ((...args: any[]) => args)();
+          const inputArguments: any[] = [];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -356,8 +362,8 @@ export const createPatches = (
       patch(
         kujira,
         'kujiraStargateClientGetTx',
-        async (_id: string): Promise<IndexedTx | null> => {
-          const inputArguments = ((...args: any[]) => args)();
+        async (id: string): Promise<IndexedTx | null> => {
+          const inputArguments = [id];
 
           const serializedArguments = Serializer.serialize(inputArguments);
 
@@ -399,9 +405,9 @@ const inputOutputWrapper = async <R>(
   targetFunctionName: string,
   targetFunctionArguments: any[] = []
 ): Promise<R> => {
-  console.log('key', dataKey);
+  console.log('key:\n', dataKey);
 
-  console.log('input', targetFunctionArguments);
+  console.log('input:\n', targetFunctionArguments);
 
   const originalTargetFunction =
     targetObject[`__original__${targetFunctionName}`];
@@ -411,7 +417,11 @@ const inputOutputWrapper = async <R>(
     targetFunctionArguments
   );
 
-  console.log('output', result);
+  // console.log('output:\n', JSON.stringify(result));
+
+  console.log(
+    `data.setIn(${JSON.stringify(dataKey)}, ${JSON.stringify(result)})`
+  );
 
   return result as R;
 };
