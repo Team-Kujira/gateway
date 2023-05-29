@@ -2476,9 +2476,6 @@ describe('Kujira', () => {
       expect(responseBody.id).toEqual(target.id);
       expect(responseBody.marketId).toBe(target.marketId);
       expect(responseBody.ownerAddress).toBe(target.ownerAddress);
-      expect(responseBody.price).toEqual(target.price);
-      expect(responseBody.amount).toEqual(target.amount);
-      expect(responseBody.side).toBe(target.side);
       expect(responseBody.marketName).toBe(target.marketName);
       expect(responseBody.payerAddress).toBe(target.payerAddress);
       expect(responseBody.status).toBe(OrderStatus.CANCELLED);

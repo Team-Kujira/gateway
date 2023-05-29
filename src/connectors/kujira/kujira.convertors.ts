@@ -344,8 +344,18 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         marketName: bundle.getIn(['market']).name,
         marketId: bundle.getIn(['market']).id,
         market: bundle.getIn(['market']),
-        ownerAddress: bundle.getIn(['events', 'transfer', 'sender']),
-        payerAddress: bundle.getIn(['events', 'transfer', 'sender']),
+        ownerAddress: options.bundles.getIn([
+          'common',
+          'events',
+          'transfer',
+          'sender',
+        ]),
+        payerAddress: options.bundles.getIn([
+          'common',
+          'events',
+          'transfer',
+          'sender',
+        ]),
         price: undefined as unknown as OrderPrice,
         amount: undefined as unknown as OrderAmount,
         side: undefined as unknown as OrderSide,
@@ -526,7 +536,9 @@ export const convertKujiraEventsToMapOfEvents = (
 
   for (const event of events) {
     for (const attribute of event.attributes) {
-      output.setIn([event.type, attribute.key], attribute.value);
+      if (!output.getIn([event.type, attribute.key])) {
+        output.setIn([event.type, attribute.key], attribute.value);
+      }
     }
   }
 
