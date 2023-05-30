@@ -12,8 +12,8 @@ import {
 } from '../helpers';
 import {
   AllMarketsWithdrawsRequest,
-  AsyncFunctionType,
   AllMarketsWithdrawsResponse,
+  AsyncFunctionType,
   Balance,
   Balances,
   CancelAllOrdersRequest,
@@ -2107,21 +2107,27 @@ describe('Kujira', () => {
 
       const spread = 2; // 2%
 
-      getNotNullOrThrowError<Order>(candidates.get('6')).price = BigNumber(
-        getNotNullOrThrowError<BigNumber>(
-          orderBookResponse.valueSeq().toArray()[0].bestAsk?.price
-        )
-          .times((100 + spread) / 100)
-          .decimalPlaces(marketPrecisions[0])
-      );
-
-      getNotNullOrThrowError<Order>(candidates.get('7')).price = BigNumber(
-        getNotNullOrThrowError<BigNumber>(
-          orderBookResponse.valueSeq().toArray()[1].bestBid?.price
-        )
-          .times((100 - spread) / 100)
-          .decimalPlaces(marketPrecisions[1])
-      );
+      for (const candidate of candidates.valueSeq()) {
+        if (candidate.clientId == '6' || candidate.clientId == '7') {
+          if (candidate.side == OrderSide.BUY) {
+            candidate.price = BigNumber(
+              getNotNullOrThrowError<BigNumber>(
+                orderBookResponse.valueSeq().toArray()[0].bestAsk?.price
+              )
+                .times((100 + spread) / 100)
+                .decimalPlaces(marketPrecisions[0])
+            );
+          } else {
+            candidate.price = BigNumber(
+              getNotNullOrThrowError<BigNumber>(
+                orderBookResponse.valueSeq().toArray()[1].bestBid?.price
+              )
+                .times((100 - spread) / 100)
+                .decimalPlaces(marketPrecisions[1])
+            );
+          }
+        }
+      }
 
       const requestBody = {
         orders: candidates
@@ -2403,10 +2409,13 @@ describe('Kujira', () => {
     it('Get all open orders and check that the orders 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders(['2', '3', '6', '7', '10', '11']);
 
-      const targetsIds = targets
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const targetsIds = [];
+
+      for (const target of targets.valueSeq()) {
+        if (target.type != OrderType.MARKET) {
+          targetsIds.push(target.id);
+        }
+      }
 
       const requestBody = {
         ownerAddress: ownerAddress,
@@ -2581,10 +2590,13 @@ describe('Kujira', () => {
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
       const targets = getOrders(['1', '2', '3', '6', '7', '10', '11']);
 
-      const targetsIds = targets
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const targetsIds = [];
+
+      for (const target of targets.valueSeq()) {
+        if (target.type != OrderType.MARKET) {
+          targetsIds.push(target.id);
+        }
+      }
 
       const requestBody = {
         ownerAddress: ownerAddress,
@@ -2852,10 +2864,13 @@ describe('Kujira', () => {
         '11',
       ]);
 
-      const targetsIds = targets
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const targetsIds = [];
+
+      for (const target of targets.valueSeq()) {
+        if (target.type != OrderType.MARKET) {
+          targetsIds.push(target.id);
+        }
+      }
 
       const requestBody = {
         ownerAddress: ownerAddress,
@@ -2876,18 +2891,23 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap<OrderId, Order>(
+        response.body
+      ) as GetOrdersResponse;
 
       logResponse(responseBody);
 
-      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const responseOrdersIds: OrderId[] = [];
 
-      targetsIds.forEach((orderId) =>
-        expect(responseOrdersIds.includes(orderId)).toBeFalse()
-      );
+      for (const order of responseBody) {
+        responseOrdersIds.push(getNotNullOrThrowError<any>(order)[0]);
+      }
+
+      for (const targetId of targetsIds) {
+        expect(
+          responseOrdersIds.includes(getNotNullOrThrowError<any>(targetId))
+        ).toBeFalse();
+      }
     });
 
     it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
