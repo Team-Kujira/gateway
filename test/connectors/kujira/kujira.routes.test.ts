@@ -97,7 +97,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-enablePatches();
+// enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -2114,7 +2114,7 @@ describe('Kujira', () => {
         getNotNullOrThrowError<BigNumber>(
           orderBookResponse.valueSeq().toArray()[0].bestAsk?.price
         )
-          .times((100 - spread) / 100)
+          .times((100 + spread) / 100)
           .decimalPlaces(marketPrecisions[0])
       );
 
@@ -2430,17 +2430,22 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
-      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
-        .map((order) => order.id)
+      const responseOrdersIds: OrderId[] = [];
+      (responseBody as IMap<OrderId, Order>)
         .valueSeq()
-        .toArray();
+        .toArray()
+        .forEach((order) =>
+          responseOrdersIds.push(getNotNullOrThrowError(order.id))
+        );
 
       targetsIds.forEach((orderId) =>
-        expect(responseOrdersIds.includes(orderId)).toBeFalse()
+        expect(
+          responseOrdersIds.includes(getNotNullOrThrowError(orderId))
+        ).toBeFalse()
       );
     });
 
@@ -2603,7 +2608,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
