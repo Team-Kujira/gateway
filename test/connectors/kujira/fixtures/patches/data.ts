@@ -12,12 +12,7 @@ data.setIn(['global', 'fetch'], () => {
 });
 
 data.setIn(
-  [
-    'kujira',
-    'kujiraGetBasicMarkets',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{},"Array"]',
-    '1',
-  ],
+  ['kujira', 'kujiraGetBasicMarkets', '[[]]', '1'],
   IMap({
     kujira10qt8wg0n7z740ssvf3urmvgtjhxpyp74hxqvqt7z226gykuus7eqedsw8k: {
       address:
@@ -272,12 +267,7 @@ data.setIn(
 );
 
 data.setIn(
-  [
-    'kujira',
-    'kujiraGetBasicTokens',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{},"Array"]',
-    '1',
-  ],
+  ['kujira', 'kujiraGetBasicTokens', '[[]]', '1'],
   IMap({
     'ibc/A1E1A20C1E4F2F76F301DA625CC476FBD0FCD8CA94DAF60814CA5257B6CD3E3E': {
       reference:
@@ -356,7 +346,7 @@ data.setIn(
   [
     'kujira',
     'kujiraQueryClientWasmQueryContractSmart',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{"0":"5","1":"6"},"Array",{"name":"7","type":"8","category":"9","value":"10"},{"name":"11","type":"2","category":"2","value":"12","class":"13"},"0","string","primitive","kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh","1",{"book":"14"},"Object",{"name":"15","type":"2","category":"2","value":"16","class":"13"},"book",{"offset":"17","limit":"18"},{"name":"19","type":"20","category":"9","value":0},{"name":"21","type":"20","category":"9","value":255},"offset","number","limit"]',
+    '[["1","2"],"kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",{"book":"3"},{"offset":0,"limit":255}]',
     '1',
   ],
   {
@@ -1192,7 +1182,7 @@ data.setIn(
   [
     'kujira',
     'kujiraQueryClientWasmQueryContractSmart',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{"0":"5","1":"6"},"Array",{"name":"7","type":"8","category":"9","value":"10"},{"name":"11","type":"2","category":"2","value":"12","class":"13"},"0","string","primitive","kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6","1",{"book":"14"},"Object",{"name":"15","type":"2","category":"2","value":"16","class":"13"},"book",{"offset":"17","limit":"18"},{"name":"19","type":"20","category":"9","value":0},{"name":"21","type":"20","category":"9","value":255},"offset","number","limit"]',
+    '[["1","2"],"kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6",{"book":"3"},{"offset":0,"limit":255}]',
     '1',
   ],
   {
@@ -1371,7 +1361,7 @@ data.setIn(
   [
     'kujira',
     'kujiraQueryClientWasmQueryContractSmart',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{"0":"5","1":"6"},"Array",{"name":"7","type":"8","category":"9","value":"10"},{"name":"11","type":"2","category":"2","value":"12","class":"13"},"0","string","primitive","kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg","1",{"book":"14"},"Object",{"name":"15","type":"2","category":"2","value":"16","class":"13"},"book",{"offset":"17","limit":"18"},{"name":"19","type":"20","category":"9","value":0},{"name":"21","type":"20","category":"9","value":255},"offset","number","limit"]',
+    '[["1","2"],"kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg",{"book":"3"},{"offset":0,"limit":255}]',
     '1',
   ],
   {
@@ -1628,7 +1618,7 @@ data.setIn(
   [
     'kujira',
     'kujiraStargateClientGetAllBalances',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{"0":"5"},"Array",{"name":"6","type":"7","category":"8","value":"9"},"0","string","primitive","kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km"]',
+    '[["1"],"kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km"]',
     '1',
   ],
   [
@@ -1648,8 +1638,188 @@ data.setIn(
 data.setIn(
   [
     'kujira',
+    'kujiraQueryClientWasmQueryContractSmart',
+    '[["1","2"],"kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",{"orders_by_user":"3"},{"address":"4","limit":255,"start_after":null},"kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km"]',
+    '1',
+  ],
+  {
+    orders: [
+      {
+        idx: '156190',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.841',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '0',
+        filled_amount: '858000',
+        created_at: '1684968497280642167',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '156254',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.841',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '0',
+        filled_amount: '858000',
+        created_at: '1684968758467460430',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '156288',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.841',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '0',
+        filled_amount: '858000',
+        created_at: '1684970116826937178',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '167611',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '999.99',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '1000000',
+        filled_amount: '0',
+        created_at: '1685398425408190178',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '167613',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '999.99',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '1000000',
+        filled_amount: '0',
+        created_at: '1685398624548464479',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '169665',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '999.99',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '1000000',
+        filled_amount: '0',
+        created_at: '1685464699505179127',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '169888',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.001',
+        offer_denom: {
+          native: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo',
+        },
+        offer_amount: '1000000',
+        filled_amount: '0',
+        created_at: '1685468026057763149',
+        original_offer_amount: '1000000',
+      },
+    ],
+  }
+);
+
+data.setIn(
+  [
+    'kujira',
+    'kujiraQueryClientWasmQueryContractSmart',
+    '[["1","2"],"kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6",{"orders_by_user":"3"},{"address":"4","limit":255,"start_after":null},"kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km"]',
+    '1',
+  ],
+  {
+    orders: [
+      {
+        idx: '4806',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.826',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '0',
+        filled_amount: '834000',
+        created_at: '1684968477580489976',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '4809',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.826',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '0',
+        filled_amount: '834000',
+        created_at: '1684968736848093851',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '4812',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.826',
+        offer_denom: { native: 'ukuji' },
+        offer_amount: '0',
+        filled_amount: '834000',
+        created_at: '1684970094964942099',
+        original_offer_amount: '1000000',
+      },
+    ],
+  }
+);
+
+data.setIn(
+  [
+    'kujira',
+    'kujiraQueryClientWasmQueryContractSmart',
+    '[["1","2"],"kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg",{"orders_by_user":"3"},{"address":"4","limit":255,"start_after":null},"kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km"]',
+    '1',
+  ],
+  {
+    orders: [
+      {
+        idx: '17889',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.001',
+        offer_denom: {
+          native:
+            'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk',
+        },
+        offer_amount: '1000000',
+        filled_amount: '0',
+        created_at: '1685398425408190178',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '17912',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.001',
+        offer_denom: {
+          native:
+            'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk',
+        },
+        offer_amount: '1000000',
+        filled_amount: '0',
+        created_at: '1685398624548464479',
+        original_offer_amount: '1000000',
+      },
+      {
+        idx: '18642',
+        owner: 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km',
+        quote_price: '0.001',
+        offer_denom: {
+          native:
+            'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk',
+        },
+        offer_amount: '1000000',
+        filled_amount: '0',
+        created_at: '1685464699505179127',
+        original_offer_amount: '1000000',
+      },
+    ],
+  }
+);
+
+data.setIn(
+  [
+    'kujira',
     'kujiraStargateClientGetTx',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{"0":"5"},"Array",{"name":"6","type":"7","category":"8","value":"9"},"0","string","primitive","D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9"]',
+    '[["1"],"D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9"]',
     '1',
   ],
   {
@@ -2262,7 +2432,7 @@ data.setIn(
   [
     'kujira',
     'kujiraStargateClientGetTx',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{"0":"5"},"Array",{"name":"6","type":"7","category":"8","value":"9"},"0","string","primitive","50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91"]',
+    '[["1"],"50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91"]',
     '1',
   ],
   {
@@ -2828,7 +2998,7 @@ data.setIn(
   [
     'kujira',
     'kujiraStargateClientGetTx',
-    '[{"name":"1","type":"2","category":"2","value":"3","class":"4"},"root","object",{"0":"5"},"Array",{"name":"6","type":"7","category":"8","value":"9"},"0","string","primitive","66DBF37EAE15E28AD70E3292216DEE3D6B61E5C5913EBCE584E4971D2A6A2F2B"]',
+    '[["1"],"66DBF37EAE15E28AD70E3292216DEE3D6B61E5C5913EBCE584E4971D2A6A2F2B"]',
     '1',
   ],
   {

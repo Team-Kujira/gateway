@@ -1,8 +1,17 @@
 import 'jest-extended';
-import { parse as flattedParse, stringify as flattedStringify } from 'flatted';
-import { promisify } from 'util';
 import fs from 'fs';
+import { promisify } from 'util';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { parse as flattedParse, stringify as flattedStringify } from 'flatted';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Map as ImmutableMap } from 'immutable';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { BigNumber } from 'bignumber.js';
 
 jest.setTimeout(30 * 60 * 1000);
@@ -342,9 +351,9 @@ describe('Playground', () => {
 
       // Symbol('symbol'), // symbol
 
-      // null, // null
+      null, // null
 
-      // undefined, // undefined
+      undefined, // undefined
 
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -366,11 +375,11 @@ describe('Playground', () => {
 
       // new MyClass(), // Instance of a class
 
-      BigNumber('123.456'),
+      // BigNumber('123.456'),
 
       // myObject, // Object with cyclic reference
 
-      ImmutableMap(myObject), // ImmutableJS object
+      // ImmutableMap(myObject), // ImmutableJS object
     ];
 
     let serialized: any = undefined;

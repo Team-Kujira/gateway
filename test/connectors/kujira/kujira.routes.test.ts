@@ -97,7 +97,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-// enablePatches();
+enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -218,16 +218,6 @@ beforeAll(async () => {
 
   getPatch = <R = AsyncFunctionType<any, any>>(keyPath: string[]): R =>
     helperGetPatch<R>(patches, keyPath);
-
-  // (await getPatch(['kujira', 'kujiraFinClientWithdrawOrders']))();
-  // (await getPatch(['kujira', 'kujiraGetBasicMarkets']))();
-  // (await getPatch(['kujira', 'kujiraGetBasicTokens']))();
-  // (await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart']))();
-  // (await getPatch(['kujira', 'kujiraSigningStargateClientSignAndBroadcast']))();
-  // (await getPatch(['kujira', 'kujiraStargateClientGetAllBalances']))();
-  // (await getPatch(['kujira', 'kujiraStargateClientGetBalanceStaked']))();
-  // (await getPatch(['kujira', 'kujiraStargateClientGetHeight']))();
-  // (await getPatch(['kujira', 'kujiraStargateClientGetTx']))();
 
   await kujira.init();
 
@@ -1169,6 +1159,7 @@ describe('Kujira', () => {
 
   describe('User', () => {
     it('Get balance of token 1 by id', async () => {
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
 
       const request = {
@@ -1187,6 +1178,7 @@ describe('Kujira', () => {
     });
 
     it('Get balance of token 1 by symbol', async () => {
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
 
       const request = {
@@ -1207,6 +1199,7 @@ describe('Kujira', () => {
     });
 
     it('Get balances of tokens 2 and 3 by ids', async () => {
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
 
       const request = {
@@ -1234,6 +1227,7 @@ describe('Kujira', () => {
     });
 
     it('Get balances of tokens 2 and 3 by symbols', async () => {
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
 
       const targetsSymbols: TokenSymbol[] = [
@@ -1274,6 +1268,7 @@ describe('Kujira', () => {
     });
 
     it('Get all balances', async () => {
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
 
       const request = {
