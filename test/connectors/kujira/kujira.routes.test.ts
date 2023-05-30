@@ -97,7 +97,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-enablePatches();
+// enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -1352,6 +1352,8 @@ describe('Kujira', () => {
     market 3: token2/token3
 
     cancel all open orders
+
+    settle funds for all markets
 
     get the wallet balances from the tokens 1, 2, and 3
 
