@@ -221,6 +221,21 @@ beforeAll(async () => {
 
   await kujira.init();
 
+  // Order Type Reference
+  // #01 - LIMIT
+  // #02 - LIMIT
+  // #03 - MARKET
+  // #04 - LIMIT
+  // #05 - LIMIT
+  // #06 - LIMIT
+  // #07 - LIMIT
+  // #08 - LIMIT
+  // #09 - LIMIT
+  // #10 - MARKET
+  // #11 - MARKET
+  // #12 - LIMIT
+  // #13 - LIMIT
+
   orders.set('1', {
     id: undefined,
     clientId: '1',
@@ -2913,10 +2928,13 @@ describe('Kujira', () => {
     it('Get all filled orders and check that the orders 2, 6, and 7 are present', async () => {
       const targets = getOrders(['2', '6', '7']);
 
-      const targetsIds = targets
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const targetsIds = [];
+
+      for (const target of targets.valueSeq()) {
+        if (target.type != OrderType.MARKET) {
+          targetsIds.push(target.id);
+        }
+      }
 
       const requestBody = {
         ownerAddress: ownerAddress,
@@ -2937,18 +2955,23 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap<OrderId, Order>(
+        response.body
+      ) as GetOrdersResponse;
 
       logResponse(responseBody);
 
-      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const responseOrdersIds: OrderId[] = [];
 
-      targetsIds.forEach((orderId) =>
-        expect(responseOrdersIds.includes(orderId)).toBeTrue()
-      );
+      for (const order of responseBody) {
+        responseOrdersIds.push(getNotNullOrThrowError<any>(order)[0]);
+      }
+
+      for (const targetId of targetsIds) {
+        expect(
+          responseOrdersIds.includes(getNotNullOrThrowError<any>(targetId))
+        ).toBeTrue();
+      }
     });
 
     it('Get all orders (open or filled) and check that the orders 2, 3, 6, 7, 10, and 11 are present and the orders 1, 4, 5 are missing', async () => {
@@ -2970,7 +2993,12 @@ describe('Kujira', () => {
       const filledMarketOrdersTargetsIds = filledMarketOrdersTargets
         .map((order) => order.id)
         .valueSeq()
-        .toArray();
+        .toArray()
+        ? filledMarketOrdersTargets
+            .map((order) => order.id)
+            .valueSeq()
+            .toArray()
+        : undefined;
 
       const cancelledOrdersTargetsIds = cancelledOrdersTargets
         .map((order) => order.id)
@@ -2995,16 +3023,23 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap<OrderId, Order>(
+        response.body
+      ) as GetOrdersResponse;
 
       logResponse(responseBody);
 
-      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const responseOrdersIds: OrderId[] = [];
 
-      expect(openLimitOrdersTargetsIds).toIncludeSameMembers(responseOrdersIds);
+      for (const order of responseBody) {
+        responseOrdersIds.push(getNotNullOrThrowError<any>(order)[0]);
+      }
+
+      openLimitOrdersTargetsIds.forEach((orderId) =>
+        expect(responseOrdersIds).toInclude(
+          getNotNullOrThrowError<OrderId>(orderId)
+        )
+      );
 
       filledLimitOrdersTargetsIds.forEach((orderId) =>
         expect(responseOrdersIds).toInclude(
@@ -3012,10 +3047,10 @@ describe('Kujira', () => {
         )
       );
 
-      filledMarketOrdersTargetsIds.forEach((orderId) =>
-        expect(responseOrdersIds).not.toInclude(
-          getNotNullOrThrowError<OrderId>(orderId)
-        )
+      getNotNullOrThrowError<OrderId[]>(filledMarketOrdersTargetsIds).forEach(
+        (orderId) => {
+          expect(orderId).toBeUndefined();
+        }
       );
 
       cancelledOrdersTargetsIds.forEach((orderId) =>
