@@ -405,9 +405,9 @@ const inputOutputWrapper = async <R>(
   targetFunctionName: string,
   targetFunctionArguments: any[] = []
 ): Promise<R> => {
-  console.log('key:\n', dataKey);
+  // console.log('key:\n', dataKey);
 
-  console.log('input:\n', targetFunctionArguments);
+  // console.log('input:\n', targetFunctionArguments);
 
   const originalTargetFunction =
     targetObject[`__original__${targetFunctionName}`];

@@ -1445,6 +1445,13 @@ describe('Kujira', () => {
     */
 
     it('Cancel all open orders', async () => {
+      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
+      await getPatch([
+        'kujira',
+        'kujiraSigningStargateClientSignAndBroadcast',
+      ])();
+
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
@@ -3026,6 +3033,13 @@ describe('Kujira', () => {
     });
 
     it('Cancel all open orders', async () => {
+      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
+      await getPatch([
+        'kujira',
+        'kujiraSigningStargateClientSignAndBroadcast',
+      ])();
+
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
@@ -3617,6 +3631,13 @@ describe('Kujira', () => {
     });
 
     it('Cancel all open orders', async () => {
+      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
+      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
+      await getPatch([
+        'kujira',
+        'kujiraSigningStargateClientSignAndBroadcast',
+      ])();
+
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
