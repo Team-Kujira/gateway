@@ -1378,15 +1378,15 @@ export class Kujira {
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
-    const ordersByMarketIds: IMap<MarketId, Order> = IMap<
+    const ordersByMarketIds: IMap<MarketId, Order[]> = IMap<
       MarketId,
-      Order
+      Order[]
     >().asMutable();
 
     const ordersByOwnerByMarketIds: IMap<
       OwnerAddress,
-      IMap<MarketId, Order>
-    > = IMap<OwnerAddress, IMap<MarketId, Order>>().asMutable();
+      IMap<MarketId, Order[]>
+    > = IMap<OwnerAddress, IMap<MarketId, Order[]>>().asMutable();
 
     for (const ownerAddress of ownerAddresses) {
       for (const id of options.ids) {
@@ -1395,7 +1395,15 @@ export class Kujira {
           ownerAddress: ownerAddress,
         };
         const targetOrder = await this.getOrder(request);
-        ordersByMarketIds.set(targetOrder.marketId, targetOrder);
+        if (!ordersByMarketIds.get(targetOrder.marketId)) {
+          ordersByMarketIds.set(targetOrder.marketId, [targetOrder]);
+        } else {
+          const temp = getNotNullOrThrowError<any>(
+            ordersByMarketIds.get(targetOrder.marketId)
+          );
+          temp.push(targetOrder);
+          ordersByMarketIds.set(targetOrder.marketId, temp);
+        }
       }
       ordersByOwnerByMarketIds.set(ownerAddress, ordersByMarketIds);
     }
@@ -1405,13 +1413,11 @@ export class Kujira {
         const filteredOrdersByOwner =
           ordersByOwnerByMarketIds.get(ownerAddress);
 
-        const selectedOrders = [];
+        const selectedOrdersIds = [];
         for (const order of getNotNullOrThrowError<any>(
           filteredOrdersByOwner
-        ).valueSeq()) {
-          if (order.marketId == market.id) {
-            selectedOrders.push(order.id);
-          }
+        ).get(market.id)) {
+          selectedOrdersIds.push(order.id);
         }
 
         const denom: Denom = market.connectorMarket.denoms[0];
@@ -1422,7 +1428,7 @@ export class Kujira {
           msg: Buffer.from(
             JSON.stringify({
               retract_orders: {
-                order_idxs: selectedOrders,
+                order_idxs: selectedOrdersIds,
               },
             })
           ),
@@ -1491,39 +1497,36 @@ export class Kujira {
   async cancelAllOrders(
     options: CancelAllOrdersRequest
   ): Promise<CancelAllOrdersResponse> {
-    const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
+    const output = IMap<OwnerAddress[], IMap<OrderId, Order>>().asMutable();
 
     const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
-    for (const ownerAddress of ownerAddresses) {
-      const marketIds: MarketId[] = options?.marketId
-        ? [options?.marketId]
-        : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+    const marketIds: MarketId[] = options?.marketId
+      ? [options?.marketId]
+      : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
 
-      const cancelledOrders = IMap<OrderId, Order>().asMutable();
+    const cancelledOrders = IMap<OrderId, Order>().asMutable();
 
-      for (const marketId of marketIds) {
-        const openOrders = (await this.getOrders({
-          ownerAddresses: [ownerAddress],
-          marketId: marketId,
-          status: OrderStatus.OPEN,
-        })) as IMap<OrderId, Order>; // Cast because we have only one ownerAddress
+    const openOrders = (await this.getOrders({
+      ownerAddresses: ownerAddresses,
+      marketIds: marketIds,
+      status: OrderStatus.OPEN,
+    })) as IMap<OrderId, Order>;
 
-        const openOrdersIds = openOrders.keySeq().toArray();
+    const openOrdersIds = openOrders.keySeq().toArray();
 
-        cancelledOrders.merge(
-          (await this.cancelOrders({
-            ids: openOrdersIds,
-            marketId,
-            ownerAddresses: [ownerAddress],
-          })) as IMap<OrderId, Order> // Cast because we have only one ownerAddress
-        );
-      }
+    cancelledOrders.merge(
+      (await this.cancelOrders({
+        ids: openOrdersIds,
+        marketId: '',
+        marketIds: marketIds,
+        ownerAddresses: ownerAddresses,
+      })) as IMap<OrderId, Order>
+    );
 
-      output.set(ownerAddress, cancelledOrders);
-    }
+    output.set(ownerAddresses, cancelledOrders);
 
     if (ownerAddresses.length == 1) {
       return output.first();
