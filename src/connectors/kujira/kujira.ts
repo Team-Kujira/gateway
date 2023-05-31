@@ -1515,21 +1515,23 @@ export class Kujira {
       status: OrderStatus.OPEN,
     })) as IMap<OrderId, Order>;
 
-    const openOrdersIds = openOrders.keySeq().toArray();
+    if (openOrders.size > 0) {
+      const openOrdersIds = openOrders.keySeq().toArray();
 
-    cancelledOrders.merge(
-      (await this.cancelOrders({
-        ids: openOrdersIds,
-        marketId: '',
-        marketIds: marketIds,
-        ownerAddresses: ownerAddresses,
-      })) as IMap<OrderId, Order>
-    );
+      cancelledOrders.merge(
+        (await this.cancelOrders({
+          ids: openOrdersIds,
+          marketId: '',
+          marketIds: marketIds,
+          ownerAddresses: ownerAddresses,
+        })) as IMap<OrderId, Order>
+      );
 
-    output.set(ownerAddresses, cancelledOrders);
+      output.set(ownerAddresses, cancelledOrders);
 
-    if (ownerAddresses.length == 1) {
-      return output.first();
+      if (ownerAddresses.length == 1) {
+        return output.first();
+      }
     }
 
     return output;
