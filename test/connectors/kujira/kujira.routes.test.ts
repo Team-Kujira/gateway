@@ -2656,15 +2656,21 @@ describe('Kujira', () => {
     it('Cancel the orders 4 and 5', async () => {
       const targets = getOrders(['4', '5']);
 
-      const targetsIds = targets
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const targetsIds = [];
 
-      const targetMarketsIds = targets
-        .map((order) => order.marketId)
-        .valueSeq()
-        .toArray();
+      for (const target of targets.valueSeq()) {
+        if (target.type != OrderType.MARKET) {
+          targetsIds.push(target.id);
+        }
+      }
+
+      const targetMarketsIds = [];
+
+      for (const target of targets.valueSeq()) {
+        if (target.type != OrderType.MARKET) {
+          targetMarketsIds.push(target.marketId);
+        }
+      }
 
       const requestBody = {
         ids: targetsIds,

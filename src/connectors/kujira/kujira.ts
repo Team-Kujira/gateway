@@ -1355,11 +1355,22 @@ export class Kujira {
   async cancelOrders(
     options: CancelOrdersRequest
   ): Promise<CancelOrdersResponse> {
-    // TODO Make this method to support multiple markets!!!
-    const market = await this.getMarket({
-      id: options.marketId,
-      name: options.marketName,
-    });
+    let markets;
+    if (options.marketName || options.marketId) {
+      options.marketIds = [options.marketId];
+      options.marketNames = options.marketName
+        ? [options.marketName]
+        : undefined;
+      markets = await this.getMarkets({
+        ids: options.marketIds,
+        names: options.marketNames,
+      });
+    } else {
+      markets = await this.getMarkets({
+        ids: options.marketIds,
+        names: options.marketNames,
+      });
+    }
 
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
@@ -1367,68 +1378,103 @@ export class Kujira {
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
+    const ordersByMarketIds: IMap<MarketId, Order> = IMap<
+      MarketId,
+      Order
+    >().asMutable();
+
+    const ordersByOwnerByMarketIds: IMap<
+      OwnerAddress,
+      IMap<MarketId, Order>
+    > = IMap<OwnerAddress, IMap<MarketId, Order>>().asMutable();
+
     for (const ownerAddress of ownerAddresses) {
-      // TODO check if using index 0 would work for all !!!
-      const denom: Denom = market.connectorMarket.denoms[0];
-
-      const message = msg.wasm.msgExecuteContract({
-        sender: ownerAddress,
-        contract: market.id,
-        msg: Buffer.from(
-          JSON.stringify({
-            retract_orders: {
-              order_idxs: options.ids,
-            },
-          })
-        ),
-        funds: coins(1, denom.reference),
-      });
-
-      const messages: readonly EncodeObject[] = [message];
-
-      const walletArtifacts = await this.getWalletArtifacts({
-        ownerAddress,
-      });
-
-      const response = await this.kujiraSigningStargateClientSignAndBroadcast(
-        walletArtifacts.signingStargateClient,
-        ownerAddress,
-        messages,
-        config.orders.create.fee
-      );
-
-      const bundles = IMap<string, any>().asMutable();
-
-      bundles.setIn(['common', 'response'], response);
-      bundles.setIn(['common', 'status'], OrderStatus.CANCELLED);
-      bundles.setIn(
-        ['common', 'events'],
-        convertKujiraEventsToMapOfEvents(response.events)
-      );
-
-      const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
-        JSON.parse(getNotNullOrThrowError<string>(response.rawLog)),
-        options.ids.length
-      );
-
-      for (const [bundleIndex, events] of mapOfEvents.entries()) {
-        for (const [key, value] of events.entries()) {
-          bundles.setIn(
-            ['orders', bundleIndex, 'id'],
-            options.ids[Number(bundleIndex)]
-          );
-          bundles.setIn(['orders', bundleIndex, 'market'], market);
-          bundles.setIn(['orders', bundleIndex, 'events', key], value);
-        }
+      for (const id of options.ids) {
+        const request = {
+          id: id,
+          ownerAddress: ownerAddress,
+        };
+        const targetOrder = await this.getOrder(request);
+        ordersByMarketIds.set(targetOrder.marketId, targetOrder);
       }
+      ordersByOwnerByMarketIds.set(ownerAddress, ordersByMarketIds);
+    }
 
-      output.set(
-        ownerAddress,
-        convertKujiraOrdersToMapOfOrders({
-          type: ConvertOrderType.CANCELLED_ORDERS,
-          bundles,
-        })
-      );
+    for (const market of markets.valueSeq()) {
+      for (const ownerAddress of ownerAddresses) {
+        const filteredOrdersByOwner =
+          ordersByOwnerByMarketIds.get(ownerAddress);
+
+        const selectedOrders = [];
+        for (const order of getNotNullOrThrowError<any>(
+          filteredOrdersByOwner
+        ).valueSeq()) {
+          if (order.marketId == market.id) {
+            selectedOrders.push(order.id);
+          }
+        }
+
+        const denom: Denom = market.connectorMarket.denoms[0];
+
+        const message = msg.wasm.msgExecuteContract({
+          sender: ownerAddress,
+          contract: market.id,
+          msg: Buffer.from(
+            JSON.stringify({
+              retract_orders: {
+                order_idxs: selectedOrders,
+              },
+            })
+          ),
+          funds: coins(1, denom.reference),
+        });
+
+        const messages: readonly EncodeObject[] = [message];
+
+        const walletArtifacts = await this.getWalletArtifacts({
+          ownerAddress,
+        });
+
+        const response = await this.kujiraSigningStargateClientSignAndBroadcast(
+          walletArtifacts.signingStargateClient,
+          ownerAddress,
+          messages,
+          config.orders.create.fee
+        );
+
+        const bundles = IMap<string, any>().asMutable();
+
+        bundles.setIn(['common', 'response'], response);
+        bundles.setIn(['common', 'status'], OrderStatus.CANCELLED);
+        bundles.setIn(
+          ['common', 'events'],
+          convertKujiraEventsToMapOfEvents(response.events)
+        );
+
+        const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
+          JSON.parse(getNotNullOrThrowError<string>(response.rawLog)),
+          options.ids.length
+        );
+
+        for (const [bundleIndex, events] of mapOfEvents.entries()) {
+          for (const [key, value] of events.entries()) {
+            bundles.setIn(
+              ['orders', bundleIndex, 'id'],
+              options.ids[Number(bundleIndex)]
+            );
+            bundles.setIn(['orders', bundleIndex, 'market'], market);
+            bundles.setIn(['orders', bundleIndex, 'events', key], value);
+          }
+        }
+
+        output.set(
+          ownerAddress,
+          convertKujiraOrdersToMapOfOrders({
+            type: ConvertOrderType.CANCELLED_ORDERS,
+            bundles,
+          })
+        );
+      }
     }
 
     if (ownerAddresses.length == 1) {
