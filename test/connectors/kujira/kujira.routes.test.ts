@@ -3390,7 +3390,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.placeOrders,
       });
 
-      const responseBody = response.body as PlaceOrdersResponse;
+      const responseBody = IMap(response.body) as PlaceOrdersResponse;
 
       logResponse(responseBody);
 
@@ -3426,8 +3426,12 @@ describe('Kujira', () => {
         expect(order.id).toBe(candidate?.id);
         expect(order.marketId).toBe(candidate?.marketId);
         expect(order.ownerAddress).toBe(candidate?.ownerAddress);
-        expect(order.price).toEqual(candidate?.price);
-        expect(order.amount).toEqual(candidate?.amount);
+        expect(
+          BigNumber(getNotNullOrThrowError(order.price)).toString()
+        ).toEqual(candidate?.price?.toString());
+        expect(
+          BigNumber(getNotNullOrThrowError(order.amount)).toString()
+        ).toEqual(candidate?.amount.toString());
         expect(order.side).toBe(candidate?.side);
         expect(order.payerAddress).toBe(candidate?.payerAddress);
         expect(order.status).toBe(OrderStatus.OPEN);
@@ -3583,7 +3587,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
@@ -3641,7 +3645,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
@@ -3697,7 +3701,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.cancelAllOrders,
       });
 
-      const responseBody = response.body as CancelAllOrdersResponse;
+      const responseBody = IMap(response.body) as CancelAllOrdersResponse;
 
       logResponse(responseBody);
       const targets = getOrders(['12', '13']);
