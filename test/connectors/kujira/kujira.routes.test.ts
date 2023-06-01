@@ -1459,7 +1459,7 @@ describe('Kujira', () => {
     settle funds for all markets
     */
 
-    it('Cancel all open orders', async () => {
+    it('Cancel all open orders - 1', async () => {
       await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
       await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch([
@@ -3068,7 +3068,7 @@ describe('Kujira', () => {
       );
     });
 
-    it('Cancel all open orders', async () => {
+    it('Cancel all open orders - 2', async () => {
       await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
       await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch([
@@ -3670,7 +3670,7 @@ describe('Kujira', () => {
       );
     });
 
-    it('Cancel all open orders', async () => {
+    it('Cancel all open orders - 3', async () => {
       await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
       await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
       await getPatch([
