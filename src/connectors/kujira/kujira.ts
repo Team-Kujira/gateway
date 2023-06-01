@@ -1469,14 +1469,14 @@ export class Kujira {
 
           const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
             JSON.parse(getNotNullOrThrowError<string>(response.rawLog)),
-            options.ids.length
+            selectedOrdersIds.length
           );
 
           for (const [bundleIndex, events] of mapOfEvents.entries()) {
             for (const [key, value] of events.entries()) {
               bundles.setIn(
                 ['orders', bundleIndex, 'id'],
-                options.ids[Number(bundleIndex)]
+                selectedOrdersIds[Number(bundleIndex)]
               );
               bundles.setIn(['orders', bundleIndex, 'market'], market);
               bundles.setIn(['orders', bundleIndex, 'events', key], value);
