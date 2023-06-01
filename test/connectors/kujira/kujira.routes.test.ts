@@ -2867,7 +2867,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
@@ -3276,7 +3276,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
@@ -3327,7 +3327,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
@@ -3877,7 +3877,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.getOrders,
       });
 
-      const responseBody = response.body as GetOrdersResponse;
+      const responseBody = IMap(response.body) as GetOrdersResponse;
 
       logResponse(responseBody);
 
@@ -4052,7 +4052,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.settleMarketsFunds,
       });
 
-      const responseBody = response.body as MarketsWithdrawsFundsResponse;
+      const responseBody = IMap(response.body) as MarketsWithdrawsFundsResponse;
 
       logResponse(responseBody);
 
@@ -4208,7 +4208,7 @@ describe('Kujira', () => {
         controllerFunction: kujira.settleAllMarketsFunds,
       });
 
-      const responseBody = response.body as AllMarketsWithdrawsResponse;
+      const responseBody = IMap(response.body) as AllMarketsWithdrawsResponse;
 
       logResponse(responseBody);
 
