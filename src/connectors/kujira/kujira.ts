@@ -1483,13 +1483,22 @@ export class Kujira {
             }
           }
 
-          output.set(
-            ownerAddress,
-            convertKujiraOrdersToMapOfOrders({
-              type: ConvertOrderType.CANCELLED_ORDERS,
-              bundles,
-            })
-          );
+          if (output.get(ownerAddress)) {
+            output.get(ownerAddress)?.merge(
+              convertKujiraOrdersToMapOfOrders({
+                type: ConvertOrderType.CANCELLED_ORDERS,
+                bundles,
+              })
+            );
+          } else {
+            output.set(
+              ownerAddress,
+              convertKujiraOrdersToMapOfOrders({
+                type: ConvertOrderType.CANCELLED_ORDERS,
+                bundles,
+              })
+            );
+          }
         }
       }
 
