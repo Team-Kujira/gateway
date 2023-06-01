@@ -1355,136 +1355,147 @@ export class Kujira {
   async cancelOrders(
     options: CancelOrdersRequest
   ): Promise<CancelOrdersResponse> {
-    let markets;
-    if (options.marketName || options.marketId) {
-      options.marketIds = [options.marketId];
-      options.marketNames = options.marketName
-        ? [options.marketName]
-        : undefined;
-      markets = await this.getMarkets({
-        ids: options.marketIds,
-        names: options.marketNames,
-      });
-    } else {
-      markets = await this.getMarkets({
-        ids: options.marketIds,
-        names: options.marketNames,
-      });
-    }
-
     const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
-    const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
-      ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
-      : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
-
-    const ordersByMarketIds: IMap<MarketId, Order[]> = IMap<
-      MarketId,
-      Order[]
-    >().asMutable();
-
-    const ordersByOwnerByMarketIds: IMap<
-      OwnerAddress,
-      IMap<MarketId, Order[]>
-    > = IMap<OwnerAddress, IMap<MarketId, Order[]>>().asMutable();
-
-    for (const ownerAddress of ownerAddresses) {
-      for (const id of options.ids) {
-        const request = {
-          id: id,
-          ownerAddress: ownerAddress,
-        };
-        const targetOrder = await this.getOrder(request);
-        if (!ordersByMarketIds.get(targetOrder.marketId)) {
-          ordersByMarketIds.set(targetOrder.marketId, [targetOrder]);
-        } else {
-          const temp = getNotNullOrThrowError<any>(
-            ordersByMarketIds.get(targetOrder.marketId)
-          );
-          temp.push(targetOrder);
-          ordersByMarketIds.set(targetOrder.marketId, temp);
-        }
+    if (options.ids) {
+      let markets;
+      if (options.marketName || options.marketId) {
+        options.marketIds = [options.marketId];
+        options.marketNames = options.marketName
+          ? [options.marketName]
+          : undefined;
+        markets = await this.getMarkets({
+          ids: options.marketIds,
+          names: options.marketNames,
+        });
+      } else {
+        markets = await this.getMarkets({
+          ids: options.marketIds,
+          names: options.marketNames,
+        });
       }
-      ordersByOwnerByMarketIds.set(ownerAddress, ordersByMarketIds);
-    }
 
-    for (const market of markets.valueSeq()) {
+      const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
+        ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
+        : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
+
+      const ordersByMarketIds: IMap<MarketId, Order[]> = IMap<
+        MarketId,
+        Order[]
+      >().asMutable();
+
+      const ordersByOwnerByMarketIds: IMap<
+        OwnerAddress,
+        IMap<MarketId, Order[]>
+      > = IMap<OwnerAddress, IMap<MarketId, Order[]>>().asMutable();
+
       for (const ownerAddress of ownerAddresses) {
-        const filteredOrdersByOwner =
-          ordersByOwnerByMarketIds.get(ownerAddress);
-
-        const selectedOrdersIds = [];
-        for (const order of getNotNullOrThrowError<any>(
-          filteredOrdersByOwner
-        ).get(market.id)) {
-          selectedOrdersIds.push(order.id);
-        }
-
-        const denom: Denom = market.connectorMarket.denoms[0];
-
-        const message = msg.wasm.msgExecuteContract({
-          sender: ownerAddress,
-          contract: market.id,
-          msg: Buffer.from(
-            JSON.stringify({
-              retract_orders: {
-                order_idxs: selectedOrdersIds,
-              },
-            })
-          ),
-          funds: coins(1, denom.reference),
-        });
-
-        const messages: readonly EncodeObject[] = [message];
-
-        const walletArtifacts = await this.getWalletArtifacts({
-          ownerAddress,
-        });
-
-        const response = await this.kujiraSigningStargateClientSignAndBroadcast(
-          walletArtifacts.signingStargateClient,
-          ownerAddress,
-          messages,
-          config.orders.create.fee
-        );
-
-        const bundles = IMap<string, any>().asMutable();
-
-        bundles.setIn(['common', 'response'], response);
-        bundles.setIn(['common', 'status'], OrderStatus.CANCELLED);
-        bundles.setIn(
-          ['common', 'events'],
-          convertKujiraEventsToMapOfEvents(response.events)
-        );
-
-        const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
-          JSON.parse(getNotNullOrThrowError<string>(response.rawLog)),
-          options.ids.length
-        );
-
-        for (const [bundleIndex, events] of mapOfEvents.entries()) {
-          for (const [key, value] of events.entries()) {
-            bundles.setIn(
-              ['orders', bundleIndex, 'id'],
-              options.ids[Number(bundleIndex)]
+        for (const id of options.ids) {
+          const request = {
+            id: id,
+            ownerAddress: ownerAddress,
+          };
+          const targetOrder = await this.getOrder(request);
+          if (!ordersByMarketIds.get(targetOrder.marketId)) {
+            ordersByMarketIds.set(targetOrder.marketId, [targetOrder]);
+          } else {
+            const aux = getNotNullOrThrowError<any>(
+              ordersByMarketIds.get(targetOrder.marketId)
             );
-            bundles.setIn(['orders', bundleIndex, 'market'], market);
-            bundles.setIn(['orders', bundleIndex, 'events', key], value);
+            aux.push(targetOrder);
+            ordersByMarketIds.set(targetOrder.marketId, aux);
           }
         }
-
-        output.set(
-          ownerAddress,
-          convertKujiraOrdersToMapOfOrders({
-            type: ConvertOrderType.CANCELLED_ORDERS,
-            bundles,
-          })
-        );
+        ordersByOwnerByMarketIds.set(ownerAddress, ordersByMarketIds);
       }
-    }
 
-    if (ownerAddresses.length == 1) {
-      return output.first();
+      for (const market of markets.valueSeq()) {
+        for (const ownerAddress of ownerAddresses) {
+          const filteredOrdersByOwner = IMap<MarketId, Order[]>(
+            ordersByOwnerByMarketIds.get(ownerAddress)
+          );
+
+          const selectedOrdersIds = [];
+
+          for (const orders of filteredOrdersByOwner.valueSeq()) {
+            for (const order of orders) {
+              if (order.marketId == market.id) {
+                selectedOrdersIds.push(order.id);
+              }
+            }
+          }
+
+          if (selectedOrdersIds.length == 0) {
+            continue;
+          }
+
+          const denom: Denom = market.connectorMarket.denoms[0];
+
+          const message = msg.wasm.msgExecuteContract({
+            sender: ownerAddress,
+            contract: market.id,
+            msg: Buffer.from(
+              JSON.stringify({
+                retract_orders: {
+                  order_idxs: selectedOrdersIds,
+                },
+              })
+            ),
+            funds: coins(1, denom.reference),
+          });
+
+          const messages: readonly EncodeObject[] = [message];
+
+          const walletArtifacts = await this.getWalletArtifacts({
+            ownerAddress,
+          });
+
+          const response =
+            await this.kujiraSigningStargateClientSignAndBroadcast(
+              walletArtifacts.signingStargateClient,
+              ownerAddress,
+              messages,
+              config.orders.create.fee
+            );
+
+          const bundles = IMap<string, any>().asMutable();
+
+          bundles.setIn(['common', 'response'], response);
+          bundles.setIn(['common', 'status'], OrderStatus.CANCELLED);
+          bundles.setIn(
+            ['common', 'events'],
+            convertKujiraEventsToMapOfEvents(response.events)
+          );
+
+          const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
+            JSON.parse(getNotNullOrThrowError<string>(response.rawLog)),
+            options.ids.length
+          );
+
+          for (const [bundleIndex, events] of mapOfEvents.entries()) {
+            for (const [key, value] of events.entries()) {
+              bundles.setIn(
+                ['orders', bundleIndex, 'id'],
+                options.ids[Number(bundleIndex)]
+              );
+              bundles.setIn(['orders', bundleIndex, 'market'], market);
+              bundles.setIn(['orders', bundleIndex, 'events', key], value);
+            }
+          }
+
+          output.set(
+            ownerAddress,
+            convertKujiraOrdersToMapOfOrders({
+              type: ConvertOrderType.CANCELLED_ORDERS,
+              bundles,
+            })
+          );
+        }
+      }
+
+      if (ownerAddresses.length == 1) {
+        return output.first();
+      }
     }
 
     return output;

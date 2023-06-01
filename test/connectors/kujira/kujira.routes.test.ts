@@ -2654,27 +2654,27 @@ describe('Kujira', () => {
     });
 
     it('Cancel the orders 4 and 5', async () => {
-      const targets = getOrders(['4', '5']);
+      const candidates = getOrders(['4', '5']);
 
-      const targetsIds = [];
+      const candidatesIds = [];
 
-      for (const target of targets.valueSeq()) {
+      for (const target of candidates.valueSeq()) {
         if (target.type != OrderType.MARKET) {
-          targetsIds.push(target.id);
+          candidatesIds.push(target.id);
         }
       }
 
-      const targetMarketsIds = [];
+      const candidatesMarketsIds = [];
 
-      for (const target of targets.valueSeq()) {
+      for (const target of candidates.valueSeq()) {
         if (target.type != OrderType.MARKET) {
-          targetMarketsIds.push(target.marketId);
+          candidatesMarketsIds.push(target.marketId);
         }
       }
 
       const requestBody = {
-        ids: targetsIds,
-        marketIds: targetMarketsIds,
+        ids: candidatesIds,
+        marketIds: candidatesMarketsIds,
         ownerAddress: ownerAddress,
       } as CancelOrdersRequest;
 
@@ -2699,25 +2699,23 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      // expect(responseBody.size).toBe(targetsIds.length);
-      // expect(responseBody.keySeq().toArray()).toIncludeSameMembers(targetsIds);
-      //
-      // for (const order of responseBody.valueSeq()) {
-      //   const test = targets.find((order) => );
-      //   const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
-      //   const candidate = orders.get(clientId);
-      //
-      //   expect(order).toBeObject();
-      //   expect(order.id?.length).toBeGreaterThan(0);
-      //   expect(order.id).toBe(candidate?.id);
-      //   expect(order.marketId).toBe(candidate?.marketId);
-      //   expect(order.ownerAddress).toBe(candidate?.ownerAddress);
-      //   expect(order.price).toEqual(candidate?.price);
-      //   expect(order.amount).toEqual(candidate?.amount);
-      //   expect(order.side).toBe(candidate?.side);
-      //   expect(order.payerAddress).toBe(candidate?.payerAddress);
-      //   expect(order.hashes?.cancellation?.length).toBeCloseTo(64);
-      // }
+      expect(responseBody.size).toBe(candidatesIds.length);
+      expect(responseBody.keySeq().toArray()).toIncludeSameMembers(
+        candidatesIds
+      );
+
+      for (const order of responseBody.valueSeq()) {
+        for (const candidate of candidates.valueSeq()) {
+          if (order.id == candidate.id) {
+            expect(order).toBeObject();
+            expect(order.id?.length).toBeGreaterThan(0);
+            expect(order.marketId).toBe(candidate?.marketId);
+            expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+            expect(order.payerAddress).toBe(candidate?.payerAddress);
+            expect(order.hashes?.cancellation?.length).toBeCloseTo(64);
+          }
+        }
+      }
     });
 
     it.skip('Check the wallet balances from the tokens 1, 2, and 3', async () => {
