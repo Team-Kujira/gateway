@@ -3607,25 +3607,45 @@ describe('Kujira', () => {
       const filledMarketOrdersTargets = getOrders(['3', '10', '11']);
       const cancelledOrdersTargets = getOrders(['1', '4', '5', '8', '9']);
 
-      const openLimitOrdersTargetsIds = openLimitOrdersTargets
-        .map((order) => order.id)
+      const openLimitOrdersTargetsIds: OrderId[] = [];
+      openLimitOrdersTargets
         .valueSeq()
-        .toArray();
+        .toArray()
+        .forEach((order) =>
+          openLimitOrdersTargetsIds.push(
+            getNotNullOrThrowError<OrderId>(order.id)
+          )
+        );
 
-      const filledLimitOrdersTargetsIds = filledLimitOrdersTargets
-        .map((order) => order.id)
+      const filledLimitOrdersTargetsIds: OrderId[] = [];
+      filledLimitOrdersTargets
         .valueSeq()
-        .toArray();
+        .toArray()
+        .forEach((order) =>
+          filledLimitOrdersTargetsIds.push(
+            getNotNullOrThrowError<OrderId>(order.id)
+          )
+        );
 
-      const filledMarketOrdersTargetsIds = filledMarketOrdersTargets
-        .map((order) => order.id)
+      const filledMarketOrdersTargetsIds: OrderId[] = [];
+      filledMarketOrdersTargets
         .valueSeq()
-        .toArray();
+        .toArray()
+        .forEach((order) =>
+          filledMarketOrdersTargetsIds.push(
+            getNotNullOrThrowError<OrderId>(order.id)
+          )
+        );
 
-      const cancelledOrdersTargetsIds = cancelledOrdersTargets
-        .map((order) => order.id)
+      const cancelledOrdersTargetsIds: OrderId[] = [];
+      cancelledOrdersTargets
         .valueSeq()
-        .toArray();
+        .toArray()
+        .forEach((order) =>
+          cancelledOrdersTargetsIds.push(
+            getNotNullOrThrowError<OrderId>(order.id)
+          )
+        );
 
       const requestBody = {
         ownerAddress: ownerAddress,
@@ -3654,24 +3674,14 @@ describe('Kujira', () => {
         .valueSeq()
         .toArray();
 
-      expect(openLimitOrdersTargetsIds).toIncludeSameMembers(responseOrdersIds);
+      expect(responseOrdersIds).toIncludeAllMembers(openLimitOrdersTargetsIds);
 
-      filledLimitOrdersTargetsIds.forEach((orderId) =>
-        expect(responseOrdersIds).toInclude(
-          getNotNullOrThrowError<OrderId>(orderId)
-        )
+      expect(responseOrdersIds).not.toIncludeAllMembers(
+        filledMarketOrdersTargetsIds
       );
 
-      filledMarketOrdersTargetsIds.forEach((orderId) =>
-        expect(responseOrdersIds).not.toInclude(
-          getNotNullOrThrowError<OrderId>(orderId)
-        )
-      );
-
-      cancelledOrdersTargetsIds.forEach((orderId) =>
-        expect(responseOrdersIds).not.toInclude(
-          getNotNullOrThrowError<OrderId>(orderId)
-        )
+      expect(responseOrdersIds).not.toIncludeAllMembers(
+        cancelledOrdersTargetsIds
       );
     });
 
