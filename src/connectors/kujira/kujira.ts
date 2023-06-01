@@ -1469,27 +1469,36 @@ export class Kujira {
 
           const mapOfEvents = convertKujiraRawLogEventsToMapOfEvents(
             JSON.parse(getNotNullOrThrowError<string>(response.rawLog)),
-            options.ids.length
+            selectedOrdersIds.length
           );
 
           for (const [bundleIndex, events] of mapOfEvents.entries()) {
             for (const [key, value] of events.entries()) {
               bundles.setIn(
                 ['orders', bundleIndex, 'id'],
-                options.ids[Number(bundleIndex)]
+                selectedOrdersIds[Number(bundleIndex)]
               );
               bundles.setIn(['orders', bundleIndex, 'market'], market);
               bundles.setIn(['orders', bundleIndex, 'events', key], value);
             }
           }
 
-          output.set(
-            ownerAddress,
-            convertKujiraOrdersToMapOfOrders({
-              type: ConvertOrderType.CANCELLED_ORDERS,
-              bundles,
-            })
-          );
+          if (output.get(ownerAddress)) {
+            output.get(ownerAddress)?.merge(
+              convertKujiraOrdersToMapOfOrders({
+                type: ConvertOrderType.CANCELLED_ORDERS,
+                bundles,
+              })
+            );
+          } else {
+            output.set(
+              ownerAddress,
+              convertKujiraOrdersToMapOfOrders({
+                type: ConvertOrderType.CANCELLED_ORDERS,
+                bundles,
+              })
+            );
+          }
         }
       }
 
