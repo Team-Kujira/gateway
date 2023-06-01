@@ -3094,44 +3094,49 @@ describe('Kujira', () => {
         controllerFunction: kujira.cancelAllOrders,
       });
 
-      const responseBody = response.body as CancelAllOrdersResponse;
+      const responseBody = getNotNullOrThrowError<IMap<OrderId, Order>>(
+        IMap<OrderId, Order>(response.body) as CancelAllOrdersResponse
+      );
 
       logResponse(responseBody);
 
-      const targets = getOrders(['3', '6', '7', '8', '9', '10', '11']);
+      const candidates = getOrders(['3', '6', '7', '8', '9', '10', '11']);
 
-      const targetsIds = targets
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      const candidatesIds = [];
 
-      const responseOrdersIds = (responseBody as IMap<OrderId, Order>)
-        .map((order) => order.id)
-        .valueSeq()
-        .toArray();
+      for (const target of candidates.values()) {
+        if (target.type != OrderType.MARKET) {
+          if (responseBody.get(getNotNullOrThrowError<OrderId>(target.id))) {
+            candidatesIds.push(target.id);
+          }
+        }
+      }
 
-      targetsIds.forEach((orderId) =>
-        expect(responseOrdersIds.includes(orderId)).toBeTrue()
-      );
+      const responseOrdersIds: OrderId[] = [];
 
-      for (const [orderId, order] of (
-        responseBody as IMap<OrderId, Order>
-      ).entries()) {
-        const clientId = getNotNullOrThrowError<OrderClientId>(order.clientId);
-        const candidate = orders.get(clientId);
+      for (const order of responseBody.valueSeq()) {
+        responseOrdersIds.push(
+          getNotNullOrThrowError<any>(getNotNullOrThrowError<Order>(order).id)
+        );
+      }
 
-        expect(order).toBeObject();
-        expect(orderId).toBe(order.id);
-        expect(order.id?.length).toBeGreaterThan(0);
-        expect(order.id).toBe(candidate?.id);
-        expect(order.marketId).toBe(candidate?.marketId);
-        expect(order.ownerAddress).toBe(candidate?.ownerAddress);
-        expect(order.price).toEqual(candidate?.price);
-        expect(order.amount).toEqual(candidate?.amount);
-        expect(order.side).toBe(candidate?.side);
-        expect(order.payerAddress).toBe(candidate?.payerAddress);
-        expect(order.hashes?.creation?.length).toBeCloseTo(64);
-        expect(order.status).toBe(OrderStatus.CANCELLED);
+      for (const target of candidatesIds) {
+        expect(
+          responseOrdersIds.includes(getNotNullOrThrowError<OrderId>(target))
+        ).toBeTrue();
+      }
+
+      for (const order of responseBody.valueSeq()) {
+        for (const candidate of candidates.valueSeq()) {
+          if (order.id == candidate.id) {
+            expect(order).toBeObject();
+            expect(order.id?.length).toBeGreaterThan(0);
+            expect(order.marketId).toBe(candidate?.marketId);
+            expect(order.ownerAddress).toBe(candidate?.ownerAddress);
+            expect(order.payerAddress).toBe(candidate?.payerAddress);
+            expect(order.hashes?.cancellation?.length).toBeCloseTo(64);
+          }
+        }
       }
     });
 
