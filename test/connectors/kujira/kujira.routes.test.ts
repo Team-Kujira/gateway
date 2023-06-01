@@ -97,7 +97,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-// enablePatches();
+enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -473,7 +473,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   sendRequest = <R>(options: SendRequestOptions<R>) => {
-    options.strategy = options.strategy || RequestStrategy.RESTful;
+    options.strategy = options.strategy || RequestStrategy.Controller;
     options.RESTExpress = options.RESTExpress || expressApp;
     options.RESTRoute = `/kujira${options.RESTRoute}`;
     options.controller = options.controller || kujira;
@@ -492,7 +492,20 @@ beforeEach(async () => {
     return;
   };
 
-  // await getPatch(['global', 'fetch'])();
+  // await getPatch(['global', 'fetch'])(testTitle);
+  await getPatch(['kujira', 'kujiraFinClientWithdrawOrders'])(testTitle);
+  await getPatch(['kujira', 'kujiraGetBasicMarkets'])(testTitle);
+  await getPatch(['kujira', 'kujiraGetBasicTokens'])(testTitle);
+  await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])(
+    testTitle
+  );
+  await getPatch(['kujira', 'kujiraSigningStargateClientSignAndBroadcast'])(
+    testTitle
+  );
+  await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])(testTitle);
+  await getPatch(['kujira', 'kujiraStargateClientGetBalanceStaked'])(testTitle);
+  await getPatch(['kujira', 'kujiraStargateClientGetHeight'])(testTitle);
+  await getPatch(['kujira', 'kujiraStargateClientGetTx'])(testTitle);
 });
 
 afterEach(() => {
@@ -509,8 +522,6 @@ describe('Kujira', () => {
 
   describe('Tokens', () => {
     it('Get token 1 by id', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicTokens'])();
-
       const requestBody = {
         id: tokenIds[1],
       } as GetTokenRequest;
@@ -542,8 +553,6 @@ describe('Kujira', () => {
     });
 
     it('Get token 1 by name', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicTokens'])();
-
       const target = Denom.from(tokenIds[1]);
       const request = {
         name: target.symbol,
@@ -563,8 +572,6 @@ describe('Kujira', () => {
     });
 
     it('Get token 1 by symbol', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicTokens'])();
-
       const target = Denom.from(tokenIds[1]);
       const request = {
         symbol: target.symbol,
@@ -583,8 +590,6 @@ describe('Kujira', () => {
     });
 
     it('Get tokens 2 and 3 by ids', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicTokens'])();
-
       const request = {
         ids: [tokenIds[2], tokenIds[3]],
       } as GetTokensRequest;
@@ -618,8 +623,6 @@ describe('Kujira', () => {
     });
 
     it('Get tokens 2 and 3 by names', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicTokens'])();
-
       const targetsIds = [tokenIds[2], tokenIds[3]];
       const targetsDenoms: Denom[] = [];
       for (const targetId of targetsIds) {
@@ -660,8 +663,6 @@ describe('Kujira', () => {
     });
 
     it('Get tokens 2 and 3 by symbols', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicTokens'])();
-
       const targetsIds = [tokenIds[2], tokenIds[3]];
       const targetsDenoms: Denom[] = [];
       for (const targetId of targetsIds) {
@@ -702,8 +703,6 @@ describe('Kujira', () => {
     });
 
     it('Get all tokens', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicTokens'])();
-
       const request = {} as GetAllTokensRequest;
 
       logRequest(request);
@@ -731,8 +730,6 @@ describe('Kujira', () => {
 
   describe('Markets', () => {
     it('Get market 1 by id', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-
       const request = {
         id: marketsIds[1],
       } as GetMarketRequest;
@@ -759,8 +756,6 @@ describe('Kujira', () => {
     });
 
     it('Get market 1 by name', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-
       const networkPair = networksPairs[marketsIds[1]];
 
       const request = {
@@ -788,8 +783,6 @@ describe('Kujira', () => {
     });
 
     it('Get markets 2 and 3 by ids', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-
       const targetMarketIds = [marketsIds[2], marketsIds[3]];
 
       const request = {
@@ -829,8 +822,6 @@ describe('Kujira', () => {
     });
 
     it('Get markets 2 and 3 by names', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-
       const targetMarketIds = [marketsIds[2], marketsIds[3]];
       const targetNames = [];
 
@@ -879,10 +870,6 @@ describe('Kujira', () => {
     });
 
     it('Get all markets', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-
       const targetMarketIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
       const request = {} as GetAllMarketsRequest;
 
@@ -919,8 +906,6 @@ describe('Kujira', () => {
 
   describe('Order books', () => {
     it('Get order book from market 1 by id', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const request = {
         marketId: marketsIds[1],
       } as GetOrderBookRequest;
@@ -940,8 +925,6 @@ describe('Kujira', () => {
     });
 
     it('Get order book from market 1 by name', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const networkPair = networksPairs[marketsIds[1]];
 
       const request = {
@@ -965,8 +948,6 @@ describe('Kujira', () => {
     });
 
     it('Get order books from the markets 2 and 3 by ids', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const request = {
         marketIds: [marketsIds[2], marketsIds[3]],
       } as GetOrderBooksRequest;
@@ -994,8 +975,6 @@ describe('Kujira', () => {
     });
 
     it('Get order books from the markets 2 and 3 by names', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const targetMarketIds = [marketsIds[2], marketsIds[3]];
       const targetNames = [];
 
@@ -1034,8 +1013,6 @@ describe('Kujira', () => {
     });
 
     it('Get all order books', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const request = {} as GetAllOrderBooksRequest;
 
       logRequest(request);
@@ -1059,8 +1036,6 @@ describe('Kujira', () => {
 
   describe('Tickers', () => {
     it('Get ticker from market 1 by id', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const request = {
         marketId: marketsIds[1],
       } as GetTickerRequest;
@@ -1099,8 +1074,6 @@ describe('Kujira', () => {
     });
 
     it('Get tickers from markets 2 and 3 by ids', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const targetMarketsIds = [marketsIds[2], marketsIds[3]];
       const request = {
         marketIds: targetMarketsIds,
@@ -1152,8 +1125,6 @@ describe('Kujira', () => {
     });
 
     it('Get all tickers', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const targetMarketsIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
       const request = {} as GetAllTickersRequest;
 
@@ -1174,9 +1145,6 @@ describe('Kujira', () => {
 
   describe('User', () => {
     it('Get balance of token 1 by id', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
-
       const request = {
         tokenId: tokensDenoms[1].reference,
         ownerAddress: ownerAddress,
@@ -1193,9 +1161,6 @@ describe('Kujira', () => {
     });
 
     it('Get balance of token 1 by symbol', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
-
       const request = {
         tokenSymbol: tokensDenoms[1].symbol,
         ownerAddress: ownerAddress,
@@ -1214,9 +1179,6 @@ describe('Kujira', () => {
     });
 
     it('Get balances of tokens 2 and 3 by ids', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
-
       const request = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
@@ -1242,9 +1204,6 @@ describe('Kujira', () => {
     });
 
     it('Get balances of tokens 2 and 3 by symbols', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
-
       const targetsSymbols: TokenSymbol[] = [
         tokensDenoms[2].symbol,
         tokensDenoms[3].symbol,
@@ -1283,9 +1242,6 @@ describe('Kujira', () => {
     });
 
     it('Get all balances', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch(['kujira', 'kujiraStargateClientGetAllBalances'])();
-
       const request = {
         ownerAddress: ownerAddress,
       } as GetAllBalancesRequest;
@@ -1330,8 +1286,6 @@ describe('Kujira', () => {
     });
 
     it('Get transactions 2 and 3', async () => {
-      await getPatch(['kujira', 'kujiraStargateClientGetTx'])();
-
       const request = {
         hashes: [transactionsHashes[2], transactionsHashes[3]],
       } as GetTransactionsRequest;
@@ -1460,13 +1414,6 @@ describe('Kujira', () => {
     */
 
     it('Cancel all open orders - 1', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch([
-        'kujira',
-        'kujiraSigningStargateClientSignAndBroadcast',
-      ])();
-
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
@@ -2606,7 +2553,7 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      expect(responseBody.hashes).toBeUndefined();
+      expect(responseBody).toBeUndefined();
     });
 
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {

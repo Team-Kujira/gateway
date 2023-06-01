@@ -17,6 +17,7 @@ import { Coin, EncodeObject } from '@cosmjs/proto-signing';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import { Serializer } from '../../../../../src/connectors/kujira/kujira.helpers';
+import { isMap } from 'immutable';
 
 let usePatches = true;
 let useInputOutputWrapper = true;
@@ -31,7 +32,7 @@ export const createPatches = (
 ): IMap<string, AsyncFunctionType<any, any>> => {
   const patches = IMap<string, AsyncFunctionType<any, any>>().asMutable();
 
-  patches.setIn(['global', 'fetch'], async (ordinal: number = 1) => {
+  patches.setIn(['global', 'fetch'], async (testTitle: string) => {
     if (!usePatches) return;
 
     patch(global, 'fetch', async (...any: any[]) => {
@@ -39,7 +40,9 @@ export const createPatches = (
 
       const serializedArguments = Serializer.serialize(inputArguments);
 
-      const dataKey = ['global', 'fetch', serializedArguments, `${ordinal}`];
+      const dataKey = ['global', 'fetch', serializedArguments, testTitle];
+
+      const key: string = JSON.stringify(dataKey);
 
       if (useInputOutputWrapper) {
         return await inputOutputWrapper<any>(
@@ -50,13 +53,13 @@ export const createPatches = (
         );
       }
 
-      return data.getIn(dataKey) as any;
+      return data.get(key) as any;
     });
   });
 
   patches.setIn(
     ['kujira', 'kujiraFinClientWithdrawOrders'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -79,8 +82,10 @@ export const createPatches = (
             'kujira',
             'kujiraFinClientWithdrawOrders',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<ExecuteResult>(
@@ -91,7 +96,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as ExecuteResult;
+          return data.get(key) as ExecuteResult;
         }
       );
     }
@@ -99,7 +104,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraGetBasicMarkets'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -114,8 +119,10 @@ export const createPatches = (
             'kujira',
             'kujiraGetBasicMarkets',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<IMap<MarketId, BasicKujiraMarket>>(
@@ -126,7 +133,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as IMap<MarketId, BasicKujiraMarket>;
+          return data.get(key) as IMap<MarketId, BasicKujiraMarket>;
         }
       );
     }
@@ -134,7 +141,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraGetBasicTokens'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -149,8 +156,10 @@ export const createPatches = (
             'kujira',
             'kujiraGetBasicTokens',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<IMap<TokenId, BasicKujiraToken>>(
@@ -161,7 +170,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as IMap<TokenId, BasicKujiraToken>;
+          return data.get(key) as IMap<TokenId, BasicKujiraToken>;
         }
       );
     }
@@ -169,7 +178,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraQueryClientWasmQueryContractSmart'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -184,8 +193,10 @@ export const createPatches = (
             'kujira',
             'kujiraQueryClientWasmQueryContractSmart',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<JsonObject>(
@@ -196,7 +207,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as JsonObject;
+          return data.get(key) as JsonObject;
         }
       );
     }
@@ -204,7 +215,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraSigningStargateClientSignAndBroadcast'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -231,8 +242,10 @@ export const createPatches = (
             'kujira',
             'kujiraSigningStargateClientSignAndBroadcast',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<KujiraOrder>(
@@ -243,7 +256,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as KujiraOrder;
+          return data.get(key) as KujiraOrder;
         }
       );
     }
@@ -251,7 +264,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraStargateClientGetAllBalances'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -266,8 +279,10 @@ export const createPatches = (
             'kujira',
             'kujiraStargateClientGetAllBalances',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<readonly Coin[]>(
@@ -278,7 +293,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as readonly Coin[];
+          return data.get(key) as readonly Coin[];
         }
       );
     }
@@ -286,7 +301,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraStargateClientGetBalanceStaked'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -301,8 +316,10 @@ export const createPatches = (
             'kujira',
             'kujiraStargateClientGetBalanceStaked',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<Coin | null>(
@@ -313,7 +330,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as Coin | null;
+          return data.get(key) as Coin | null;
         }
       );
     }
@@ -321,7 +338,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraStargateClientGetHeight'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -336,8 +353,10 @@ export const createPatches = (
             'kujira',
             'kujiraStargateClientGetHeight',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<number>(
@@ -348,7 +367,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as number;
+          return data.get(key) as number;
         }
       );
     }
@@ -356,7 +375,7 @@ export const createPatches = (
 
   patches.setIn(
     ['kujira', 'kujiraStargateClientGetTx'],
-    async (ordinal: number = 1) => {
+    async (testTitle: string) => {
       if (!usePatches) return;
 
       patch(
@@ -371,8 +390,10 @@ export const createPatches = (
             'kujira',
             'kujiraStargateClientGetTx',
             serializedArguments,
-            `${ordinal}`,
+            testTitle,
           ];
+
+          const key: string = JSON.stringify(dataKey);
 
           if (useInputOutputWrapper) {
             return await inputOutputWrapper<IndexedTx | null>(
@@ -383,7 +404,7 @@ export const createPatches = (
             );
           }
 
-          return data.getIn(dataKey) as IndexedTx | null;
+          return data.get(key) as IndexedTx | null;
         }
       );
     }
@@ -419,9 +440,35 @@ const inputOutputWrapper = async <R>(
 
   // console.log('output:\n', JSON.stringify(result));
 
-  console.log(
-    `data.setIn(${JSON.stringify(dataKey)}, ${JSON.stringify(result)})`
-  );
+  const key: string = JSON.stringify(dataKey);
+
+  if (data.has(key)) {
+    if (result === data.get(key)) {
+      return result as R;
+    }
+
+    // dataKey[dataKey.length - 1] = `${
+    //   parseInt(dataKey[dataKey.length - 1]) + 1
+    // }`;
+    //
+    // key = `'${JSON.stringify(dataKey)}'`;
+  }
+
+  data.set(key, result);
+
+  let value: string;
+  if (isMap(result)) {
+    value = `IMap<any, any>(${JSON.stringify(result)}).asMutable()`;
+  } else if ('tx' in result) {
+    value = JSON.stringify(result).replace(
+      /"tx":\{(.*?)}/,
+      '"tx": new Uint8Array(Object.values({$1}))'
+    );
+  } else {
+    value = JSON.stringify(result);
+  }
+
+  console.log(`data.set(\`${key}\`, ${value})`);
 
   return result as R;
 };

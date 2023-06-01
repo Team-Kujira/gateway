@@ -673,7 +673,9 @@ export class Kujira {
   async getAllTokens(
     _options: GetAllTokensRequest
   ): Promise<GetAllTokensResponse> {
-    const tokenIds = (await this.kujiraGetBasicTokens())
+    const basicTokens = await this.kujiraGetBasicTokens();
+
+    const tokenIds = basicTokens
       .valueSeq()
       .map((token) => token.reference)
       .toArray();
@@ -746,10 +748,10 @@ export class Kujira {
   ): Promise<GetAllMarketsResponse> {
     const allMarkets = IMap<MarketId, Market>().asMutable();
 
-    let marketsData: IMap<MarketId, BasicKujiraMarket> =
+    let basicMarkets: IMap<MarketId, BasicKujiraMarket> =
       await this.kujiraGetBasicMarkets();
 
-    marketsData = marketsData.filter(
+    basicMarkets = basicMarkets.filter(
       (item) =>
         (config.markets.disallowed?.length
           ? !config.markets.disallowed.includes(item.address) &&
@@ -769,7 +771,7 @@ export class Kujira {
       allMarkets.set(market.address, convertKujiraMarketToMarket(market));
     };
 
-    await promiseAllInBatches(loadMarket, marketsData.valueSeq().toArray());
+    await promiseAllInBatches(loadMarket, basicMarkets.valueSeq().toArray());
 
     return allMarkets;
   }
