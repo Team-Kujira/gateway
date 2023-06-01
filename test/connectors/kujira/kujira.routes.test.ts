@@ -13,6 +13,7 @@ import {
 import {
   AllMarketsWithdrawsRequest,
   AllMarketsWithdrawsResponse,
+  Amount,
   AsyncFunctionType,
   Balance,
   Balances,
@@ -134,6 +135,11 @@ const tokensDenoms = {
   2: Denom.from(tokenIds[2]),
   3: Denom.from(tokenIds[3]),
 };
+
+const tokensBalancesHistory: IMap<any, Amount> = IMap<
+  any,
+  Amount
+>().asMutable();
 
 const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
 
@@ -1496,11 +1502,21 @@ describe('Kujira', () => {
         expect(BigNumber(balance.lockedInOrders).gte(0)).toBeTrue();
       }
 
+      // Adding current balances to historic
+      for (const item of tokens.values()) {
+        const tokenSymbol = (item.token as Token).symbol;
+        tokensBalancesHistory.setIn([tokenSymbol, 'free'], item.free);
+        tokensBalancesHistory.setIn([tokenSymbol, 'unsettled'], item.unsettled);
+        tokensBalancesHistory.setIn(
+          [tokenSymbol, 'lockedInOrders'],
+          item.lockedInOrders
+        );
+      }
+
       userBalances = {
         ...responseBody,
         tokens: IMap(responseBody.tokens).asMutable(),
       };
-      // userBalances.tokens = IMap(responseBody.tokens).asMutable();
     });
 
     it('Create a limit buy order 1 for market 1', async () => {
@@ -2025,7 +2041,7 @@ describe('Kujira', () => {
       });
 
       // Verifying token 3 (quote) balance
-      const expectedCurrentQuoteBalance = BigNumber(
+      const expectedCurrentQuoteFreeBalance = BigNumber(
         getNotNullOrThrowError<any>(
           userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
         ).free
@@ -2033,13 +2049,17 @@ describe('Kujira', () => {
       // .plus(getNotNullOrThrowError<any>(secundaryTargetOrder.price));
 
       expect(
-        responseBody.tokens.get(primaryTargetOrder.market.quoteToken.id)?.free
-      ).toEqual(expectedCurrentQuoteBalance);
+        BigNumber(
+          getNotNullOrThrowError<any>(
+            responseBody.tokens.get(primaryTargetOrder.market.quoteToken.id)
+          ).free
+        )
+      ).toEqual(expectedCurrentQuoteFreeBalance);
 
       // Updating Quote Balances (free and unsettled)
       userBalances.tokens.set(primaryTargetOrder.market.quoteToken.id, {
         token: primaryTargetOrder.market.quoteToken,
-        free: expectedCurrentQuoteBalance,
+        free: expectedCurrentQuoteFreeBalance,
         lockedInOrders: BigNumber(
           getNotNullOrThrowError<any>(
             userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
