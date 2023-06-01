@@ -1368,7 +1368,7 @@ describe('Kujira', () => {
 
     cancel all open orders
 
-    (1) settle funds for all markets
+    settle funds for all markets
 
     get the wallet balances from the tokens 1, 2, and 3
 
@@ -1456,7 +1456,7 @@ describe('Kujira', () => {
 
     check the wallet balances from the tokens 1, 2 and 3
 
-    (2) settle funds for all markets
+    settle funds for all markets
     */
 
     it('Cancel all open orders - 1', async () => {
@@ -1490,7 +1490,7 @@ describe('Kujira', () => {
       logResponse(responseBody);
     });
 
-    it('(1) Settle funds for all markets', async () => {
+    it('Settle funds for all markets - 1', async () => {
       const requestBody = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
@@ -4189,7 +4189,7 @@ describe('Kujira', () => {
       userBalances = responseBody;
     });
 
-    it('(2) Settle funds for all markets', async () => {
+    it('Settle funds for all markets - 2', async () => {
       const requestBody = {
         ownerAddress: ownerAddress,
       } as AllMarketsWithdrawsRequest;
