@@ -26,7 +26,9 @@ import {
   GetAllBalancesRequest,
   GetAllBalancesResponse,
   GetAllMarketsRequest,
+  GetAllMarketsResponse,
   GetAllOrderBooksRequest,
+  GetAllOrderBooksResponse,
   GetAllTickersRequest,
   GetAllTickersResponse,
   GetAllTokensRequest,
@@ -36,9 +38,13 @@ import {
   GetBalancesRequest,
   GetBalancesResponse,
   GetMarketRequest,
+  GetMarketResponse,
   GetMarketsRequest,
+  GetMarketsResponse,
   GetOrderBookRequest,
+  GetOrderBookResponse,
   GetOrderBooksRequest,
+  GetOrderBooksResponse,
   GetOrderRequest,
   GetOrderResponse,
   GetOrdersRequest,
@@ -109,7 +115,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-// enablePatches();
+enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -838,23 +844,35 @@ describe('Kujira', () => {
 
   describe('Markets', () => {
     it('Get market 1 by id', async () => {
-      const request = {
+      const requestBody = {
         id: marketsIds[1],
       } as GetMarketRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarket(request);
+      const response = await sendRequest<GetMarketResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/market',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarket,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetMarketResponse;
+
+      logResponse(responseBody);
 
       const networkPair = networksPairs[marketsIds[1]];
-      expect(response.id).toEqual(marketsIds[1]);
-      expect([response.baseToken.id, response.quoteToken.id]).toEqual([
+      expect(responseBody.id).toEqual(marketsIds[1]);
+      expect([responseBody.baseToken.id, responseBody.quoteToken.id]).toEqual([
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
       ]);
-      expect(response.precision).toEqual(
+      expect(responseBody.precision).toEqual(
         'decimal_places' in networkPair.precision
           ? networkPair.precision.decimal_places
           : 'significant_figures' in networkPair.precision
@@ -866,22 +884,34 @@ describe('Kujira', () => {
     it('Get market 1 by name', async () => {
       const networkPair = networksPairs[marketsIds[1]];
 
-      const request = {
+      const requestBody = {
         name: networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
       } as GetMarketRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarket(request);
+      const response = await sendRequest<GetMarketResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/market',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarket,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetMarketResponse;
 
-      expect(response.id).toEqual(marketsIds[1]);
-      expect([response.baseToken.id, response.quoteToken.id]).toEqual([
+      logResponse(responseBody);
+
+      expect(responseBody.id).toEqual(marketsIds[1]);
+      expect([responseBody.baseToken.id, responseBody.quoteToken.id]).toEqual([
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
       ]);
-      expect(response.precision).toEqual(
+      expect(responseBody.precision).toEqual(
         'decimal_places' in networkPair.precision
           ? networkPair.precision.decimal_places
           : 'significant_figures' in networkPair.precision
@@ -893,22 +923,37 @@ describe('Kujira', () => {
     it('Get markets 2 and 3 by ids', async () => {
       const targetMarketIds = [marketsIds[2], marketsIds[3]];
 
-      const request = {
+      const requestBody = {
         ids: targetMarketIds,
       } as GetMarketsRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarkets(request);
+      const response = await sendRequest<GetMarketsResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/markets',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarkets,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetMarketsResponse as IMap<
+        MarketId,
+        Market
+      >;
 
-      expect(targetMarketIds.length).toEqual(response.size);
+      logResponse(responseBody);
+
+      expect(targetMarketIds.length).toEqual(responseBody.size);
 
       targetMarketIds.forEach((marketId) => {
         const networkPair = networksPairs[marketId];
         const responseToken = getNotNullOrThrowError<Market>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
 
         expect(responseToken.id).toEqual(marketId);
@@ -941,22 +986,37 @@ describe('Kujira', () => {
         );
       }
 
-      const request = {
+      const requestBody = {
         names: targetNames,
       } as GetMarketsRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarkets(request);
+      const response = await sendRequest<GetMarketsResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/markets',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarkets,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetMarketsResponse as IMap<
+        MarketId,
+        Market
+      >;
 
-      expect(targetMarketIds.length).toEqual(response.size);
+      logResponse(responseBody);
+
+      expect(targetMarketIds.length).toEqual(responseBody.size);
 
       for (const target of targetMarketIds) {
         const networkPair = networksPairs[target];
         const responseToken = getNotNullOrThrowError<Market>(
-          response.get(target)
+          responseBody.get(target)
         );
 
         expect(responseToken.id).toEqual(target);
@@ -979,18 +1039,33 @@ describe('Kujira', () => {
 
     it('Get all markets', async () => {
       const targetMarketIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
-      const request = {} as GetAllMarketsRequest;
+      const requestBody = {} as GetAllMarketsRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
       logRequest(request);
 
-      const response = await kujira.getAllMarkets(request);
+      const response = await sendRequest<GetAllMarketsResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/markets/all',
+        RESTRequest: request,
+        controllerFunction: kujira.getAllMarkets,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetAllMarketsResponse as IMap<
+        MarketId,
+        Market
+      >;
+
+      logResponse(responseBody);
 
       targetMarketIds.forEach((marketId) => {
         const networkPair = networksPairs[marketId];
         const responseToken = getNotNullOrThrowError<Market>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
 
         expect(responseToken.id).toEqual(marketId);
@@ -1014,65 +1089,101 @@ describe('Kujira', () => {
 
   describe('Order books', () => {
     it('Get order book from market 1 by id', async () => {
-      const request = {
+      const requestBody = {
         marketId: marketsIds[1],
       } as GetOrderBookRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBook(request);
+      const response = await sendRequest<GetOrderBookResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBook',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBook,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrderBookResponse;
 
-      expect(response).not.toBeUndefined();
-      expect(response.market.id).toBe(request.marketId);
-      expect(response.bids).not.toBeEmpty();
-      expect(response.asks).not.toBeEmpty();
-      expect(response.bestBid).not.toBeUndefined();
-      expect(response.bestAsk).not.toBeUndefined();
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeUndefined();
+      expect(responseBody.market.id).toBe(request.marketId);
+      expect(responseBody.bids).not.toBeEmpty();
+      expect(responseBody.asks).not.toBeEmpty();
+      expect(responseBody.bestBid).not.toBeUndefined();
+      expect(responseBody.bestAsk).not.toBeUndefined();
     });
 
     it('Get order book from market 1 by name', async () => {
       const networkPair = networksPairs[marketsIds[1]];
 
-      const request = {
+      const requestBody = {
         marketName:
           networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
       } as GetOrderBookRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBook(request);
+      const response = await sendRequest<GetOrderBookResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBook',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBook,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrderBookResponse;
 
-      expect(response).not.toBeUndefined();
-      expect(response.market.name).toBe(request.marketName);
-      expect(response.market.id).toBe(marketsIds[1]);
-      expect(response.bids).not.toBeEmpty();
-      expect(response.asks).not.toBeEmpty();
-      expect(response.bestBid).not.toBeUndefined();
-      expect(response.bestAsk).not.toBeUndefined();
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeUndefined();
+      expect(responseBody.market.name).toBe(request.marketName);
+      expect(responseBody.market.id).toBe(marketsIds[1]);
+      expect(responseBody.bids).not.toBeEmpty();
+      expect(responseBody.asks).not.toBeEmpty();
+      expect(responseBody.bestBid).not.toBeUndefined();
+      expect(responseBody.bestAsk).not.toBeUndefined();
     });
 
     it('Get order books from the markets 2 and 3 by ids', async () => {
-      const request = {
+      const requestBody = {
         marketIds: [marketsIds[2], marketsIds[3]],
       } as GetOrderBooksRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBooks(request);
+      const response = await sendRequest<GetOrderBooksResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBooks',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBooks,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetOrderBooksResponse;
 
-      expect(response.size).toEqual(request.marketIds?.length);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toEqual(requestBody.marketIds?.length);
 
       for (const marketId of getNotNullOrThrowError<MarketId[]>(
         request.marketIds
       )) {
         const orderBook = getNotNullOrThrowError<OrderBook>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
         expect(orderBook.market.id).toBe(marketId);
         expect(orderBook.bids).not.toBeEmpty();
@@ -1094,23 +1205,35 @@ describe('Kujira', () => {
         );
       }
 
-      const request = {
+      const requestBody = {
         marketNames: targetNames,
       } as GetOrderBooksRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBooks(request);
+      const response = await sendRequest<GetOrderBooksResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBooks',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBooks,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetOrderBooksResponse;
 
-      expect(response.size).toEqual(request.marketNames?.length);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toEqual(requestBody.marketNames?.length);
 
       for (const marketName of getNotNullOrThrowError<MarketName[]>(
         request.marketNames
       )) {
         const orderBook = getNotNullOrThrowError<OrderBook>(
-          response.get(marketName)
+          responseBody.get(marketName)
         );
         expect(orderBook.market.name).toBe(marketName);
         expect(orderBook.bids).not.toBeEmpty();
@@ -1121,17 +1244,29 @@ describe('Kujira', () => {
     });
 
     it('Get all order books', async () => {
-      const request = {} as GetAllOrderBooksRequest;
+      const requestBody = {} as GetAllOrderBooksRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
       logRequest(request);
 
-      const response = await kujira.getAllOrderBooks(request);
+      const response = await sendRequest<GetAllOrderBooksResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBooks/all',
+        RESTRequest: request,
+        controllerFunction: kujira.getAllOrderBooks,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetAllOrderBooksResponse;
+
+      logResponse(responseBody);
 
       Object.values(marketsIds).forEach((marketId) => {
         const orderBook = getNotNullOrThrowError<OrderBook>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
         expect(orderBook.market.id).toBe(marketId);
         expect(orderBook.bids).not.toBeEmpty();
