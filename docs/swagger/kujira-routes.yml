@@ -1,89 +1,501 @@
+swagger: '2.0'
+info:
+  title: Kujira API
+  version: 1.0.0
 paths:
-  /kujira/balances:
-    post:
-      tags:
-        - 'kujira'
-      summary: 'Get the balances of an kujira public key'
-      operationId: 'balances'
-      consumes:
-        - 'application/json'
-      produces:
-        - 'application/json'
-      parameters:
-        - in: 'body'
-          name: 'body'
-          required: true
-          schema:
-            $ref: '#/definitions/BalancesRequest'
+  root:
+    get:
+      description: Returns information about the Kujira API
       responses:
         '200':
+          description: OK
           schema:
-            $ref: '#/definitions/KujiraBalancesResponse'
-  
-  /kujira/block/current:
-    post:
-      tags:
-        - 'kujira'
-      summary: 'Get the current block number for an kujira network'
+            type: object
+            properties:
+              chain:
+                type: string
+              network:
+                type: string
+              connector:
+                type: string
+              connection:
+                type: boolean
+              timestamp:
+                type: integer
+  /token:
+    get:
+      description: Retrieves information about a specific token
       parameters:
-        - in: 'body'
-          name: 'body'
+        - in: query
+          name: tokenAddress
+          description: The address of the token
           required: true
-          schema:
-            $ref: '#/definitions/NetworkSelectionRequest'
-      produces:
-        - 'application/json'
-      responses:
-        '200'
-  
-  /kujira/poll:
-    post:
-      tags:
-        - 'kujira'
-      summary: 'Poll the status of a transaction'
-      consumes:
-        - 'application/json'
-      produces:
-        - 'application/json'
-      parameters:
-        - in: 'body'
-          name: 'body'
-          required: true
-          schema:
-            $ref: '#/definitions/KujiraPollRequest'
+          type: string
       responses:
         '200':
+          description: OK
           schema:
-            $ref: '#/definitions/KujiraPollResponse'
-  
-  /kujira/transfer/to/bank:
-    post:
-      tags:
-        - 'kujira'
-      summary: 'Transfer subaccount balance to bank'
+            $ref: '#/definitions/TokenResponse'
+  /tokens:
+    get:
+      description: Retrieves information about multiple tokens
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TokensResponse'
+  /tokens/all:
+    get:
+      description: Retrieves information about all tokens
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AllTokensResponse'
+  /market:
+    get:
+      description: Retrieves information about a specific market
       parameters:
-        - in: 'body'
-          name: 'body'
+        - in: query
+          name: marketId
+          description: The ID of the market
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MarketResponse'
+  /markets:
+    get:
+      description: Retrieves information about multiple markets
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MarketsResponse'
+  /markets/all:
+    get:
+      description: Retrieves information about all markets
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AllMarketsResponse'
+  /orderBook:
+    get:
+      description: Retrieves the order book for a specific market
+      parameters:
+        - in: query
+          name: marketId
+          description: The ID of the market
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OrderBookResponse'
+  /orderBooks:
+    get:
+      description: Retrieves the order books for multiple markets
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OrderBooksResponse'
+  /orderBooks/all:
+    get:
+      description: Retrieves the order books for all markets
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AllOrderBooksResponse'
+  /ticker:
+    get:
+      description: Retrieves the ticker for a specific market
+      parameters:
+        - in: query
+          name: marketId
+          description: The ID of the market
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TickerResponse'
+  /tickers:
+    get:
+      description: Retrieves the tickers for multiple markets
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TickersResponse'
+  /ticker/all:
+    get:
+      description: Retrieves the tickers for all markets
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AllTickersResponse'
+  /balance:
+    get:
+      description: Retrieves the balance for a specific token
+    parameters:
+      - in: query
+        name: tokenAddress
+        description: The address of the token
+        required: true
+        type: string
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/BalanceResponse'
+  /balances:
+    get:
+      description: Retrieves the balances for multiple tokens
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/BalancesResponse'
+  /balances/all:
+    get:
+      description: Retrieves the balances for all tokens
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/AllBalancesResponse'
+  /order:
+    get:
+      description: Retrieves information about a specific order
+    parameters:
+      - in: query
+        name: orderId
+        description: The ID of the order
+        required: true
+        type: string
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/OrderResponse'
+    post:
+      description: Places a new order
+      parameters:
+        - in: body
+          name: order
+          description: The order details
           required: true
           schema:
-            $ref: '#/definitions/TransferToSubAccountRequest'
-      produces:
-        - 'application/json'
+            $ref: '#/definitions/PlaceOrderRequest'
       responses:
-        '200'
-  
-  /kujira/transfer/to/sub:
-    post:
-      tags:
-        - 'kujira'
-      summary: 'Transfer bank balance to subaccount balance'
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PlaceOrderResponse'
+    delete:
+      description: Cancels a specific order
       parameters:
-        - in: 'body'
-          name: 'body'
+        - in: body
+          name: order
+          description: The order details
           required: true
           schema:
-            $ref: '#/definitions/TransferToSubAccountRequest'
-      produces:
-        - 'application/json'
+            $ref: '#/definitions/CancelOrderRequest'
       responses:
-        '200'
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/CancelOrderResponse'
+  /orders:
+    get:
+      description: Retrieves information about multiple orders
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/OrdersResponse'
+    post:
+      description: Places multiple orders
+      parameters:
+        - in: body
+          name: orders
+          description: The list of order details
+          required: true
+          schema:
+            $ref: '#/definitions/PlaceOrdersRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/PlaceOrdersResponse'
+    delete:
+      description: Cancels multiple orders
+      parameters:
+        - in: body
+          name: orders
+          description: The list of order details
+          required: true
+          schema:
+            $ref: '#/definitions/CancelOrdersRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/CancelOrdersResponse'
+  /orders/all:
+    delete:
+      description: Cancels all orders
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/CancelAllOrdersResponse'
+  /market/withdraw:
+    post:
+      description: Withdraws funds from a specific market
+      parameters:
+        - in: body
+          name: withdraw
+          description: The withdrawal details
+          required: true
+          schema:
+            $ref: '#/definitions/MarketWithdrawRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MarketWithdrawResponse'
+  /market/withdraws:
+    post:
+      description: Withdraws funds from multiple markets
+      parameters:
+        - in: body
+          name: withdraws
+          description: The list of withdrawal details
+          required: true
+          schema:
+            $ref: '#/definitions/MarketsWithdrawsRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MarketsWithdrawsFundsResponse'
+  /market/withdraws/all:
+    post:
+      description: Withdraws funds from all markets
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AllMarketsWithdrawsResponse'
+  /transaction:
+    get:
+      description: Retrieves information about a specific transaction
+    parameters:
+      - in: query
+        name: transactionId
+        description: The ID of the transaction
+        required: true
+        type: string
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/TransactionResponse'
+  /transactions:
+    get:
+      description: Retrieves information about multiple transactions
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/TransactionsResponse'
+  /wallet/publicKey:
+    get:
+      description: Retrieves the public key of the wallet
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/WalletPublicKeyResponse'
+  /wallet/publicKeys:
+    get:
+      description: Retrieves the public keys of multiple wallets
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/WalletsPublicKeysResponse'
+  /block/current:
+    get:
+      description: Retrieves information about the current block
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/CurrentBlockResponse'
+  /fees/estimated:
+    get:
+      description: Retrieves information about the estimated fees
+    responses:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/EstimatedFeesResponse'
+definitions:
+  TokenResponse:
+    type: object
+    properties:
+      // Define properties for TokenResponse
+  TokensResponse:
+    type: object
+    properties:
+      // Define properties for TokensResponse
+  AllTokensResponse:
+    type: object
+    properties:
+      // Define properties for AllTokensResponse
+  MarketResponse:
+    type: object
+    properties:
+      // Define properties for MarketResponse
+  MarketsResponse:
+    type: object
+    properties:
+      // Define properties for MarketsResponse
+  AllMarketsResponse:
+    type: object
+    properties:
+      // Define properties for AllMarketsResponse
+  OrderBookResponse:
+    type: object
+    properties:
+      // Define properties for OrderBookResponse
+  OrderBooksResponse:
+    type: object
+    properties:
+      // Define properties for OrderBooksResponse
+  AllOrderBooksResponse:
+    type: object
+    properties:
+      // Define properties for AllOrderBooksResponse
+  TickerResponse:
+    type: object
+    properties:
+      // Define properties for TickerResponse
+  TickersResponse:
+    type: object
+    properties:
+      // Define properties for TickersResponse
+  AllTickersResponse:
+    type: object
+    properties:
+      // Define properties for AllTickersResponse
+  BalanceResponse:
+    type: object
+    properties:
+      // Define properties for BalanceResponse
+  BalancesResponse:
+    type: object
+    properties:
+      // Define properties for BalancesResponse
+  AllBalancesResponse:
+    type: object
+    properties:
+      // Define properties for AllBalancesResponse
+  OrderResponse:
+    type: object
+    properties:
+      // Define properties for OrderResponse
+  OrdersResponse:
+    type: object
+    properties:
+      // Define properties for OrdersResponse
+  PlaceOrderRequest:
+    type: object
+    properties:
+      // Define properties for PlaceOrderRequest
+  PlaceOrderResponse:
+    type: object
+    properties:
+      // Define properties for PlaceOrderResponse
+  PlaceOrdersRequest:
+    type: object
+    properties:
+      // Define properties for PlaceOrdersRequest
+  PlaceOrdersResponse:
+    type: object
+    properties:
+      // Define properties for PlaceOrdersResponse
+  CancelOrderRequest:
+    type: object
+    properties:
+      // Define properties for CancelOrderRequest
+  CancelOrderResponse:
+    type: object
+    properties:
+      // Define properties for CancelOrderResponse
+  CancelOrdersRequest:
+    type: object
+    properties:
+      // Define properties for CancelOrdersRequest
+  CancelOrdersResponse:
+    type: object
+    properties:
+      // Define properties for CancelOrdersResponse
+  CancelAllOrdersResponse:
+    type: object
+    properties:
+      // Define properties for CancelAllOrdersResponse
+  MarketWithdrawRequest:
+    type: object
+    properties:
+      // Define properties for MarketWithdrawRequest
+  MarketWithdrawResponse:
+    type: object
+    properties:
+      // Define properties for MarketWithdrawResponse
+  MarketsWithdrawsRequest:
+    type: object
+    properties:
+      // Define properties for MarketsWithdrawsRequest
+  MarketsWithdrawsFundsResponse:
+    type: object
+    properties:
+      // Define properties for MarketsWithdrawsFundsResponse
+  AllMarketsWithdrawsResponse:
+    type: object
+    properties:
+      // Define properties for AllMarketsWithdrawsResponse
+  TransactionResponse:
+    type: object
+    properties:
+      // Define properties for TransactionResponse
+  TransactionsResponse:
+    type: object
+    properties:
+      // Define properties for TransactionsResponse
+  WalletPublicKeyResponse:
+    type: object
+    properties:
+      // Define properties for WalletPublicKeyResponse
+  WalletsPublicKeysResponse:
+    type: object
+    properties:
+      // Define properties for WalletsPublicKeysResponse
+  CurrentBlockResponse:
+    type: object
+    properties:
+      // Define properties for CurrentBlockResponse
+  EstimatedFeesResponse:
+    type: object
+    properties:
+      // Define properties for EstimatedFeesResponse
