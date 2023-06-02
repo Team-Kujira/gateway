@@ -19,8 +19,8 @@ import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import { isMap } from 'immutable';
 import { getNotNullOrThrowError } from '../../../../../src/connectors/kujira/kujira.helpers';
 
-let usePatches = true;
-let useInputOutputWrapper = true;
+export let usePatches = true;
+export let useInputOutputWrapper = true;
 
 export const enablePatches = () => (usePatches = true);
 export const disablePatches = () => (usePatches = false);

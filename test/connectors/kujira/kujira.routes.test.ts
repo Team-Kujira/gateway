@@ -107,11 +107,14 @@ import {
   enableInputOutputWrapper,
   enablePatches,
   getPatch as helperGetPatch,
+  useInputOutputWrapper,
+  usePatches,
 } from './fixtures/patches/patches';
 import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
+import data from './fixtures/patches/data';
 
 enablePatches();
 disablePatches();
@@ -220,11 +223,17 @@ beforeAll(async () => {
   expressApp.use('/kujira', KujiraRoutes.router);
 
   const mnemonic: string = getNotNullOrThrowError<string>(
-    process.env.TEST_KUJIRA_MNEMONIC
+    usePatches && !useInputOutputWrapper
+      ? data.get('KUJIRA_MNEMONIC')
+      : process.env.TEST_KUJIRA_MNEMONIC
   );
 
   const accountNumber: number = getNotNullOrThrowError<number>(
-    Number(process.env.TEST_KUJIRA_ACCOUNT_NUMBER) || config.accountNumber
+    Number(
+      usePatches && !useInputOutputWrapper
+        ? data.get('KUJIRA_ACCOUNT_NUMBER')
+        : process.env.TEST_KUJIRA_ACCOUNT_NUMBER
+    ) || config.accountNumber
   );
 
   ownerAddress = (
@@ -499,7 +508,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   sendRequest = <R>(options: SendRequestOptions<R>) => {
-    options.strategy = options.strategy || RequestStrategy.RESTful;
+    options.strategy = options.strategy || RequestStrategy.Controller;
     options.RESTExpress = options.RESTExpress || expressApp;
     options.RESTRoute = `/kujira${options.RESTRoute}`;
     options.controller = options.controller || kujira;

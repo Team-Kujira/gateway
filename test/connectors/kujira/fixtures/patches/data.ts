@@ -3,6 +3,11 @@ import { printStackTrace } from '../../../helpers';
 
 const data = IMap<string, any>().asMutable();
 
+data.set('KUJIRA_PUBLIC_KEY', 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km');
+data.set('KUJIRA_MNEMONIC', 'squirrel crime sweet yard news dentist chronic mad drive ski vapor bottom');
+data.set('KUJIRA_ACCOUNT_NUMBER', 0);
+
+
 data.set('["global","fetch"]', () => {
   printStackTrace();
 
