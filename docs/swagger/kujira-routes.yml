@@ -3,7 +3,7 @@ info:
   title: Kujira API
   version: 1.0.0
 paths:
-  root:
+  /:
     get:
       description: Returns information about the Kujira API
       responses:
@@ -145,47 +145,47 @@ paths:
   /balance:
     get:
       description: Retrieves the balance for a specific token
-    parameters:
-      - in: query
-        name: tokenAddress
-        description: The address of the token
-        required: true
-        type: string
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/BalanceResponse'
+      parameters:
+        - in: query
+          name: tokenAddress
+          description: The address of the token
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/BalanceResponse'
   /balances:
     get:
       description: Retrieves the balances for multiple tokens
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/BalancesResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/BalancesResponse'
   /balances/all:
     get:
       description: Retrieves the balances for all tokens
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/AllBalancesResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/AllBalancesResponse'
   /order:
     get:
       description: Retrieves information about a specific order
-    parameters:
-      - in: query
-        name: orderId
-        description: The ID of the order
-        required: true
-        type: string
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/OrderResponse'
+      parameters:
+        - in: query
+          name: orderId
+          description: The ID of the order
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OrderResponse'
     post:
       description: Places a new order
       parameters:
@@ -217,11 +217,11 @@ paths:
   /orders:
     get:
       description: Retrieves information about multiple orders
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/OrdersResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/OrdersResponse'
     post:
       description: Places multiple orders
       parameters:
@@ -299,57 +299,57 @@ paths:
   /transaction:
     get:
       description: Retrieves information about a specific transaction
-    parameters:
-      - in: query
-        name: transactionId
-        description: The ID of the transaction
-        required: true
-        type: string
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/TransactionResponse'
+      parameters:
+        - in: query
+          name: transactionId
+          description: The ID of the transaction
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TransactionResponse'
   /transactions:
     get:
       description: Retrieves information about multiple transactions
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/TransactionsResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/TransactionsResponse'
   /wallet/publicKey:
     get:
       description: Retrieves the public key of the wallet
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/WalletPublicKeyResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/WalletPublicKeyResponse'
   /wallet/publicKeys:
     get:
       description: Retrieves the public keys of multiple wallets
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/WalletsPublicKeysResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/WalletsPublicKeysResponse'
   /block/current:
     get:
       description: Retrieves information about the current block
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/CurrentBlockResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/CurrentBlockResponse'
   /fees/estimated:
     get:
       description: Retrieves information about the estimated fees
-    responses:
-      '200':
-        description: OK
-        schema:
-          $ref: '#/definitions/EstimatedFeesResponse'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/EstimatedFeesResponse'
 definitions:
   TokenResponse:
     type: object
