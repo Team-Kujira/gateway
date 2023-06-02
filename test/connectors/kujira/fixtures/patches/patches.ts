@@ -68,6 +68,40 @@ export const createPatches = (
     });
   });
 
+  patches.setIn(['kujira', 'getFastestRpc'], async (testTitle: string) => {
+    if (!usePatches) return;
+
+    patch(kujira, 'getFastestRpc', async (...any: any[]) => {
+      const inputArguments = any;
+
+      // const serializedArguments = Serializer.serialize(inputArguments);
+
+      if (!ordinalMap.has(testTitle)) {
+        ordinalMap.set(testTitle, 1);
+      }
+
+      const ordinal =
+        getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+      ordinalMap.set(testTitle, ordinal);
+
+      const dataKey = ['kujira', 'getFastestRpc', testTitle, ordinal];
+
+      const key: string = JSON.stringify(dataKey);
+
+      if (useInputOutputWrapper) {
+        return await inputOutputWrapper<any>(
+          dataKey,
+          kujira,
+          'getFastestRpc',
+          inputArguments
+        );
+      }
+
+      return data.get(key) as any;
+    });
+  });
+
   patches.setIn(
     ['kujira', 'kujiraFinClientWithdrawOrders'],
     async (testTitle: string) => {

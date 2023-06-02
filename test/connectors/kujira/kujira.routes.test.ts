@@ -501,7 +501,7 @@ beforeEach(async () => {
     return;
   };
 
-  // await getPatch(['global', 'fetch'])(testTitle);
+  await getPatch(['global', 'fetch'])(testTitle);
   await getPatch(['kujira', 'kujiraFinClientWithdrawOrders'])(testTitle);
   await getPatch(['kujira', 'kujiraGetBasicMarkets'])(testTitle);
   await getPatch(['kujira', 'kujiraGetBasicTokens'])(testTitle);
