@@ -16,8 +16,8 @@ import { StdFee } from '@cosmjs/amino';
 import { Coin, EncodeObject } from '@cosmjs/proto-signing';
 import { SigningStargateClient } from '@cosmjs/stargate';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
-import { Serializer } from '../../../../../src/connectors/kujira/kujira.helpers';
 import { isMap } from 'immutable';
+import { getNotNullOrThrowError } from '../../../../../src/connectors/kujira/kujira.helpers';
 
 let usePatches = true;
 let useInputOutputWrapper = true;
@@ -26,6 +26,8 @@ export const enablePatches = () => (usePatches = true);
 export const disablePatches = () => (usePatches = false);
 export const enableInputOutputWrapper = () => (useInputOutputWrapper = true);
 export const disableInputOutputWrapper = () => (useInputOutputWrapper = false);
+
+const ordinalMap = IMap<string, number>().asMutable();
 
 export const createPatches = (
   kujira: Kujira
@@ -38,9 +40,18 @@ export const createPatches = (
     patch(global, 'fetch', async (...any: any[]) => {
       const inputArguments = any;
 
-      const serializedArguments = Serializer.serialize(inputArguments);
+      // const serializedArguments = Serializer.serialize(inputArguments);
 
-      const dataKey = ['global', 'fetch', serializedArguments, testTitle];
+      if (!ordinalMap.has(testTitle)) {
+        ordinalMap.set(testTitle, 1);
+      }
+
+      const ordinal =
+        getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+      ordinalMap.set(testTitle, ordinal);
+
+      const dataKey = ['global', 'fetch', testTitle, ordinal];
 
       const key: string = JSON.stringify(dataKey);
 
@@ -76,13 +87,22 @@ export const createPatches = (
         ): Promise<ExecuteResult> => {
           const inputArguments = [finClient, orderIdxs, fee, memo, funds];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraFinClientWithdrawOrders',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -113,13 +133,22 @@ export const createPatches = (
         async (): Promise<IMap<MarketId, BasicKujiraMarket>> => {
           const inputArguments: any[] = [];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraGetBasicMarkets',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -150,13 +179,22 @@ export const createPatches = (
         async (): Promise<IMap<TokenId, BasicKujiraToken>> => {
           const inputArguments: any[] = [];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraGetBasicTokens',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -187,13 +225,22 @@ export const createPatches = (
         async (address: string, query: JsonObject): Promise<JsonObject> => {
           const inputArguments = [address, query];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraQueryClientWasmQueryContractSmart',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -236,13 +283,22 @@ export const createPatches = (
             memo,
           ];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraSigningStargateClientSignAndBroadcast',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -273,13 +329,22 @@ export const createPatches = (
         async (address: string): Promise<readonly Coin[]> => {
           const inputArguments = [address];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraStargateClientGetAllBalances',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -310,13 +375,22 @@ export const createPatches = (
         async (address: string): Promise<Coin | null> => {
           const inputArguments = [address];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraStargateClientGetBalanceStaked',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -347,13 +421,22 @@ export const createPatches = (
         async (): Promise<number> => {
           const inputArguments: any[] = [];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraStargateClientGetHeight',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -384,13 +467,22 @@ export const createPatches = (
         async (id: string): Promise<IndexedTx | null> => {
           const inputArguments = [id];
 
-          const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments);
+
+          if (!ordinalMap.has(testTitle)) {
+            ordinalMap.set(testTitle, 1);
+          }
+
+          const ordinal =
+            getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+          ordinalMap.set(testTitle, ordinal);
 
           const dataKey = [
             'kujira',
             'kujiraStargateClientGetTx',
-            serializedArguments,
             testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -421,7 +513,7 @@ export const getPatch = <R = AsyncFunctionType<any, any>>(
 };
 
 const inputOutputWrapper = async <R>(
-  dataKey: string[],
+  dataKey: any[],
   targetObject: any,
   targetFunctionName: string,
   targetFunctionArguments: any[] = []

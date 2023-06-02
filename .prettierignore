@@ -4,3 +4,5 @@ certs
 coverage
 dist
 vendor
+
+test/connectors/kujira/fixtures/patches/data.ts
