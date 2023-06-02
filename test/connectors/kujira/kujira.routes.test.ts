@@ -28,6 +28,7 @@ import {
   GetAllMarketsRequest,
   GetAllMarketsResponse,
   GetAllOrderBooksRequest,
+  GetAllOrderBooksResponse,
   GetAllTickersRequest,
   GetAllTickersResponse,
   GetAllTokensRequest,
@@ -41,7 +42,9 @@ import {
   GetMarketsRequest,
   GetMarketsResponse,
   GetOrderBookRequest,
+  GetOrderBookResponse,
   GetOrderBooksRequest,
+  GetOrderBooksResponse,
   GetOrderRequest,
   GetOrderResponse,
   GetOrdersRequest,
@@ -1086,65 +1089,101 @@ describe('Kujira', () => {
 
   describe('Order books', () => {
     it('Get order book from market 1 by id', async () => {
-      const request = {
+      const requestBody = {
         marketId: marketsIds[1],
       } as GetOrderBookRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBook(request);
+      const response = await sendRequest<GetOrderBookResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBook',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBook,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrderBookResponse;
 
-      expect(response).not.toBeUndefined();
-      expect(response.market.id).toBe(request.marketId);
-      expect(response.bids).not.toBeEmpty();
-      expect(response.asks).not.toBeEmpty();
-      expect(response.bestBid).not.toBeUndefined();
-      expect(response.bestAsk).not.toBeUndefined();
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeUndefined();
+      expect(responseBody.market.id).toBe(request.marketId);
+      expect(responseBody.bids).not.toBeEmpty();
+      expect(responseBody.asks).not.toBeEmpty();
+      expect(responseBody.bestBid).not.toBeUndefined();
+      expect(responseBody.bestAsk).not.toBeUndefined();
     });
 
     it('Get order book from market 1 by name', async () => {
       const networkPair = networksPairs[marketsIds[1]];
 
-      const request = {
+      const requestBody = {
         marketName:
           networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
       } as GetOrderBookRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBook(request);
+      const response = await sendRequest<GetOrderBookResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBook',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBook,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetOrderBookResponse;
 
-      expect(response).not.toBeUndefined();
-      expect(response.market.name).toBe(request.marketName);
-      expect(response.market.id).toBe(marketsIds[1]);
-      expect(response.bids).not.toBeEmpty();
-      expect(response.asks).not.toBeEmpty();
-      expect(response.bestBid).not.toBeUndefined();
-      expect(response.bestAsk).not.toBeUndefined();
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeUndefined();
+      expect(responseBody.market.name).toBe(request.marketName);
+      expect(responseBody.market.id).toBe(marketsIds[1]);
+      expect(responseBody.bids).not.toBeEmpty();
+      expect(responseBody.asks).not.toBeEmpty();
+      expect(responseBody.bestBid).not.toBeUndefined();
+      expect(responseBody.bestAsk).not.toBeUndefined();
     });
 
     it('Get order books from the markets 2 and 3 by ids', async () => {
-      const request = {
+      const requestBody = {
         marketIds: [marketsIds[2], marketsIds[3]],
       } as GetOrderBooksRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBooks(request);
+      const response = await sendRequest<GetOrderBooksResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBooks',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBooks,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetOrderBooksResponse;
 
-      expect(response.size).toEqual(request.marketIds?.length);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toEqual(requestBody.marketIds?.length);
 
       for (const marketId of getNotNullOrThrowError<MarketId[]>(
         request.marketIds
       )) {
         const orderBook = getNotNullOrThrowError<OrderBook>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
         expect(orderBook.market.id).toBe(marketId);
         expect(orderBook.bids).not.toBeEmpty();
@@ -1166,23 +1205,35 @@ describe('Kujira', () => {
         );
       }
 
-      const request = {
+      const requestBody = {
         marketNames: targetNames,
       } as GetOrderBooksRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getOrderBooks(request);
+      const response = await sendRequest<GetOrderBooksResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBooks',
+        RESTRequest: request,
+        controllerFunction: kujira.getOrderBooks,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetOrderBooksResponse;
 
-      expect(response.size).toEqual(request.marketNames?.length);
+      logResponse(responseBody);
+
+      expect(responseBody.size).toEqual(requestBody.marketNames?.length);
 
       for (const marketName of getNotNullOrThrowError<MarketName[]>(
         request.marketNames
       )) {
         const orderBook = getNotNullOrThrowError<OrderBook>(
-          response.get(marketName)
+          responseBody.get(marketName)
         );
         expect(orderBook.market.name).toBe(marketName);
         expect(orderBook.bids).not.toBeEmpty();
@@ -1193,17 +1244,29 @@ describe('Kujira', () => {
     });
 
     it('Get all order books', async () => {
-      const request = {} as GetAllOrderBooksRequest;
+      const requestBody = {} as GetAllOrderBooksRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
       logRequest(request);
 
-      const response = await kujira.getAllOrderBooks(request);
+      const response = await sendRequest<GetAllOrderBooksResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/orderBooks/all',
+        RESTRequest: request,
+        controllerFunction: kujira.getAllOrderBooks,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetAllOrderBooksResponse;
+
+      logResponse(responseBody);
 
       Object.values(marketsIds).forEach((marketId) => {
         const orderBook = getNotNullOrThrowError<OrderBook>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
         expect(orderBook.market.id).toBe(marketId);
         expect(orderBook.bids).not.toBeEmpty();
