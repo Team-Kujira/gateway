@@ -24,11 +24,13 @@ import {
   CancelOrdersRequest,
   CancelOrdersResponse,
   GetAllBalancesRequest,
+  GetAllBalancesResponse,
   GetAllMarketsRequest,
   GetAllOrderBooksRequest,
   GetAllTickersRequest,
   GetAllTokensRequest,
   GetBalanceRequest,
+  GetBalanceResponse,
   GetBalancesRequest,
   GetBalancesResponse,
   GetMarketRequest,
@@ -45,7 +47,9 @@ import {
   GetTokenResponse,
   GetTokensRequest,
   GetTransactionRequest,
+  GetTransactionResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   IMap,
   Market,
   MarketId,
@@ -76,6 +80,7 @@ import {
   TokenName,
   TokenSymbol,
   Transaction,
+  TransactionHash,
   Withdraw,
 } from '../../../src/connectors/kujira/kujira.types';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
@@ -98,7 +103,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-enablePatches();
+// enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -1156,58 +1161,94 @@ describe('Kujira', () => {
 
   describe('User', () => {
     it('Get balance of token 1 by id', async () => {
-      const request = {
+      const requestBody = {
         tokenId: tokensDenoms[1].reference,
         ownerAddress: ownerAddress,
       } as GetBalanceRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalance(request);
+      const response = await sendRequest<GetBalanceResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/balance',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalance,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalanceResponse;
 
-      expect(response).not.toBeUndefined();
-      expect((response.token as Token).id).toBe(request.tokenId);
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeUndefined();
+      expect((responseBody.token as Token).id).toBe(requestBody.tokenId);
     });
 
     it('Get balance of token 1 by symbol', async () => {
-      const request = {
+      const requestBody = {
         tokenSymbol: tokensDenoms[1].symbol,
         ownerAddress: ownerAddress,
       } as GetBalanceRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalance(request);
+      const response = await sendRequest<GetBalanceResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/balance',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalance,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalanceResponse;
 
-      expect(response).not.toBeUndefined();
-      expect(getNotNullOrThrowError<any>(response.token).symbol).toBe(
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeUndefined();
+      expect(getNotNullOrThrowError<any>(responseBody.token).symbol).toBe(
         request.tokenSymbol
       );
     });
 
     it('Get balances of tokens 2 and 3 by ids', async () => {
-      const request = {
+      const requestBody = {
         tokenIds: [tokenIds[2], tokenIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      expect(response.tokens.size).toEqual(request.tokenIds?.length);
+      logResponse(responseBody);
+
+      expect(IMap(responseBody.tokens).size).toEqual(request.tokenIds?.length);
 
       for (const tokenId of getNotNullOrThrowError<TokenId[]>(
         request.tokenIds
       )) {
         const balance = getNotNullOrThrowError<Balance>(
-          response.tokens.get(tokenId)
+          IMap(responseBody.tokens).get(tokenId)
         );
         expect(balance).not.toBeUndefined();
         expect((balance.token as Token).id).toBe(tokenId);
@@ -1220,24 +1261,38 @@ describe('Kujira', () => {
         tokensDenoms[3].symbol,
       ];
 
-      const request = {
+      const requestBody = {
         tokenSymbols: targetsSymbols,
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getBalances(request);
+      const response = await sendRequest<GetBalancesResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/balances',
+        RESTRequest: request,
+        controllerFunction: kujira.getBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetBalancesResponse;
 
-      expect(response.tokens.size).toEqual(request.tokenSymbols?.length);
+      logResponse(responseBody);
+
+      expect(IMap(responseBody.tokens).size).toEqual(
+        request.tokenSymbols?.length
+      );
 
       for (const tokenSymbol of getNotNullOrThrowError<TokenSymbol[]>(
-        request.tokenSymbols
+        requestBody.tokenSymbols
       )) {
         const balance = getNotNullOrThrowError<Balance>(
-          response.tokens
+          IMap(responseBody.tokens)
             .filter(
               (token) =>
                 getNotNullOrThrowError<Token>(token.token)?.symbol ==
@@ -1253,19 +1308,31 @@ describe('Kujira', () => {
     });
 
     it('Get all balances', async () => {
-      const request = {
+      const requestBody = {
         ownerAddress: ownerAddress,
       } as GetAllBalancesRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getAllBalances(request);
+      const response = await sendRequest<GetAllBalancesResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/balances/all',
+        RESTRequest: request,
+        controllerFunction: kujira.getAllBalances,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetAllBalancesResponse;
+
+      logResponse(responseBody);
 
       Object.values(tokenIds).forEach((tokenId) => {
         const balance = getNotNullOrThrowError<Balance>(
-          response.tokens.get(tokenId)
+          IMap(responseBody.tokens).get(tokenId)
         );
         expect(balance).not.toBeUndefined();
         expect((balance.token as Token).id).toBe(tokenId);
@@ -1277,39 +1344,65 @@ describe('Kujira', () => {
     it('Get transaction 1', async () => {
       await getPatch(['kujira', 'kujiraStargateClientGetTx'])();
 
-      const request = {
+      const requestBody = {
         hash: transactionsHashes[1],
       } as GetTransactionRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTransaction(request);
+      const response = await sendRequest<GetTransactionResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/transaction',
+        RESTRequest: request,
+        controllerFunction: kujira.getTransaction,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetTransactionResponse;
 
-      expect(response.hash).toEqual(request.hash);
-      expect(response.blockNumber).toBeGreaterThan(0);
-      expect(response.gasUsed).toBeGreaterThan(0);
-      expect(response.gasWanted).toBeGreaterThan(0);
-      expect(response.code).toBe(0);
-      expect(response.data).toContain('retract_orders');
-      expect(response.data).toContain('order_idxs');
+      logResponse(responseBody);
+
+      expect(responseBody.hash).toEqual(request.hash);
+      expect(responseBody.blockNumber).toBeGreaterThan(0);
+      expect(responseBody.gasUsed).toBeGreaterThan(0);
+      expect(responseBody.gasWanted).toBeGreaterThan(0);
+      expect(responseBody.code).toBe(0);
+      expect(responseBody.data).toContain('retract_orders');
+      expect(responseBody.data).toContain('order_idxs');
     });
 
     it('Get transactions 2 and 3', async () => {
-      const request = {
+      const requestBody = {
         hashes: [transactionsHashes[2], transactionsHashes[3]],
       } as GetTransactionsRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTransactions(request);
+      const response = await sendRequest<GetTransactionsResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/transactions',
+        RESTRequest: request,
+        controllerFunction: kujira.getTransactions,
+      });
 
-      logResponse(response);
+      const responseBody = IMap<TransactionHash, Transaction>(
+        response.body
+      ) as GetTransactionsResponse;
 
-      request.hashes.forEach((hash) => {
+      logResponse(responseBody);
+
+      requestBody.hashes.forEach((hash) => {
         const transaction = getNotNullOrThrowError<Transaction>(
-          response.get(hash)
+          responseBody.get(hash)
         );
 
         expect(transaction.hash).toEqual(hash);
