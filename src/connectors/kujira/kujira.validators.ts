@@ -477,9 +477,6 @@ export const validateGetOrdersRequest: RequestValidator =
     StatusCodes.BAD_REQUEST
   );
 
-export const validateGetAllOrdersRequest: RequestValidator =
-  createRequestValidator([validateOrderOwnerAddress], StatusCodes.BAD_REQUEST);
-
 export const validatePlaceOrderRequest: RequestValidator =
   createRequestValidator(
     [
@@ -558,119 +555,7 @@ export const validateCancelOrdersRequest: RequestValidator =
 export const validateCancelAllOrdersRequest: RequestValidator =
   createRequestValidator([validateOrderOwnerAddress], StatusCodes.BAD_REQUEST);
 
-export const validateGetOpenOrderRequest: RequestValidator =
-  createRequestValidator(
-    [
-      validateOrderClientId,
-      validateOrderExchangeId,
-      createValidator(
-        null,
-        (request) =>
-          !(
-            request &&
-            request.id === undefined &&
-            request.exchangeOrderId === undefined
-          ),
-        `No client id or exchange id were informed.`,
-        false
-      ),
-      // validateOrderMarketName,
-      validateOrderOwnerAddress,
-    ],
-    StatusCodes.BAD_REQUEST,
-    (request) => `Error when trying to get open order "${request.id}"`
-  );
-
-export const validateGetOpenOrdersRequest: RequestValidator =
-  createRequestValidator(
-    [
-      createValidator(
-        null,
-        (values) => values && values.length,
-        `No orders were informed.`,
-        false
-      ),
-      createBatchValidator(
-        [
-          validateOrderClientIds,
-          validateOrderExchangeIds,
-          createValidator(
-            null,
-            (request) =>
-              !(
-                request &&
-                request.ids === undefined &&
-                request.exchangeOrderIds === undefined
-              ),
-            `No client ids or exchange ids were informed.`,
-            false
-          ),
-          // validateOrderMarketName,
-          validateOrderOwnerAddress,
-        ],
-        (_, index) => `Invalid get open orders request at position ${index}:`
-      ),
-    ],
-    StatusCodes.BAD_REQUEST
-  );
-
-export const validateGetFilledOrderRequest: RequestValidator =
-  createRequestValidator(
-    [
-      validateOrderClientId,
-      validateOrderExchangeId,
-      createValidator(
-        null,
-        (request) =>
-          !(
-            request &&
-            request.id === undefined &&
-            request.exchangeOrderId === undefined
-          ),
-        `No client id or exchange id were informed.`,
-        false
-      ),
-      // validateOrderMarketName,
-      // validateOrderOwnerAddress,
-    ],
-    StatusCodes.BAD_REQUEST,
-    (request) => `Error when trying to get filled order "${request.id}"`
-  );
-
-export const validateGetFilledOrdersRequest: RequestValidator =
-  createRequestValidator(
-    [
-      createValidator(
-        null,
-        (values) => values && values.length,
-        `No orders were informed.`,
-        false
-      ),
-      createBatchValidator(
-        [
-          validateOrderClientIds,
-          validateOrderExchangeIds,
-          createValidator(
-            null,
-            (request) =>
-              !(
-                request &&
-                request.ids === undefined &&
-                request.exchangeOrderIds === undefined
-              ),
-            `No client ids or exchange ids were informed.`,
-            false
-          ),
-          // validateOrderMarketName,
-          // validateOrderOwnerAddress,
-        ],
-        (_, index) => `Invalid get filled orders request at position ${index}:`
-      ),
-    ],
-    StatusCodes.BAD_REQUEST
-  );
-
-export const validateSettleFundsRequest: RequestValidator =
+export const validateSettleMarketFundsRequest: RequestValidator =
   createRequestValidator(
     [validateOrderMarketName, validateOrderOwnerAddress],
     StatusCodes.BAD_REQUEST,
@@ -678,23 +563,14 @@ export const validateSettleFundsRequest: RequestValidator =
       `Error when trying to settle funds for market "${request.marketId}."`
   );
 
-export const validateSettleFundsSeveralRequest: RequestValidator =
+export const validateSettleMarketsFundsRequest: RequestValidator =
   createRequestValidator(
     [validateOrderMarketNames, validateOrderOwnerAddress],
     StatusCodes.BAD_REQUEST
   );
 
-export const validateSettleAllFundsRequest: RequestValidator =
-  createRequestValidator([validateOrderOwnerAddress], StatusCodes.BAD_REQUEST);
-
-export const validateSettleMarketFundsRequest: RequestValidator =
-  createRequestValidator([], StatusCodes.BAD_REQUEST);
-
-export const validateSettleMarketsFundsRequest: RequestValidator =
-  createRequestValidator([], StatusCodes.BAD_REQUEST);
-
 export const validateSettleAllMarketsFundsRequest: RequestValidator =
-  createRequestValidator([], StatusCodes.BAD_REQUEST);
+  createRequestValidator([validateOrderOwnerAddress], StatusCodes.BAD_REQUEST);
 
 export const validateGetWalletPublicKeyRequest: RequestValidator =
   createRequestValidator([], StatusCodes.BAD_REQUEST);
