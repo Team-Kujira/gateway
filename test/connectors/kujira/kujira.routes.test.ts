@@ -98,7 +98,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-enablePatches();
+// enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -140,6 +140,8 @@ const tokensBalancesHistory: IMap<any, Amount> = IMap<
   any,
   Amount
 >().asMutable();
+
+const activateHistory: boolean = false;
 
 const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
 
@@ -227,20 +229,21 @@ beforeAll(async () => {
 
   await kujira.init();
 
-  // Order Type Reference
-  // #01 - LIMIT
-  // #02 - LIMIT
-  // #03 - MARKET
-  // #04 - LIMIT
-  // #05 - LIMIT
-  // #06 - LIMIT
-  // #07 - LIMIT
-  // #08 - LIMIT
-  // #09 - LIMIT
-  // #10 - MARKET
-  // #11 - MARKET
-  // #12 - LIMIT
-  // #13 - LIMIT
+  // Order  |  Type  |  Side  | Market (ID/Name)
+  // ====== + ====== + ====== + ================
+  //  #01   | LIMIT  |  BUY   | 1 / KUJI/DEMO
+  //  #02   | LIMIT  |  SELL  | 2 / KUJI/USK
+  //  #03   | MARKET |  SELL  | 3 / DEMO/USK
+  //  #04   | LIMIT  |  BUY   | 1 / KUJI/DEMO
+  //  #05   | LIMIT  |  SELL  | 2 / KUJI/USK
+  //  #06   | LIMIT  |  BUY   | 3 / DEMO/USK
+  //  #07   | LIMIT  |  SELL  | 1 / KUJI/DEMO
+  //  #08   | LIMIT  |  BUY   | 2 / KUJI/USK
+  //  #09   | LIMIT  |  SELL  | 3 / DEMO/USK
+  //  #10   | MARKET |  BUY   | 1 / KUJI/DEMO
+  //  #11   | MARKET |  SELL  | 2 / KUJI/USK
+  //  #12   | LIMIT  |  BUY   | 3 / DEMO/USK
+  //  #13   | LIMIT  |  SELL  | 1 / KUJI/DEMO
 
   orders.set('1', {
     id: undefined,
@@ -1503,14 +1506,19 @@ describe('Kujira', () => {
       }
 
       // Adding current balances to historic
-      for (const item of tokens.values()) {
-        const tokenSymbol = (item.token as Token).symbol;
-        tokensBalancesHistory.setIn([tokenSymbol, 'free'], item.free);
-        tokensBalancesHistory.setIn([tokenSymbol, 'unsettled'], item.unsettled);
-        tokensBalancesHistory.setIn(
-          [tokenSymbol, 'lockedInOrders'],
-          item.lockedInOrders
-        );
+      if (activateHistory) {
+        for (const item of tokens.values()) {
+          const tokenSymbol = (item.token as Token).symbol;
+          tokensBalancesHistory.setIn([tokenSymbol, 'free'], item.free);
+          tokensBalancesHistory.setIn(
+            [tokenSymbol, 'unsettled'],
+            item.unsettled
+          );
+          tokensBalancesHistory.setIn(
+            [tokenSymbol, 'lockedInOrders'],
+            item.lockedInOrders
+          );
+        }
       }
 
       userBalances = {
@@ -1568,6 +1576,174 @@ describe('Kujira', () => {
       lastPayedFeeSum = BigNumber(
         getNotNullOrThrowError<BigNumber>(responseBody.fee)
       );
+
+      // Adding current balances to historic
+      if (activateHistory) {
+        const tokensToUpadate = [
+          responseBody.market.baseToken,
+          responseBody.market.quoteToken,
+        ];
+        for (const item of tokensToUpadate.values()) {
+          const tokenBalances = getNotNullOrThrowError<Balance>(
+            tokensBalancesHistory.getIn([item.symbol])
+          );
+
+          if (item.symbol == candidate.market.quoteToken.symbol) {
+            if (candidate.type == OrderType.LIMIT) {
+              if (candidate.side == OrderSide.BUY) {
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  tokenBalances.free
+                    ? tokenBalances.free.minus(candidate.amount)
+                    : candidate.amount
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders
+                    ? tokenBalances.lockedInOrders.plus(candidate.amount)
+                    : candidate.amount // This order will be OPEN, not FILLED
+                );
+              } else {
+                // OrderSide.SELL
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  tokenBalances.free // This order will be OPEN, not FILLED
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled // This order will be OPEN, not FILLED
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders // ? This order will be OPEN, not FILLED
+                );
+              }
+            } else {
+              // OrderType.MARKET
+              if (candidate.side == OrderSide.BUY) {
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  tokenBalances.free
+                    ? tokenBalances.free.minus(candidate.amount)
+                    : candidate.amount
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders
+                );
+              } else {
+                // OrderSide.SELL
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  tokenBalances.free
+                    ? tokenBalances.free.plus(
+                        getNotNullOrThrowError<BigNumber>(responseBody.price)
+                      )
+                    : getNotNullOrThrowError<BigNumber>(responseBody.price)
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders
+                );
+              }
+            }
+          } else {
+            // baseToken
+            if (candidate.type == OrderType.LIMIT) {
+              if (candidate.side == OrderSide.BUY) {
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  tokenBalances.free // This order will be OPEN, not FILLED
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders
+                    ? tokenBalances.lockedInOrders.plus(candidate.amount)
+                    : candidate.amount
+                );
+              } else {
+                // OrderSide.SELL
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  getNotNullOrThrowError<BigNumber>(tokenBalances.free).minus(
+                    candidate.amount
+                  )
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled // This order will be OPEN, not FILLED
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders
+                    ? tokenBalances.lockedInOrders.plus(candidate.amount)
+                    : candidate.amount
+                );
+              }
+            } else {
+              // OrderType.MARKET
+              if (candidate.side == OrderSide.BUY) {
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  tokenBalances.free
+                    ? tokenBalances.free.plus(
+                        getNotNullOrThrowError<BigNumber>(responseBody.price)
+                      )
+                    : getNotNullOrThrowError<BigNumber>(responseBody.price)
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders
+                );
+              } else {
+                // OrderSide.SELL
+                const tokenSymbol = item.symbol;
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'free'],
+                  tokenBalances.free
+                    ? tokenBalances.free.minus(candidate.amount)
+                    : candidate.amount
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'unsettled'],
+                  tokenBalances.unsettled
+                );
+                tokensBalancesHistory.setIn(
+                  [tokenSymbol, 'lockedInOrders'],
+                  tokenBalances.lockedInOrders
+                );
+              }
+            }
+          }
+        }
+      }
 
       // Updating Quote Balance
       // userBalances.tokens.set(candidate.market.quoteToken.id, {
