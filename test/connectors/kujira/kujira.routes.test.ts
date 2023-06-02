@@ -26,6 +26,7 @@ import {
   GetAllBalancesRequest,
   GetAllBalancesResponse,
   GetAllMarketsRequest,
+  GetAllMarketsResponse,
   GetAllOrderBooksRequest,
   GetAllTickersRequest,
   GetAllTickersResponse,
@@ -36,7 +37,9 @@ import {
   GetBalancesRequest,
   GetBalancesResponse,
   GetMarketRequest,
+  GetMarketResponse,
   GetMarketsRequest,
+  GetMarketsResponse,
   GetOrderBookRequest,
   GetOrderBooksRequest,
   GetOrderRequest,
@@ -838,23 +841,35 @@ describe('Kujira', () => {
 
   describe('Markets', () => {
     it('Get market 1 by id', async () => {
-      const request = {
+      const requestBody = {
         id: marketsIds[1],
       } as GetMarketRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarket(request);
+      const response = await sendRequest<GetMarketResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/market',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarket,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetMarketResponse;
+
+      logResponse(responseBody);
 
       const networkPair = networksPairs[marketsIds[1]];
-      expect(response.id).toEqual(marketsIds[1]);
-      expect([response.baseToken.id, response.quoteToken.id]).toEqual([
+      expect(responseBody.id).toEqual(marketsIds[1]);
+      expect([responseBody.baseToken.id, responseBody.quoteToken.id]).toEqual([
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
       ]);
-      expect(response.precision).toEqual(
+      expect(responseBody.precision).toEqual(
         'decimal_places' in networkPair.precision
           ? networkPair.precision.decimal_places
           : 'significant_figures' in networkPair.precision
@@ -866,22 +881,34 @@ describe('Kujira', () => {
     it('Get market 1 by name', async () => {
       const networkPair = networksPairs[marketsIds[1]];
 
-      const request = {
+      const requestBody = {
         name: networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
       } as GetMarketRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarket(request);
+      const response = await sendRequest<GetMarketResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/market',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarket,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetMarketResponse;
 
-      expect(response.id).toEqual(marketsIds[1]);
-      expect([response.baseToken.id, response.quoteToken.id]).toEqual([
+      logResponse(responseBody);
+
+      expect(responseBody.id).toEqual(marketsIds[1]);
+      expect([responseBody.baseToken.id, responseBody.quoteToken.id]).toEqual([
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
       ]);
-      expect(response.precision).toEqual(
+      expect(responseBody.precision).toEqual(
         'decimal_places' in networkPair.precision
           ? networkPair.precision.decimal_places
           : 'significant_figures' in networkPair.precision
@@ -893,22 +920,37 @@ describe('Kujira', () => {
     it('Get markets 2 and 3 by ids', async () => {
       const targetMarketIds = [marketsIds[2], marketsIds[3]];
 
-      const request = {
+      const requestBody = {
         ids: targetMarketIds,
       } as GetMarketsRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarkets(request);
+      const response = await sendRequest<GetMarketsResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/markets',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarkets,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetMarketsResponse as IMap<
+        MarketId,
+        Market
+      >;
 
-      expect(targetMarketIds.length).toEqual(response.size);
+      logResponse(responseBody);
+
+      expect(targetMarketIds.length).toEqual(responseBody.size);
 
       targetMarketIds.forEach((marketId) => {
         const networkPair = networksPairs[marketId];
         const responseToken = getNotNullOrThrowError<Market>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
 
         expect(responseToken.id).toEqual(marketId);
@@ -941,22 +983,37 @@ describe('Kujira', () => {
         );
       }
 
-      const request = {
+      const requestBody = {
         names: targetNames,
       } as GetMarketsRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getMarkets(request);
+      const response = await sendRequest<GetMarketsResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/markets',
+        RESTRequest: request,
+        controllerFunction: kujira.getMarkets,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetMarketsResponse as IMap<
+        MarketId,
+        Market
+      >;
 
-      expect(targetMarketIds.length).toEqual(response.size);
+      logResponse(responseBody);
+
+      expect(targetMarketIds.length).toEqual(responseBody.size);
 
       for (const target of targetMarketIds) {
         const networkPair = networksPairs[target];
         const responseToken = getNotNullOrThrowError<Market>(
-          response.get(target)
+          responseBody.get(target)
         );
 
         expect(responseToken.id).toEqual(target);
@@ -979,18 +1036,33 @@ describe('Kujira', () => {
 
     it('Get all markets', async () => {
       const targetMarketIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
-      const request = {} as GetAllMarketsRequest;
+      const requestBody = {} as GetAllMarketsRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
       logRequest(request);
 
-      const response = await kujira.getAllMarkets(request);
+      const response = await sendRequest<GetAllMarketsResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/markets/all',
+        RESTRequest: request,
+        controllerFunction: kujira.getAllMarkets,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetAllMarketsResponse as IMap<
+        MarketId,
+        Market
+      >;
+
+      logResponse(responseBody);
 
       targetMarketIds.forEach((marketId) => {
         const networkPair = networksPairs[marketId];
         const responseToken = getNotNullOrThrowError<Market>(
-          response.get(marketId)
+          responseBody.get(marketId)
         );
 
         expect(responseToken.id).toEqual(marketId);
