@@ -1,0 +1,5 @@
+{
+  "chain": "kujira",
+  "network": "testnet",
+  "ownerAddress": "$KUJIRA_ADDRESS"
+}

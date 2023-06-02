@@ -7,7 +7,8 @@
 # export BSC_ADDRESS='put-your-binance-smart-chain-key-here'
 # export INJECTIVE_SUBACCOUNTID='put-your-injective-subaccount-id-here'
 # export POLYGON_ADDRESS='<put-your-public-key-here>'
-# export KUJIRA_SUBACCOUNTID='put-your-kujira-subaccount-id-here'
+# export KUJIRA_ADDRESS='put-your-kujira-subaccount-id-here'
+# export KUJIRA_MNEMONIC='put-your-kujira-mnemonic-here'
 
 # -k is --insecure, this disables certificate verification and should only be
 # used for local development and testing

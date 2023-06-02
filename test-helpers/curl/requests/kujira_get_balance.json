@@ -1,0 +1,7 @@
+{
+  "chain": "kujira",
+  "network": "testnet",
+  "tokenId": "ukuji",
+  "tokenSymbol": "KUJI",
+  "ownerAddress": "$KUJIRA_ADDRESS"
+}

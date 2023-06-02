@@ -1,0 +1,8 @@
+{
+  "chain": "kujira",
+  "network": "testnet",
+  "marketIds": [
+    "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+    "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+  ]
+}
