@@ -29,6 +29,7 @@ import {
   GetAllOrderBooksRequest,
   GetAllTickersRequest,
   GetAllTokensRequest,
+  GetAllTokensResponse,
   GetBalanceRequest,
   GetBalanceResponse,
   GetBalancesRequest,
@@ -46,6 +47,7 @@ import {
   GetTokenRequest,
   GetTokenResponse,
   GetTokensRequest,
+  GetTokensResponse,
   GetTransactionRequest,
   GetTransactionResponse,
   GetTransactionsRequest,
@@ -542,12 +544,12 @@ describe('Kujira', () => {
         id: tokenIds[1],
       } as GetTokenRequest;
 
-      logRequest(requestBody);
-
       const request = {
         ...commonRequestBody,
         ...requestBody,
       };
+
+      logRequest(request);
 
       const response = await sendRequest<GetTokenResponse>({
         RESTMethod: RESTfulMethod.GET,
@@ -570,55 +572,94 @@ describe('Kujira', () => {
 
     it('Get token 1 by name', async () => {
       const target = Denom.from(tokenIds[1]);
-      const request = {
+      const requestBody = {
         name: target.symbol,
       } as GetTokenRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getToken(request);
+      const response = await sendRequest<GetTokenResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/token',
+        RESTRequest: request,
+        controllerFunction: kujira.getToken,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetTokenResponse;
 
-      expect(response).not.toBeEmpty();
-      expect(response.id).toBe(target.reference);
-      expect(response.name).toBe(request.name);
-      expect(response.symbol).toBe(target.symbol);
-      expect(response.decimals).toBe(target.decimals);
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeEmpty();
+      expect(responseBody.id).toBe(target.reference);
+      expect(responseBody.name).toBe(requestBody.name);
+      expect(responseBody.symbol).toBe(target.symbol);
+      expect(responseBody.decimals).toBe(target.decimals);
     });
 
     it('Get token 1 by symbol', async () => {
       const target = Denom.from(tokenIds[1]);
-      const request = {
+      const requestBody = {
         symbol: target.symbol,
       } as GetTokenRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getToken(request);
+      const response = await sendRequest<GetTokenResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/token',
+        RESTRequest: request,
+        controllerFunction: kujira.getToken,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetTokenResponse;
 
-      expect(response).not.toBeEmpty();
-      expect(response.id).toBe(target.reference);
-      expect(response.symbol).toBe(request.symbol);
-      expect(response.decimals).toBe(target.decimals);
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeEmpty();
+      expect(responseBody.id).toBe(target.reference);
+      expect(responseBody.symbol).toBe(requestBody.symbol);
+      expect(responseBody.decimals).toBe(target.decimals);
     });
 
     it('Get tokens 2 and 3 by ids', async () => {
-      const request = {
+      const requestBody = {
         ids: [tokenIds[2], tokenIds[3]],
       } as GetTokensRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTokens(request);
+      const response = await sendRequest<GetTokensResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/tokens',
+        RESTRequest: request,
+        controllerFunction: kujira.getTokens,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetTokensResponse as IMap<
+        TokenId,
+        Token
+      >;
 
-      expect(response.size).toBe(request.ids?.length);
+      logResponse(responseBody);
 
-      for (const token of response.values()) {
+      expect(responseBody.size).toBe(requestBody.ids?.length);
+
+      for (const token of responseBody.values()) {
         const targetToken = Denom.from(token.id);
         expect(token).not.toBeEmpty();
         expect(token.id).toBe(targetToken.reference);
@@ -626,10 +667,12 @@ describe('Kujira', () => {
         expect(token.decimals).toBe(targetToken.decimals);
       }
 
-      for (const tokenId of getNotNullOrThrowError<TokenId[]>(request.ids)) {
+      for (const tokenId of getNotNullOrThrowError<TokenId[]>(
+        requestBody.ids
+      )) {
         const token = Denom.from(tokenId);
         const targetToken = getNotNullOrThrowError<Token>(
-          response.get(tokenId)
+          responseBody.get(tokenId)
         );
         expect(targetToken).not.toBeEmpty();
         expect(targetToken.id).toBe(token.reference);
@@ -645,19 +688,34 @@ describe('Kujira', () => {
         targetsDenoms.push(Denom.from(targetId));
       }
 
-      const request = {
+      const requestBody = {
         names: [targetsDenoms[0].symbol, targetsDenoms[1].symbol],
       } as GetTokensRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTokens(request);
+      const response = await sendRequest<GetTokensResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/tokens',
+        RESTRequest: request,
+        controllerFunction: kujira.getTokens,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetTokensResponse as IMap<
+        TokenId,
+        Token
+      >;
 
-      expect(response.size).toBe(request.names?.length);
+      logResponse(responseBody);
 
-      for (const token of response.values()) {
+      expect(responseBody.size).toBe(requestBody.names?.length);
+
+      for (const token of responseBody.values()) {
         const targetToken = Denom.from(token.id);
         expect(token).not.toBeEmpty();
         expect(token.id).toBe(targetToken.reference);
@@ -666,11 +724,11 @@ describe('Kujira', () => {
       }
 
       for (const tokenName of getNotNullOrThrowError<TokenName[]>(
-        request.names
+        requestBody.names
       )) {
         const token = Denom.from(tokenName);
         const targetToken = getNotNullOrThrowError<Token>(
-          response.filter((item: Token) => item.name == tokenName).first()
+          responseBody.filter((item: Token) => item.name == tokenName).first()
         );
         expect(targetToken).not.toBeEmpty();
         expect(targetToken.symbol).toBe(token.reference);
@@ -685,19 +743,34 @@ describe('Kujira', () => {
         targetsDenoms.push(Denom.from(targetId));
       }
 
-      const request = {
+      const requestBody = {
         symbols: [targetsDenoms[0].symbol, targetsDenoms[1].symbol],
       } as GetTokensRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTokens(request);
+      const response = await sendRequest<GetTokensResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/tokens',
+        RESTRequest: request,
+        controllerFunction: kujira.getTokens,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetTokensResponse as IMap<
+        TokenId,
+        Token
+      >;
 
-      expect(response.size).toBe(request.symbols?.length);
+      logResponse(responseBody);
 
-      for (const token of response.values()) {
+      expect(responseBody.size).toBe(requestBody.symbols?.length);
+
+      for (const token of responseBody.values()) {
         const targetToken = Denom.from(token.id);
         expect(token).not.toBeEmpty();
         expect(token.id).toBe(targetToken.reference);
@@ -706,11 +779,11 @@ describe('Kujira', () => {
       }
 
       for (const tokenName of getNotNullOrThrowError<TokenSymbol[]>(
-        request.symbols
+        requestBody.symbols
       )) {
         const token = Denom.from(tokenName);
         const targetToken = getNotNullOrThrowError<Token>(
-          response.filter((item: Token) => item.name == tokenName).first()
+          responseBody.filter((item: Token) => item.name == tokenName).first()
         );
         expect(targetToken).not.toBeEmpty();
         expect(targetToken.symbol).toBe(token.reference);
@@ -719,11 +792,26 @@ describe('Kujira', () => {
     });
 
     it('Get all tokens', async () => {
-      const request = {} as GetAllTokensRequest;
+      const requestBody = {} as GetAllTokensRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
       logRequest(request);
 
-      allTokens = await kujira.getAllTokens(request);
+      const response = await sendRequest<GetAllTokensResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/tokens/all',
+        RESTRequest: request,
+        controllerFunction: kujira.getAllTokens,
+      });
+
+      allTokens = IMap(response.body) as GetAllTokensResponse as IMap<
+        TokenId,
+        Token
+      >;
 
       logResponse(allTokens);
 
