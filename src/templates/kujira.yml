@@ -27,7 +27,7 @@ tokens:
 #  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/tokens.json
   allowed:
   disallowed:
-  resolutionStrategy: 'markets'
+  resolutionStrategy: markets
 markets:
   url: # empty means using the default
 #  url: /root/gateway/conf/connectors/kujira/contracts.json
