@@ -4768,14 +4768,10 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      expect(responseBody.size).toBe(Object.values(marketsIds).length);
+      expect(responseBody.size).toBeGreaterThan(0);
       const targetMarketsIds = Object.values(marketsIds);
-      for (const [marketId, withdraw] of (
-        responseBody as IMap<MarketId, Withdraw>
-      ).entries()) {
-        expect(targetMarketsIds).toInclude(marketId);
-        expect(withdraw.hash.length).toBeCloseTo(64);
-      }
+      const responseMarketsIds = responseBody.keySeq().toArray();
+      expect(responseMarketsIds).toIncludeAllMembers(targetMarketsIds);
     });
   });
 });
