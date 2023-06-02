@@ -279,13 +279,11 @@ export class Kujira {
   }
 
   private async getRPCEndpoint(): Promise<string> {
-    let rpcEndpoint = config.rpcEndpoint;
-
-    if (!rpcEndpoint) {
-      rpcEndpoint = this.getFastestRpc();
+    if (!config.rpcEndpoint) {
+      config.rpcEndpoint = this.getFastestRpc();
     }
 
-    return rpcEndpoint;
+    return config.rpcEndpoint;
   }
 
   async getDirectSecp256k1HdWallet(

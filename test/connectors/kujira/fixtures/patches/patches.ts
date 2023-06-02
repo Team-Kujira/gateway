@@ -68,6 +68,40 @@ export const createPatches = (
     });
   });
 
+  patches.setIn(['kujira', 'decryptWallet'], async (testTitle: string) => {
+    if (!usePatches) return;
+
+    patch(kujira, 'decryptWallet', async (...any: any[]) => {
+      const inputArguments = any;
+
+      // const serializedArguments = Serializer.serialize(inputArguments);
+
+      if (!ordinalMap.has(testTitle)) {
+        ordinalMap.set(testTitle, 1);
+      }
+
+      const ordinal =
+        getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+      ordinalMap.set(testTitle, ordinal);
+
+      const dataKey = ['kujira', 'decryptWallet', testTitle, ordinal];
+
+      const key: string = JSON.stringify(dataKey);
+
+      if (useInputOutputWrapper) {
+        return await inputOutputWrapper<any>(
+          dataKey,
+          kujira,
+          'decryptWallet',
+          inputArguments
+        );
+      }
+
+      return data.get(key) as any;
+    });
+  });
+
   patches.setIn(['kujira', 'getFastestRpc'], async (testTitle: string) => {
     if (!usePatches) return;
 
@@ -262,7 +296,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =

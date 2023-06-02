@@ -98,7 +98,7 @@ import { Express } from 'express-serve-static-core';
 
 enablePatches();
 disablePatches();
-// enablePatches();
+enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
@@ -501,7 +501,9 @@ beforeEach(async () => {
     return;
   };
 
-  await getPatch(['global', 'fetch'])(testTitle);
+  // await getPatch(['global', 'fetch'])(testTitle);
+  await getPatch(['kujira', 'decryptWallet'])(testTitle);
+  await getPatch(['kujira', 'getFastestRpc'])(testTitle);
   await getPatch(['kujira', 'kujiraFinClientWithdrawOrders'])(testTitle);
   await getPatch(['kujira', 'kujiraGetBasicMarkets'])(testTitle);
   await getPatch(['kujira', 'kujiraGetBasicTokens'])(testTitle);
