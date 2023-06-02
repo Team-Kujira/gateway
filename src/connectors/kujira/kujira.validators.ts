@@ -686,3 +686,30 @@ export const validateSettleFundsSeveralRequest: RequestValidator =
 
 export const validateSettleAllFundsRequest: RequestValidator =
   createRequestValidator([validateOrderOwnerAddress], StatusCodes.BAD_REQUEST);
+
+export const validateSettleMarketFundsRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateSettleMarketsFundsRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateSettleAllMarketsFundsRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateGetWalletPublicKeyRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateGetWalletsPublicKeysRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateGetTransactionRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateGetTransactionsRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateGetCurrentBlockRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
+
+export const validateGetEstimatedFeesRequest: RequestValidator =
+  createRequestValidator([], StatusCodes.BAD_REQUEST);
