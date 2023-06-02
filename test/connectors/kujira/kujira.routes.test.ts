@@ -482,7 +482,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   sendRequest = <R>(options: SendRequestOptions<R>) => {
-    options.strategy = options.strategy || RequestStrategy.Controller;
+    options.strategy = options.strategy || RequestStrategy.RESTful;
     options.RESTExpress = options.RESTExpress || expressApp;
     options.RESTRoute = `/kujira${options.RESTRoute}`;
     options.controller = options.controller || kujira;
@@ -2749,7 +2749,7 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      expect(responseBody).toBeUndefined();
+      expect(responseBody).toBeOneOf([null, undefined, '']);
     });
 
     it('Get all open orders and check that orders 1, 2, 3, 6, 7, 10, and 11 are missing', async () => {
