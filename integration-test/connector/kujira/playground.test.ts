@@ -10,10 +10,7 @@ import {
   GetAllMarketsResponse,
   GetTokenSymbolsToTokenIdsMapRequest,
 } from '../../../src/connectors/kujira/kujira.types';
-import {
-  deserializeFromFile,
-  serializeToFile,
-} from '../../../src/connectors/kujira/kujira.helpers';
+import { Serializer } from '../../../src/connectors/kujira/kujira.helpers';
 
 jest.setTimeout(30 * 60 * 1000);
 
@@ -73,9 +70,9 @@ describe('Playground', () => {
 
     const filepath = '/tmp/playground-03.dat';
 
-    await serializeToFile(response, filepath);
+    await Serializer.serializeToFile(response, filepath);
     const newResponse: GetAllMarketsResponse =
-      await deserializeFromFile<GetAllMarketsResponse>(filepath);
+      await Serializer.deserializeFromFile<GetAllMarketsResponse>(filepath);
 
     console.log(newResponse);
   });
