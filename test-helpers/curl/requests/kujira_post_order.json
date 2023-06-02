@@ -1,11 +1,11 @@
 {
   "chain": "kujira",
-  "network": "mainnet",
-  "connector": "kujira",
-  "address": "$KUJIRA_SUBACCOUNTID",
-  "market": "KUJI-DEMO",
-  "price": "2",
-  "amount": "0.10",
-  "side": "SELL",
-  "orderType": "LIMIT"
+  "network": "testnet",
+  "marketId": "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+  "ownerAddress": "$KUJIRA_ADDRESS",
+  "side": "BUY",
+  "price": 0.001,
+  "amount": 1.0,
+  "type": "LIMIT",
+  "payerAddress": "$KUJIRA_ADDRESS"
 }
