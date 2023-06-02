@@ -28,6 +28,7 @@ import {
   GetAllMarketsRequest,
   GetAllOrderBooksRequest,
   GetAllTickersRequest,
+  GetAllTickersResponse,
   GetAllTokensRequest,
   GetAllTokensResponse,
   GetBalanceRequest,
@@ -43,7 +44,9 @@ import {
   GetOrdersRequest,
   GetOrdersResponse,
   GetTickerRequest,
+  GetTickerResponse,
   GetTickersRequest,
+  GetTickersResponse,
   GetTokenRequest,
   GetTokenResponse,
   GetTokensRequest,
@@ -77,6 +80,7 @@ import {
   RequestStrategy,
   RESTfulMethod,
   Ticker,
+  TickerPrice,
   Token,
   TokenId,
   TokenName,
@@ -1140,66 +1144,104 @@ describe('Kujira', () => {
 
   describe('Tickers', () => {
     it('Get ticker from market 1 by id', async () => {
-      const request = {
+      const requestBody = {
         marketId: marketsIds[1],
       } as GetTickerRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTicker(request);
+      const response = await sendRequest<GetTickerResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/ticker',
+        RESTRequest: request,
+        controllerFunction: kujira.getTicker,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetTickerResponse;
 
-      expect(response.market.id).toEqual(marketsIds[1]);
-      expect(response.price.gt(0)).toBeTrue();
-      expect(response.timestamp).toBeGreaterThan(0);
+      logResponse(responseBody);
+
+      expect(responseBody.market.id).toEqual(marketsIds[1]);
+      expect(
+        BigNumber(getNotNullOrThrowError<TickerPrice>(responseBody.price)).gt(0)
+      ).toBeTrue();
+      expect(responseBody.timestamp).toBeGreaterThan(0);
     });
 
     it('Get ticker from market 1 by name', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const networkPair = networksPairs[marketsIds[1]];
 
-      const request = {
+      const requestBody = {
         marketName:
           networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
       } as GetTickerRequest;
 
-      logRequest(request);
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
-      const response = await kujira.getTicker(request);
+      const response = await sendRequest<GetTickerResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/ticker',
+        RESTRequest: request,
+        controllerFunction: kujira.getTicker,
+      });
 
-      logResponse(response);
+      const responseBody = response.body as GetTickerResponse;
 
-      expect(response.market.name).toEqual(request.marketName);
-      expect(response.market.id).toEqual(marketsIds[1]);
-      expect(response.price.gt(0)).toBeTrue();
-      expect(response.timestamp).toBeGreaterThan(0);
+      logResponse(responseBody);
+
+      expect(responseBody.market.name).toEqual(request.marketName);
+      expect(responseBody.market.id).toEqual(marketsIds[1]);
+      expect(
+        BigNumber(getNotNullOrThrowError<TickerPrice>(responseBody.price)).gt(0)
+      ).toBeTrue();
+      expect(responseBody.timestamp).toBeGreaterThan(0);
     });
 
     it('Get tickers from markets 2 and 3 by ids', async () => {
       const targetMarketsIds = [marketsIds[2], marketsIds[3]];
-      const request = {
+      const requestBody = {
         marketIds: targetMarketsIds,
       } as GetTickersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTickers(request);
+      const response = await sendRequest<GetTickersResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/tickers',
+        RESTRequest: request,
+        controllerFunction: kujira.getTickers,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetTickersResponse;
+
+      logResponse(responseBody);
 
       targetMarketsIds.forEach((marketId) => {
-        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketId));
+        const ticker = getNotNullOrThrowError<Ticker>(
+          responseBody.get(marketId)
+        );
         expect(ticker.market.id).toEqual(marketId);
-        expect(ticker.price.gt(0)).toBeTrue();
+        expect(
+          BigNumber(getNotNullOrThrowError<TickerPrice>(ticker.price)).gt(0)
+        ).toBeTrue();
         expect(ticker.timestamp).toBeGreaterThan(0);
       });
     });
 
     it('Get tickers from markets 2 and 3 by names', async () => {
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-
       const targetMarketIds = [marketsIds[2], marketsIds[3]];
       const targetNames = [];
 
@@ -1210,38 +1252,70 @@ describe('Kujira', () => {
             networksPairs[target].denoms[1].symbol
         );
       }
-      const request = {
+      const requestBody = {
         marketNames: targetNames,
       } as GetTickersRequest;
 
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
       logRequest(request);
 
-      const response = await kujira.getTickers(request);
+      const response = await sendRequest<GetTickersResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/tickers',
+        RESTRequest: request,
+        controllerFunction: kujira.getTickers,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetTickersResponse;
+
+      logResponse(responseBody);
 
       for (const marketName of targetNames.values()) {
-        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketName));
+        const ticker = getNotNullOrThrowError<Ticker>(
+          responseBody.get(marketName)
+        );
         expect(ticker.market.name).toEqual(marketName);
-        expect(ticker.price.gt(0)).toBeTrue();
+        expect(
+          BigNumber(getNotNullOrThrowError<TickerPrice>(ticker.price)).gt(0)
+        ).toBeTrue();
         expect(ticker.timestamp).toBeGreaterThan(0);
       }
     });
 
     it('Get all tickers', async () => {
       const targetMarketsIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
-      const request = {} as GetAllTickersRequest;
+      const requestBody = {} as GetAllTickersRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
 
       logRequest(request);
 
-      const response = await kujira.getAllTickers(request);
+      const response = await sendRequest<GetAllTickersResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/ticker/all',
+        RESTRequest: request,
+        controllerFunction: kujira.getAllTickers,
+      });
 
-      logResponse(response);
+      const responseBody = IMap(response.body) as GetAllTickersResponse;
+
+      logResponse(responseBody);
 
       targetMarketsIds.forEach((marketId) => {
-        const ticker = getNotNullOrThrowError<Ticker>(response.get(marketId));
+        const ticker = getNotNullOrThrowError<Ticker>(
+          responseBody.get(marketId)
+        );
         expect(ticker.market.id).toEqual(marketId);
-        expect(ticker.price.gt(0)).toBeTrue();
+        expect(
+          BigNumber(getNotNullOrThrowError<TickerPrice>(ticker.price)).gt(0)
+        ).toBeTrue();
         expect(ticker.timestamp).toBeGreaterThan(0);
       });
     });
