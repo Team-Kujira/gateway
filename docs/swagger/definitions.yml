@@ -1553,7 +1553,7 @@ definitions:
         type: 'string'
       txHash:
         type: 'string'
-  
+
   PerpCloseRequest:
     type: 'object'
     required:
@@ -2322,116 +2322,6 @@ definitions:
       lastTradePrice:
         type: 'string'
         example: '1.234'
-  KujiraBankBalance:
-    type: 'object'
-    required:
-      - 'token'
-      - 'amount'
-    properties:
-      token:
-        type: 'string'
-        example: 'kuji'
-      amount:
-        type: 'string'
-        example: '1.25'
-
-  KujiraSubaccountBalanceSub:
-    type: 'object'
-    required:
-      - 'token'
-      - 'totalBalance'
-      - 'availableBalance'
-    properties:
-      token:
-        type: 'string'
-        example: 'kuji'
-      totalBalance:
-        type: 'string'
-        example: '100.0'
-      availableBalance:
-        type: 'string'
-        example: '15.0'
-
-  KujiraSubaccountBalancesWithId:
-    type: 'object'
-    required:
-      - 'subaccountId'
-      - 'balances'
-    properties:
-      subaccountId:
-        type: 'string'
-        example: '0'
-      balances:
-        type: 'array'
-        item:
-          $ref: '#/definitions/KujiraSubaccountBalanceSub'
-        example: '{"token": "kuji", "tokenBalance": "100.0", "availableBalance": "15.0"}'
-
-  KujiraBalancesResponse:
-    type: 'object'
-    required:
-      - 'kujiraAddress'
-      - 'balances'
-      - 'subaccounts'
-    properties:
-      injectiveAddress:
-        type: 'string'
-        example: ''
-      balances:
-        type: 'array'
-        item:
-          $ref: '#/definitions/KujiraBankBalance'
-      subaccoutns:
-        type: 'array'
-        item:
-          $ref: '#/definitions/KujiraSubaccountBalancesWithId'
-
-  KujiraPollResponse:
-    type: 'object'
-    required:
-      - 'blockNumber'
-      - 'hash'
-      - 'gasWanted'
-      - 'gasLimit'
-      - 'gasUsed'
-      - 'sequences'
-    properties:
-      blockNumber:
-        type: 'number'
-        example: 123456
-      hash:
-        type: 'string'
-        example: '0xaaaaaaaaaabbbb'
-      gasWanted:
-        type: 'number'
-        example: 1000000
-      gasLimit:
-        type: 'number'
-        example: 2000000
-      gasUsed:
-        type: 'number'
-        example: 1000000
-      sequences:
-        type: 'array'
-        items: 'number'
-        example: [1,2]
-
-  KujiraPollRequest:
-    type: 'object'
-    required:
-      - 'txHash'
-      - 'chain'
-      - 'network'
-    properties:
-      txHash:
-        type: 'string'
-        example: ''  # noqa: documentation
-      chain:
-        type: 'string'
-        example: 'kujira'
-      network:
-        type: 'string'
-        example: 'mainnet'
 
   AlgorandPollRequest:
     type: 'object'
@@ -2594,3 +2484,80 @@ definitions:
       txHash:
         type: 'string'
         example: '0x...'
+
+  KujiraTokenResponse_1:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: "ukuji"
+      name:
+        type: string
+        example: "KUJI"
+      symbol:
+        type: string
+        example: "KUJI"
+      decimals:
+        type: integer
+        example: 6
+
+  KujiraTokenResponse_2:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+      name:
+        type: string
+        example: "DEMO"
+      symbol:
+        type: string
+        example: "DEMO"
+      decimals:
+        type: integer
+        example: 6
+
+  KujiraTokenResponse_3:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: "factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk"
+      name:
+        type: string
+        example: "USK"
+      symbol:
+        type: string
+        example: "USK"
+      decimals:
+        type: integer
+        example: 6
+
+  KujiraTokenResponse_4:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: "ibc/F91EA2C0A23697A1048E08C2F787E3A58AC6F706A1CD2257A504925158CFC0F3"
+      name:
+        type: string
+        example: "axlUSDC"
+      symbol:
+        type: string
+        example: "axlUSDC"
+      decimals:
+        type: integer
+        example: 6
+
+  KujiraFees:
+    type: "object"
+    properties:
+      maker:
+        type: string
+        example: "0.075",
+      taker:
+        type: string
+        example: "0.15",
+      serviceProvider:
+        type: string
+        example: "0"
