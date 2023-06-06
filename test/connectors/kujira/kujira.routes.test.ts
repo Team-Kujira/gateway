@@ -216,6 +216,7 @@ beforeAll(async () => {
   configManager.set('kujira.retry.all.delayBetweenRetries', 1);
   configManager.set('kujira.parallel.all.batchSize', 100);
   configManager.set('kujira.parallel.all.delayBetweenBatches', 1);
+  configManager.set('kujira.rpcEndpoint', 'test-rpc-kujira.mintthemoon.xyz');
 
   expressApp = express();
   expressApp.use(express.json());
