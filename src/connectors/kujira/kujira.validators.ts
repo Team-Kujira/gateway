@@ -109,13 +109,36 @@ export const createBatchValidator = <Item>(
   headerItemMessage?: (
     item: undefined | null | any | Item,
     index?: number
-  ) => string
-): ((items: any[]) => { warnings: Array<string>; errors: Array<string> }) => {
-  return (items: any[]) => {
+  ) => string,
+  accessor:
+    | undefined
+    | null
+    | string
+    | ((target: any | Item) => any) = undefined
+): ((input: any[]) => { warnings: Array<string>; errors: Array<string> }) => {
+  return (input: any[]) => {
     let warnings: Array<string> = [];
     let errors: Array<string> = [];
 
-    for (const [index, item] of items.entries()) {
+    let items: any[] = [];
+    if (input === undefined && accessor) {
+      errors.push(`Request with undefined value informed when it shouldn't.`);
+    } else if (input === null && accessor) {
+      errors.push(`Request with null value informed when it shouldn't.`);
+    } else if (!accessor) {
+      items = input;
+    } else if (typeof accessor === 'string') {
+      if (!(`${accessor}` in input)) {
+        errors.push(`The request is missing the key/property "${accessor}".`);
+      } else {
+        items = input[accessor as any];
+      }
+    } else {
+      items = accessor(input);
+    }
+
+    let index = 0;
+    for (const item of items) {
       for (const validator of validators) {
         const itemResult = validator(item, index);
 
@@ -130,6 +153,7 @@ export const createBatchValidator = <Item>(
         warnings = [...warnings, ...itemResult.warnings];
         errors = [...errors, ...itemResult.errors];
       }
+      index++;
     }
 
     return { warnings, errors };
@@ -158,10 +182,13 @@ export const throwIfErrorsExist = (
 };
 
 export const validateOrderClientId: Validator = createValidator(
-  'id',
-  (_, value) => isNaturalNumberString(value),
-  (_, value) =>
-    `Invalid client id (${value}), it needs to be in big number format.`,
+  null,
+  (target, _) =>
+    typeof target === 'object' ? isNaturalNumberString(target.id) : target,
+  (target, _) => {
+    const id = typeof target === 'object' ? target.id : target;
+    return `Invalid client id (${id}), it needs to be in big number format.`;
+  },
   true
 );
 
@@ -179,10 +206,15 @@ export const validateOrderClientIds: Validator = createValidator(
 );
 
 export const validateOrderExchangeId: Validator = createValidator(
-  'exchangeOrderId',
-  (_, value) => value === undefined || isNaturalNumberString(value),
-  (_, value) =>
-    `Invalid exchange id (${value}), it needs to be in big number format.`,
+  null,
+  (target, _) =>
+    typeof target == 'object' && 'exchangeOrderId' in target
+      ? isNaturalNumberString(target.exchangeOrderId)
+      : target,
+  (target, _) => {
+    const id = typeof target == 'object' ? target.exchangeOrderId : target;
+    return `Invalid exchange id (${id}), it needs to be in big number format.`;
+  },
   true
 );
 
@@ -463,31 +495,29 @@ export const validateGetOrderRequest: RequestValidator = createRequestValidator(
 export const validateGetOrdersRequest: RequestValidator =
   createRequestValidator(
     [
+      validateOrderOwnerAddress,
+      validateOrderExchangeId,
       createValidator(
         null,
-        (values) => values && values.length,
+        (values) => (values.ids && values.ids.length) || values.ownerAddress,
         `No orders were informed.`,
         false
       ),
       createBatchValidator(
         [
           validateOrderClientId,
-          validateOrderExchangeId,
           createValidator(
             null,
             (request) =>
-              !(
-                request &&
-                request.ids === undefined &&
-                request.exchangeOrderIds === undefined
-              ),
+              request ||
+              request.ids === undefined ||
+              request.exchangeOrderIds === undefined,
             `No client ids or exchange ids were informed.`,
-            false
+            true
           ),
-          // validateOrderMarketName,
-          validateOrderOwnerAddress,
         ],
-        (_, index) => `Invalid get orders request at position ${index}:`
+        (_, index) => `Invalid get orders request at position ${index}:`,
+        'ids'
       ),
     ],
     StatusCodes.BAD_REQUEST
@@ -513,7 +543,7 @@ export const validatePlaceOrdersRequest: RequestValidator =
     [
       createValidator(
         null,
-        (values) => values && values.length,
+        (values) => values.orders && values.orders.length,
         `No orders were informed.`,
         false
       ),
@@ -528,7 +558,8 @@ export const validatePlaceOrdersRequest: RequestValidator =
           validateOrderType,
         ],
         (item, index) =>
-          `Invalid create orders request at position ${index} with id / exchange id "${item.id} / ${item.exchangeOrderId}":`
+          `Invalid create orders request at position ${index} with id / exchange id "${item.id} / ${item.exchangeOrderId}":`,
+        'orders'
       ),
     ],
     StatusCodes.BAD_REQUEST
