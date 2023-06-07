@@ -82,8 +82,8 @@ paths:
           description: OK
           schema:
             $ref: "#/definitions/AllMarketsResponse"
-#  /orderBook:
-#    get:
+  /orderBook:
+    get:
 #      description: Retrieves the order book for a specific market
 #      parameters:
 #        - in: query
@@ -91,11 +91,11 @@ paths:
 #          description: The ID of the market
 #          required: true
 #          type: string
-#      responses:
-#        "200":
-#          description: OK
-#          schema:
-#            $ref: "#/definitions/OrderBookResponse"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/OrderBookResponse"
 #  /orderBooks:
 #    get:
 #      description: Retrieves the order books for multiple markets
@@ -303,8 +303,8 @@ paths:
           description: OK
           schema:
             $ref: "#/definitions/AllMarketsWithdrawsResponse"
-#  /transaction:
-#    get:
+  /transaction:
+    get:
 #      description: Retrieves information about a specific transaction
 #      parameters:
 #        - in: query
@@ -312,35 +312,35 @@ paths:
 #          description: The ID of the transaction
 #          required: true
 #          type: string
-#      responses:
-#        "200":
-#          description: OK
-#          schema:
-#            $ref: "#/definitions/TransactionResponse"
-#  /transactions:
-#    get:
-#      description: Retrieves information about multiple transactions
-#      responses:
-#        "200":
-#          description: OK
-#          schema:
-#            $ref: "#/definitions/TransactionsResponse"
-#  /wallet/publicKey:
-#    get:
-#      description: Retrieves the public key of the wallet
-#      responses:
-#        "200":
-#          description: OK
-#          schema:
-#            $ref: "#/definitions/WalletPublicKeyResponse"
-#  /wallet/publicKeys:
-#    get:
-#      description: Retrieves the public keys of multiple wallets
-#      responses:
-#        "200":
-#          description: OK
-#          schema:
-#            $ref: "#/definitions/WalletsPublicKeysResponse"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/TransactionResponse_1"
+  /transactions:
+    get:
+      description: Retrieves information about multiple transactions
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/TransactionsResponse"
+  /wallet/publicKey:
+    get:
+      description: Retrieves the public key of the wallet
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/WalletPublicKeyResponse"
+  /wallet/publicKeys:
+    get:
+      description: Retrieves the public keys of multiple wallets
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/WalletsPublicKeysResponse"
 #  /block/current:
 #    get:
 #      description: Retrieves information about the current block
@@ -415,12 +415,188 @@ definitions:
         type: object
         $ref: "#/definitions/KujiraMarketResponse_DEMO_USK"
 
-#  OrderBookResponse:
-#    type: object
-#    properties:
-#      // Define properties for OrderBookResponse
+  OrderBookResponse:
+    type: object
+    properties:
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      bids:
+        type: object
+        $ref: "#/definitions/bids"
+      asks:
+        type: object
+        $ref: "#/definitions/asks"
+      bestBid:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.922"
+          amount:
+            type: string
+            example: "294608278"
+          side:
+            type: string
+            example: "BUY"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      bestAsk:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.925"
+          amount:
+            type: string
+            example: "318801543"
+          side:
+            type: string
+            example: "SELL"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      connectorOrderBook:
+        type: object
+        properties:
+          base:
+            type: object
+            properties:
+              0.937:
+                type: object
+                $ref: "#/definitions/0937"
+              0.942:
+                type: object
+                $ref: "#/definitions/0942"
+              0.946:
+                type: object
+                $ref: "#/definitions/0946"
+          quote:
+            type: object
+            properties:
+              0.922:
+                type: object
+                $ref: "#/definitions/0922"
+              0.829:
+                type: object
+                $ref: "#/definitions/0829"
+              0.88:
+                type: object
+                $ref: "#/definitions/088"
 
-#  OrderBooksResponse:
+  0937:
+    type: object
+    properties:
+      quote_price:
+        type: string
+        example: "0.937"
+      offer_denom:
+        type: object
+        properties:
+          native:
+            type: string
+            example: "ukuji"
+      total_offer_amount:
+        type: string
+        example: "2218314210"
+  0942:
+    type: object
+    properties:
+      quote_price:
+        type: string
+        example: "0.942"
+      offer_denom:
+        type: object
+        properties:
+          native:
+            type: string
+            example: "ukuji"
+      total_offer_amount:
+        type: string
+        example: "3159607369"
+  0946:
+    type: object
+    properties:
+      quote_price:
+        type: string
+        example: "0.946"
+      offer_denom:
+        type: object
+        properties:
+          native:
+            type: string
+            example: "ukuji"
+      total_offer_amount:
+        type: string
+        example: "3784035703"
+
+  0922:
+    type: object
+    properties:
+      quote_price:
+        type: string
+        example: "0.92"
+      offer_denom:
+        type: object
+        properties:
+          native:
+            type: string
+            example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+      total_offer_amount:
+        type: string
+        example: "588628515"
+  0829:
+    type: object
+    properties:
+      quote_price:
+        type: string
+        example: "0.829"
+      offer_denom:
+        type: object
+        properties:
+          native:
+            type: string
+            example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+      total_offer_amount:
+        type: string
+        example: "1"
+  088:
+    type: object
+    properties:
+      quote_price:
+        type: string
+        example: "0.829"
+      offer_denom:
+        type: object
+        properties:
+          native:
+            type: string
+            example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+      total_offer_amount:
+        type: string
+        example: "300000"
+
+
+  #  OrderBooksResponse:
 #    type: object
 #    properties:
 #      // Define properties for OrderBooksResponse
@@ -1156,25 +1332,67 @@ definitions:
             type: string
             example: "6975AE200A86AC0F1851AF2CC6E1BCA239DC976F299F03CA9A024AC31F518C14"
 
-  #  TransactionResponse:
-#    type: object
-#    properties:
-#      // Define properties for TransactionResponse
+  TransactionResponse_1:
+    type: object
+    properties:
+      hash:
+        type: string
+        example: "D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9"
+      blockNumber:
+        type: integer
+        example: 13248211
+      gasUsed:
+        type: integer
+        example: 186481
+      gasWanted:
+        type: integer
+        example: 218241
+      code:
+        type: integer
+        example: 0
+      data:
+        type: string
+        example: "..."
 
-#  TransactionsResponse:
-#    type: object
-#    properties:
-#      // Define properties for TransactionsResponse
+  TransactionResponse_2:
+    type: object
+    properties:
+      hash:
+        type: string
+        example: "50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91"
+      blockNumber:
+        type: integer
+        example: 13248197
+      gasUsed:
+        type: integer
+        example: 2238628
+      gasWanted:
+        type: integer
+        example: 2889683
+      code:
+        type: integer
+        example: 0
+      data:
+        type: string
+        example: "..."
 
-#  WalletPublicKeyResponse:
-#    type: object
-#    properties:
-#      // Define properties for WalletPublicKeyResponse
+  TransactionsResponse:
+    type: object
+    properties:
+      D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9:
+        $ref: "#/definitions/TransactionResponse_1"
+      50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91:
+        $ref: "#/definitions/TransactionResponse_2"
 
-#  WalletsPublicKeysResponse:
-#    type: object
-#    properties:
-#      // Define properties for WalletsPublicKeysResponse
+
+  WalletPublicKeyResponse:
+    type: string
+    example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+
+  WalletsPublicKeysResponse:
+    type: array
+    example: ["kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc",
+              "kujira1ecxw2jvl0ac2zjs3wvfm79zaz94tc98dxzah3c"]
 
 #  CurrentBlockResponse:
 #    type: object
@@ -1655,3 +1873,155 @@ definitions:
       unsettled:
         type: string
         example: "0"
+
+  bids:
+    type: object
+    properties:
+      unknown_104:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.92"
+          amount:
+            type: string
+            example: "588628515"
+          side:
+            type: string
+            example: "BUY"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      unknown_126:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.829"
+          amount:
+            type: string
+            example: "1"
+          side:
+            type: string
+            example: "BUY"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      unknown_115:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.88"
+          amount:
+            type: string
+            example: "300000"
+          side:
+            type: string
+            example: "BUY"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+
+  asks:
+    type: object
+    properties:
+      unknown_5:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.937"
+          amount:
+            type: string
+            example: "2218314210"
+          side:
+            type: string
+            example: "SELL"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      unknown_6:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.942"
+          amount:
+            type: string
+            example: "3159607369"
+          side:
+            type: string
+            example: "SELL"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      unknown_7:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.946"
+          amount:
+            type: string
+            example: "3784035703"
+          side:
+            type: string
+            example: "SELL"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
