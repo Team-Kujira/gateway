@@ -239,9 +239,12 @@ export const validateOrderSide: Validator = createValidator(
 
 export const validateOrderPrice: Validator = createValidator(
   'price',
-  (_, value) => typeof value === 'number' || isFloatString(value),
+  (_, value) =>
+    typeof value === 'undefined'
+      ? true
+      : typeof value === 'number' || isFloatString(value),
   (_, value) => `Invalid order price (${value}).`,
-  false
+  true
 );
 
 export const validateOrderAmount: Validator = createValidator(
@@ -267,7 +270,7 @@ export const validateGetTokenRequest: RequestValidator = createRequestValidator(
   [
     createValidator(
       null,
-      (request) => request.name,
+      (request) => request.id || request.name || request.symbol,
       `No token was informed. If you want to get a token, please inform the parameter "id".`,
       false
     ),
@@ -280,8 +283,11 @@ export const validateGetTokensRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.names && request.names.length,
-        `No tokens were informed. If you want to get all tokens, please do not inform the parameter "names".`,
+        (request) =>
+          (request.names && request.names.length) ||
+          (request.ids && request.ids.length) ||
+          (request.symbols && request.symbols.length),
+        `No tokens were informed. If you want to get all tokens, please do not inform the parameter "names" or "ids".`,
         false
       ),
     ],
@@ -299,7 +305,7 @@ export const validateGetMarketRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.name,
+        (request) => request.id || request.name,
         `No market was informed. If you want to get a market, please inform the parameter "name".`,
         false
       ),
@@ -312,7 +318,9 @@ export const validateGetMarketsRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.names && request.names.length,
+        (request) =>
+          (request.ids && request.ids.length) ||
+          (request.names && request.names.length),
         `No markets were informed. If you want to get all markets, please do not inform the parameter "names".`,
         false
       ),
@@ -331,7 +339,7 @@ export const validateGetOrderBookRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketId,
+        (request) => request.marketId || request.marketName,
         `No market name was informed. If you want to get an order book, please inform the parameter "marketId".`,
         false
       ),
@@ -344,7 +352,9 @@ export const validateGetOrderBooksRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketIds && request.marketIds.length,
+        (request) =>
+          (request.marketIds && request.marketIds.length) ||
+          (request.marketNames && request.marketNames.length),
         `No market names were informed. If you want to get all order books, please do not inform the parameter "marketIds".`,
         false
       ),
@@ -363,7 +373,7 @@ export const validateGetTickerRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketId,
+        (request) => request.marketId || request.marketName,
         `No market name was informed. If you want to get a ticker, please inform the parameter "marketId".`,
         false
       ),
@@ -376,7 +386,9 @@ export const validateGetTickersRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketIds && request.marketIds.length,
+        (request) =>
+          (request.marketIds && request.marketIds.length) ||
+          (request.marketNames && request.marketNames.length),
         `No market names were informed. If you want to get all tickers, please do not inform the parameter "marketIds".`,
         false
       ),
@@ -395,7 +407,9 @@ export const validateGetBalanceRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketId,
+        (request) =>
+          (request.tokenId && request.ownerAddress) ||
+          (request.tokenSymbol && request.ownerAddress),
         `No market name was informed. If you want to get a balance, please inform the parameter "marketId".`,
         false
       ),
@@ -408,7 +422,9 @@ export const validateGetBalancesRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request.marketIds && request.marketIds.length,
+        (request) =>
+          (request.tokenIds && request.ownerAddress) ||
+          (request.tokenSymbols && request.ownerAddress),
         `No market names were informed. If you want to get all balances, please do not inform the parameter "marketIds".`,
         false
       ),
