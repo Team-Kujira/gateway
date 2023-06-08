@@ -232,10 +232,17 @@ export const validateOrderExchangeIds: Validator = createValidator(
 );
 
 export const validateOrderMarketName: Validator = createValidator(
-  'marketId',
+  'marketName',
   (_, value) => value.trim().length,
   (_, value) => `Invalid market name (${value}).`,
-  false
+  true
+);
+
+export const validateOrderMarketId: Validator = createValidator(
+  'marketId',
+  (_, value) => value.trim().length && value.trim().slice(0, 6) === 'kujira',
+  (_, value) => `Invalid market id (${value}).`,
+  true
 );
 
 export const validateOrderMarketNames: Validator = createValidator(
@@ -295,7 +302,7 @@ export const validateOrderType: Validator = createValidator(
           .map((item) => item.toLowerCase())
           .includes(value.toLowerCase()),
   (_, value) => `Invalid order type (${value}).`,
-  true
+  false
 );
 
 export const validateGetTokenRequest: RequestValidator = createRequestValidator(
@@ -543,22 +550,64 @@ export const validatePlaceOrdersRequest: RequestValidator =
     [
       createValidator(
         null,
-        (values) => values.orders && values.orders.length,
+        (request) => request.orders && request.orders.length,
         `No orders were informed.`,
         false
       ),
+      validateOrderOwnerAddress ||
+        createBatchValidator(
+          [validateOrderOwnerAddress],
+          (index) => `No ownerAddress were informed in the order "${index}`,
+          'orders'
+        ),
+      // createBatchValidator(
+      //   [
+      //     createValidator(
+      //       null,
+      //       (order) => order.marketId || order.marketName,
+      //       `No market informed for any orders...`,
+      //       false
+      //     ),
+      //   ],
+      //   (index) => `No market name were informed in the order "${index}`,
+      //   'orders'
+      // ),
       createBatchValidator(
         [
-          validateOrderClientId,
-          validateOrderMarketName,
-          validateOrderOwnerAddress,
+          createValidator(
+            null,
+            (order) => {
+              if (order.marketId) {
+                createBatchValidator(
+                  [validateOrderMarketId],
+                  (item) => `Invalid marketId at order ${item}`,
+                  '[order]'
+                );
+                return order.marketId;
+              } else if (order.marketName) {
+                createBatchValidator(
+                  [validateOrderMarketName],
+                  (item) => `Invalid marketId at order ${item}`,
+                  '[order]'
+                );
+                return order.marketName;
+              }
+            },
+            `No market informed for any orders...`,
+            false
+          ),
+        ],
+        (index) => `No market name were informed in the order "${index}`,
+        'orders'
+      ),
+      createBatchValidator(
+        [
           validateOrderSide,
           validateOrderPrice,
           validateOrderAmount,
           validateOrderType,
         ],
-        (item, index) =>
-          `Invalid create orders request at position ${index} with id / exchange id "${item.id} / ${item.exchangeOrderId}":`,
+        (index) => `Invalid order request body  at position ${index}`,
         'orders'
       ),
     ],
