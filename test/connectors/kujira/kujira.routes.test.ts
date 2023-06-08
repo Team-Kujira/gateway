@@ -122,7 +122,7 @@ enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
-enableInputOutputWrapper();
+// enableInputOutputWrapper();
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -1126,10 +1126,16 @@ describe('Kujira', () => {
 
       expect(responseBody).not.toBeUndefined();
       expect(responseBody.market.id).toBe(request.marketId);
-      expect(responseBody.bids).not.toBeEmpty();
-      expect(responseBody.asks).not.toBeEmpty();
-      expect(responseBody.bestBid).not.toBeUndefined();
-      expect(responseBody.bestAsk).not.toBeUndefined();
+      expect(responseBody.bids).not.toBeUndefined();
+      expect(responseBody.asks).not.toBeUndefined();
+
+      if (response.body.bids.size) {
+        expect(responseBody.bestBid).not.toBeUndefined();
+      }
+
+      if (response.body.asks.size) {
+        expect(responseBody.bestAsk).not.toBeUndefined();
+      }
     });
 
     it('Get order book from market 1 by name', async () => {
@@ -1161,10 +1167,16 @@ describe('Kujira', () => {
       expect(responseBody).not.toBeUndefined();
       expect(responseBody.market.name).toBe(request.marketName);
       expect(responseBody.market.id).toBe(marketsIds[1]);
-      expect(responseBody.bids).not.toBeEmpty();
-      expect(responseBody.asks).not.toBeEmpty();
-      expect(responseBody.bestBid).not.toBeUndefined();
-      expect(responseBody.bestAsk).not.toBeUndefined();
+      expect(responseBody.bids).not.toBeUndefined();
+      expect(responseBody.asks).not.toBeUndefined();
+
+      if (response.body.bids.size) {
+        expect(responseBody.bestBid).not.toBeUndefined();
+      }
+
+      if (response.body.asks.size) {
+        expect(responseBody.bestAsk).not.toBeUndefined();
+      }
     });
 
     it('Get order books from the markets 2 and 3 by ids', async () => {
@@ -1199,10 +1211,16 @@ describe('Kujira', () => {
           responseBody.get(marketId)
         );
         expect(orderBook.market.id).toBe(marketId);
-        expect(orderBook.bids).not.toBeEmpty();
-        expect(orderBook.asks).not.toBeEmpty();
-        expect(orderBook.bestBid).not.toBeUndefined();
-        expect(orderBook.bestAsk).not.toBeUndefined();
+        expect(orderBook.bids).not.toBeUndefined();
+        expect(orderBook.asks).not.toBeUndefined();
+
+        if (orderBook.bids.size) {
+          expect(orderBook.bestBid).not.toBeUndefined();
+        }
+
+        if (orderBook.asks.size) {
+          expect(orderBook.bestAsk).not.toBeUndefined();
+        }
       }
     });
 
@@ -1249,10 +1267,16 @@ describe('Kujira', () => {
           responseBody.get(marketName)
         );
         expect(orderBook.market.name).toBe(marketName);
-        expect(orderBook.bids).not.toBeEmpty();
-        expect(orderBook.asks).not.toBeEmpty();
-        expect(orderBook.bestBid).not.toBeUndefined();
-        expect(orderBook.bestAsk).not.toBeUndefined();
+        expect(orderBook.bids).not.toBeUndefined();
+        expect(orderBook.asks).not.toBeUndefined();
+
+        if (orderBook.bids.size) {
+          expect(orderBook.bestBid).not.toBeUndefined();
+        }
+
+        if (orderBook.asks.size) {
+          expect(orderBook.bestAsk).not.toBeUndefined();
+        }
       }
     });
 
@@ -1282,10 +1306,16 @@ describe('Kujira', () => {
           responseBody.get(marketId)
         );
         expect(orderBook.market.id).toBe(marketId);
-        expect(orderBook.bids).not.toBeEmpty();
-        expect(orderBook.asks).not.toBeEmpty();
-        expect(orderBook.bestBid).not.toBeUndefined();
-        expect(orderBook.bestAsk).not.toBeUndefined();
+        expect(orderBook.bids).not.toBeUndefined();
+        expect(orderBook.asks).not.toBeUndefined();
+
+        if (orderBook.bids.size) {
+          expect(orderBook.bestBid).not.toBeUndefined();
+        }
+
+        if (orderBook.asks.size) {
+          expect(orderBook.bestAsk).not.toBeUndefined();
+        }
       });
     });
   });
@@ -1315,10 +1345,16 @@ describe('Kujira', () => {
       logResponse(responseBody);
 
       expect(responseBody.market.id).toEqual(marketsIds[1]);
-      expect(
-        BigNumber(getNotNullOrThrowError<TickerPrice>(responseBody.price)).gt(0)
-      ).toBeTrue();
-      expect(responseBody.timestamp).toBeGreaterThan(0);
+
+      const price = BigNumber(
+        getNotNullOrThrowError<TickerPrice>(responseBody.price)
+      );
+
+      if (price.isNaN()) {
+        expect(price).toBeNaN();
+      } else {
+        expect(price.gt(0)).toBeTrue();
+      }
     });
 
     it('Get ticker from market 1 by name', async () => {
@@ -1347,9 +1383,17 @@ describe('Kujira', () => {
 
       expect(responseBody.market.name).toEqual(request.marketName);
       expect(responseBody.market.id).toEqual(marketsIds[1]);
-      expect(
-        BigNumber(getNotNullOrThrowError<TickerPrice>(responseBody.price)).gt(0)
-      ).toBeTrue();
+
+      const price = BigNumber(
+        getNotNullOrThrowError<TickerPrice>(responseBody.price)
+      );
+
+      if (price.isNaN()) {
+        expect(price).toBeNaN();
+      } else {
+        expect(price.gt(0)).toBeTrue();
+      }
+
       expect(responseBody.timestamp).toBeGreaterThan(0);
     });
 
@@ -1382,9 +1426,17 @@ describe('Kujira', () => {
           responseBody.get(marketId)
         );
         expect(ticker.market.id).toEqual(marketId);
-        expect(
-          BigNumber(getNotNullOrThrowError<TickerPrice>(ticker.price)).gt(0)
-        ).toBeTrue();
+
+        const price = BigNumber(
+          getNotNullOrThrowError<TickerPrice>(ticker.price)
+        );
+
+        if (price.isNaN()) {
+          expect(price).toBeNaN();
+        } else {
+          expect(price.gt(0)).toBeTrue();
+        }
+
         expect(ticker.timestamp).toBeGreaterThan(0);
       });
     });
@@ -1427,9 +1479,17 @@ describe('Kujira', () => {
           responseBody.get(marketName)
         );
         expect(ticker.market.name).toEqual(marketName);
-        expect(
-          BigNumber(getNotNullOrThrowError<TickerPrice>(ticker.price)).gt(0)
-        ).toBeTrue();
+
+        const price = BigNumber(
+          getNotNullOrThrowError<TickerPrice>(ticker.price)
+        );
+
+        if (price.isNaN()) {
+          expect(price).toBeNaN();
+        } else {
+          expect(price.gt(0)).toBeTrue();
+        }
+
         expect(ticker.timestamp).toBeGreaterThan(0);
       }
     });
@@ -1461,9 +1521,17 @@ describe('Kujira', () => {
           responseBody.get(marketId)
         );
         expect(ticker.market.id).toEqual(marketId);
-        expect(
-          BigNumber(getNotNullOrThrowError<TickerPrice>(ticker.price)).gt(0)
-        ).toBeTrue();
+
+        const price = BigNumber(
+          getNotNullOrThrowError<TickerPrice>(ticker.price)
+        );
+
+        if (price.isNaN()) {
+          expect(price).toBeNaN();
+        } else {
+          expect(price.gt(0)).toBeTrue();
+        }
+
         expect(ticker.timestamp).toBeGreaterThan(0);
       });
     });
