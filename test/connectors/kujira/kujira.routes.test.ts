@@ -122,7 +122,7 @@ enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
-// enableInputOutputWrapper();
+enableInputOutputWrapper();
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
