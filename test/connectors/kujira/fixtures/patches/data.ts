@@ -196,7 +196,6 @@ data.set(`["kujira","kujiraQueryClientWasmQueryContractSmart","Kujira Orders Can
 data.set(`["kujira","kujiraQueryClientWasmQueryContractSmart","Kujira Orders Cancel all open orders - 1",10]`, {"orders":[]});
 data.set(`["kujira","kujiraQueryClientWasmQueryContractSmart","Kujira Orders Cancel all open orders - 1",11]`, {"orders":[]});
 data.set(`["kujira","kujiraQueryClientWasmQueryContractSmart","Kujira Orders Cancel all open orders - 1",12]`, {"orders":[]});
-data.set(`["kujira","decryptWallet","Kujira Orders Settle funds for all markets - 1",2]`, {"mnemonic":"squirrel crime sweet yard news dentist chronic mad drive ski vapor bottom","accountNumber":0,"publicKey":"kujira1yrensec9gzl7y3t3duz44efzgwj2qv6gwayrn7"});
 data.set(`["kujira","kujiraQueryClientWasmQueryContractSmart","Kujira Orders Settle funds for all markets - 1",3]`, {"orders":[]});
 data.set(`["kujira","kujiraQueryClientWasmQueryContractSmart","Kujira Orders Settle funds for all markets - 1",4]`, {"orders":[]});
 data.set(`["kujira","kujiraQueryClientWasmQueryContractSmart","Kujira Orders Settle funds for all markets - 1",5]`, {"orders":[]});

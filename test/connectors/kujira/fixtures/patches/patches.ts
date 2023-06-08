@@ -87,7 +87,7 @@ export const createPatches = (
 
       const dataKey = ['kujira', 'decryptWallet', testTitle, ordinal];
 
-      const key: string = JSON.stringify(dataKey);
+      // const key: string = JSON.stringify(dataKey);
 
       if (useInputOutputWrapper) {
         return await inputOutputWrapper<any>(
@@ -98,7 +98,11 @@ export const createPatches = (
         );
       }
 
-      return data.get(key) as any;
+      return {
+        mnemonic: data.get('KUJIRA_MNEMONIC'),
+        accountNumber: data.get('KUJIRA_ACCOUNT_NUMBER'),
+        publicKey: data.get('KUJIRA_PUBLIC_KEY'),
+      } as any;
     });
   });
 
