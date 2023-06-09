@@ -122,7 +122,9 @@ enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
-// enableInputOutputWrapper();
+enableInputOutputWrapper();
+
+const requestStrategy = RequestStrategy.Controller;
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -218,7 +220,8 @@ beforeAll(async () => {
   configManager.set('kujira.parallel.all.delayBetweenBatches', 1);
   configManager.set(
     'kujira.rpcEndpoint',
-    'https://test-rpc-kujira.mintthemoon.xyz/'
+    // 'https://test-rpc-kujira.mintthemoon.xyz/'
+    'https://kujira-testnet-rpc.polkachu.com/'
   );
 
   expressApp = express();
@@ -512,7 +515,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   sendRequest = <R>(options: SendRequestOptions<R>) => {
-    options.strategy = options.strategy || RequestStrategy.RESTful;
+    options.strategy = options.strategy || requestStrategy;
     options.RESTExpress = options.RESTExpress || expressApp;
     options.RESTRoute = `/kujira${options.RESTRoute}`;
     options.controller = options.controller || kujira;
