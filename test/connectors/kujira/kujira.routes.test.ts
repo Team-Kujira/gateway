@@ -122,7 +122,7 @@ enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
-enableInputOutputWrapper();
+// enableInputOutputWrapper();
 
 const requestStrategy = RequestStrategy.RESTful;
 
@@ -213,16 +213,52 @@ let expressApp: Express;
 
 beforeAll(async () => {
   const configManager = ConfigManagerV2.getInstance();
-  configManager.set('kujira.timeout.all', 1);
-  configManager.set('kujira.retry.all.maxNumberOfRetries', 1);
-  configManager.set('kujira.retry.all.delayBetweenRetries', 1);
-  configManager.set('kujira.parallel.all.batchSize', 100);
-  configManager.set('kujira.parallel.all.delayBetweenBatches', 1);
+
+  configManager.set('kujira.network', 'testnet');
+  // configManager.set('kujira.rpcEndpoint', null);
+  configManager.set('kujira.prefix', 'kujira');
+  configManager.set('kujira.accountNumber', 0);
+  configManager.set('kujira.gasPrice', 0.00125);
+  configManager.set('kujira.gasPriceSuffix', 'ukuji');
+  configManager.set('kujira.gasLimitEstimate', 0.009147);
+  configManager.set('kujira.orderBook.offset', 0);
+  configManager.set('kujira.orderBook.limit', 255);
+  configManager.set('kujira.cache.marketsData', 3600);
+  configManager.set('kujira.cache.markets', 3600);
+  configManager.set('kujira.orders.create.fee', 'auto');
+  configManager.set('kujira.orders.create.maxPerTransaction', 8);
+  configManager.set('kujira.orders.open.limit', 255);
+  configManager.set('kujira.orders.filled.limit', 255);
+  configManager.set('kujira.orders.cancel.maxPerTransaction', 25);
+  // configManager.set('kujira.tokens.url', null);
+  // configManager.set('kujira.tokens.allowed', null);
+  // configManager.set('kujira.tokens.disallowed', null);
+  configManager.set('kujira.tokens.resolutionStrategy', 'markets');
+  // configManager.set('kujira.markets.url', null);
+  // configManager.set('kujira.markets.allowed', null);
+  // configManager.set('kujira.markets.disallowed', null);
+  // configManager.set('kujira.tickers.sources.orderBookSimpleAveragePrice', null);
+  // configManager.set(
+  //   'kujira.tickers.sources.orderBookWeightedAveragePrice',
+  //   null
+  // );
+  // configManager.set(
+  //   'kujira.tickers.sources.orderBookVolumeWeightedAveragePrice',
+  //   null
+  // );
+  // configManager.set('kujira.tickers.sources.lastFilledOrder', null);
   configManager.set(
-    'kujira.rpcEndpoint',
-    // 'https://test-rpc-kujira.mintthemoon.xyz/'
-    'https://kujira-testnet-rpc.polkachu.com/'
+    'kujira.tickers.sources.nomics.url',
+    'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&interval=1m&market=${marketAddress}'
   );
+  configManager.set('kujira.transactions.merge.createOrders', true);
+  configManager.set('kujira.transactions.merge.cancelOrders', true);
+  configManager.set('kujira.transactions.merge.settleFunds', true);
+  configManager.set('kujira.retry.all.maxNumberOfRetries', 3);
+  configManager.set('kujira.retry.all.delayBetweenRetries', 200);
+  configManager.set('kujira.timeout.all', 60000);
+  configManager.set('kujira.parallel.all.batchSize', 100);
+  configManager.set('kujira.parallel.all.delayBetweenBatches', 200);
 
   expressApp = express();
   expressApp.use(express.json());
