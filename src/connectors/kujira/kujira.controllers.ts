@@ -75,45 +75,46 @@ import {
   TransactionNotFoundError,
   WalletPublicKeyNotFoundError,
 } from './kujira.types';
-// import {
-// validateCancelAllOrdersRequest,
-// validateCancelOrderRequest,
-// validateCancelOrdersRequest,
-// validateGetAllBalancesRequest,
-// validateGetAllMarketsRequest,
-// validateGetAllOrderBooksRequest,
-// validateGetAllTickersRequest,
-// validateGetAllTokensRequest,
-// validateGetBalanceRequest,
-// validateGetBalancesRequest,
-// validateGetCurrentBlockRequest,
-// validateGetEstimatedFeesRequest,
-// validateGetMarketRequest,
-// validateGetMarketsRequest,
-// validateGetOrderBookRequest,
-// validateGetOrderBooksRequest,
-// validateGetOrderRequest,
-// validateGetOrdersRequest,
-// validateGetTickerRequest,
-// validateGetTickersRequest,
-// validateGetTokenRequest,
-// validateGetTokensRequest,
-// validateGetTransactionRequest,
-// validateGetTransactionsRequest,
-// validateGetWalletPublicKeyRequest,
-// validateGetWalletsPublicKeysRequest,
-// validatePlaceOrderRequest,
-// validatePlaceOrdersRequest,
-// validateSettleAllMarketsFundsRequest,
-// validateSettleMarketFundsRequest,
-// validateSettleMarketsFundsRequest,
-// } from './kujira.// validators';
+import {
+  validateCancelAllOrdersRequest,
+  validateCancelOrderRequest,
+  validateCancelOrdersRequest,
+  validateGetAllBalancesRequest,
+  validateGetAllMarketsRequest,
+  validateGetAllOrderBooksRequest,
+  validateGetAllOrdersRequest,
+  validateGetAllTickersRequest,
+  validateGetAllTokensRequest,
+  validateGetBalanceRequest,
+  validateGetBalancesRequest,
+  validateGetCurrentBlockRequest,
+  validateGetEstimatedFeesRequest,
+  validateGetMarketRequest,
+  validateGetMarketsRequest,
+  validateGetOrderBookRequest,
+  validateGetOrderBooksRequest,
+  validateGetOrderRequest,
+  validateGetOrdersRequest,
+  validateGetTickerRequest,
+  validateGetTickersRequest,
+  validateGetTokenRequest,
+  validateGetTokensRequest,
+  validateGetTransactionRequest,
+  validateGetTransactionsRequest,
+  validateGetWalletPublicKeyRequest,
+  validateGetWalletsPublicKeysRequest,
+  validatePlaceOrderRequest,
+  validatePlaceOrdersRequest,
+  validateSettleAllMarketsFundsRequest,
+  validateSettleMarketFundsRequest,
+  validateSettleMarketsFundsRequest,
+} from './kujira.validators';
 
 export async function getToken(
   connector: Connector,
   request: GetTokenRequest
 ): Promise<ResponseWrapper<GetTokenResponse>> {
-  // validateGetTokenRequest(request); // TODO - Verify this // validator!!!
+  validateGetTokenRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetTokenResponse>();
 
@@ -136,7 +137,7 @@ export async function getTokens(
   connector: Connector,
   request: GetTokensRequest
 ): Promise<ResponseWrapper<GetTokensResponse>> {
-  // validateGetTokensRequest(request); // TODO - Verify this // validator!!!
+  validateGetTokensRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetTokensResponse>();
 
@@ -159,7 +160,7 @@ export async function getAllTokens(
   connector: Connector,
   request: GetAllTokensRequest
 ): Promise<ResponseWrapper<GetAllTokensResponse>> {
-  // validateGetAllTokensRequest(request);
+  validateGetAllTokensRequest(request);
 
   const response = new ResponseWrapper<GetAllTokensResponse>();
 
@@ -184,7 +185,7 @@ export async function getMarket(
   connector: Connector,
   request: GetMarketRequest
 ): Promise<ResponseWrapper<GetMarketResponse>> {
-  // validateGetMarketRequest(request); // TODO - Verify this // validator!!!
+  validateGetMarketRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetMarketResponse>();
 
@@ -207,7 +208,7 @@ export async function getMarkets(
   connector: Connector,
   request: GetMarketsRequest
 ): Promise<ResponseWrapper<GetMarketsResponse>> {
-  // validateGetMarketsRequest(request); // TODO - Verify this // validator!!!
+  validateGetMarketsRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetMarketsResponse>();
 
@@ -230,7 +231,7 @@ export async function getAllMarkets(
   connector: Connector,
   request: GetAllMarketsRequest
 ): Promise<ResponseWrapper<GetAllMarketsResponse>> {
-  // validateGetAllMarketsRequest(request);
+  validateGetAllMarketsRequest(request);
 
   const response = new ResponseWrapper<GetAllMarketsResponse>();
 
@@ -255,7 +256,7 @@ export async function getOrderBook(
   connector: Connector,
   request: GetOrderBookRequest
 ): Promise<ResponseWrapper<GetOrderBookResponse>> {
-  // validateGetOrderBookRequest(request); // TODO - Verify this // validator!!!
+  validateGetOrderBookRequest(request);
 
   const response = new ResponseWrapper<GetOrderBookResponse>();
 
@@ -280,7 +281,7 @@ export async function getOrderBooks(
   connector: Connector,
   request: GetOrderBooksRequest
 ): Promise<ResponseWrapper<GetOrderBooksResponse>> {
-  // validateGetOrderBooksRequest(request);
+  validateGetOrderBooksRequest(request);
 
   const response = new ResponseWrapper<GetOrderBooksResponse>();
 
@@ -305,7 +306,7 @@ export async function getAllOrderBooks(
   connector: Connector,
   request: GetAllOrderBooksRequest
 ): Promise<ResponseWrapper<GetAllOrderBooksResponse>> {
-  // validateGetAllOrderBooksRequest(request);
+  validateGetAllOrderBooksRequest(request);
 
   const response = new ResponseWrapper<GetAllOrderBooksResponse>();
 
@@ -330,7 +331,7 @@ export async function getTicker(
   connector: Connector,
   request: GetTickerRequest
 ): Promise<ResponseWrapper<GetTickerResponse>> {
-  // validateGetTickerRequest(request); // TODO - Verify this // validator!!!
+  validateGetTickerRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetTickerResponse>();
 
@@ -353,7 +354,7 @@ export async function getTickers(
   connector: Connector,
   request: GetTickersRequest
 ): Promise<ResponseWrapper<GetTickersResponse>> {
-  // validateGetTickersRequest(request); // TODO - Verify this // validator!!!
+  validateGetTickersRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetTickersResponse>();
 
@@ -376,7 +377,7 @@ export async function getAllTickers(
   connector: Connector,
   request: GetAllTickersRequest
 ): Promise<ResponseWrapper<GetAllTickersResponse>> {
-  // validateGetAllTickersRequest(request);
+  validateGetAllTickersRequest(request);
 
   const response = new ResponseWrapper<GetAllTickersResponse>();
 
@@ -401,7 +402,7 @@ export async function getBalance(
   connector: Connector,
   request: GetBalanceRequest
 ): Promise<ResponseWrapper<GetBalanceResponse>> {
-  // validateGetBalanceRequest(request); // TODO - Verify this // validator!!!
+  validateGetBalanceRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetBalanceResponse>();
 
@@ -424,7 +425,7 @@ export async function getBalances(
   connector: Connector,
   request: GetBalancesRequest
 ): Promise<ResponseWrapper<GetBalancesResponse>> {
-  // validateGetBalancesRequest(request); // TODO - Verify this // validator!!!
+  validateGetBalancesRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<GetBalancesResponse>();
 
@@ -447,7 +448,7 @@ export async function getAllBalances(
   connector: Connector,
   request: GetAllBalancesRequest
 ): Promise<ResponseWrapper<GetAllBalancesResponse>> {
-  // validateGetAllBalancesRequest(request);
+  validateGetAllBalancesRequest(request);
 
   const response = new ResponseWrapper<GetAllBalancesResponse>();
 
@@ -472,7 +473,7 @@ export async function getOrder(
   connector: Connector,
   request: GetOrderRequest
 ): Promise<ResponseWrapper<GetOrderResponse>> {
-  // validateGetOrderRequest(request);
+  validateGetOrderRequest(request);
 
   const response = new ResponseWrapper<GetOrderResponse>();
 
@@ -495,7 +496,18 @@ export async function getOrders(
   connector: Connector,
   request: GetOrdersRequest
 ): Promise<ResponseWrapper<GetOrdersResponse>> {
-  // validateGetOrdersRequest(request); // TODO - Verify this // validator!!!
+  if (request.ids) {
+    validateGetOrdersRequest(request);
+  } else if (
+    request.marketId ||
+    request.marketIds ||
+    request.marketName ||
+    request.marketNames ||
+    request.status ||
+    request.statuses
+  ) {
+    validateGetAllOrdersRequest(request);
+  }
 
   const response = new ResponseWrapper<GetOrdersResponse>();
 
@@ -518,7 +530,7 @@ export async function placeOrder(
   connector: Connector,
   request: PlaceOrderRequest
 ): Promise<ResponseWrapper<PlaceOrderResponse>> {
-  // validatePlaceOrderRequest(request); // TODO - Verify this // validator!!!
+  validatePlaceOrderRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<PlaceOrderResponse>();
 
@@ -533,7 +545,7 @@ export async function placeOrders(
   connector: Connector,
   request: PlaceOrdersRequest
 ): Promise<ResponseWrapper<PlaceOrdersResponse>> {
-  // validatePlaceOrdersRequest(request);
+  validatePlaceOrdersRequest(request);
 
   const response = new ResponseWrapper<PlaceOrdersResponse>();
 
@@ -548,7 +560,7 @@ export async function cancelOrder(
   connector: Connector,
   request: CancelOrderRequest
 ): Promise<ResponseWrapper<CancelOrderResponse>> {
-  // validateCancelOrderRequest(request);
+  validateCancelOrderRequest(request);
 
   const response = new ResponseWrapper<CancelOrderResponse>();
 
@@ -571,7 +583,7 @@ export async function cancelOrders(
   connector: Connector,
   request: CancelOrdersRequest
 ): Promise<ResponseWrapper<CancelOrdersResponse>> {
-  // validateCancelOrdersRequest(request); // TODO - Verify this // validator!!!
+  validateCancelOrdersRequest(request); // TODO - Verify this // validator!!!
 
   const response = new ResponseWrapper<CancelOrdersResponse>();
 
@@ -596,7 +608,7 @@ export async function cancelAllOrders(
   connector: Connector,
   request: CancelAllOrdersRequest
 ): Promise<ResponseWrapper<CancelAllOrdersResponse>> {
-  // validateCancelAllOrdersRequest(request);
+  validateCancelAllOrdersRequest(request);
 
   const response = new ResponseWrapper<CancelAllOrdersResponse>();
 
@@ -613,7 +625,7 @@ export async function widthdrawFromMarket(
   connector: Connector,
   request: MarketWithdrawRequest
 ): Promise<ResponseWrapper<MarketWithdrawResponse>> {
-  // validateSettleMarketFundsRequest(request);
+  validateSettleMarketFundsRequest(request);
 
   const response = new ResponseWrapper<MarketWithdrawResponse>();
 
@@ -638,7 +650,7 @@ export async function withdrawsFromMarkets(
   connector: Connector,
   request: MarketsWithdrawsRequest
 ): Promise<ResponseWrapper<MarketsWithdrawsFundsResponse>> {
-  // validateSettleMarketsFundsRequest(request);
+  validateSettleMarketsFundsRequest(request);
 
   const response = new ResponseWrapper<MarketsWithdrawsFundsResponse>();
 
@@ -663,7 +675,7 @@ export async function withdrawFromAllMarkets(
   connector: Connector,
   request: AllMarketsWithdrawsRequest
 ): Promise<ResponseWrapper<AllMarketsWithdrawsResponse>> {
-  // validateSettleAllMarketsFundsRequest(request);
+  validateSettleAllMarketsFundsRequest(request);
 
   const response = new ResponseWrapper<AllMarketsWithdrawsResponse>();
 
@@ -680,7 +692,7 @@ export async function getWalletPublicKey(
   connector: Connector,
   request: GetWalletPublicKeyRequest
 ): Promise<ResponseWrapper<GetWalletPublicKeyResponse>> {
-  // validateGetWalletPublicKeyRequest(request);
+  validateGetWalletPublicKeyRequest(request);
 
   const response = new ResponseWrapper<GetWalletPublicKeyResponse>();
 
@@ -705,7 +717,7 @@ export async function getWalletsPublicKeys(
   connector: Connector,
   request: GetWalletsPublicKeysRequest
 ): Promise<ResponseWrapper<GetWalletsPublicKeysResponse>> {
-  // validateGetWalletsPublicKeysRequest(request);
+  validateGetWalletsPublicKeysRequest(request);
 
   const response = new ResponseWrapper<GetWalletsPublicKeysResponse>();
 
@@ -730,7 +742,7 @@ export async function getTransaction(
   connector: Connector,
   request: GetTransactionRequest
 ): Promise<ResponseWrapper<GetTransactionResponse>> {
-  // validateGetTransactionRequest(request);
+  validateGetTransactionRequest(request);
 
   const response = new ResponseWrapper<GetTransactionResponse>();
 
@@ -755,7 +767,7 @@ export async function getTransactions(
   connector: Connector,
   request: GetTransactionsRequest
 ): Promise<ResponseWrapper<GetTransactionsResponse>> {
-  // validateGetTransactionsRequest(request);
+  validateGetTransactionsRequest(request);
 
   const response = new ResponseWrapper<GetTransactionsResponse>();
 
@@ -780,7 +792,7 @@ export async function getCurrentBlock(
   connector: Connector,
   request: GetCurrentBlockRequest
 ): Promise<ResponseWrapper<GetCurrentBlockResponse>> {
-  // validateGetCurrentBlockRequest(request);
+  validateGetCurrentBlockRequest(request);
 
   const response = new ResponseWrapper<GetCurrentBlockResponse>();
 
@@ -797,7 +809,7 @@ export async function getEstimatedFees(
   connector: Connector,
   request: GetEstimatedFeesRequest
 ): Promise<ResponseWrapper<GetEstimatedFeesResponse>> {
-  // validateGetEstimatedFeesRequest(request);
+  validateGetEstimatedFeesRequest(request);
 
   const response = new ResponseWrapper<GetEstimatedFeesResponse>();
 

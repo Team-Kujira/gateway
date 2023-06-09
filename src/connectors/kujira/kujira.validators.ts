@@ -4,7 +4,7 @@ import {
   isFloatString,
   isNaturalNumberString,
 } from '../../services/validators';
-import { OrderSide, OrderType } from './kujira.types';
+import { OrderSide, OrderType, OrderStatus } from './kujira.types';
 
 type Validator = <Item>(
   item: undefined | null | any | Item,
@@ -238,15 +238,8 @@ export const validateOrderMarketName: Validator = createValidator(
   true
 );
 
-export const validateOrderMarketId: Validator = createValidator(
-  'marketId',
-  (_, value) => value.trim().length && value.trim().slice(0, 6) === 'kujira',
-  (_, value) => `Invalid market id (${value}).`,
-  true
-);
-
 export const validateOrderMarketNames: Validator = createValidator(
-  'marketIds',
+  'marketNames',
   (_, values) => {
     let ok = true;
     values === undefined
@@ -255,6 +248,29 @@ export const validateOrderMarketNames: Validator = createValidator(
     return ok;
   },
   `Invalid market names, it needs to be an array of strings.`,
+  true
+);
+
+export const validateOrderMarketId: Validator = createValidator(
+  'marketId',
+  (_, value) => value.trim().length && value.trim().slice(0, 6) === 'kujira',
+  (_, value) => `Invalid market id (${value}).`,
+  true
+);
+
+export const validateAllMarketIds: Validator = createValidator(
+  'marketIds',
+  (_, values) => {
+    let ok = true;
+    values === undefined
+      ? (ok = true)
+      : values.map(
+          (item: any) =>
+            (ok = item.trim().length && item.trim().slice(0, 6) === 'kujira')
+        );
+    return ok;
+  },
+  `Invalid market ids, it needs to be an array of strings.`,
   true
 );
 
@@ -302,6 +318,22 @@ export const validateOrderType: Validator = createValidator(
           .map((item) => item.toLowerCase())
           .includes(value.toLowerCase()),
   (_, value) => `Invalid order type (${value}).`,
+  false
+);
+
+export const validateOrderStatus: Validator = createValidator(
+  'status',
+  (_, value) =>
+    value === undefined ? true : Object.values(OrderStatus).includes(value),
+  (_, value) => `Invalid order(s) status (${value}).`,
+  false
+);
+
+export const validateOrderStatuses: Validator = createValidator(
+  'statuses',
+  (_, values) =>
+    values === undefined ? true : Object.values(OrderStatus).includes(values),
+  (_, values) => `Invalid order(s) status (${values}).`,
   false
 );
 
@@ -416,6 +448,20 @@ export const validateGetTickerRequest: RequestValidator =
         `No market name was informed. If you want to get a ticker, please inform the parameter "marketId".`,
         false
       ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.marketId) {
+            createRequestValidator([validateOrderMarketId]);
+            return request.marketId;
+          } else if (request.marketName) {
+            createRequestValidator([validateOrderMarketName]);
+            return request.marketName;
+          }
+        },
+        `No market informed. Informe a market id or market name.`,
+        false
+      ),
     ],
     StatusCodes.BAD_REQUEST
   );
@@ -528,6 +574,50 @@ export const validateGetOrdersRequest: RequestValidator =
       ),
     ],
     StatusCodes.BAD_REQUEST
+  );
+
+export const validateGetAllOrdersRequest: RequestValidator =
+  createRequestValidator(
+    [
+      validateOrderOwnerAddress,
+      createValidator(
+        null,
+        (request) => {
+          if (request.status) {
+            createRequestValidator([validateOrderStatus]);
+            return request.status;
+          } else if (request.statuses) {
+            createRequestValidator([validateOrderStatuses]);
+            return request.marketIds;
+          }
+        },
+        `No order status informed.`,
+        true
+      ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.marketId) {
+            createRequestValidator([validateOrderMarketId]);
+            return request.marketId;
+          } else if (request.marketIds) {
+            createRequestValidator([validateAllMarketIds]);
+            return request.marketIds;
+          } else if (request.marketName) {
+            createRequestValidator([validateOrderMarketName]);
+            return request.marketName;
+          } else if (request.marketNames) {
+            createRequestValidator([validateOrderMarketNames]);
+            return request.marketNames;
+          }
+        },
+        `No market informed. Informe a market id or market name.`,
+        true
+      ),
+    ],
+    StatusCodes.BAD_REQUEST,
+    (request) =>
+      `Error when trying to get all orders for markets "${request.marketId} ? "${request.marketId} : "${request.marketId} "`
   );
 
 export const validatePlaceOrderRequest: RequestValidator =
