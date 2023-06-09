@@ -533,8 +533,21 @@ export const validateGetOrdersRequest: RequestValidator =
 export const validatePlaceOrderRequest: RequestValidator =
   createRequestValidator(
     [
-      validateOrderClientId,
-      validateOrderMarketName,
+      createValidator(
+        null,
+        (request) => {
+          if (request.marketId) {
+            createRequestValidator([validateOrderMarketId]);
+            return request.marketId;
+          } else if (request.marketName) {
+            createRequestValidator([validateOrderMarketName]);
+            return request.marketName;
+          }
+        },
+        `No market informed. Informe a market id or market name.`,
+        false
+      ),
+      // validateOrderMarketName || validateOrderMarketId,
       validateOrderOwnerAddress,
       validateOrderSide,
       validateOrderPrice,
@@ -617,9 +630,28 @@ export const validatePlaceOrdersRequest: RequestValidator =
 export const validateCancelOrderRequest: RequestValidator =
   createRequestValidator(
     [
-      validateOrderClientId,
+      createValidator(
+        null,
+        (request) => request.marketId,
+        `No market id were informed. Not optional.`,
+        false
+      ),
+      // createValidator(
+      //   null,
+      //   (request) => {
+      //     if (request.marketId) {
+      //       createRequestValidator([validateOrderMarketId]);
+      //       return request.marketId;
+      //     } else if (request.marketName) {
+      //       createRequestValidator([validateOrderMarketName]);
+      //       return request.marketName;
+      //     }
+      //   },
+      //   `No market informed. Informe a market id or market name.`,
+      //   false
+      // ),
+      validateOrderMarketId,
       validateOrderExchangeId,
-      validateOrderMarketName,
       validateOrderOwnerAddress,
     ],
     StatusCodes.BAD_REQUEST,
