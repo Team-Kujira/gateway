@@ -161,8 +161,8 @@ export const createBatchValidator = <Item>(
 };
 
 /**
-  Throw an error because the request parameter is malformed, collect all the
-    errors related to the request to give the most information possible
+ Throw an error because the request parameter is malformed, collect all the
+ errors related to the request to give the most information possible
  */
 export const throwIfErrorsExist = (
   errors: Array<string>,

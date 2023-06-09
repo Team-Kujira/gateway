@@ -124,7 +124,7 @@ enableInputOutputWrapper();
 disableInputOutputWrapper();
 enableInputOutputWrapper();
 
-const requestStrategy = RequestStrategy.Controller;
+const requestStrategy = RequestStrategy.RESTful;
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
