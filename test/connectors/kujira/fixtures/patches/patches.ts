@@ -43,7 +43,7 @@ export const createPatches = (
       // const serializedArguments = Serializer.serialize(inputArguments);
 
       if (!ordinalMap.has(testTitle)) {
-        ordinalMap.set(testTitle, 1); // TODO change this to 0 and regenerate the data!!!
+        ordinalMap.set(testTitle, 0);
       }
 
       const ordinal =
@@ -77,7 +77,7 @@ export const createPatches = (
       // const serializedArguments = Serializer.serialize(inputArguments);
 
       if (!ordinalMap.has(testTitle)) {
-        ordinalMap.set(testTitle, 1);
+        ordinalMap.set(testTitle, 0);
       }
 
       const ordinal =
@@ -115,7 +115,7 @@ export const createPatches = (
       // const serializedArguments = Serializer.serialize(inputArguments);
 
       if (!ordinalMap.has(testTitle)) {
-        ordinalMap.set(testTitle, 1);
+        ordinalMap.set(testTitle, 0);
       }
 
       const ordinal =
@@ -151,7 +151,7 @@ export const createPatches = (
         // const serializedArguments = Serializer.serialize(inputArguments);
 
         if (!ordinalMap.has(testTitle)) {
-          ordinalMap.set(testTitle, 1);
+          ordinalMap.set(testTitle, 0);
         }
 
         const ordinal =
@@ -193,7 +193,7 @@ export const createPatches = (
         // const serializedArguments = Serializer.serialize(inputArguments);
 
         if (!ordinalMap.has(testTitle)) {
-          ordinalMap.set(testTitle, 1);
+          ordinalMap.set(testTitle, 0);
         }
 
         const ordinal =
@@ -235,7 +235,7 @@ export const createPatches = (
         // const serializedArguments = Serializer.serialize(inputArguments);
 
         if (!ordinalMap.has(testTitle)) {
-          ordinalMap.set(testTitle, 1);
+          ordinalMap.set(testTitle, 0);
         }
 
         const ordinal =
@@ -277,7 +277,7 @@ export const createPatches = (
         // const serializedArguments = Serializer.serialize(inputArguments);
 
         if (!ordinalMap.has(testTitle)) {
-          ordinalMap.set(testTitle, 1);
+          ordinalMap.set(testTitle, 0);
         }
 
         const ordinal =
@@ -319,7 +319,7 @@ export const createPatches = (
         // const serializedArguments = Serializer.serialize(inputArguments);
 
         if (!ordinalMap.has(testTitle)) {
-          ordinalMap.set(testTitle, 1);
+          ordinalMap.set(testTitle, 0);
         }
 
         const ordinal =
@@ -361,7 +361,7 @@ export const createPatches = (
         // const serializedArguments = Serializer.serialize(inputArguments);
 
         if (!ordinalMap.has(testTitle)) {
-          ordinalMap.set(testTitle, 1);
+          ordinalMap.set(testTitle, 0);
         }
 
         const ordinal =
@@ -414,7 +414,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =
@@ -460,7 +460,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =
@@ -509,7 +509,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =
@@ -616,7 +616,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =
@@ -662,7 +662,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =
@@ -708,7 +708,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =
@@ -754,7 +754,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =
@@ -800,7 +800,7 @@ export const createPatches = (
           // const serializedArguments = Serializer.serialize(inputArguments);
 
           if (!ordinalMap.has(testTitle)) {
-            ordinalMap.set(testTitle, 1);
+            ordinalMap.set(testTitle, 0);
           }
 
           const ordinal =

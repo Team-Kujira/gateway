@@ -257,7 +257,7 @@ beforeAll(async () => {
   configManager.set('kujira.transactions.merge.createOrders', true);
   configManager.set('kujira.transactions.merge.cancelOrders', true);
   configManager.set('kujira.transactions.merge.settleFunds', true);
-  configManager.set('kujira.retry.all.maxNumberOfRetries', 3);
+  configManager.set('kujira.retry.all.maxNumberOfRetries', 1);
   configManager.set('kujira.retry.all.delayBetweenRetries', 200);
   configManager.set('kujira.timeout.all', 60000);
   configManager.set('kujira.parallel.all.batchSize', 100);

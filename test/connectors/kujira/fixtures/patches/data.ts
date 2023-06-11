@@ -19,7 +19,7 @@ data.set('KUJIRA_PUBLIC_KEY', 'kujira1d6ld7s0edsh5qsmt3lq4tnrqgvxc3jdrk9z3km');
 data.set('KUJIRA_MNEMONIC', 'squirrel crime sweet yard news dentist chronic mad drive ski vapor bottom');
 data.set('KUJIRA_ACCOUNT_NUMBER', 0);
 
-data.set(`["kujira","getFastestRpc","beforeAll",1]`, 'https://test-rpc-kujira.mintthemoon.xyz');
+data.set(`["kujira","getFastestRpc","beforeAll",1]`, 'https://kujira-testnet-rpc.polkachu.com');
 data.set(`["kujira","kujiraGetHttpBatchClient","beforeAll",2]`, Object.create(HttpBatchClient.prototype) as HttpBatchClient);
 data.set(`["kujira","kujiraGetTendermint34Client","beforeAll",3]`, Object.create(Tendermint34Client.prototype) as Tendermint34Client);
 data.set(`["kujira","kujiraGetKujiraQueryClient","beforeAll",4]`, {} as KujiraQueryClient);
