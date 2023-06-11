@@ -11,7 +11,7 @@ export namespace KujiraConfig {
     chain: 'kujira',
     network: configManager.get('kujira.network') || 'mainnet',
     connector: 'kujira',
-    rpcEndpoint: configManager.get(`kujira.rpcEndpoint`),
+    rpcEndpoint: configManager.get('kujira.rpcEndpoint'),
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
     nativeToken: 'KUJI',

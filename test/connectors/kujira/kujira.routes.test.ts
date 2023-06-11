@@ -215,7 +215,10 @@ beforeAll(async () => {
   const configManager = ConfigManagerV2.getInstance();
 
   configManager.set('kujira.network', 'testnet');
-  // configManager.set('kujira.rpcEndpoint', null);
+  // configManager.set(
+  //   'kujira.rpcEndpoint',
+  //   'https://kujira-testnet-rpc.polkachu.com'
+  // );
   configManager.set('kujira.prefix', 'kujira');
   configManager.set('kujira.accountNumber', 0);
   configManager.set('kujira.gasPrice', 0.00125);
