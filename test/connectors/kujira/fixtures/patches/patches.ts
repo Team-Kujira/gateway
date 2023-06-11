@@ -43,7 +43,7 @@ export const createPatches = (
       // const serializedArguments = Serializer.serialize(inputArguments);
 
       if (!ordinalMap.has(testTitle)) {
-        ordinalMap.set(testTitle, 1);
+        ordinalMap.set(testTitle, 1); // TODO change this to 0 and regenerate the data!!!
       }
 
       const ordinal =
@@ -64,7 +64,7 @@ export const createPatches = (
         );
       }
 
-      return data.get(key) as any;
+      return getNotNullOrThrowError<any>(data.get(key)) as any;
     });
   });
 
@@ -136,9 +136,261 @@ export const createPatches = (
         );
       }
 
-      return data.get(key) as any;
+      return getNotNullOrThrowError<any>(data.get(key)) as any;
     });
   });
+
+  patches.setIn(
+    ['kujira', 'kujiraGetHttpBatchClient'],
+    async (testTitle: string) => {
+      if (!usePatches) return;
+
+      patch(kujira, 'kujiraGetHttpBatchClient', async (...any: any[]) => {
+        const inputArguments = any;
+
+        // const serializedArguments = Serializer.serialize(inputArguments);
+
+        if (!ordinalMap.has(testTitle)) {
+          ordinalMap.set(testTitle, 1);
+        }
+
+        const ordinal =
+          getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+        ordinalMap.set(testTitle, ordinal);
+
+        const dataKey = [
+          'kujira',
+          'kujiraGetHttpBatchClient',
+          testTitle,
+          ordinal,
+        ];
+
+        const key: string = JSON.stringify(dataKey);
+
+        if (useInputOutputWrapper) {
+          return await inputOutputWrapper<any>(
+            dataKey,
+            kujira,
+            'kujiraGetHttpBatchClient',
+            inputArguments
+          );
+        }
+
+        return getNotNullOrThrowError<any>(data.get(key)) as any;
+      });
+    }
+  );
+
+  patches.setIn(
+    ['kujira', 'kujiraGetTendermint34Client'],
+    async (testTitle: string) => {
+      if (!usePatches) return;
+
+      patch(kujira, 'kujiraGetTendermint34Client', async (...any: any[]) => {
+        const inputArguments = any;
+
+        // const serializedArguments = Serializer.serialize(inputArguments);
+
+        if (!ordinalMap.has(testTitle)) {
+          ordinalMap.set(testTitle, 1);
+        }
+
+        const ordinal =
+          getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+        ordinalMap.set(testTitle, ordinal);
+
+        const dataKey = [
+          'kujira',
+          'kujiraGetTendermint34Client',
+          testTitle,
+          ordinal,
+        ];
+
+        const key: string = JSON.stringify(dataKey);
+
+        if (useInputOutputWrapper) {
+          return await inputOutputWrapper<any>(
+            dataKey,
+            kujira,
+            'kujiraGetTendermint34Client',
+            inputArguments
+          );
+        }
+
+        return getNotNullOrThrowError<any>(data.get(key)) as any;
+      });
+    }
+  );
+
+  patches.setIn(
+    ['kujira', 'kujiraGetKujiraQueryClient'],
+    async (testTitle: string) => {
+      if (!usePatches) return;
+
+      patch(kujira, 'kujiraGetKujiraQueryClient', async (...any: any[]) => {
+        const inputArguments = any;
+
+        // const serializedArguments = Serializer.serialize(inputArguments);
+
+        if (!ordinalMap.has(testTitle)) {
+          ordinalMap.set(testTitle, 1);
+        }
+
+        const ordinal =
+          getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+        ordinalMap.set(testTitle, ordinal);
+
+        const dataKey = [
+          'kujira',
+          'kujiraGetKujiraQueryClient',
+          testTitle,
+          ordinal,
+        ];
+
+        const key: string = JSON.stringify(dataKey);
+
+        if (useInputOutputWrapper) {
+          return await inputOutputWrapper<any>(
+            dataKey,
+            kujira,
+            'kujiraGetKujiraQueryClient',
+            inputArguments
+          );
+        }
+
+        return getNotNullOrThrowError<any>(data.get(key)) as any;
+      });
+    }
+  );
+
+  patches.setIn(
+    ['kujira', 'kujiraGetStargateClient'],
+    async (testTitle: string) => {
+      if (!usePatches) return;
+
+      patch(kujira, 'kujiraGetStargateClient', async (...any: any[]) => {
+        const inputArguments = any;
+
+        // const serializedArguments = Serializer.serialize(inputArguments);
+
+        if (!ordinalMap.has(testTitle)) {
+          ordinalMap.set(testTitle, 1);
+        }
+
+        const ordinal =
+          getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+        ordinalMap.set(testTitle, ordinal);
+
+        const dataKey = [
+          'kujira',
+          'kujiraGetStargateClient',
+          testTitle,
+          ordinal,
+        ];
+
+        const key: string = JSON.stringify(dataKey);
+
+        if (useInputOutputWrapper) {
+          return await inputOutputWrapper<any>(
+            dataKey,
+            kujira,
+            'kujiraGetStargateClient',
+            inputArguments
+          );
+        }
+
+        return getNotNullOrThrowError<any>(data.get(key)) as any;
+      });
+    }
+  );
+
+  patches.setIn(
+    ['kujira', 'kujiraGetSigningStargateClient'],
+    async (testTitle: string) => {
+      if (!usePatches) return;
+
+      patch(kujira, 'kujiraGetSigningStargateClient', async (...any: any[]) => {
+        const inputArguments = any;
+
+        // const serializedArguments = Serializer.serialize(inputArguments);
+
+        if (!ordinalMap.has(testTitle)) {
+          ordinalMap.set(testTitle, 1);
+        }
+
+        const ordinal =
+          getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+        ordinalMap.set(testTitle, ordinal);
+
+        const dataKey = [
+          'kujira',
+          'kujiraGetSigningStargateClient',
+          testTitle,
+          ordinal,
+        ];
+
+        const key: string = JSON.stringify(dataKey);
+
+        if (useInputOutputWrapper) {
+          return await inputOutputWrapper<any>(
+            dataKey,
+            kujira,
+            'kujiraGetSigningStargateClient',
+            inputArguments
+          );
+        }
+
+        return getNotNullOrThrowError<any>(data.get(key)) as any;
+      });
+    }
+  );
+
+  patches.setIn(
+    ['kujira', 'kujiraGetSigningCosmWasmClient'],
+    async (testTitle: string) => {
+      if (!usePatches) return;
+
+      patch(kujira, 'kujiraGetSigningCosmWasmClient', async (...any: any[]) => {
+        const inputArguments = any;
+
+        // const serializedArguments = Serializer.serialize(inputArguments);
+
+        if (!ordinalMap.has(testTitle)) {
+          ordinalMap.set(testTitle, 1);
+        }
+
+        const ordinal =
+          getNotNullOrThrowError<number>(ordinalMap.get(testTitle)) + 1;
+
+        ordinalMap.set(testTitle, ordinal);
+
+        const dataKey = [
+          'kujira',
+          'kujiraGetSigningCosmWasmClient',
+          testTitle,
+          ordinal,
+        ];
+
+        const key: string = JSON.stringify(dataKey);
+
+        if (useInputOutputWrapper) {
+          return await inputOutputWrapper<any>(
+            dataKey,
+            kujira,
+            'kujiraGetSigningCosmWasmClient',
+            inputArguments
+          );
+        }
+
+        return getNotNullOrThrowError<any>(data.get(key)) as any;
+      });
+    }
+  );
 
   patches.setIn(
     ['kujira', 'kujiraFinClientWithdrawOrders'],
@@ -188,7 +440,7 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as ExecuteResult;
+          return getNotNullOrThrowError<any>(data.get(key)) as ExecuteResult;
         }
       );
     }
@@ -234,7 +486,10 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as IMap<MarketId, BasicKujiraMarket>;
+          return getNotNullOrThrowError<any>(data.get(key)) as IMap<
+            MarketId,
+            BasicKujiraMarket
+          >;
         }
       );
     }
@@ -280,7 +535,10 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as IMap<TokenId, BasicKujiraToken>;
+          return getNotNullOrThrowError<any>(data.get(key)) as IMap<
+            TokenId,
+            BasicKujiraToken
+          >;
         }
       );
     }
@@ -326,7 +584,7 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as JsonObject;
+          return getNotNullOrThrowError<any>(data.get(key)) as JsonObject;
         }
       );
     }
@@ -384,7 +642,7 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as KujiraOrder;
+          return getNotNullOrThrowError<any>(data.get(key)) as KujiraOrder;
         }
       );
     }
@@ -430,7 +688,7 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as readonly Coin[];
+          return getNotNullOrThrowError<any>(data.get(key)) as readonly Coin[];
         }
       );
     }
@@ -476,7 +734,7 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as Coin | null;
+          return getNotNullOrThrowError<any>(data.get(key)) as Coin | null;
         }
       );
     }
@@ -522,7 +780,7 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as number;
+          return getNotNullOrThrowError<any>(data.get(key)) as number;
         }
       );
     }
@@ -568,7 +826,7 @@ export const createPatches = (
             );
           }
 
-          return data.get(key) as IndexedTx | null;
+          return getNotNullOrThrowError<any>(data.get(key)) as IndexedTx | null;
         }
       );
     }
@@ -607,7 +865,7 @@ const inputOutputWrapper = async <R>(
   const key: string = JSON.stringify(dataKey);
 
   if (data.has(key)) {
-    if (result === data.get(key)) {
+    if (result === getNotNullOrThrowError<any>(data.get(key))) {
       return result as R;
     }
 
@@ -623,7 +881,7 @@ const inputOutputWrapper = async <R>(
   let value: string;
   if (isMap(result)) {
     value = `IMap<any, any>(${JSON.stringify(result)}).asMutable()`;
-  } else if ('tx' in result) {
+  } else if (result != null && 'tx' in result) {
     value = JSON.stringify(result).replace(
       /"tx":\{(.*?)}/,
       '"tx": new Uint8Array(Object.values({$1}))'

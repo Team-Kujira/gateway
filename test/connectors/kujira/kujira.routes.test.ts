@@ -110,6 +110,7 @@ import {
   useInputOutputWrapper,
   usePatches,
 } from './fixtures/patches/patches';
+import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
@@ -121,9 +122,9 @@ enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
-// enableInputOutputWrapper();
+enableInputOutputWrapper();
 
-const requestStrategy = RequestStrategy.RESTful;
+const requestStrategy = RequestStrategy.Controller;
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -211,6 +212,54 @@ let ownerAddress: OwnerAddress;
 let expressApp: Express;
 
 beforeAll(async () => {
+  const configManager = ConfigManagerV2.getInstance();
+
+  configManager.set('kujira.network', 'testnet');
+  // configManager.set('kujira.rpcEndpoint', null);
+  configManager.set('kujira.prefix', 'kujira');
+  configManager.set('kujira.accountNumber', 0);
+  configManager.set('kujira.gasPrice', 0.00125);
+  configManager.set('kujira.gasPriceSuffix', 'ukuji');
+  configManager.set('kujira.gasLimitEstimate', 0.009147);
+  configManager.set('kujira.orderBook.offset', 0);
+  configManager.set('kujira.orderBook.limit', 255);
+  configManager.set('kujira.cache.marketsData', 3600);
+  configManager.set('kujira.cache.markets', 3600);
+  configManager.set('kujira.orders.create.fee', 'auto');
+  configManager.set('kujira.orders.create.maxPerTransaction', 8);
+  configManager.set('kujira.orders.open.limit', 255);
+  configManager.set('kujira.orders.filled.limit', 255);
+  configManager.set('kujira.orders.cancel.maxPerTransaction', 25);
+  // configManager.set('kujira.tokens.url', null);
+  // configManager.set('kujira.tokens.allowed', null);
+  // configManager.set('kujira.tokens.disallowed', null);
+  configManager.set('kujira.tokens.resolutionStrategy', 'markets');
+  // configManager.set('kujira.markets.url', null);
+  // configManager.set('kujira.markets.allowed', null);
+  // configManager.set('kujira.markets.disallowed', null);
+  // configManager.set('kujira.tickers.sources.orderBookSimpleAveragePrice', null);
+  // configManager.set(
+  //   'kujira.tickers.sources.orderBookWeightedAveragePrice',
+  //   null
+  // );
+  // configManager.set(
+  //   'kujira.tickers.sources.orderBookVolumeWeightedAveragePrice',
+  //   null
+  // );
+  // configManager.set('kujira.tickers.sources.lastFilledOrder', null);
+  configManager.set(
+    'kujira.tickers.sources.nomics.url',
+    'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&interval=1m&market=${marketAddress}'
+  );
+  configManager.set('kujira.transactions.merge.createOrders', true);
+  configManager.set('kujira.transactions.merge.cancelOrders', true);
+  configManager.set('kujira.transactions.merge.settleFunds', true);
+  configManager.set('kujira.retry.all.maxNumberOfRetries', 3);
+  configManager.set('kujira.retry.all.delayBetweenRetries', 200);
+  configManager.set('kujira.timeout.all', 60000);
+  configManager.set('kujira.parallel.all.batchSize', 100);
+  configManager.set('kujira.parallel.all.delayBetweenBatches', 200);
+
   expressApp = express();
   expressApp.use(express.json());
 
@@ -230,6 +279,23 @@ beforeAll(async () => {
     ) || config.accountNumber
   );
 
+  kujira = await Kujira.getInstance(config.chain, config.network);
+
+  patches = await createPatches(kujira);
+
+  getPatch = <R = AsyncFunctionType<any, any>>(keyPath: string[]): R =>
+    helperGetPatch<R>(patches, keyPath);
+
+  // await getPatch(['global', 'fetch'])('beforeAll');
+  await getPatch(['kujira', 'getFastestRpc'])('beforeAll');
+  await getPatch(['kujira', 'kujiraGetHttpBatchClient'])('beforeAll');
+  await getPatch(['kujira', 'kujiraGetTendermint34Client'])('beforeAll');
+  await getPatch(['kujira', 'kujiraGetKujiraQueryClient'])('beforeAll');
+  await getPatch(['kujira', 'kujiraGetStargateClient'])('beforeAll');
+  await getPatch(['kujira', 'kujiraGetBasicMarkets'])('beforeAll');
+
+  await kujira.init();
+
   ownerAddress = (
     await addWallet({
       chain: config.chain,
@@ -239,15 +305,6 @@ beforeAll(async () => {
       accountId: accountNumber,
     } as AddWalletRequest)
   ).address;
-
-  kujira = await Kujira.getInstance(config.chain, config.network);
-
-  patches = await createPatches(kujira);
-
-  getPatch = <R = AsyncFunctionType<any, any>>(keyPath: string[]): R =>
-    helperGetPatch<R>(patches, keyPath);
-
-  await kujira.init();
 
   // Order  |  Type  |  Side  | Market (ID/Name)
   // ====== + ====== + ====== + ================
@@ -521,12 +578,12 @@ beforeEach(async () => {
     return;
   };
 
-  // await getPatch(['global', 'fetch'])(testTitle);
   await getPatch(['kujira', 'decryptWallet'])(testTitle);
-  await getPatch(['kujira', 'getFastestRpc'])(testTitle);
   await getPatch(['kujira', 'kujiraFinClientWithdrawOrders'])(testTitle);
   await getPatch(['kujira', 'kujiraGetBasicMarkets'])(testTitle);
   await getPatch(['kujira', 'kujiraGetBasicTokens'])(testTitle);
+  await getPatch(['kujira', 'kujiraGetSigningCosmWasmClient'])(testTitle);
+  await getPatch(['kujira', 'kujiraGetSigningStargateClient'])(testTitle);
   await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])(
     testTitle
   );

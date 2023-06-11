@@ -324,25 +324,41 @@ export class Kujira {
 
       const rpcEndpoint: string = await this.getRPCEndpoint();
 
-      this.httpBatchClient = new HttpBatchClient(rpcEndpoint, {
-        dispatchInterval: 2000,
-      });
+      this.kujiraGetHttpBatchClient(rpcEndpoint);
 
-      this.tendermint34Client = await Tendermint34Client.create(
-        this.httpBatchClient
-      );
+      await this.kujiraGetTendermint34Client();
 
-      this.kujiraQueryClient = kujiraQueryClient({
-        client: this.tendermint34Client,
-      });
+      this.kujiraGetKujiraQueryClient();
 
-      this.stargateClient = await StargateClient.connect(rpcEndpoint);
+      await this.kujiraGetStargateClient(rpcEndpoint);
 
       await this.getAllMarkets();
 
       this.isReady = true;
       this.isInitializing = false;
     }
+  }
+
+  private async kujiraGetStargateClient(rpcEndpoint: string) {
+    this.stargateClient = await StargateClient.connect(rpcEndpoint);
+  }
+
+  private kujiraGetKujiraQueryClient() {
+    this.kujiraQueryClient = kujiraQueryClient({
+      client: this.tendermint34Client,
+    });
+  }
+
+  private async kujiraGetTendermint34Client() {
+    this.tendermint34Client = await Tendermint34Client.create(
+      this.httpBatchClient
+    );
+  }
+
+  private kujiraGetHttpBatchClient(rpcEndpoint: string) {
+    this.httpBatchClient = new HttpBatchClient(rpcEndpoint, {
+      dispatchInterval: 2000,
+    });
   }
 
   @Cache(caches.tokens, { ttl: config.cache.tokensData })
@@ -471,26 +487,16 @@ export class Kujira {
 
     const publicKey = account.address;
 
-    const signingStargateClient = await SigningStargateClient.connectWithSigner(
+    const signingStargateClient = await this.kujiraGetSigningStargateClient(
       rpcEndpoint,
       directSecp256k1HdWallet,
-      {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        registry: registry,
-        gasPrice: GasPrice.fromString(gasPrice),
-      }
+      gasPrice
     );
 
-    const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(
+    const signingCosmWasmClient = await this.kujiraGetSigningCosmWasmClient(
       rpcEndpoint,
       directSecp256k1HdWallet,
-      {
-        registry: registry,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        gasPrice: GasPrice.fromString(gasPrice),
-      }
+      gasPrice
     );
 
     const walletArtifacts: KujiraWalletArtifacts = {
@@ -506,6 +512,43 @@ export class Kujira {
     this.accounts.set(publicKey, walletArtifacts);
 
     return walletArtifacts;
+  }
+
+  private async kujiraGetSigningCosmWasmClient(
+    rpcEndpoint: string,
+    directSecp256k1HdWallet: DirectSecp256k1HdWallet,
+    gasPrice: string
+  ) {
+    const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(
+      rpcEndpoint,
+      directSecp256k1HdWallet,
+      {
+        registry: registry,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        gasPrice: GasPrice.fromString(gasPrice),
+      }
+    );
+    return signingCosmWasmClient;
+  }
+
+  private async kujiraGetSigningStargateClient(
+    rpcEndpoint: string,
+    directSecp256k1HdWallet: DirectSecp256k1HdWallet,
+    gasPrice: string
+  ) {
+    const signingStargateClient = await SigningStargateClient.connectWithSigner(
+      rpcEndpoint,
+      directSecp256k1HdWallet,
+      {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        registry: registry,
+        gasPrice: GasPrice.fromString(gasPrice),
+      }
+    );
+
+    return signingStargateClient;
   }
 
   private async kujiraQueryClientWasmQueryContractSmart(
