@@ -1439,17 +1439,21 @@ export class Kujira {
             ownerAddress: ownerAddress,
           };
           const targetOrder = await this.getOrder(request);
-          if (!ordersByMarketIds.get(targetOrder.marketId)) {
-            ordersByMarketIds.set(targetOrder.marketId, [targetOrder]);
-          } else {
-            const aux = getNotNullOrThrowError<any>(
-              ordersByMarketIds.get(targetOrder.marketId)
-            );
-            aux.push(targetOrder);
-            ordersByMarketIds.set(targetOrder.marketId, aux);
+          if (targetOrder != undefined) {
+            if (targetOrder.ownerAddress === ownerAddress) {
+              if (!ordersByMarketIds.get(targetOrder.marketId)) {
+                ordersByMarketIds.set(targetOrder.marketId, [targetOrder]);
+              } else {
+                const aux = getNotNullOrThrowError<any>(
+                  ordersByMarketIds.get(targetOrder.marketId)
+                );
+                aux.push(targetOrder);
+                ordersByMarketIds.set(targetOrder.marketId, aux);
+              }
+              ordersByOwnerByMarketIds.set(ownerAddress, ordersByMarketIds);
+            }
           }
         }
-        ordersByOwnerByMarketIds.set(ownerAddress, ordersByMarketIds);
       }
 
       for (const market of markets.valueSeq()) {
@@ -1462,8 +1466,10 @@ export class Kujira {
 
           for (const orders of filteredOrdersByOwner.valueSeq()) {
             for (const order of orders) {
-              if (order.marketId == market.id) {
-                selectedOrdersIds.push(order.id);
+              if (order.ownerAddress === ownerAddress) {
+                if (order.marketId === market.id) {
+                  selectedOrdersIds.push(order.id);
+                }
               }
             }
           }
@@ -1572,18 +1578,61 @@ export class Kujira {
 
     const cancelledOrders = IMap<OrderId, Order>().asMutable();
 
-    const openOrders = (await this.getOrders({
-      ownerAddresses: ownerAddresses,
-      marketIds: marketIds,
-      status: OrderStatus.OPEN,
-    })) as IMap<OrderId, Order>;
+    let openOrders = IMap<OrderId, Order>().asMutable();
+
+    // const openOrders = (await this.getOrders({
+    //   ownerAddresses: ownerAddresses,
+    //   marketIds: marketIds,
+    //   status: OrderStatus.OPEN,
+    // })) as IMap<OrderId, Order>;
+
+    if (options.marketId) {
+      openOrders = (await this.getOrders({
+        ownerAddresses: ownerAddresses,
+        marketId: options.marketId,
+        status: OrderStatus.OPEN,
+      })) as IMap<OrderId, Order>;
+    } else if (options.marketIds) {
+      for (const marketId of options.marketIds.values()) {
+        if (openOrders.size === 0) {
+          openOrders = (await this.getOrders({
+            ownerAddresses: ownerAddresses,
+            marketId: marketId,
+            status: OrderStatus.OPEN,
+          })) as IMap<OrderId, Order>;
+        } else {
+          const resultByMarketId = (await this.getOrders({
+            ownerAddresses: ownerAddresses,
+            marketId: marketId,
+            status: OrderStatus.OPEN,
+          })) as IMap<OrderId, Order>;
+          openOrders.merge(resultByMarketId);
+        }
+      }
+    }
 
     if (openOrders.size > 0) {
-      const openOrdersIds = openOrders.keySeq().toArray();
+      const openOrdersIds = [];
+      if (options.ownerAddress) {
+        openOrdersIds.push(
+          getNotNullOrThrowError<OrderId>(openOrders.keySeq().toArray()) // TODO Fix this line !!!
+        );
+      } else if (options.ownerAddresses) {
+        for (const owner of options.ownerAddresses) {
+          const openOrdersByOwner = getNotNullOrThrowError<
+            IMap<OrderId, Order>
+          >(openOrders.get(owner));
+          const ordersIds = [];
+          for (const order of openOrdersByOwner.valueSeq()) {
+            ordersIds.push(order?.id);
+          }
+          openOrdersIds.push(...ordersIds);
+        }
+      }
 
       cancelledOrders.merge(
         (await this.cancelOrders({
-          ids: openOrdersIds,
+          ids: getNotNullOrThrowError(openOrdersIds),
           marketId: '',
           marketIds: marketIds,
           ownerAddresses: ownerAddresses,

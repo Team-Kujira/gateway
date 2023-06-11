@@ -281,6 +281,19 @@ export const validateOrderOwnerAddress: Validator = createValidator(
   false
 );
 
+export const validateOrderOwnerAddresses: Validator = createValidator(
+  'ownerAddresses',
+  (_, values) => {
+    let ok = true;
+    values === undefined
+      ? (ok = true)
+      : values.map((item: any) => /^kujira[a-z0-9]{39}$/.test(item));
+    return ok;
+  },
+  `Invalid owner addresses...`,
+  true
+);
+
 export const validateOrderSide: Validator = createValidator(
   'side',
   (_, value) =>
@@ -579,7 +592,20 @@ export const validateGetOrdersRequest: RequestValidator =
 export const validateGetAllOrdersRequest: RequestValidator =
   createRequestValidator(
     [
-      validateOrderOwnerAddress,
+      createValidator(
+        null,
+        (request) => {
+          if (request.ownerAddress) {
+            createRequestValidator([validateOrderOwnerAddress]);
+            return request.ownerAddress;
+          } else if (request.ownerAddresses) {
+            createRequestValidator([validateOrderOwnerAddresses]);
+            return request.ownerAddresses;
+          }
+        },
+        `No owner address informed.`,
+        true
+      ),
       createValidator(
         null,
         (request) => {
@@ -759,7 +785,6 @@ export const validateCancelOrdersRequest: RequestValidator =
       ),
       createBatchValidator(
         [
-          validateOrderClientIds,
           validateOrderExchangeIds,
           validateOrderMarketName,
           validateOrderOwnerAddress,
@@ -771,7 +796,25 @@ export const validateCancelOrdersRequest: RequestValidator =
   );
 
 export const validateCancelAllOrdersRequest: RequestValidator =
-  createRequestValidator([validateOrderOwnerAddress], StatusCodes.BAD_REQUEST);
+  createRequestValidator(
+    [
+      createValidator(
+        null,
+        (request) => {
+          if (request.ownerAddress) {
+            createRequestValidator([validateOrderOwnerAddress]);
+            return request.ownerAddress;
+          } else if (request.ownerAddresses) {
+            createRequestValidator([validateOrderOwnerAddresses]);
+            return request.ownerAddresses;
+          }
+        },
+        `Nothing owner address informed.`,
+        false
+      ),
+    ],
+    StatusCodes.BAD_REQUEST
+  );
 
 export const validateSettleMarketFundsRequest: RequestValidator =
   createRequestValidator(
