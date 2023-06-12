@@ -255,7 +255,7 @@ export const validateOrderMarketId: Validator = createValidator(
   'marketId',
   (_, value) => value.trim().length && value.trim().slice(0, 6) === 'kujira',
   (_, value) => `Invalid market id (${value}).`,
-  true
+  false
 );
 
 export const validateAllMarketIds: Validator = createValidator(
@@ -689,18 +689,6 @@ export const validatePlaceOrdersRequest: RequestValidator =
           (index) => `No ownerAddress were informed in the order "${index}`,
           'orders'
         ),
-      // createBatchValidator(
-      //   [
-      //     createValidator(
-      //       null,
-      //       (order) => order.marketId || order.marketName,
-      //       `No market informed for any orders...`,
-      //       false
-      //     ),
-      //   ],
-      //   (index) => `No market name were informed in the order "${index}`,
-      //   'orders'
-      // ),
       createBatchValidator(
         [
           createValidator(
@@ -752,20 +740,6 @@ export const validateCancelOrderRequest: RequestValidator =
         `No market id were informed. Not optional.`,
         false
       ),
-      // createValidator(
-      //   null,
-      //   (request) => {
-      //     if (request.marketId) {
-      //       createRequestValidator([validateOrderMarketId]);
-      //       return request.marketId;
-      //     } else if (request.marketName) {
-      //       createRequestValidator([validateOrderMarketName]);
-      //       return request.marketName;
-      //     }
-      //   },
-      //   `No market informed. Informe a market id or market name.`,
-      //   false
-      // ),
       validateOrderMarketId,
       validateOrderExchangeId,
       validateOrderOwnerAddress,
@@ -777,19 +751,53 @@ export const validateCancelOrderRequest: RequestValidator =
 export const validateCancelOrdersRequest: RequestValidator =
   createRequestValidator(
     [
+      validateOrderMarketId,
       createValidator(
         null,
-        (values) => values && values.length,
+        (values) => values && values.ids,
         `No orders were informed.`,
         false
       ),
-      createBatchValidator(
-        [
-          validateOrderExchangeIds,
-          validateOrderMarketName,
-          validateOrderOwnerAddress,
-        ],
-        (_, index) => `Invalid cancel orders request at position ${index}:`
+      createValidator(
+        null,
+        (request) => {
+          createRequestValidator([
+            createBatchValidator(
+              [validateOrderExchangeIds],
+              (_, index) =>
+                `Invalid cancel orders request at position ${index}:`,
+              null
+            ),
+          ]);
+          return request.ids;
+        },
+        `No orders ids informed.`,
+        false
+      ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.marketIds) {
+            createRequestValidator([validateAllMarketIds]);
+            return request.marketIds;
+          }
+        },
+        `No market informed..`,
+        true
+      ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.ownerAddress) {
+            createRequestValidator([validateOrderOwnerAddress]);
+            return request.ownerAddress;
+          } else if (request.ownerAddresses) {
+            createRequestValidator([validateOrderOwnerAddresses]);
+            return request.ownerAddresses;
+          }
+        },
+        `Nothing owner address informed.`,
+        false
       ),
     ],
     StatusCodes.BAD_REQUEST

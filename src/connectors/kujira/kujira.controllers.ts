@@ -78,7 +78,7 @@ import {
 import {
   // validateCancelAllOrdersRequest,
   validateCancelOrderRequest,
-  // validateCancelOrdersRequest,
+  validateCancelOrdersRequest,
   validateGetAllBalancesRequest,
   validateGetAllMarketsRequest,
   validateGetAllOrderBooksRequest,
@@ -583,7 +583,7 @@ export async function cancelOrders(
   connector: Connector,
   request: CancelOrdersRequest
 ): Promise<ResponseWrapper<CancelOrdersResponse>> {
-  // validateCancelOrdersRequest(request); // TODO - Verify this validator!!!
+  validateCancelOrdersRequest(request);
 
   const response = new ResponseWrapper<CancelOrdersResponse>();
 
