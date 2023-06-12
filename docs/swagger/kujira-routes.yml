@@ -1,7 +1,3 @@
-swagger: "2.0"
-info:
-  title: Kujira API
-  version: 1.0.0
 paths:
   /:
     get:
@@ -2480,12 +2476,7 @@ definitions:
             example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
           denoms:
             items:
-              type: object
-              properties:
-                additionalProperties:
-                  $ref: "#/definitions/KujiraDenomKUJI"
-                additionalProperties2:
-                  $ref: "#/definitions/KujiraDenomDEMO"
+              $ref: "#/definitions/KujiraDenomKUJI"
           precision:
             type: object
             properties:
@@ -2542,12 +2533,7 @@ definitions:
             example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
           denoms:
             items:
-              type: object
-              properties:
-                additionalProperties:
-                  $ref: "#/definitions/KujiraDenomKUJI"
-                additionalProperties2:
-                  $ref: "#/definitions/KujiraDenomUSK"
+              $ref: "#/definitions/KujiraDenomUSK"
           precision:
             type: object
             properties:
@@ -2604,12 +2590,7 @@ definitions:
             example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
           denoms:
             items:
-              type: object
-              properties:
-                additionalProperties:
-                  $ref: "#/definitions/KujiraDenomDEMO"
-                additionalProperties2:
-                  $ref: "#/definitions/KujiraDenomUSK"
+              $ref: "#/definitions/KujiraDenomDEMO"
           precision:
             type: object
             properties:
