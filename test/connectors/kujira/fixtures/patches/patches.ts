@@ -881,7 +881,7 @@ const inputOutputWrapper = async <R>(
   let value: string;
   if (isMap(result)) {
     value = `IMap<any, any>(${JSON.stringify(result)}).asMutable()`;
-  } else if (result != null && 'tx' in result) {
+  } else if (result != null && typeof result == 'object' && 'tx' in result) {
     value = JSON.stringify(result).replace(
       /"tx":\{(.*?)}/,
       '"tx": new Uint8Array(Object.values({$1}))'
