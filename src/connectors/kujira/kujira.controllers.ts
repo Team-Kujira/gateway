@@ -76,7 +76,7 @@ import {
   WalletPublicKeyNotFoundError,
 } from './kujira.types';
 import {
-  // validateCancelAllOrdersRequest,
+  validateCancelAllOrdersRequest,
   validateCancelOrderRequest,
   validateCancelOrdersRequest,
   validateGetAllBalancesRequest,
@@ -608,7 +608,7 @@ export async function cancelAllOrders(
   connector: Connector,
   request: CancelAllOrdersRequest
 ): Promise<ResponseWrapper<CancelAllOrdersResponse>> {
-  // validateCancelAllOrdersRequest(request); // TODO - Verify this validator!!!
+  validateCancelAllOrdersRequest(request);
 
   const response = new ResponseWrapper<CancelAllOrdersResponse>();
 

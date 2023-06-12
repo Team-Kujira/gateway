@@ -663,7 +663,6 @@ export const validatePlaceOrderRequest: RequestValidator =
         `No market informed. Informe a market id or market name.`,
         false
       ),
-      // validateOrderMarketName || validateOrderMarketId,
       validateOrderOwnerAddress,
       validateOrderSide,
       validateOrderPrice,
@@ -796,7 +795,7 @@ export const validateCancelOrdersRequest: RequestValidator =
             return request.ownerAddresses;
           }
         },
-        `Nothing owner address informed.`,
+        `No owner address informed.`,
         false
       ),
     ],
@@ -817,8 +816,28 @@ export const validateCancelAllOrdersRequest: RequestValidator =
             return request.ownerAddresses;
           }
         },
-        `Nothing owner address informed.`,
+        `No owner address informed.`,
         false
+      ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.marketId) {
+            createRequestValidator([validateOrderMarketId]);
+            return request.marketId;
+          } else if (request.marketIds) {
+            createRequestValidator([validateAllMarketIds]);
+            return request.marketIds;
+          } else if (request.marketName) {
+            createRequestValidator([validateOrderMarketName]);
+            return request.marketName;
+          } else if (request.marketNames) {
+            createRequestValidator([validateOrderMarketNames]);
+            return request.marketNames;
+          }
+        },
+        `No market informed. Informe a market id or market name.`,
+        true
       ),
     ],
     StatusCodes.BAD_REQUEST
