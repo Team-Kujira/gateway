@@ -235,7 +235,7 @@ export const validateOrderMarketName: Validator = createValidator(
   'marketName',
   (_, value) => value.trim().length,
   (_, value) => `Invalid market name (${value}).`,
-  true
+  false
 );
 
 export const validateOrderMarketNames: Validator = createValidator(
@@ -278,7 +278,7 @@ export const validateOrderOwnerAddress: Validator = createValidator(
   'ownerAddress',
   (_, value) => /^kujira[a-z0-9]{39}$/.test(value),
   (_, value) => `Invalid owner address (${value}).`,
-  false
+  true
 );
 
 export const validateOrderOwnerAddresses: Validator = createValidator(
@@ -551,7 +551,6 @@ export const validateGetOrderRequest: RequestValidator = createRequestValidator(
       `No client id or exchange id were informed.`,
       false
     ),
-    // validateOrderMarketName,
     validateOrderOwnerAddress,
   ],
   StatusCodes.BAD_REQUEST,
@@ -845,7 +844,36 @@ export const validateCancelAllOrdersRequest: RequestValidator =
 
 export const validateSettleMarketFundsRequest: RequestValidator =
   createRequestValidator(
-    [validateOrderMarketName, validateOrderOwnerAddress],
+    [
+      createValidator(
+        null,
+        (request) => {
+          if (request.ownerAddress) {
+            createRequestValidator([validateOrderOwnerAddress]);
+            return request.ownerAddress;
+          } else if (request.ownerAddresses) {
+            createRequestValidator([validateOrderOwnerAddresses]);
+            return request.ownerAddresses;
+          }
+        },
+        `No owner address informed.`,
+        false
+      ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.marketId) {
+            createRequestValidator([validateOrderMarketId]);
+            return request.marketId;
+          } else if (request.marketName) {
+            createRequestValidator([validateOrderMarketName]);
+            return request.marketName;
+          }
+        },
+        `No market informed. Informe a market id or market name.`,
+        false
+      ),
+    ],
     StatusCodes.BAD_REQUEST,
     (request) =>
       `Error when trying to settle funds for market "${request.marketId}."`
@@ -853,7 +881,44 @@ export const validateSettleMarketFundsRequest: RequestValidator =
 
 export const validateSettleMarketsFundsRequest: RequestValidator =
   createRequestValidator(
-    [validateOrderMarketNames, validateOrderOwnerAddress],
+    [
+      createValidator(
+        null,
+        (request) => {
+          if (request.ownerAddress) {
+            createRequestValidator([validateOrderOwnerAddress]);
+            return request.ownerAddress;
+          }
+        },
+        `No owner address informed.`,
+        true
+      ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.ownerAddresses) {
+            createRequestValidator([validateOrderOwnerAddresses]);
+            return request.ownerAddresses;
+          }
+        },
+        `No owner address informed.`,
+        false
+      ),
+      createValidator(
+        null,
+        (request) => {
+          if (request.marketIds) {
+            createRequestValidator([validateAllMarketIds]);
+            return request.marketIds;
+          } else if (request.marketNames) {
+            createRequestValidator([validateOrderMarketNames]);
+            return request.marketNames;
+          }
+        },
+        `No markets informed. Informe market ids or market names.`,
+        true
+      ),
+    ],
     StatusCodes.BAD_REQUEST
   );
 

@@ -105,9 +105,9 @@ import {
   validateGetWalletsPublicKeysRequest,
   validatePlaceOrderRequest,
   validatePlaceOrdersRequest,
-  // validateSettleAllMarketsFundsRequest,
-  // validateSettleMarketFundsRequest,
-  // validateSettleMarketsFundsRequest,
+  validateSettleAllMarketsFundsRequest,
+  validateSettleMarketFundsRequest,
+  validateSettleMarketsFundsRequest,
 } from './kujira.validators';
 
 export async function getToken(
@@ -625,7 +625,7 @@ export async function widthdrawFromMarket(
   connector: Connector,
   request: MarketWithdrawRequest
 ): Promise<ResponseWrapper<MarketWithdrawResponse>> {
-  // validateSettleMarketFundsRequest(request); // TODO - Verify this validator!!!
+  validateSettleMarketFundsRequest(request);
 
   const response = new ResponseWrapper<MarketWithdrawResponse>();
 
@@ -650,7 +650,7 @@ export async function withdrawsFromMarkets(
   connector: Connector,
   request: MarketsWithdrawsRequest
 ): Promise<ResponseWrapper<MarketsWithdrawsFundsResponse>> {
-  // validateSettleMarketsFundsRequest(request); // TODO - Verify this validator!!!
+  validateSettleMarketsFundsRequest(request);
 
   const response = new ResponseWrapper<MarketsWithdrawsFundsResponse>();
 
@@ -675,7 +675,7 @@ export async function withdrawFromAllMarkets(
   connector: Connector,
   request: AllMarketsWithdrawsRequest
 ): Promise<ResponseWrapper<AllMarketsWithdrawsResponse>> {
-  // validateSettleAllMarketsFundsRequest(request); // TODO - Verify this validator!!!
+  validateSettleAllMarketsFundsRequest(request);
 
   const response = new ResponseWrapper<AllMarketsWithdrawsResponse>();
 
