@@ -6,6 +6,13 @@ paths:
   /:
     get:
       description: Returns information about the Kujira API
+      parameters:
+        - in: body
+          name: root
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/RootRequest"
       responses:
         "200":
           description: OK
@@ -26,11 +33,12 @@ paths:
     get:
       description: Retrieves information about a specific token
       parameters:
-        - in: query
-          name: tokenAddress
-          description: The address of the token
+        - in: body
+          name: get token
+          description: The ID or name of the token and chain and network
           required: true
-          type: string
+          schema:
+            $ref: "#/definitions/TokenRequest"
       responses:
         "200":
           description: OK
@@ -39,6 +47,13 @@ paths:
   /tokens:
     get:
       description: Retrieves information about multiple tokens
+      parameters:
+        - in: body
+          name: get tokens
+          description: The IDs or names of the tokens and chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/TokensRequest"
       responses:
         "200":
           description: OK
@@ -47,6 +62,13 @@ paths:
   /tokens/all:
     get:
       description: Retrieves information about all tokens
+      parameters:
+        - in: body
+          name: get all tokens
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/AllTokensRequest"
       responses:
         "200":
           description: OK
@@ -56,11 +78,12 @@ paths:
     get:
       description: Retrieves information about a specific market
       parameters:
-        - in: query
-          name: marketId
-          description: The ID of the market
+        - in: body
+          name: get market
+          description: The ID or name of the market and chain and network
           required: true
-          type: string
+          schema:
+            $ref: "#/definitions/MarketRequest"
       responses:
         "200":
           description: OK
@@ -69,6 +92,13 @@ paths:
   /markets:
     get:
       description: Retrieves information about multiple markets
+      parameters:
+        - in: body
+          name: get markets
+          description: The IDs or names of the markets and chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/MarketsRequest"
       responses:
         "200":
           description: OK
@@ -77,6 +107,13 @@ paths:
   /markets/all:
     get:
       description: Retrieves information about all markets
+      parameters:
+        - in: body
+          name: get all markets
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/AllMarketsRequest"
       responses:
         "200":
           description: OK
@@ -86,11 +123,12 @@ paths:
     get:
       description: Retrieves the order book for a specific market
       parameters:
-        - in: query
-          name: marketId
-          description: The ID of the market
+        - in: body
+          name: get order book
+          description: The ID or name of the market and chain and network
           required: true
-          type: string
+          schema:
+            $ref: "#/definitions/OrderBookRequest"
       responses:
         "200":
           description: OK
@@ -99,6 +137,13 @@ paths:
   /orderBooks:
     get:
       description: Retrieves the order books for multiple markets
+      parameters:
+        - in: body
+          name: get order books
+          description: The IDs or names of the markets and chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/OrderBooksRequest"
       responses:
         "200":
           description: OK
@@ -107,6 +152,13 @@ paths:
   /orderBooks/all:
     get:
       description: Retrieves the order books for all markets
+      parameters:
+        - in: body
+          name: get all order books
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/AllOrderBooksRequest"
       responses:
         "200":
           description: OK
@@ -116,11 +168,12 @@ paths:
     get:
       description: Retrieves the ticker for a specific market
       parameters:
-        - in: query
-          name: marketId
-          description: The ID of the market
+        - in: body
+          name: get ticker
+          description: The ID or name of the market and chain and network
           required: true
-          type: string
+          schema:
+            $ref: "#/definitions/TickerRequest"
       responses:
         "200":
           description: OK
@@ -129,6 +182,13 @@ paths:
   /tickers:
     get:
       description: Retrieves the tickers for multiple markets
+      parameters:
+        - in: body
+          name: get tickers
+          description: The IDs or names of the markets and chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/TickersRequest"
       responses:
         "200":
           description: OK
@@ -137,6 +197,13 @@ paths:
   /ticker/all:
     get:
       description: Retrieves the tickers for all markets
+      parameters:
+        - in: body
+          name: get all tickers
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/AllTickersRequest"
       responses:
         "200":
           description: OK
@@ -146,11 +213,12 @@ paths:
     get:
       description: Retrieves the balance for a specific token
       parameters:
-        - in: query
-          name: tokenAddress
-          description: The address of the token
+        - in: body
+          name: get balance
+          description: The ID or symbol of the token, owner public key and chain and network
           required: true
-          type: string
+          schema:
+            $ref: "#/definitions/BalanceRequest"
       responses:
         "200":
           description: OK
@@ -159,6 +227,13 @@ paths:
   /balances:
     get:
       description: Retrieves the balances for multiple tokens
+      parameters:
+        - in: body
+          name: get balances
+          description: The IDs or symbols of the tokens, owner public key and chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/BalancesRequest"
       responses:
         "200":
           description: OK
@@ -167,6 +242,13 @@ paths:
   /balances/all:
     get:
       description: Retrieves the balances for all tokens
+      parameters:
+        - in: body
+          name: get all balances
+          description: The owner public key and chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/AllBalancesRequest"
       responses:
         "200":
           description: OK
@@ -176,11 +258,12 @@ paths:
     get:
       description: Retrieves information about a specific order
       parameters:
-        - in: query
-          name: orderId
-          description: The ID of the order
+        - in: body
+          name: get order
+          description: The order ID, order market id, owner public key and chain and network
           required: true
-          type: string
+          schema:
+            $ref: "#/definitions/GetOrderRequest"
       responses:
         "200":
           description: OK
@@ -190,8 +273,8 @@ paths:
       description: Places a new order
       parameters:
         - in: body
-          name: order
-          description: The order details
+          name: place order
+          description: The order details with owner public key and chain and network. Note >> The wallet needs to have been added to the Gateway beforehand.
           required: true
           schema:
             $ref: "#/definitions/PlaceOrderRequest"
@@ -204,8 +287,8 @@ paths:
       description: Cancels a specific order
       parameters:
         - in: body
-          name: order
-          description: The order details
+          name: cancel order
+          description: The order ID, order market ID, owner public key and chain and network. Note >> The wallet needs to have been added to the Gateway beforehand.
           required: true
           schema:
             $ref: "#/definitions/CancelOrderRequest"
@@ -217,6 +300,13 @@ paths:
   /orders:
     get:
       description: Retrieves information about multiple orders
+      parameters:
+        - in: body
+          name: get orders
+          description: The orders IDs, orders market IDs, owner(s) public key(s) and chain and network.
+          required: true
+          schema:
+            $ref: "#/definitions/GetOrdersRequest"
       responses:
         "200":
           description: OK
@@ -226,8 +316,8 @@ paths:
       description: Places multiple orders
       parameters:
         - in: body
-          name: orders
-          description: The list of order details
+          name: place orders
+          description: The list of order details with owner public key and chain and network. Note >> The wallet needs to have been added to the Gateway beforehand.
           required: true
           schema:
             $ref: "#/definitions/PlaceOrdersRequest"
@@ -240,8 +330,8 @@ paths:
       description: Cancels multiple orders
       parameters:
         - in: body
-          name: orders
-          description: The list of order details
+          name: cancel orders
+          description: The order IDs, orders makret ID(s), owner(s) public key(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
           required: true
           schema:
             $ref: "#/definitions/CancelOrdersRequest"
@@ -252,14 +342,28 @@ paths:
             $ref: "#/definitions/CancelOrdersResponse"
   /orders/all:
     get:
-      description: get all orders
+      description: Get all orders considering the given parameters
+      parameters:
+        - in: body
+          name: get all orders
+          description: The owner(s) public key(s) and chain and network.
+          required: true
+          schema:
+            $ref: "#/definitions/GetAllOrdersRequest"
       responses:
         "200":
           description: OK
           schema:
             $ref: "#/definitions/GetlAllOrdersResponse"
     delete:
-      description: Cancels all orders
+      description: Cancels all orders considering the given parameters
+      parameters:
+        - in: body
+          name: cancel all orders
+          description: The owner(s) public key(s), market ID(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            $ref: "#/definitions/CancelAllOrdersRequest"
       responses:
         "200":
           description: OK
@@ -271,7 +375,7 @@ paths:
       parameters:
         - in: body
           name: withdraw
-          description: The withdrawal details
+          description: The owner(s) public key(s), market ID and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
           required: true
           schema:
             $ref: "#/definitions/MarketWithdrawRequest"
@@ -286,7 +390,7 @@ paths:
       parameters:
         - in: body
           name: withdraws
-          description: The list of withdrawal details
+          description: The owner(s) public key(s), market ID(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
           required: true
           schema:
             $ref: "#/definitions/MarketsWithdrawsRequest"
@@ -300,8 +404,8 @@ paths:
       description: Withdraws funds from all markets
       parameters:
         - in: body
-          name: withdraws
-          description: The list of withdrawal details
+          name: withdraws all markets
+          description: The owner(s) public key(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
           required: true
           schema:
             $ref: "#/definitions/AllMarketsWithdrawsRequest"
@@ -314,19 +418,27 @@ paths:
     get:
       description: Retrieves information about a specific transaction
       parameters:
-        - in: query
-          name: transactionId
-          description: The ID of the transaction
+        - in: body
+          name: transaction
+          description: The hash of the transaction and chain and network
           required: true
-          type: string
+          schema:
+            $ref: "#/definitions/TransactionRequest"
       responses:
         "200":
           description: OK
           schema:
-            $ref: "#/definitions/TransactionResponse_1"
+            $ref: "#/definitions/TransactionResponse"
   /transactions:
     get:
       description: Retrieves information about multiple transactions
+      parameters:
+        - in: body
+          name: transactions
+          description: The hashes of the transactions and chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/TransactionsRequest"
       responses:
         "200":
           description: OK
@@ -335,6 +447,13 @@ paths:
   /wallet/publicKey:
     get:
       description: Retrieves the public key of the wallet
+      parameters:
+        - in: body
+          name: get wallet
+          description: The mnemonic, an account number like 0 and chain and network. Note >> the wallet needs to have been used in the current gateway run to work
+          required: true
+          schema:
+            $ref: "#/definitions/WalletPublicKeyRequest"
       responses:
         "200":
           description: OK
@@ -343,6 +462,13 @@ paths:
   /wallet/publicKeys:
     get:
       description: Retrieves the public keys of multiple wallets
+      parameters:
+        - in: body
+          name: get wallets
+          description: The chain and network. Note >> wallets need to have been used in the current gateway run to work
+          required: true
+          schema:
+            $ref: "#/definitions/WalletsPublicKeysRequest"
       responses:
         "200":
           description: OK
@@ -353,8 +479,8 @@ paths:
       description: Retrieves information about the current block
       parameters:
         - in: body
-          name: current
-          description: Basic information to instantiates the Kujira's classes
+          name: current block
+          description: The chain and network
           required: true
           schema:
             $ref: "#/definitions/CurrentBlockRequest"
@@ -368,8 +494,8 @@ paths:
       description: Retrieves information about the estimated fees
       parameters:
         - in: body
-          name: current
-          description: Basic information to instantiates the Kujira's classes
+          name: estimated fees
+          description: The chain and network
           required: true
           schema:
             $ref: "#/definitions/EstimatedFeesRequest"
@@ -379,9 +505,41 @@ paths:
           schema:
             $ref: "#/definitions/EstimatedFeesResponse"
 definitions:
+  RootRequest:
+    $ref: "#/definitions/CommonRequestBody"
+
+  TokenRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      id:
+        type: string
+        example: "ukuji"
+
   TokenResponse:
     type: object
     $ref: "#/definitions/KujiraTokenResponse_KUJI"
+
+  TokensRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      ids:
+        type: array
+        example: [
+          "ukuji",
+          "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+        ]
 
   TokensResponse:
     type: "object"
@@ -392,6 +550,9 @@ definitions:
       factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk:
         type: object
         $ref: "#/definitions/KujiraTokenResponse_DEMO"
+
+  AllTokensRequest:
+    $ref: "#/definitions/CommonRequestBody"
 
   AllTokensResponse:
     type: "object"
@@ -409,9 +570,38 @@ definitions:
         type: object
         $ref: "#/definitions/KujiraTokenResponse_axlUSDC"
 
+  MarketRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      id:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+
   MarketResponse:
     type: object
     $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+
+  MarketsRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      id:
+        type: string
+        example: [
+          "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+          "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+        ]
 
   MarketsResponse:
     type: "object"
@@ -422,6 +612,9 @@ definitions:
       kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
         type: object
         $ref: "#/definitions/KujiraMarketResponse_KUJI_USK"
+
+  AllMarketsRequest:
+    $ref: "#/definitions/CommonRequestBody"
 
   AllMarketsResponse:
     type: "object"
@@ -435,6 +628,19 @@ definitions:
       kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg:
         type: object
         $ref: "#/definitions/KujiraMarketResponse_DEMO_USK"
+
+  OrderBookRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
 
   OrderBookResponse:
     type: object
@@ -991,6 +1197,22 @@ definitions:
         type: string
         example: "2000"
 
+  OrderBooksRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      marketIds:
+        type: string
+        example: [
+          "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+          "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+        ]
+
   OrderBooksResponse:
     type: object
     properties:
@@ -1000,6 +1222,9 @@ definitions:
       kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg:
         type: object
         $ref: "#/definitions/OrderBookResponse_2"
+
+  AllOrderBooksRequest:
+    $ref: "#/definitions/CommonRequestBody"
 
   AllOrderBooksResponse:
     type: object
@@ -1014,9 +1239,38 @@ definitions:
         type: object
         $ref: "#/definitions/OrderBookResponse_3"
 
+  TickerRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+
   TickerResponse:
     type: object
     $ref: "#/definitions/KujiraTickerResponse_KUJI_DEMO"
+
+  TickersRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      marketIds:
+        type: string
+        example: [
+          "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+          "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+        ]
 
   TickersResponse:
     type: object
@@ -1027,6 +1281,9 @@ definitions:
       kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
         type: object
         $ref: "#/definitions/KujiraTickerResponse_KUJI_USK"
+
+  AllTickersRequest:
+    $ref: "#/definitions/CommonRequestBody"
 
   AllTickersResponse:
     type: object
@@ -1041,9 +1298,44 @@ definitions:
         type: object
         $ref: "#/definitions/KujiraTickerResponse_DEMO_USK"
 
+  BalanceRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      tokenId:
+        type: string
+        example: "ukuji"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+
   BalanceResponse:
     type: object
     $ref: "#/definitions/KujiraBalanceResponse_KUJI"
+
+  BalancesRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      tokenIds:
+        type: string
+        example: [
+          "ukuji",
+          "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+        ]
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
 
   BalancesResponse:
     type: object
@@ -1072,6 +1364,19 @@ definitions:
           unsettled:
             type: string
             example: "0"
+
+  AllBalancesRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
 
   AllBalancesResponse:
     type: object
@@ -1103,6 +1408,22 @@ definitions:
           unsettled:
             type: string
             example: "0"
+
+  GetOrderRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      id:
+        type: string
+        example: "182442"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
 
   GetOrderResponse_KUJI_DEMO_BUY_OPEN:
     type: object
@@ -1354,6 +1675,22 @@ definitions:
             type: string
             example: "1000000"
 
+  GetOrdersRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      ids:
+        type: string
+        example: ["182442", "182565"]
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+
   GetOrdersResponse:
     type: object
     properties:
@@ -1361,6 +1698,19 @@ definitions:
         $ref: "#/definitions/GetOrderResponse_KUJI_DEMO_BUY_OPEN"
       182565:
         $ref: "#/definitions/GetOrderResponse_KUJI_DEMO_SELL_OPEN"
+
+  GetAllOrdersRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
 
   GetlAllOrdersResponse:
     type: object
@@ -1764,6 +2114,19 @@ definitions:
       182565:
         $ref: "#/definitions/CancelOrderResponse_KUJI_DEMO_SELL"
 
+  CancelAllOrdersRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+
   CancelAllOrdersResponse:
     type: object
     properties:
@@ -1876,6 +2239,22 @@ definitions:
             type: string
             example: "6975AE200A86AC0F1851AF2CC6E1BCA239DC976F299F03CA9A024AC31F518C14"
 
+  TransactionRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      signature:
+        type: string
+        example: "3931621667DAC5CF2AB9266B185055DF5DC712A60659581020211836F9B2D934"
+
+  TransactionResponse:
+    $ref: "#/definitions/TransactionResponse_1"
+
   TransactionResponse_1:
     type: object
     properties:
@@ -1920,6 +2299,22 @@ definitions:
         type: string
         example: "..."
 
+  TransactionsRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      signatures:
+        type: string
+        example: [
+          "3931621667DAC5CF2AB9266B185055DF5DC712A60659581020211836F9B2D934",
+          "AB77153A4175C72103B26F284C7FF4975DAB5E134489A391A3725F693BDE1A8E"
+        ]
+
   TransactionsResponse:
     type: object
     properties:
@@ -1928,9 +2323,25 @@ definitions:
       50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91:
         $ref: "#/definitions/TransactionResponse_2"
 
+  WalletPublicKeyRequest:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+      mnemonic:
+        type: string
+        example: "**** **** **** **** **** **** **** **** **** **** **** ****"
+
   WalletPublicKeyResponse:
     type: string
     example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+
+  WalletsPublicKeysRequest:
+    $ref: "#/definitions/CommonRequestBody"
 
   WalletsPublicKeysResponse:
     type: array
