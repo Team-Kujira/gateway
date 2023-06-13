@@ -167,30 +167,18 @@ const marketsIds = {
   ].address, // DEMO/USK
 };
 
-// const tokenIds = {
-//   1: 'ukuji', // KUJI
-//   2: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo', // DEMO
-//   3: 'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk', // USK
-// };
-
-// const tokensDenoms = {
-//   1: Denom.from(tokenIds[1]),
-//   2: Denom.from(tokenIds[2]),
-//   3: Denom.from(tokenIds[3]),
-// };
-
-const tokensDenoms = [
+const tokensIds = [
   ...new Set(
     Object.values(marketsIds).flatMap((marketId) => [
-      networksPairs[marketId].denoms[0],
-      networksPairs[marketId].denoms[1],
+      networksPairs[marketId].denoms[0].reference,
+      networksPairs[marketId].denoms[1].reference,
     ])
   ),
 ];
 
-const tokensIds: { [key: number]: string } = {};
-for (let i = 0; i < tokensDenoms.length; i++) {
-  tokensIds[i] = tokensDenoms[i].reference;
+const tokensDenoms: { [key: number]: Denom } = {};
+for (let i = 0; i < tokensIds.length; i++) {
+  tokensDenoms[i] = Denom.from(tokensIds[i]);
 }
 
 const transactionsHashes = {
@@ -627,8 +615,10 @@ describe('Kujira', () => {
 
   describe('Tokens', () => {
     it('Get token 1 by id', async () => {
+      const target = tokensIds[1];
+
       const requestBody = {
-        id: tokensIds[1],
+        id: target,
       } as GetTokenRequest;
 
       const request = {
@@ -649,7 +639,7 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      const targetDenom = Denom.from(tokensIds[1]);
+      const targetDenom = Denom.from(target);
 
       expect(responseBody).not.toBeEmpty();
       expect(responseBody.id).toBe(request.id);
@@ -659,6 +649,7 @@ describe('Kujira', () => {
 
     it('Get token 1 by name', async () => {
       const target = Denom.from(tokensIds[1]);
+
       const requestBody = {
         name: target.symbol,
       } as GetTokenRequest;
@@ -690,6 +681,7 @@ describe('Kujira', () => {
 
     it('Get token 1 by symbol', async () => {
       const target = Denom.from(tokensIds[1]);
+
       const requestBody = {
         symbol: target.symbol,
       } as GetTokenRequest;
@@ -903,18 +895,14 @@ describe('Kujira', () => {
       logResponse(allTokens);
 
       for (const tokenId of Object.values(tokensIds)) {
-        if (tokenId != tokensIds['1']) {
-          const token = Denom.from(tokenId);
-          const targetToken = getNotNullOrThrowError<Token>(
-            allTokens
-              .filter((item: Token) => item.id == tokenId)
-              .toArray()[0][1]
-          );
-          expect(targetToken).not.toBeEmpty();
-          expect(targetToken.id).toBe(token.reference);
-          expect(targetToken.symbol).toBe(token.symbol);
-          expect(targetToken.decimals).toBe(token.decimals);
-        }
+        const token = Denom.from(tokenId);
+        const targetToken = getNotNullOrThrowError<Token>(
+          allTokens.filter((item: Token) => item.id == tokenId).toArray()[0][1]
+        );
+        expect(targetToken).not.toBeEmpty();
+        expect(targetToken.id).toBe(token.reference);
+        expect(targetToken.symbol).toBe(token.symbol);
+        expect(targetToken.decimals).toBe(token.decimals);
       }
     });
   });
@@ -2009,7 +1997,7 @@ describe('Kujira', () => {
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       const requestBody = {
-        tokenIds: [tokensIds[1], tokensIds[2], tokensIds[3]],
+        tokenIds: tokensIds,
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
