@@ -385,6 +385,7 @@ export const validateGetTokensRequest: RequestValidator =
       createValidator(
         null,
         (request) =>
+          // TODO create a validator and reuse it elsewhere!!!
           (request.names && request.names.length) ||
           (request.ids && request.ids.length) ||
           (request.symbols && request.symbols.length),
@@ -420,6 +421,7 @@ export const validateGetMarketsRequest: RequestValidator =
       createValidator(
         null,
         (request) =>
+          // TODO create a validator and reuse it elsewhere!!!
           (request.ids && request.ids.length) ||
           (request.names && request.names.length),
         `No markets were informed. If you want to get all markets, please do not inform the parameter "names".`,
@@ -440,6 +442,7 @@ export const validateGetOrderBookRequest: RequestValidator =
     [
       createValidator(
         null,
+        // TODO create a validator and reuse it elsewhere!!!
         (request) => request.marketId || request.marketName,
         `No market name was informed. If you want to get an order book, please inform the parameter "marketId".`,
         false
@@ -454,6 +457,7 @@ export const validateGetOrderBooksRequest: RequestValidator =
       createValidator(
         null,
         (request) =>
+          // TODO create a validator and reuse it elsewhere!!!
           (request.marketIds && request.marketIds.length) ||
           (request.marketNames && request.marketNames.length),
         `No market names were informed. If you want to get all order books, please do not inform the parameter "marketIds".`,
@@ -474,6 +478,7 @@ export const validateGetTickerRequest: RequestValidator =
     [
       createValidator(
         null,
+        // TODO create a validator and reuse it elsewhere!!!
         (request) => request.marketId || request.marketName,
         `No market name was informed. If you want to get a ticker, please inform the parameter "marketId".`,
         false
@@ -481,6 +486,7 @@ export const validateGetTickerRequest: RequestValidator =
       createValidator(
         null,
         (request) => {
+          // TODO change to use plain validators!!!
           if (request.marketId) {
             createRequestValidator([validateOrderMarketId]);
 
@@ -506,6 +512,7 @@ export const validateGetTickersRequest: RequestValidator =
       createValidator(
         null,
         (request) =>
+          // TODO create a validator and reuse it elsewhere!!!
           (request.marketIds && request.marketIds.length) ||
           (request.marketNames && request.marketNames.length),
         `No market names were informed. If you want to get all tickers, please do not inform the parameter "marketIds".`,
@@ -527,6 +534,7 @@ export const validateGetBalanceRequest: RequestValidator =
       createValidator(
         null,
         (request) =>
+          // TODO create a validator and reuse it elsewhere!!!
           (request.tokenId && request.ownerAddress) ||
           (request.tokenSymbol && request.ownerAddress),
         `No market name was informed. If you want to get a balance, please inform the parameter "marketId".`,
@@ -542,6 +550,7 @@ export const validateGetBalancesRequest: RequestValidator =
       createValidator(
         null,
         (request) =>
+          // TODO create a validator and reuse it elsewhere!!!
           (request.tokenIds && request.ownerAddress) ||
           (request.tokenSymbols && request.ownerAddress),
         `No market names were informed. If you want to get all balances, please do not inform the parameter "marketIds".`,
@@ -561,6 +570,7 @@ export const validateGetOrderRequest: RequestValidator = createRequestValidator(
   [
     createValidator(
       null,
+      // TODO create a validator and reuse it elsewhere!!!
       (request) => request && (request.id || request.clientId),
       `No id or client id was informed.`,
       false
@@ -579,6 +589,7 @@ export const validateGetOrdersRequest: RequestValidator =
       createValidator(
         null,
         (request) =>
+          // TODO create a validator and reuse it elsewhere!!!
           request &&
           ((request.ids && request.ids.length) ||
             (request.clientIds && request.clientIds.length)),
