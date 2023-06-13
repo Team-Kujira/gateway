@@ -2484,3 +2484,1583 @@ definitions:
       txHash:
         type: 'string'
         example: '0x...'
+
+  KujiraOrderBookResponse:
+    type: object
+    properties:
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      bids:
+        type: object
+        properties:
+          unknown_104:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/DEMO"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              price:
+                type: string
+                example: "0.92"
+              amount:
+                type: string
+                example: "588628515"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_126:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/DEMO"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              price:
+                type: string
+                example: "0.829"
+              amount:
+                type: string
+                example: "1"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_115:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/DEMO"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              price:
+                type: string
+                example: "0.88"
+              amount:
+                type: string
+                example: "300000"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+      asks:
+        type: object
+        properties:
+          unknown_5:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/DEMO"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              price:
+                type: string
+                example: "0.937"
+              amount:
+                type: string
+                example: "2218314210"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_6:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/DEMO"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              price:
+                type: string
+                example: "0.942"
+              amount:
+                type: string
+                example: "3159607369"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_7:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/DEMO"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              price:
+                type: string
+                example: "0.946"
+              amount:
+                type: string
+                example: "3784035703"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+      bestBid:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.922"
+          amount:
+            type: string
+            example: "294608278"
+          side:
+            type: string
+            example: "BUY"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      bestAsk:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/DEMO"
+          marketId:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          price:
+            type: string
+            example: "0.925"
+          amount:
+            type: string
+            example: "318801543"
+          side:
+            type: string
+            example: "SELL"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      connectorOrderBook:
+        type: object
+        properties:
+          base:
+            items:
+              properties:
+                quote_price:
+                  type: string
+                  example: "0.937"
+                offer_denom:
+                  type: object
+                  properties:
+                    native:
+                      type: string
+                      example: "ukuji"
+                total_offer_amount:
+                  type: string
+                  example: "2218314210"
+          quote:
+            items:
+              properties:
+                quote_price:
+                  type: string
+                  example: "0.92"
+                offer_denom:
+                  type: object
+                  properties:
+                    native:
+                      type: string
+                      example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+                total_offer_amount:
+                  type: string
+                  example: "588628515"
+
+  KujiraOrderBookResponse_2:
+    type: object
+    properties:
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_DEMO_USK"
+      bids:
+        type: object
+        properties:
+          unknown_40:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "DEMO/USK"
+              marketId:
+                type: string
+                example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+              price:
+                type: string
+                example: "5.067"
+              amount:
+                type: string
+                example: "67065921741"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_30:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "DEMO/USK"
+              marketId:
+                type: string
+                example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+              price:
+                type: string
+                example: "10.963"
+              amount:
+                type: string
+                example: "274959023"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_41:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "DEMO/USK"
+              marketId:
+                type: string
+                example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+              price:
+                type: string
+                example: "1.333"
+              amount:
+                type: string
+                example: "11923296614"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+      asks:
+        type: object
+        properties:
+          unknown_5:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "DEMO/USK"
+              marketId:
+                type: string
+                example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+              price:
+                type: string
+                example: "11.228"
+              amount:
+                type: string
+                example: "24782547"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_6:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "DEMO/USK"
+              marketId:
+                type: string
+                example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+              price:
+                type: string
+                example: "11.232"
+              amount:
+                type: string
+                example: "1"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_7:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "DEMO/USK"
+              marketId:
+                type: string
+                example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+              price:
+                type: string
+                example: "11.237"
+              amount:
+                type: string
+                example: "1"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+      bestBid:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "DEMO/USK"
+          marketId:
+            type: string
+            example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+          price:
+            type: string
+            example: "10.963"
+          amount:
+            type: string
+            example: "274959023"
+          side:
+            type: string
+            example: "BUY"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      bestAsk:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "DEMO/USK"
+          marketId:
+            type: string
+            example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+          price:
+            type: string
+            example: "11.205"
+          amount:
+            type: string
+            example: "24807354"
+          side:
+            type: string
+            example: "SELL"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      connectorOrderBook:
+        type: object
+        properties:
+          base:
+            items:
+              properties:
+                quote_price:
+                  type: string
+                  example: "11.228"
+                offer_denom:
+                  type: object
+                  properties:
+                    native:
+                      type: string
+                      example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+                total_offer_amount:
+                  type: string
+                  example: "24782547"
+          quote:
+            items:
+              properties:
+                quote_price:
+                  type: string
+                  example: "5.067"
+                offer_denom:
+                  type: object
+                  properties:
+                    native:
+                      type: string
+                      example: "factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk"
+                total_offer_amount:
+                  type: string
+                  example: "67065921741"
+
+  KujiraOrderBookResponse_3:
+    type: object
+    properties:
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_USK"
+      bids:
+        type: object
+        properties:
+          unknown_5:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/USK"
+              marketId:
+                type: string
+                example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+              price:
+                type: string
+                example: "0.808"
+              amount:
+                type: string
+                example: "635156750"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_6:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/USK"
+              marketId:
+                type: string
+                example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+              price:
+                type: string
+                example: "0.796"
+              amount:
+                type: string
+                example: "901015219"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_7:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/USK"
+              marketId:
+                type: string
+                example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+              price:
+                type: string
+                example: "0.781"
+              amount:
+                type: string
+                example: "1338007600"
+              side:
+                type: string
+                example: "BUY"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+      asks:
+        type: object
+        properties:
+          unknown_0:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/USK"
+              marketId:
+                type: string
+                example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+              price:
+                type: string
+                example: "5"
+              amount:
+                type: string
+                example: "7738151"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_1:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/USK"
+              marketId:
+                type: string
+                example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+              price:
+                type: string
+                example: "11"
+              amount:
+                type: string
+                example: "6"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+          unknown_2:
+            type: object
+            properties:
+              marketName:
+                type: string
+                example: "KUJI/USK"
+              marketId:
+                type: string
+                example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+              price:
+                type: string
+                example: "9999.999"
+              amount:
+                type: string
+                example: "2000"
+              side:
+                type: string
+                example: "SELL"
+              status:
+                type: string
+                example: "OPEN"
+              type:
+                type: string
+                example: "LIMIT"
+      bestBid:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/USK"
+          marketId:
+            type: string
+            example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+          price:
+            type: string
+            example: "0.824"
+          amount:
+            type: string
+            example: "295919702"
+          side:
+            type: string
+            example: "BUY"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      bestAsk:
+        type: object
+        properties:
+          marketName:
+            type: string
+            example: "KUJI/USK"
+          marketId:
+            type: string
+            example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+          price:
+            type: string
+            example: "5"
+          amount:
+            type: string
+            example: "7738151"
+          side:
+            type: string
+            example: "SELL"
+          status:
+            type: string
+            example: "OPEN"
+          type:
+            type: string
+            example: "LIMIT"
+      connectorOrderBook:
+        type: object
+        properties:
+          base:
+            items:
+              properties:
+                quote_price:
+                  type: string
+                  example: "0.808"
+                offer_denom:
+                  type: object
+                  properties:
+                    native:
+                      type: string
+                      example: "factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk"
+                total_offer_amount:
+                  type: string
+                  example: "635156750"
+          quote:
+            items:
+              properties:
+                quote_price:
+                  type: string
+                  example: "5"
+                offer_denom:
+                  type: object
+                  properties:
+                    native:
+                      type: string
+                      example: "ukuji"
+                total_offer_amount:
+                  type: string
+                  example: "7738151"
+
+  KujiraGetOrderResponse_KUJI_DEMO_BUY_OPEN:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "182442"
+      marketName:
+        type: string
+        example: "KUJI/DEMO"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      price:
+        type: string
+        example: "0.001"
+      amount:
+        type: string
+        example: "1"
+      side:
+        type: string
+        example: "BUY"
+      status:
+        type: string
+        example: "OPEN"
+      "type":
+        type: string
+        example: "LIMIT"
+      creationTimestamp:
+        type: integer
+        example: 1685739559805265000
+
+  KujiraGetOrderResponse_KUJI_DEMO_SELL_OPEN:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "182565"
+      marketName:
+        type: string
+        example: "KUJI/DEMO"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      price:
+        type: string
+        example: "999.99"
+      amount:
+        type: string
+        example: "1"
+      side:
+        type: string
+        example: "SELL"
+      status:
+        type: string
+        example: "OPEN"
+      "type":
+        type: string
+        example: "LIMIT"
+      creationTimestamp:
+        type: integer
+        example: 1685739680290897400
+      connectorOrder:
+        type: object
+        properties:
+          idx:
+            type: string
+            example: "182565"
+          owner:
+            type: string
+            example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+          quote_price:
+            type: string
+            example: "999.99"
+          offer_denom:
+            type: object
+            properties:
+              native:
+                type: string
+                example: "ukuji"
+          offer_amount:
+            type: string
+            example: "1000000"
+          filled_amount:
+            type: string
+            example: "0"
+          created_at:
+            type: string
+            example: "1685739680290897438"
+          original_offer_amount:
+            type: string
+            example: "1000000"
+
+  KujiraGetOrderResponse_KUJI_USK_BUY_OPEN:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "25951"
+      marketName:
+        type: string
+        example: "DEMO/USK"
+      marketId:
+        type: string
+        example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_DEMO_USK"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      price:
+        type: string
+        example: "0.001"
+      amount:
+        type: string
+        example: "1"
+      side:
+        type: string
+        example: "BUY"
+      status:
+        type: string
+        example: "OPEN"
+      "type":
+        type: string
+        example: "LIMIT"
+      creationTimestamp:
+        type: integer
+        example: 1685739680290897400
+      connectorOrder:
+        type: object
+        properties:
+          idx:
+            type: string
+            example: "25951"
+          owner:
+            type: string
+            example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+          quote_price:
+            type: string
+            example: "0.001"
+          offer_denom:
+            type: object
+            properties:
+              native:
+                type: string
+                example: "factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk"
+          offer_amount:
+            type: string
+            example: "1000000"
+          filled_amount:
+            type: string
+            example: "0"
+          created_at:
+            type: string
+            example: "1685739680290897438"
+          original_offer_amount:
+            type: string
+            example: "1000000"
+
+  KujiraPlaceOrderResponse_KUJI_DEMO_BUY_OPEN:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "182442"
+      marketName:
+        type: string
+        example: "KUJI/DEMO"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      price:
+        type: string
+        example: "0.001"
+      amount:
+        type: string
+        example: "1"
+      side:
+        type: string
+        example: "BUY"
+      status:
+        type: string
+        example: "OPEN"
+      "type":
+        type: string
+        example: "LIMIT"
+      fee:
+        type: string
+        example: "0.00028"
+      hashes:
+        type: object
+        properties:
+          creation:
+            type: string
+            example: "08200600B7DDB3796460A4B94B82CA276AE09FA384173F68AFBA2A3923AD5062"
+
+  KujiraPlaceOrderResponse_KUJI_DEMO_SELL_OPEN:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "182565"
+      marketName:
+        type: string
+        example: "KUJI/DEMO"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      price:
+        type: string
+        example: "999.99"
+      amount:
+        type: string
+        example: "1"
+      side:
+        type: string
+        example: "SELL"
+      status:
+        type: string
+        example: "OPEN"
+      "type":
+        type: string
+        example: "LIMIT"
+      fee:
+        type: string
+        example: "0.000648"
+      hashes:
+        type: object
+        properties:
+          creation:
+            type: string
+            example: "ED2E223A3ECD5D44C2AF154A0723A310A6FEE2F6ADAA78D0D14BF0B5AFE49493"
+
+  KujiraCancelOrderResponse_KUJI_DEMO_BUY:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "182442"
+      marketName:
+        type: string
+        example: "KUJI/DEMO"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      price:
+        type: string
+        example: "0.001"
+      amount:
+        type: string
+        example: "1"
+      side:
+        type: string
+        example: "BUY"
+      status:
+        type: string
+        example: "CANCELLED"
+      "type":
+        type: string
+        example: "LIMIT"
+      fee:
+        type: string
+        example: "0.000274"
+      hashes:
+        type: object
+        properties:
+          cancellation:
+            type: string
+            example: "5588F418F5A855856F9066E50E7F4824DBB24B2AC552252E3D82A2A2E806DBD9"
+
+  KujiraCancelOrderResponse_KUJI_DEMO_SELL:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "182565"
+      marketName:
+        type: string
+        example: "KUJI/DEMO"
+      marketId:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      status:
+        type: string
+        example: "CANCELLED"
+      "type":
+        type: string
+        example: "LIMIT"
+      fee:
+        type: string
+        example: "0.000262"
+      hashes:
+        type: object
+        properties:
+          cancellation:
+            type: string
+            example: "1DCCE1639BCA60E019BA7849728138B85698CA71D21B59B5B92483182B23EE55"
+
+  KujiraCancelOrderResponse_DEMO_USK_BUY:
+    type: object
+    properties:
+      id:
+        type: string
+        example: "25951"
+      marketName:
+        type: string
+        example: "DEMO/USK"
+      marketId:
+        type: string
+        example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+      market:
+        type: object
+        $ref: "#/definitions/KujiraMarketResponse_DEMO_USK"
+      ownerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      payerAddress:
+        type: string
+        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      price:
+        type: string
+        example: "0.001"
+      amount:
+        type: string
+        example: "1"
+      side:
+        type: string
+        example: "BUY"
+      status:
+        type: string
+        example: "CANCELLED"
+      "type":
+        type: string
+        example: "LIMIT"
+      fee:
+        type: string
+        example: "0.000285"
+      hashes:
+        type: object
+        properties:
+          cancellation:
+            type: string
+            example: "C97288AB97371CFCE9B813DF49BF3798C4916E1A0480E49BF24D680F61773290"
+
+  KujiraTransactionResponse:
+    type: object
+    properties:
+      hash:
+        type: string
+        example: "D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9"
+      blockNumber:
+        type: integer
+        example: 13248211
+      gasUsed:
+        type: integer
+        example: 186481
+      gasWanted:
+        type: integer
+        example: 218241
+      code:
+        type: integer
+        example: 0
+      data:
+        type: string
+        example: "..."
+
+  KujiraTransactionResponse_2:
+    type: object
+    properties:
+      hash:
+        type: string
+        example: "50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91"
+      blockNumber:
+        type: integer
+        example: 13248197
+      gasUsed:
+        type: integer
+        example: 2238628
+      gasWanted:
+        type: integer
+        example: 2889683
+      code:
+        type: integer
+        example: 0
+      data:
+        type: string
+        example: "..."
+
+  KujiraCommonRequestBody:
+    type: object
+    properties:
+      chain:
+        type: string
+        example: "kujira"
+      network:
+        type: string
+        example: "testnet"
+
+  KujiraTokenResponse_KUJI:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: "ukuji"
+      name:
+        type: string
+        example: "KUJI"
+      symbol:
+        type: string
+        example: "KUJI"
+      decimals:
+        type: integer
+        example: 6
+
+  KujiraTokenResponse_DEMO:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+      name:
+        type: string
+        example: "DEMO"
+      symbol:
+        type: string
+        example: "DEMO"
+      decimals:
+        type: integer
+        example: 6
+
+  KujiraTokenResponse_USK:
+    type: "object"
+    properties:
+      id:
+        type: string
+        example: "factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk"
+      name:
+        type: string
+        example: "USK"
+      symbol:
+        type: string
+        example: "USK"
+      decimals:
+        type: integer
+        example: 6
+
+  KujiraFees:
+    type: "object"
+    properties:
+      maker:
+        type: string
+        example: "0.075"
+      taker:
+        type: string
+        example: "0.15"
+      serviceProvider:
+        type: string
+        example: "0"
+
+  KujiraDenomKUJI:
+    type: object
+    properties:
+      reference:
+        type: string
+        example: "ukuji"
+      decimals:
+        type: integer
+        example: 6
+      symbol:
+        type: string
+        example: "KUJI"
+
+  KujiraDenomDEMO:
+    type: object
+    properties:
+      reference:
+        type: string
+        example: "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+      decimals:
+        type: integer
+        example: 6
+      symbol:
+        type: string
+        example: "DEMO"
+
+  KujiraDenomUSK:
+    type: object
+    properties:
+      reference:
+        type: string
+        example: "factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk"
+      decimals:
+        type: integer
+        example: 6
+      symbol:
+        type: string
+        example: "USK"
+
+  KujiraMarketResponse_KUJI_DEMO:
+    properties:
+      id:
+        type: string
+        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      name:
+        type: string
+        example: "KUJI/DEMO"
+      baseToken:
+        $ref: "#/definitions/KujiraTokenResponse_KUJI"
+      quoteToken:
+        $ref: "#/definitions/KujiraTokenResponse_DEMO"
+      precision:
+        type: integer
+        example: 3
+      minimumOrderSize:
+        type: string
+        example: "0.001"
+      minimumPriceIncrement:
+        type: string
+        example: "0.001"
+      minimumBaseAmountIncrement:
+        type: string
+        example: "0.001"
+      minimumQuoteAmountIncrement:
+        type: string
+        example: "0.001"
+      fees:
+        $ref: "#/definitions/KujiraFees"
+      deprecated:
+        type: boolean
+        example: false
+      connectorMarket:
+        type: object
+        properties:
+          address:
+            type: string
+            example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+          denoms:
+            items:
+              $ref: "#/definitions/KujiraDenomKUJI"
+          precision:
+            type: object
+            properties:
+              decimal_places:
+                type: integer
+                example: 3
+          decimalDelta:
+            type: integer
+            example: 0
+          multiswap:
+            type: boolean
+            example: true
+          pool:
+            type: string
+            example: "kujira19kxd9sqk09zlzqfykk7tzyf70hl009hkekufq8q0ud90ejtqvvxs8xg5cq"
+
+  KujiraMarketResponse_KUJI_USK:
+    properties:
+      id:
+        type: string
+        example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+      name:
+        type: string
+        example: "KUJI/USK"
+      baseToken:
+        $ref: "#/definitions/KujiraTokenResponse_KUJI"
+      quoteToken:
+        $ref: "#/definitions/KujiraTokenResponse_USK"
+      precision:
+        type: integer
+        example: 3
+      minimumOrderSize:
+        type: string
+        example: "0.001"
+      minimumPriceIncrement:
+        type: string
+        example: "0.001"
+      minimumBaseAmountIncrement:
+        type: string
+        example: "0.001"
+      minimumQuoteAmountIncrement:
+        type: string
+        example: "0.001"
+      fees:
+        $ref: "#/definitions/KujiraFees"
+      deprecated:
+        type: boolean
+        example: false
+      connectorMarket:
+        type: object
+        properties:
+          address:
+            type: string
+            example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+          denoms:
+            items:
+              $ref: "#/definitions/KujiraDenomUSK"
+          precision:
+            type: object
+            properties:
+              decimal_places:
+                type: integer
+                example: 3
+          decimalDelta:
+            type: integer
+            example: 0
+          multiswap:
+            type: boolean
+            example: true
+          pool:
+            type: string
+            example: "kujira16ethwy4fkjn7ymd04ect2wwlq7pwtlxdzw3zg5nvw8smmwsks49sqjg326"
+
+  KujiraMarketResponse_DEMO_USK:
+    properties:
+      id:
+        type: string
+        example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+      name:
+        type: string
+        example: "DEMO/USK"
+      baseToken:
+        $ref: "#/definitions/KujiraTokenResponse_DEMO"
+      quoteToken:
+        $ref: "#/definitions/KujiraTokenResponse_USK"
+      precision:
+        type: integer
+        example: 3
+      minimumOrderSize:
+        type: string
+        example: "0.001"
+      minimumPriceIncrement:
+        type: string
+        example: "0.001"
+      minimumBaseAmountIncrement:
+        type: string
+        example: "0.001"
+      minimumQuoteAmountIncrement:
+        type: string
+        example: "0.001"
+      fees:
+        $ref: "#/definitions/KujiraFees"
+      deprecated:
+        type: boolean
+        example: false
+      connectorMarket:
+        type: object
+        properties:
+          address:
+            type: string
+            example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+          denoms:
+            items:
+              $ref: "#/definitions/KujiraDenomDEMO"
+          precision:
+            type: object
+            properties:
+              decimal_places:
+                type: integer
+                example: 3
+          decimalDelta:
+            type: integer
+            example: 0
+          multiswap:
+            type: boolean
+            example: true
+          pool:
+            type: string
+            example: "kujira16ethwy4fkjn7ymd04ect2wwlq7pwtlxdzw3zg5nvw8smmwsks49sqjg326"
+          margin:
+            type: object
+            properties:
+              address:
+                type: string
+                example: "kujira1vmnntr773a5p7s4k0t39v6vcgcq87kq2zaw94cy85850n79jx2kq56sqhs"
+              owner:
+                type: string
+                example: "kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5"
+              stable_denom:
+                $ref: "#/definitions/KujiraDenomUSK"
+              stable_denom_admin:
+                type: string
+                example: "kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll"
+              collateral_denom:
+                $ref: "#/definitions/KujiraDenomDEMO"
+              oracle_denom:
+                type: string
+                example: "ATOM"
+              max_ratio:
+                type: number
+                example: 0.6
+              mint_fee:
+                type: number
+                example: 0.0005
+              interest_rate:
+                type: number
+                example: 0
+              orca_address:
+                type: string
+                example: "kujira1exd7mzv8azf7tpqukm6fzxnvdt7a8kddyz2puwzk9lm7qmlx3vxq0thezm"
+              max_debt:
+                type: object
+                properties:
+                  "type":
+                    type: string
+                    example: "BigNumber"
+                  hex:
+                    type: string
+                    example: "0x012a05f200"
+              liquidation_threshold:
+                type: object
+                properties:
+                  "type":
+                    type: string
+                    example: "BigNumber"
+                  hex:
+                    type: string
+                    example: "0x012a05f200"
+              liquidation_ratio:
+                type: number
+                example: 0.2
+
+  KujiraTickerResponse_KUJI_DEMO:
+    type: object
+    properties:
+      market:
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+      price:
+        type: string
+        example: "0.923"
+      timestamp:
+        type: integer
+        example: 1685739488897
+      ticker:
+        type: object
+        properties:
+          price:
+            type: string
+            example: "0.923"
+
+  KujiraTickerResponse_KUJI_USK:
+    type: object
+    properties:
+      market:
+        $ref: "#/definitions/KujiraMarketResponse_KUJI_USK"
+      price:
+        type: string
+        example: "2.912"
+      timestamp:
+        type: integer
+        example: 1685739492707
+      ticker:
+        type: object
+        properties:
+          price:
+            type: string
+            example: "2.912"
+
+  KujiraTickerResponse_DEMO_USK:
+    type: object
+    properties:
+      market:
+        $ref: "#/definitions/KujiraMarketResponse_DEMO_USK"
+      price:
+        type: string
+        example: "11.084"
+      timestamp:
+        type: integer
+        example: 1685739492707
+      ticker:
+        type: object
+        properties:
+          price:
+            type: string
+            example: "11.084"
+
+  KujiraBalanceResponse_KUJI:
+    type: object
+    properties:
+      token:
+        $ref: "#/definitions/KujiraTokenResponse_KUJI"
+      ticker:
+        $ref: "#/definitions/KujiraTickerResponse_KUJI_USK"
+      free:
+        type: string
+        example: "2876.343666"
+      lockedInOrders:
+        type: string
+        example: "0"
+      unsettled:
+        type: string
+        example: "0"
+
+  KujiraBalanceResponse_DEMO:
+    type: object
+    properties:
+      token:
+        $ref: "#/definitions/KujiraTokenResponse_DEMO"
+      ticker:
+        $ref: "#/definitions/KujiraTickerResponse_DEMO_USK"
+      free:
+        type: string
+        example: "2876.343666"
+      lockedInOrders:
+        type: string
+        example: "0"
+      unsettled:
+        type: string
+        example: "0"
