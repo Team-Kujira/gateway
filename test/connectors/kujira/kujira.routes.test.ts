@@ -146,18 +146,6 @@ const config = KujiraConfig.config;
 
 const kujiToken = KUJI;
 
-const tokenIds = {
-  1: 'ukuji', // KUJI
-  2: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo', // DEMO
-  3: 'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk', // USK
-};
-
-const tokensDenoms = {
-  1: Denom.from(tokenIds[1]),
-  2: Denom.from(tokenIds[2]),
-  3: Denom.from(tokenIds[3]),
-};
-
 const tokensBalancesHistory: IMap<any, Amount> = IMap<
   any,
   Amount
@@ -178,6 +166,32 @@ const marketsIds = {
     'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg'
   ].address, // DEMO/USK
 };
+
+// const tokenIds = {
+//   1: 'ukuji', // KUJI
+//   2: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo', // DEMO
+//   3: 'factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk', // USK
+// };
+
+// const tokensDenoms = {
+//   1: Denom.from(tokenIds[1]),
+//   2: Denom.from(tokenIds[2]),
+//   3: Denom.from(tokenIds[3]),
+// };
+
+const tokensDenoms = [
+  ...new Set(
+    Object.values(marketsIds).flatMap((marketId) => [
+      networksPairs[marketId].denoms[0],
+      networksPairs[marketId].denoms[1],
+    ])
+  ),
+];
+
+const tokensIds: { [key: number]: string } = {};
+for (let i = 0; i < tokensDenoms.length; i++) {
+  tokensIds[i] = tokensDenoms[i].reference;
+}
 
 const transactionsHashes = {
   1: 'D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9',
@@ -614,7 +628,7 @@ describe('Kujira', () => {
   describe('Tokens', () => {
     it('Get token 1 by id', async () => {
       const requestBody = {
-        id: tokenIds[1],
+        id: tokensIds[1],
       } as GetTokenRequest;
 
       const request = {
@@ -635,7 +649,7 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      const targetDenom = Denom.from(tokenIds[1]);
+      const targetDenom = Denom.from(tokensIds[1]);
 
       expect(responseBody).not.toBeEmpty();
       expect(responseBody.id).toBe(request.id);
@@ -644,7 +658,7 @@ describe('Kujira', () => {
     });
 
     it('Get token 1 by name', async () => {
-      const target = Denom.from(tokenIds[1]);
+      const target = Denom.from(tokensIds[1]);
       const requestBody = {
         name: target.symbol,
       } as GetTokenRequest;
@@ -675,7 +689,7 @@ describe('Kujira', () => {
     });
 
     it('Get token 1 by symbol', async () => {
-      const target = Denom.from(tokenIds[1]);
+      const target = Denom.from(tokensIds[1]);
       const requestBody = {
         symbol: target.symbol,
       } as GetTokenRequest;
@@ -706,7 +720,7 @@ describe('Kujira', () => {
 
     it('Get tokens 2 and 3 by ids', async () => {
       const requestBody = {
-        ids: [tokenIds[2], tokenIds[3]],
+        ids: [tokensIds[2], tokensIds[3]],
       } as GetTokensRequest;
 
       const request = {
@@ -755,7 +769,7 @@ describe('Kujira', () => {
     });
 
     it('Get tokens 2 and 3 by names', async () => {
-      const targetsIds = [tokenIds[2], tokenIds[3]];
+      const targetsIds = [tokensIds[2], tokensIds[3]];
       const targetsDenoms: Denom[] = [];
       for (const targetId of targetsIds) {
         targetsDenoms.push(Denom.from(targetId));
@@ -810,7 +824,7 @@ describe('Kujira', () => {
     });
 
     it('Get tokens 2 and 3 by symbols', async () => {
-      const targetsIds = [tokenIds[2], tokenIds[3]];
+      const targetsIds = [tokensIds[2], tokensIds[3]];
       const targetsDenoms: Denom[] = [];
       for (const targetId of targetsIds) {
         targetsDenoms.push(Denom.from(targetId));
@@ -888,8 +902,8 @@ describe('Kujira', () => {
 
       logResponse(allTokens);
 
-      for (const tokenId of Object.values(tokenIds)) {
-        if (tokenId != tokenIds['1']) {
+      for (const tokenId of Object.values(tokensIds)) {
+        if (tokenId != tokensIds['1']) {
           const token = Denom.from(tokenId);
           const targetToken = getNotNullOrThrowError<Token>(
             allTokens
@@ -1648,7 +1662,7 @@ describe('Kujira', () => {
 
     it('Get balances of tokens 2 and 3 by ids', async () => {
       const requestBody = {
-        tokenIds: [tokenIds[2], tokenIds[3]],
+        tokenIds: [tokensIds[2], tokensIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -1758,7 +1772,7 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      Object.values(tokenIds).forEach((tokenId) => {
+      Object.values(tokensIds).forEach((tokenId) => {
         const balance = getNotNullOrThrowError<Balance>(
           IMap(responseBody.tokens).get(tokenId)
         );
@@ -1995,7 +2009,7 @@ describe('Kujira', () => {
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       const requestBody = {
-        tokenIds: [tokenIds[1], tokenIds[2], tokenIds[3]],
+        tokenIds: [tokensIds[1], tokensIds[2], tokensIds[3]],
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -2911,7 +2925,7 @@ describe('Kujira', () => {
       ]);
 
       const requestBody = {
-        tokenIds: Object.values(tokenIds),
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -3388,7 +3402,7 @@ describe('Kujira', () => {
       const targetOrders = getOrders(['4', '5']);
 
       const requestBody = {
-        tokenIds: Object.values(tokenIds),
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -3810,7 +3824,7 @@ describe('Kujira', () => {
       const targetOrders = getOrders(['8', '9']);
 
       const requestBody = {
-        tokenIds: Object.values(tokenIds),
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -4109,7 +4123,7 @@ describe('Kujira', () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
-        tokenIds: Object.values(tokenIds),
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -4427,7 +4441,7 @@ describe('Kujira', () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
-        tokenIds: Object.values(tokenIds),
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -4602,7 +4616,7 @@ describe('Kujira', () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
-        tokenIds: Object.values(tokenIds),
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
@@ -4759,7 +4773,7 @@ describe('Kujira', () => {
       const targetOrders = getOrders(['12', '13']);
 
       const requestBody = {
-        tokenIds: Object.values(tokenIds),
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
