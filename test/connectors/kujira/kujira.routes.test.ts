@@ -295,7 +295,7 @@ beforeAll(async () => {
   getPatch = <R = AsyncFunctionType<any, any>>(keyPath: string[]): R =>
     helperGetPatch<R>(patches, keyPath);
 
-  // await getPatch(['global', 'fetch'])('beforeAll');
+  await getPatch(['global', 'fetch'])('beforeAll');
   await getPatch(['kujira', 'getFastestRpc'])('beforeAll');
   await getPatch(['kujira', 'kujiraGetHttpBatchClient'])('beforeAll');
   await getPatch(['kujira', 'kujiraGetTendermint34Client'])('beforeAll');
