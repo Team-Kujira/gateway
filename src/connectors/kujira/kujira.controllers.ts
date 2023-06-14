@@ -621,7 +621,7 @@ export async function cancelAllOrders(
   return response;
 }
 
-export async function widthdrawFromMarket(
+export async function withdrawFromMarket(
   connector: Connector,
   request: MarketWithdrawRequest
 ): Promise<ResponseWrapper<MarketWithdrawResponse>> {
@@ -631,7 +631,7 @@ export async function widthdrawFromMarket(
 
   try {
     response.body = convertToResponseBody(
-      await connector.settleMarketFunds(request)
+      await connector.withdrawFromMarket(request)
     );
 
     response.status = StatusCodes.OK;
@@ -646,7 +646,7 @@ export async function widthdrawFromMarket(
   }
 }
 
-export async function withdrawsFromMarkets(
+export async function withdrawFromMarkets(
   connector: Connector,
   request: MarketsWithdrawsRequest
 ): Promise<ResponseWrapper<MarketsWithdrawsFundsResponse>> {
@@ -656,7 +656,7 @@ export async function withdrawsFromMarkets(
 
   try {
     response.body = convertToResponseBody(
-      await connector.settleMarketsFunds(request)
+      await connector.withdrawFromMarkets(request)
     );
 
     response.status = StatusCodes.OK;
@@ -680,7 +680,7 @@ export async function withdrawFromAllMarkets(
   const response = new ResponseWrapper<AllMarketsWithdrawsResponse>();
 
   response.body = convertToResponseBody(
-    await connector.settleAllMarketsFunds(request)
+    await connector.withdrawFromAllMarkets(request)
   );
 
   response.status = StatusCodes.OK;

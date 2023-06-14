@@ -95,6 +95,7 @@ import {
   TransactionHash,
   Withdraw,
 } from '../../../src/connectors/kujira/kujira.types';
+import * as KujiraController from '../../../src/connectors/kujira/kujira.controllers';
 import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
@@ -570,7 +571,7 @@ beforeEach(async () => {
     options.strategy = options.strategy || requestStrategy;
     options.RESTExpress = options.RESTExpress || expressApp;
     options.RESTRoute = `/kujira${options.RESTRoute}`;
-    options.controller = options.controller || kujira;
+    options.model = options.model || kujira;
 
     return helperSendRequest(options);
   };
@@ -635,7 +636,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/token',
         RESTRequest: request,
-        controllerFunction: kujira.getToken,
+        controllerFunction: KujiraController.getToken,
       });
 
       const responseBody = response.body as GetTokenResponse;
@@ -668,7 +669,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/token',
         RESTRequest: request,
-        controllerFunction: kujira.getToken,
+        controllerFunction: KujiraController.getToken,
       });
 
       const responseBody = response.body as GetTokenResponse;
@@ -700,7 +701,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/token',
         RESTRequest: request,
-        controllerFunction: kujira.getToken,
+        controllerFunction: KujiraController.getToken,
       });
 
       const responseBody = response.body as GetTokenResponse;
@@ -729,7 +730,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/tokens',
         RESTRequest: request,
-        controllerFunction: kujira.getTokens,
+        controllerFunction: KujiraController.getTokens,
       });
 
       const responseBody = IMap(response.body) as GetTokensResponse as IMap<
@@ -785,7 +786,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/tokens',
         RESTRequest: request,
-        controllerFunction: kujira.getTokens,
+        controllerFunction: KujiraController.getTokens,
       });
 
       const responseBody = IMap(response.body) as GetTokensResponse as IMap<
@@ -840,7 +841,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/tokens',
         RESTRequest: request,
-        controllerFunction: kujira.getTokens,
+        controllerFunction: KujiraController.getTokens,
       });
 
       const responseBody = IMap(response.body) as GetTokensResponse as IMap<
@@ -887,7 +888,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/tokens/all',
         RESTRequest: request,
-        controllerFunction: kujira.getAllTokens,
+        controllerFunction: KujiraController.getAllTokens,
       });
 
       allTokens = IMap(response.body) as GetAllTokensResponse as IMap<
@@ -927,7 +928,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/market',
         RESTRequest: request,
-        controllerFunction: kujira.getMarket,
+        controllerFunction: KujiraController.getMarket,
       });
 
       const responseBody = response.body as GetMarketResponse;
@@ -967,7 +968,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/market',
         RESTRequest: request,
-        controllerFunction: kujira.getMarket,
+        controllerFunction: KujiraController.getMarket,
       });
 
       const responseBody = response.body as GetMarketResponse;
@@ -1006,7 +1007,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/markets',
         RESTRequest: request,
-        controllerFunction: kujira.getMarkets,
+        controllerFunction: KujiraController.getMarkets,
       });
 
       const responseBody = IMap(response.body) as GetMarketsResponse as IMap<
@@ -1069,7 +1070,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/markets',
         RESTRequest: request,
-        controllerFunction: kujira.getMarkets,
+        controllerFunction: KujiraController.getMarkets,
       });
 
       const responseBody = IMap(response.body) as GetMarketsResponse as IMap<
@@ -1120,7 +1121,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/markets/all',
         RESTRequest: request,
-        controllerFunction: kujira.getAllMarkets,
+        controllerFunction: KujiraController.getAllMarkets,
       });
 
       const responseBody = IMap(response.body) as GetAllMarketsResponse as IMap<
@@ -1172,7 +1173,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orderBook',
         RESTRequest: request,
-        controllerFunction: kujira.getOrderBook,
+        controllerFunction: KujiraController.getOrderBook,
       });
 
       const responseBody = response.body as GetOrderBookResponse;
@@ -1212,7 +1213,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orderBook',
         RESTRequest: request,
-        controllerFunction: kujira.getOrderBook,
+        controllerFunction: KujiraController.getOrderBook,
       });
 
       const responseBody = response.body as GetOrderBookResponse;
@@ -1250,7 +1251,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orderBooks',
         RESTRequest: request,
-        controllerFunction: kujira.getOrderBooks,
+        controllerFunction: KujiraController.getOrderBooks,
       });
 
       const responseBody = IMap(response.body) as GetOrderBooksResponse;
@@ -1306,7 +1307,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orderBooks',
         RESTRequest: request,
-        controllerFunction: kujira.getOrderBooks,
+        controllerFunction: KujiraController.getOrderBooks,
       });
 
       const responseBody = IMap(response.body) as GetOrderBooksResponse;
@@ -1349,7 +1350,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orderBooks/all',
         RESTRequest: request,
-        controllerFunction: kujira.getAllOrderBooks,
+        controllerFunction: KujiraController.getAllOrderBooks,
       });
 
       const responseBody = IMap(response.body) as GetAllOrderBooksResponse;
@@ -1392,7 +1393,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/ticker',
         RESTRequest: request,
-        controllerFunction: kujira.getTicker,
+        controllerFunction: KujiraController.getTicker,
       });
 
       const responseBody = response.body as GetTickerResponse;
@@ -1429,7 +1430,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/ticker',
         RESTRequest: request,
-        controllerFunction: kujira.getTicker,
+        controllerFunction: KujiraController.getTicker,
       });
 
       const responseBody = response.body as GetTickerResponse;
@@ -1469,7 +1470,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/tickers',
         RESTRequest: request,
-        controllerFunction: kujira.getTickers,
+        controllerFunction: KujiraController.getTickers,
       });
 
       const responseBody = IMap(response.body) as GetTickersResponse;
@@ -1522,7 +1523,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/tickers',
         RESTRequest: request,
-        controllerFunction: kujira.getTickers,
+        controllerFunction: KujiraController.getTickers,
       });
 
       const responseBody = IMap(response.body) as GetTickersResponse;
@@ -1564,7 +1565,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/ticker/all',
         RESTRequest: request,
-        controllerFunction: kujira.getAllTickers,
+        controllerFunction: KujiraController.getAllTickers,
       });
 
       const responseBody = IMap(response.body) as GetAllTickersResponse;
@@ -1610,7 +1611,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balance',
         RESTRequest: request,
-        controllerFunction: kujira.getBalance,
+        controllerFunction: KujiraController.getBalance,
       });
 
       const responseBody = response.body as GetBalanceResponse;
@@ -1638,7 +1639,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balance',
         RESTRequest: request,
-        controllerFunction: kujira.getBalance,
+        controllerFunction: KujiraController.getBalance,
       });
 
       const responseBody = response.body as GetBalanceResponse;
@@ -1668,7 +1669,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -1710,7 +1711,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -1756,7 +1757,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances/all',
         RESTRequest: request,
-        controllerFunction: kujira.getAllBalances,
+        controllerFunction: KujiraController.getAllBalances,
       });
 
       const responseBody = response.body as GetAllBalancesResponse;
@@ -1790,7 +1791,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/transaction',
         RESTRequest: request,
-        controllerFunction: kujira.getTransaction,
+        controllerFunction: KujiraController.getTransaction,
       });
 
       const responseBody = response.body as GetTransactionResponse;
@@ -1822,7 +1823,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/transactions',
         RESTRequest: request,
-        controllerFunction: kujira.getTransactions,
+        controllerFunction: KujiraController.getTransactions,
       });
 
       const responseBody = IMap<TransactionHash, Transaction>(
@@ -1964,7 +1965,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.DELETE,
         RESTRoute: '/orders/all',
         RESTRequest: request,
-        controllerFunction: kujira.cancelAllOrders,
+        controllerFunction: KujiraController.cancelAllOrders,
       });
 
       const responseBody = response.body as CancelAllOrdersResponse;
@@ -1988,7 +1989,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/market/withdraws/all',
         RESTRequest: request,
-        controllerFunction: kujira.settleAllMarketsFunds,
+        controllerFunction: KujiraController.withdrawFromAllMarkets,
       });
 
       const responseBody = response.body as AllMarketsWithdrawsResponse;
@@ -2013,7 +2014,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -2069,7 +2070,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/order',
         RESTRequest: request,
-        controllerFunction: kujira.placeOrder,
+        controllerFunction: KujiraController.placeOrder,
       });
 
       const responseBody = response.body as PlaceOrderResponse;
@@ -2315,7 +2316,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = {
@@ -2399,7 +2400,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/order',
         RESTRequest: request,
-        controllerFunction: kujira.getOrder,
+        controllerFunction: KujiraController.getOrder,
       });
 
       const responseBody = response.body as GetOrderResponse;
@@ -2451,7 +2452,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/order',
         RESTRequest: request,
-        controllerFunction: kujira.placeOrder,
+        controllerFunction: KujiraController.placeOrder,
       });
 
       const responseBody = response.body as PlaceOrderResponse;
@@ -2505,7 +2506,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = {
@@ -2609,7 +2610,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/order',
         RESTRequest: request,
-        controllerFunction: kujira.getOrder,
+        controllerFunction: KujiraController.getOrder,
       });
 
       const responseBody = response.body as GetOrderResponse;
@@ -2646,7 +2647,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/order',
         RESTRequest: request,
-        controllerFunction: kujira.placeOrder,
+        controllerFunction: KujiraController.placeOrder,
       });
 
       const responseBody = response.body as PlaceOrderResponse;
@@ -2696,7 +2697,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = {
@@ -2838,7 +2839,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.placeOrders,
+        controllerFunction: KujiraController.placeOrders,
       });
 
       const responseBody = IMap<OrderId, Order>(
@@ -2929,7 +2930,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -3065,7 +3066,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -3124,7 +3125,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -3166,7 +3167,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.DELETE,
         RESTRoute: '/order',
         RESTRequest: request,
-        controllerFunction: kujira.cancelOrder,
+        controllerFunction: KujiraController.cancelOrder,
       });
 
       const responseBody = response.body as CancelOrderResponse;
@@ -3212,7 +3213,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -3268,7 +3269,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/order',
         RESTRequest: request,
-        controllerFunction: kujira.getOrder,
+        controllerFunction: KujiraController.getOrder,
       });
 
       const responseBody = response.body as GetOrderResponse;
@@ -3305,7 +3306,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -3358,7 +3359,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.DELETE,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.cancelOrders,
+        controllerFunction: KujiraController.cancelOrders,
       });
 
       const responseBody = IMap(response.body) as CancelOrdersResponse as IMap<
@@ -3406,7 +3407,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -3533,7 +3534,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -3580,7 +3581,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap<OrderId, Order>(
@@ -3629,7 +3630,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap<OrderId, Order>(
@@ -3697,7 +3698,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap<OrderId, Order>(
@@ -3753,7 +3754,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.DELETE,
         RESTRoute: '/orders/all',
         RESTRequest: request,
-        controllerFunction: kujira.cancelAllOrders,
+        controllerFunction: KujiraController.cancelAllOrders,
       });
 
       const responseBody = getNotNullOrThrowError<IMap<OrderId, Order>>(
@@ -3821,7 +3822,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -3940,7 +3941,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -3991,7 +3992,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -4049,7 +4050,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.placeOrders,
+        controllerFunction: KujiraController.placeOrders,
       });
 
       const responseBody = IMap(response.body) as PlaceOrdersResponse;
@@ -4120,7 +4121,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -4246,7 +4247,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -4324,7 +4325,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -4363,7 +4364,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.DELETE,
         RESTRoute: '/orders/all',
         RESTRequest: request,
-        controllerFunction: kujira.cancelAllOrders,
+        controllerFunction: KujiraController.cancelAllOrders,
       });
 
       const responseBody = getNotNullOrThrowError<IMap<OrderId, Order>>(
@@ -4431,7 +4432,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -4550,7 +4551,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/orders',
         RESTRequest: request,
-        controllerFunction: kujira.getOrders,
+        controllerFunction: KujiraController.getOrders,
       });
 
       const responseBody = IMap(response.body) as GetOrdersResponse;
@@ -4577,7 +4578,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/market/withdraw',
         RESTRequest: request,
-        controllerFunction: kujira.settleMarketFunds,
+        controllerFunction: KujiraController.withdrawFromMarket,
       });
 
       const responseBody = response.body as MarketWithdrawResponse;
@@ -4606,7 +4607,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -4725,7 +4726,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/market/withdraws',
         RESTRequest: request,
-        controllerFunction: kujira.settleMarketsFunds,
+        controllerFunction: KujiraController.withdrawFromMarkets,
       });
 
       const responseBody = IMap(response.body) as MarketsWithdrawsFundsResponse;
@@ -4763,7 +4764,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/balances',
         RESTRequest: request,
-        controllerFunction: kujira.getBalances,
+        controllerFunction: KujiraController.getBalances,
       });
 
       const responseBody = response.body as GetBalancesResponse;
@@ -4881,7 +4882,7 @@ describe('Kujira', () => {
         RESTMethod: RESTfulMethod.POST,
         RESTRoute: '/market/withdraws/all',
         RESTRequest: request,
-        controllerFunction: kujira.settleAllMarketsFunds,
+        controllerFunction: KujiraController.withdrawFromAllMarkets,
       });
 
       const responseBody = IMap(response.body) as AllMarketsWithdrawsResponse;

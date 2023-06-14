@@ -6,6 +6,7 @@ import {
   RequestStrategy,
   RESTfulMethod,
 } from '../../src/connectors/kujira/kujira.types';
+import { ResponseWrapper } from '../../src/services/common-interfaces';
 
 export type SendRequestOptions<R> = {
   strategy?: RequestStrategy;
@@ -17,8 +18,8 @@ export type SendRequestOptions<R> = {
   RESTStatusCode?: StatusCodes;
   RESTAccept?: string;
   RESTContentType?: string;
-  controller?: any;
-  controllerFunction?: (...args: any[]) => Promise<R>;
+  model?: any;
+  controllerFunction?: (...args: any[]) => Promise<ResponseWrapper<R>>;
   controllerFunctionParameters?: any[];
 };
 
@@ -45,15 +46,21 @@ export const sendRequest: SendRequestFunction = async <R>(
 
     return result;
   } else if (options.strategy == RequestStrategy.Controller) {
+    // const result = await getNotNullOrThrowError<any>(
+    //   options.controllerFunction
+    // ).apply([
+    //   options.controller,
+    //   options.controllerFunctionParameters || options.RESTRequest,
+    // ]);
+
     const result = await getNotNullOrThrowError<any>(
       options.controllerFunction
-    ).apply(options.controller, [
-      options.controllerFunctionParameters || options.RESTRequest,
-    ]);
+    )(
+      options.model,
+      options.controllerFunctionParameters || options.RESTRequest
+    );
 
-    return {
-      body: result as R,
-    } as supertest.Response;
+    return result as R as supertest.Response;
   } else {
     throw new Error(`Unknown strategy: ${options.strategy}`);
   }

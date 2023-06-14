@@ -1625,7 +1625,7 @@ export class Kujira {
    *
    * @param options
    */
-  async settleMarketFunds(
+  async withdrawFromMarket(
     options: MarketWithdrawRequest
   ): Promise<MarketWithdrawResponse> {
     const market = await this.getMarket({ id: options.marketId });
@@ -1693,7 +1693,7 @@ export class Kujira {
    *
    * @param options
    */
-  async settleMarketsFunds(
+  async withdrawFromMarkets(
     options: MarketsWithdrawsRequest
   ): Promise<MarketsWithdrawsFundsResponse> {
     if (!options.marketIds)
@@ -1714,7 +1714,7 @@ export class Kujira {
       const settleMarketFunds = async (
         options: HelperSettleFundsOptions
       ): Promise<void> => {
-        const results = (await this.settleMarketFunds({
+        const results = (await this.withdrawFromMarket({
           marketId: options.marketId,
           ownerAddresses: ownerAddresses,
         })) as Withdraw; // Cast because we have only one ownerAddress
@@ -1748,7 +1748,7 @@ export class Kujira {
    *
    * @param options
    */
-  async settleAllMarketsFunds(
+  async withdrawFromAllMarkets(
     options: AllMarketsWithdrawsRequest
   ): Promise<AllMarketsWithdrawsResponse> {
     const marketIds = (await this.getAllMarkets()).keySeq().toArray();
@@ -1757,7 +1757,7 @@ export class Kujira {
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
-    return await this.settleMarketsFunds({
+    return await this.withdrawFromMarkets({
       marketIds,
       ownerAddresses,
     });

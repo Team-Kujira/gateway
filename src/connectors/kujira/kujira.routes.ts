@@ -32,9 +32,9 @@ import {
   getWalletsPublicKeys,
   placeOrder,
   placeOrders,
-  widthdrawFromMarket,
+  withdrawFromMarket,
   withdrawFromAllMarkets,
-  withdrawsFromMarkets,
+  withdrawFromMarkets,
 } from './kujira.controllers';
 import {
   AllMarketsWithdrawsRequest,
@@ -498,7 +498,7 @@ export namespace KujiraRoutes {
       ) => {
         const controller = await getController(request);
 
-        const result = await widthdrawFromMarket(controller, request.body);
+        const result = await withdrawFromMarket(controller, request.body);
 
         return await response.status(result.status).json(result.body);
       }
@@ -514,7 +514,7 @@ export namespace KujiraRoutes {
       ) => {
         const controller = await getController(request);
 
-        const result = await withdrawsFromMarkets(controller, request.body);
+        const result = await withdrawFromMarkets(controller, request.body);
 
         return await response.status(result.status).json(result.body);
       }
