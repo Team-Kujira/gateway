@@ -2000,7 +2000,7 @@ describe('Kujira', () => {
 
     it('Get the wallet balances from the tokens 1, 2, and 3', async () => {
       const requestBody = {
-        tokenIds: tokensIds,
+        tokenIds: Object.values(tokensIds),
         ownerAddress: ownerAddress,
       } as GetBalancesRequest;
 
