@@ -167,7 +167,7 @@ const marketsIds = {
   ].address, // DEMO/USK
 };
 
-const tokensIds = [
+const tokensIdsArray = [
   ...new Set(
     Object.values(marketsIds).flatMap((marketId) => [
       networksPairs[marketId].denoms[0].reference,
@@ -176,9 +176,11 @@ const tokensIds = [
   ),
 ];
 
+const tokensIds: { [key: number]: string } = {};
 const tokensDenoms: { [key: number]: Denom } = {};
-for (let i = 0; i < tokensIds.length; i++) {
-  tokensDenoms[i] = Denom.from(tokensIds[i]);
+for (let i = 0; i < tokensIdsArray.length; i++) {
+  tokensIds[i + 1] = tokensIdsArray[i];
+  tokensDenoms[i + 1] = Denom.from(tokensIdsArray[i]);
 }
 
 const transactionsHashes = {
