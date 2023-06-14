@@ -1402,10 +1402,11 @@ export class Kujira {
     if (options.ids) {
       let markets;
       if (options.marketName || options.marketId) {
-        options.marketIds = [options.marketId];
+        options.marketIds = options.marketId ? [options.marketId] : undefined;
         options.marketNames = options.marketName
           ? [options.marketName]
           : undefined;
+
         markets = await this.getMarkets({
           ids: options.marketIds,
           names: options.marketNames,
@@ -1565,7 +1566,7 @@ export class Kujira {
   async cancelAllOrders(
     options: CancelAllOrdersRequest
   ): Promise<CancelAllOrdersResponse> {
-    const output = IMap<OwnerAddress[], IMap<OrderId, Order>>().asMutable();
+    const output = IMap<OwnerAddress, IMap<OrderId, Order>>().asMutable();
 
     const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
@@ -1575,70 +1576,42 @@ export class Kujira {
       ? [options?.marketId]
       : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
 
-    const cancelledOrders = IMap<OrderId, Order>().asMutable();
+    const openOrders = IMap<any, Order>().asMutable();
 
-    let openOrders = IMap<OrderId, Order>().asMutable();
-
-    // const openOrders = (await this.getOrders({
-    //   ownerAddresses: ownerAddresses,
-    //   marketIds: marketIds,
-    //   status: OrderStatus.OPEN,
-    // })) as IMap<OrderId, Order>;
-
-    if (options.marketId) {
-      openOrders = (await this.getOrders({
-        ownerAddresses: ownerAddresses,
-        marketId: options.marketId,
-        status: OrderStatus.OPEN,
-      })) as IMap<OrderId, Order>;
-    } else if (options.marketIds) {
-      for (const marketId of options.marketIds.values()) {
-        if (openOrders.size === 0) {
-          openOrders = (await this.getOrders({
-            ownerAddresses: ownerAddresses,
+    for (const ownerAddress of ownerAddresses) {
+      for (const marketId of marketIds) {
+        const partialOpenOrdersIds = (
+          await this.getOrders({
+            ownerAddress: ownerAddress,
             marketId: marketId,
             status: OrderStatus.OPEN,
-          })) as IMap<OrderId, Order>;
-        } else {
-          const resultByMarketId = (await this.getOrders({
-            ownerAddresses: ownerAddresses,
-            marketId: marketId,
-            status: OrderStatus.OPEN,
-          })) as IMap<OrderId, Order>;
-          openOrders.merge(resultByMarketId);
-        }
+          })
+        )
+          .keySeq()
+          .toArray();
+
+        openOrders.setIn([ownerAddress, marketId], partialOpenOrdersIds);
       }
     }
 
     if (openOrders.size > 0) {
-      const openOrdersIds = [];
-      if (options.ownerAddress) {
-        openOrdersIds.push(
-          getNotNullOrThrowError<OrderId>(openOrders.keySeq().toArray()) // TODO Fix this line !!!
-        );
-      } else if (options.ownerAddresses) {
-        for (const owner of options.ownerAddresses) {
-          const openOrdersByOwner = getNotNullOrThrowError<
-            IMap<OrderId, Order>
-          >(openOrders.get(owner));
-          const ordersIds = [];
-          for (const order of openOrdersByOwner.valueSeq()) {
-            ordersIds.push(order?.id);
-          }
-          openOrdersIds.push(...ordersIds);
+      for (const ownerAddress of ownerAddresses) {
+        const cancelledOrders = IMap<OrderId, Order>().asMutable();
+
+        for (const marketId of marketIds) {
+          const partialCancelledOrders = (await this.cancelOrders({
+            ids: getNotNullOrThrowError<OrderId[]>(
+              openOrders.getIn([ownerAddress, marketId])
+            ),
+            marketId: marketId,
+            ownerAddress: ownerAddress,
+          })) as IMap<OrderId, Order>;
+
+          cancelledOrders.merge(partialCancelledOrders);
         }
+
+        output.set(ownerAddress, cancelledOrders);
       }
-
-      cancelledOrders.merge(
-        (await this.cancelOrders({
-          ids: getNotNullOrThrowError(openOrdersIds),
-          marketId: '',
-          marketIds: marketIds,
-          ownerAddresses: ownerAddresses,
-        })) as IMap<OrderId, Order>
-      );
-
-      output.set(ownerAddresses, cancelledOrders);
 
       if (ownerAddresses.length == 1) {
         return output.first();

@@ -559,8 +559,7 @@ export interface CancelOrdersRequest {
 
 export type CancelOrdersResponse =
   | IMap<OrderId, Order>
-  | IMap<OwnerAddress, IMap<OrderId, Order>>
-  | IMap<OwnerAddress[], IMap<OrderId, Order>>;
+  | IMap<OwnerAddress, IMap<OrderId, Order>>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CancelAllOrdersRequest {
