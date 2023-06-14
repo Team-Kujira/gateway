@@ -40,9 +40,6 @@ tickers:
     orderBookWeightedAveragePrice:
     orderBookVolumeWeightedAveragePrice:
     lastFilledOrder:
-    nomics:
-      url: https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&interval=1m&market=${marketAddress}
-#      url: https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&currency=<tokenAddress>&interval=1m&limit=1&start=0&status=active
 transactions:
   merge:
     createOrders: true
