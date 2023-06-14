@@ -1775,8 +1775,6 @@ describe('Kujira', () => {
 
   describe('Transactions', () => {
     it('Get transaction 1', async () => {
-      await getPatch(['kujira', 'kujiraStargateClientGetTx'])();
-
       const requestBody = {
         hash: transactionsHashes[1],
       } as GetTransactionRequest;
@@ -3740,13 +3738,6 @@ describe('Kujira', () => {
     });
 
     it('Cancel all open orders - 2', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch([
-        'kujira',
-        'kujiraSigningStargateClientSignAndBroadcast',
-      ])();
-
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
@@ -4357,13 +4348,6 @@ describe('Kujira', () => {
     });
 
     it('Cancel all open orders - 3', async () => {
-      await getPatch(['kujira', 'kujiraGetBasicMarkets'])();
-      await getPatch(['kujira', 'kujiraQueryClientWasmQueryContractSmart'])();
-      await getPatch([
-        'kujira',
-        'kujiraSigningStargateClientSignAndBroadcast',
-      ])();
-
       const requestBody = {
         ownerAddress: ownerAddress,
       } as CancelAllOrdersRequest;
