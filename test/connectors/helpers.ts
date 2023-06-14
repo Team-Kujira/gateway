@@ -29,7 +29,7 @@ export type SendRequestFunction = <R>(
 export const sendRequest: SendRequestFunction = async <R>(
   options: SendRequestOptions<R>
 ): Promise<supertest.Response> => {
-  if (options.strategy == 'RESTful') {
+  if (options.strategy == RequestStrategy.RESTful) {
     const result = (await (
       (supertest(options.RESTExpress) as any)[
         options.RESTMethod.toLowerCase()
