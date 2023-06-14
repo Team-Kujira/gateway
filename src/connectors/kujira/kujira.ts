@@ -1063,10 +1063,6 @@ export class Kujira {
       },
     };
 
-    if (options.tokenIds) {
-      options.tokenIds = convertNonStandardKujiraTokenIds(options.tokenIds);
-    }
-
     const tokenIds =
       options.tokenIds ||
       (
@@ -1078,7 +1074,10 @@ export class Kujira {
         .toArray();
 
     for (const [tokenId, balance] of allBalances.tokens) {
-      if (tokenIds.includes(tokenId)) {
+      if (
+        tokenIds.includes(tokenId) ||
+        tokenIds.includes(Denom.from(tokenId).reference)
+      ) {
         balances.tokens.set(tokenId, balance);
 
         balances.total.free = balances.total.free.plus(balance.free);
