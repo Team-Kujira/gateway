@@ -247,9 +247,9 @@ export const validateOrderExchangeIds: Validator = createValidator(
 
 export const validateOrderMarketName: Validator = createValidator(
   'marketName',
-  (_, value) => value.trim().length,
+  (_, value) => (value === undefined ? true : value.trim().length),
   (_, value) => `Invalid market name (${value}).`,
-  false
+  true
 );
 
 export const validateOrderMarketNames: Validator = createValidator(
@@ -268,9 +268,9 @@ export const validateOrderMarketNames: Validator = createValidator(
 
 export const validateOrderMarketId: Validator = createValidator(
   'marketId',
-  (_, value) => value.trim().length && value.trim().slice(0, 6) === 'kujira',
+  (_, value) => value === undefined ? true : value.trim().length && value.trim().slice(0, 6) === 'kujira',
   (_, value) => `Invalid market id (${value}).`,
-  false
+  true
 );
 
 export const validateAllMarketIds: Validator = createValidator(
@@ -690,7 +690,7 @@ export const validatePlaceOrderRequest: RequestValidator =
             return true;
           }
 
-          return false;
+          return true;
         },
         `No market informed. Inform a market id or market name.`,
         false
@@ -743,7 +743,7 @@ export const validatePlaceOrdersRequest: RequestValidator =
               }
             },
             `No market informed for any orders...`,
-            false
+            true
           ),
         ],
         (index) => `No market name were informed in the order "${index}`,
@@ -787,7 +787,7 @@ export const validateCancelOrdersRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request && (request.marketId || request.marketName),
+        (request) => request && (request.marketId || request.marketName || (request.marketIds && request.marketIds.length)),
         `No market informed. Inform a market id or market name.`,
         false
       ),
@@ -967,15 +967,7 @@ export const validateSettleMarketsFundsRequest: RequestValidator =
       ),
       createValidator(
         null,
-        (request) => {
-          if (request.ownerAddresses) {
-            createRequestValidator([validateOrderOwnerAddresses]);
-
-            return true;
-          }
-
-          return false;
-        },
+        (request) => request.ownerAddresses || request.ownerAddress,
         `No owner address informed.`,
         false
       ),

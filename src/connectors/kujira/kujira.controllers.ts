@@ -77,8 +77,8 @@ import {
 } from './kujira.types';
 import {
   validateCancelAllOrdersRequest,
-  // validateCancelOrderRequest,
-  // validateCancelOrdersRequest,
+  validateCancelOrderRequest,
+  validateCancelOrdersRequest,
   validateGetAllBalancesRequest,
   validateGetAllMarketsRequest,
   validateGetAllOrderBooksRequest,
@@ -103,11 +103,11 @@ import {
   validateGetTransactionsRequest,
   validateGetWalletPublicKeyRequest,
   validateGetWalletsPublicKeysRequest,
-  // validatePlaceOrderRequest,
-  // validatePlaceOrdersRequest,
+  validatePlaceOrderRequest,
+  validatePlaceOrdersRequest,
   validateSettleAllMarketsFundsRequest,
   validateSettleMarketFundsRequest,
-  // validateSettleMarketsFundsRequest,
+  validateSettleMarketsFundsRequest,
 } from './kujira.validators';
 
 export async function getToken(
@@ -530,7 +530,7 @@ export async function placeOrder(
   connector: Connector,
   request: PlaceOrderRequest
 ): Promise<ResponseWrapper<PlaceOrderResponse>> {
-  // validatePlaceOrderRequest(request);
+  validatePlaceOrderRequest(request);
 
   const response = new ResponseWrapper<PlaceOrderResponse>();
 
@@ -545,7 +545,7 @@ export async function placeOrders(
   connector: Connector,
   request: PlaceOrdersRequest
 ): Promise<ResponseWrapper<PlaceOrdersResponse>> {
-  // validatePlaceOrdersRequest(request);
+  validatePlaceOrdersRequest(request);
 
   const response = new ResponseWrapper<PlaceOrdersResponse>();
 
@@ -560,7 +560,7 @@ export async function cancelOrder(
   connector: Connector,
   request: CancelOrderRequest
 ): Promise<ResponseWrapper<CancelOrderResponse>> {
-  // validateCancelOrderRequest(request);
+  validateCancelOrderRequest(request);
 
   const response = new ResponseWrapper<CancelOrderResponse>();
 
@@ -583,7 +583,7 @@ export async function cancelOrders(
   connector: Connector,
   request: CancelOrdersRequest
 ): Promise<ResponseWrapper<CancelOrdersResponse>> {
-  // validateCancelOrdersRequest(request);
+  validateCancelOrdersRequest(request);
 
   const response = new ResponseWrapper<CancelOrdersResponse>();
 
@@ -650,7 +650,7 @@ export async function withdrawFromMarkets(
   connector: Connector,
   request: MarketsWithdrawsRequest
 ): Promise<ResponseWrapper<MarketsWithdrawsFundsResponse>> {
-  // validateSettleMarketsFundsRequest(request);
+  validateSettleMarketsFundsRequest(request);
 
   const response = new ResponseWrapper<MarketsWithdrawsFundsResponse>();
 
