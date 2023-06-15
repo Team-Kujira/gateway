@@ -266,12 +266,17 @@ export const validateOrderMarketNames: Validator = createValidator(
   true
 );
 
-export const validateOrderMarketId: Validator = createValidator(
-  'marketId',
-  (_, value) => value === undefined ? true : value.trim().length && value.trim().slice(0, 6) === 'kujira',
-  (_, value) => `Invalid market id (${value}).`,
-  true
-);
+export const validateOrderMarketId = (optional = false): Validator => {
+  return createValidator(
+    'marketId',
+    (_, value) =>
+      value === undefined
+        ? true
+        : value.trim().length && value.trim().slice(0, 6) === 'kujira',
+    (_, value) => `Invalid market id (${value}).`,
+    optional
+  );
+};
 
 export const validateAllMarketIds: Validator = createValidator(
   'marketIds',
@@ -488,7 +493,7 @@ export const validateGetTickerRequest: RequestValidator =
         (request) => {
           // TODO change to use plain validators!!!
           if (request.marketId) {
-            createRequestValidator([validateOrderMarketId]);
+            createRequestValidator([validateOrderMarketId()]);
 
             return true;
           } else if (request.marketName) {
@@ -499,7 +504,7 @@ export const validateGetTickerRequest: RequestValidator =
 
           return false;
         },
-        `No market informed. Informe a market id or market name.`,
+        `No market informed. Inform a market id or market name.`,
         false
       ),
     ],
@@ -646,7 +651,7 @@ export const validateGetAllOrdersRequest: RequestValidator =
         null,
         (request) => {
           if (request.marketId) {
-            createRequestValidator([validateOrderMarketId]);
+            createRequestValidator([validateOrderMarketId()]);
 
             return true;
           } else if (request.marketIds) {
@@ -665,7 +670,7 @@ export const validateGetAllOrdersRequest: RequestValidator =
 
           return false;
         },
-        `No market informed. Informe a market id or market name.`,
+        `No market informed. Inform a market id or market name.`,
         true
       ),
     ],
@@ -681,7 +686,7 @@ export const validatePlaceOrderRequest: RequestValidator =
         null,
         (request) => {
           if (request.marketId) {
-            createRequestValidator([validateOrderMarketId]);
+            createRequestValidator([validateOrderMarketId()]);
 
             return true;
           } else if (request.marketName) {
@@ -728,7 +733,7 @@ export const validatePlaceOrdersRequest: RequestValidator =
             (order) => {
               if (order.marketId) {
                 createBatchValidator(
-                  [validateOrderMarketId],
+                  [validateOrderMarketId()],
                   (item) => `Invalid marketId at order ${item}`,
                   '[order]'
                 );
@@ -772,7 +777,7 @@ export const validateCancelOrderRequest: RequestValidator =
         `No market informed. Inform a market id or market name.`,
         false
       ),
-      validateOrderMarketId,
+      validateOrderMarketId(),
       validateOrderMarketName,
       validateOrderExchangeId,
       validateOrderOwnerAddress,
@@ -787,11 +792,15 @@ export const validateCancelOrdersRequest: RequestValidator =
     [
       createValidator(
         null,
-        (request) => request && (request.marketId || request.marketName || (request.marketIds && request.marketIds.length)),
+        (request) =>
+          request &&
+          (request.marketId ||
+            request.marketName ||
+            (request.marketIds && request.marketIds.length)),
         `No market informed. Inform a market id or market name.`,
         false
       ),
-      validateOrderMarketId,
+      validateOrderMarketId(),
       validateOrderMarketName,
       createValidator(
         null,
@@ -877,7 +886,7 @@ export const validateCancelAllOrdersRequest: RequestValidator =
         null,
         (request) => {
           if (request.marketId) {
-            createRequestValidator([validateOrderMarketId]);
+            createRequestValidator([validateOrderMarketId()]);
 
             return true;
           } else if (request.marketIds) {
@@ -896,7 +905,7 @@ export const validateCancelAllOrdersRequest: RequestValidator =
 
           return false;
         },
-        `No market informed. Informe a market id or market name.`,
+        `No market informed. Inform a market id or market name.`,
         true
       ),
     ],
@@ -928,7 +937,7 @@ export const validateSettleMarketFundsRequest: RequestValidator =
         null,
         (request) => {
           if (request.marketId) {
-            createRequestValidator([validateOrderMarketId]);
+            createRequestValidator([validateOrderMarketId()]);
 
             return true;
           } else if (request.marketName) {
@@ -939,7 +948,7 @@ export const validateSettleMarketFundsRequest: RequestValidator =
 
           return false;
         },
-        `No market informed. Informe a market id or market name.`,
+        `No market informed. Inform a market id or market name.`,
         false
       ),
     ],
@@ -986,7 +995,7 @@ export const validateSettleMarketsFundsRequest: RequestValidator =
 
           return false;
         },
-        `No markets informed. Informe market ids or market names.`,
+        `No markets informed. Inform market ids or market names.`,
         true
       ),
     ],
