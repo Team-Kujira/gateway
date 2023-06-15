@@ -415,6 +415,17 @@ export const validateGetTokens = (optional = false): Validator => {
   );
 };
 
+export const validateIfExistsMarketIdOrMarketName = (
+  optional = false
+): Validator => {
+  return createValidator(
+    null,
+    (request) => request.marketId || request.marketName,
+    `No market name was informed. please inform the parameter marketId or marketName.`,
+    optional
+  );
+};
+
 export const validateGetTokenRequest: RequestValidator = createRequestValidator(
   [
     createValidator(
@@ -511,32 +522,9 @@ export const validateGetAllOrderBooksRequest: RequestValidator =
 export const validateGetTickerRequest: RequestValidator =
   createRequestValidator(
     [
-      createValidator(
-        null,
-        // TODO create a validator and reuse it elsewhere!!!
-        (request) => request.marketId || request.marketName,
-        `No market name was informed. If you want to get a ticker, please inform the parameter "marketId".`,
-        false
-      ),
-      createValidator(
-        null,
-        (request) => {
-          // TODO change to use plain validators!!!
-          if (request.marketId) {
-            createRequestValidator([validateOrderMarketId()]);
-
-            return true;
-          } else if (request.marketName) {
-            createRequestValidator([validateOrderMarketName()]);
-
-            return true;
-          }
-
-          return false;
-        },
-        `No market informed. Inform a market id or market name.`,
-        false
-      ),
+      validateIfExistsMarketIdOrMarketName(),
+      validateOrderMarketId(true),
+      validateOrderMarketName(true),
     ],
     StatusCodes.BAD_REQUEST
   );
@@ -550,7 +538,7 @@ export const validateGetTickersRequest: RequestValidator =
           // TODO create a validator and reuse it elsewhere!!!
           (request.marketIds && request.marketIds.length) ||
           (request.marketNames && request.marketNames.length),
-        `No market names were informed. If you want to get all tickers, please do not inform the parameter "marketIds".`,
+        `No market names were informed. please do not inform the parameter "marketIds".`,
         false
       ),
     ],
