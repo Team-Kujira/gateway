@@ -179,92 +179,104 @@ export const throwIfErrorsExist = (
   }
 };
 
-export const validateOrderClientId: Validator = createValidator(
-  null,
-  (target, _) =>
-    typeof target === 'object'
-      ? isNaturalNumberString(target.clientId)
-      : target,
-  (target, _) => {
-    const id = typeof target === 'object' ? target.clientId : target;
-    return `Invalid client id (${id}), it needs to be in big number format.`;
-  },
-  true
-);
+export const validateOrderClientId = (optional = false): Validator => {
+  return createValidator(
+    null,
+    (target, _) =>
+      typeof target === 'object'
+        ? isNaturalNumberString(target.clientId)
+        : target,
+    (target, _) => {
+      const id = typeof target === 'object' ? target.clientId : target;
+      return `Invalid client id (${id}), it needs to be in big number format.`;
+    },
+    optional
+  );
+};
 
-export const validateOrderClientIds: Validator = createValidator(
-  'clientIds',
-  (_, values) => {
-    let ok = true;
-    values === undefined
-      ? (ok = true)
-      : values.map((item: any) => {
-          const id =
-            typeof item === 'object'
-              ? isNaturalNumberString(item.clientId)
-              : item;
+export const validateOrderClientIds = (optional = false): Validator => {
+  return createValidator(
+    'clientIds',
+    (_, values) => {
+      let ok = true;
+      values === undefined
+        ? (ok = true)
+        : values.map((item: any) => {
+            const id =
+              typeof item === 'object'
+                ? isNaturalNumberString(item.clientId)
+                : item;
 
-          ok = isNaturalNumberString(id) && ok;
-        });
+            ok = isNaturalNumberString(id) && ok;
+          });
 
-    return ok;
-  },
-  `Invalid client ids, it needs to be an array of big numbers.`,
-  true
-);
+      return ok;
+    },
+    `Invalid client ids, it needs to be an array of big numbers.`,
+    optional
+  );
+};
 
-export const validateOrderExchangeId: Validator = createValidator(
-  null,
-  (target, _) =>
-    typeof target == 'object' && 'id' in target
-      ? isNaturalNumberString(target.exchangeOrderId)
-      : target,
-  (target, _) => {
-    const id = typeof target == 'object' ? target.id : target;
+export const validateOrderExchangeId = (optional = false): Validator => {
+  return createValidator(
+    null,
+    (target, _) =>
+      typeof target == 'object' && 'id' in target
+        ? isNaturalNumberString(target.exchangeOrderId)
+        : target,
+    (target, _) => {
+      const id = typeof target == 'object' ? target.id : target;
 
-    return `Invalid exchange id (${id}), it needs to be in big number format.`;
-  },
-  true
-);
+      return `Invalid exchange id (${id}), it needs to be in big number format.`;
+    },
+    optional
+  );
+};
 
-export const validateOrderExchangeIds: Validator = createValidator(
-  'ids',
-  (_, values) => {
-    let ok = true;
-    values === undefined
-      ? (ok = true)
-      : values.map((item: any) => {
-          const id = typeof item == 'object' ? item.id : item;
+export const validateOrderExchangeIds = (optional = false): Validator => {
+  return createValidator(
+    'ids',
+    (_, values) => {
+      let ok = true;
+      values === undefined
+        ? (ok = true)
+        : values.map((item: any) => {
+            const id = typeof item == 'object' ? item.id : item;
 
-          ok = isNaturalNumberString(id) && ok;
-        });
+            ok = isNaturalNumberString(id) && ok;
+          });
 
-    return ok;
-  },
-  `Invalid exchange ids, it needs to be an array of big numbers.`,
-  true
-);
+      return ok;
+    },
+    `Invalid exchange ids, it needs to be an array of big numbers.`,
+    optional
+  );
+};
 
-export const validateOrderMarketName: Validator = createValidator(
-  'marketName',
-  (_, value) => (value === undefined ? true : value.trim().length),
-  (_, value) => `Invalid market name (${value}).`,
-  true
-);
+export const validateOrderMarketName = (optional = false): Validator => {
+  return createValidator(
+    'marketName',
+    (_, value) => (value === undefined ? true : value.trim().length),
+    (_, value) => `Invalid market name (${value}).`,
+    optional
+  );
+};
 
-export const validateOrderMarketNames: Validator = createValidator(
-  'marketNames',
-  (_, values) => {
-    let ok = true;
-    values === undefined
-      ? (ok = true)
-      : values.map((item: any) => (ok = item.trim().length && ok));
+export const validateOrderMarketNames = (optional = false): Validator => {
+  return createValidator(
+    'marketNames',
+    (_, values) => {
+      let ok = true;
+      values === undefined
+        ? (ok = true)
+        : values.map((item: any) => (ok = item.trim().length && ok));
 
-    return ok;
-  },
-  `Invalid market names, it needs to be an array of strings.`,
-  true
-);
+      return ok;
+    },
+    `Invalid market names, it needs to be an array of strings.`,
+    optional
+  );
+};
 
 export const validateOrderMarketId = (optional = false): Validator => {
   return createValidator(
@@ -515,7 +527,7 @@ export const validateGetTickerRequest: RequestValidator =
 
             return true;
           } else if (request.marketName) {
-            createRequestValidator([validateOrderMarketName]);
+            createRequestValidator([validateOrderMarketName()]);
 
             return true;
           }
@@ -598,8 +610,8 @@ export const validateGetOrderRequest: RequestValidator = createRequestValidator(
       `No id or client id was informed.`,
       false
     ),
-    validateOrderClientId,
-    validateOrderExchangeId,
+    validateOrderClientId(true),
+    validateOrderExchangeId(true),
     validateOrderOwnerAddress(),
   ],
   StatusCodes.BAD_REQUEST,
@@ -619,8 +631,8 @@ export const validateGetOrdersRequest: RequestValidator =
         `No orders were informed.`,
         false
       ),
-      validateOrderClientIds,
-      validateOrderExchangeIds,
+      validateOrderClientIds(true),
+      validateOrderExchangeIds(),
       validateOrderOwnerAddress(),
     ],
     StatusCodes.BAD_REQUEST
@@ -677,11 +689,11 @@ export const validateGetAllOrdersRequest: RequestValidator =
 
             return true;
           } else if (request.marketName) {
-            createRequestValidator([validateOrderMarketName]);
+            createRequestValidator([validateOrderMarketName()]);
 
             return true;
           } else if (request.marketNames) {
-            createRequestValidator([validateOrderMarketNames]);
+            createRequestValidator([validateOrderMarketNames()]);
 
             return true;
           }
@@ -708,7 +720,7 @@ export const validatePlaceOrderRequest: RequestValidator =
 
             return true;
           } else if (request.marketName) {
-            createRequestValidator([validateOrderMarketName]);
+            createRequestValidator([validateOrderMarketName()]);
 
             return true;
           }
@@ -746,9 +758,9 @@ export const validatePlaceOrdersRequest: RequestValidator =
             `marketId or maketName must be informed.`,
             false
           ),
+          validateOrderMarketId(true),
+          validateOrderMarketName(true),
           validateOrderOwnerAddress(),
-          validateOrderMarketId(),
-          validateOrderMarketName,
           validateOrderSide(),
           validateOrderPrice(true),
           validateOrderAmount(),
@@ -770,9 +782,9 @@ export const validateCancelOrderRequest: RequestValidator =
         `No market informed. Inform a market id or market name.`,
         false
       ),
-      validateOrderMarketId(),
-      validateOrderMarketName,
-      validateOrderExchangeId,
+      validateOrderMarketId(true),
+      validateOrderMarketName(true),
+      validateOrderExchangeId(true),
       validateOrderOwnerAddress(),
     ],
     StatusCodes.BAD_REQUEST,
@@ -790,11 +802,11 @@ export const validateCancelOrdersRequest: RequestValidator =
           (request.marketId ||
             request.marketName ||
             (request.marketIds && request.marketIds.length)),
-        `No market informed. Inform a market id or market name.`,
+        `No market informed. Inform a marketId, marketName ou marketNames.`,
         false
       ),
       validateOrderMarketId(true),
-      validateOrderMarketName,
+      validateOrderMarketName(true),
       createValidator(
         null,
         (values) => values && values.ids,
@@ -806,7 +818,7 @@ export const validateCancelOrdersRequest: RequestValidator =
         (_request) => {
           createRequestValidator([
             createBatchValidator(
-              [validateOrderExchangeIds],
+              [validateOrderExchangeIds()],
               (_, index) =>
                 `Invalid cancel orders request at position ${index}:`,
               null
@@ -887,11 +899,11 @@ export const validateCancelAllOrdersRequest: RequestValidator =
 
             return true;
           } else if (request.marketName) {
-            createRequestValidator([validateOrderMarketName]);
+            createRequestValidator([validateOrderMarketName()]);
 
             return true;
           } else if (request.marketNames) {
-            createRequestValidator([validateOrderMarketNames]);
+            createRequestValidator([validateOrderMarketNames()]);
 
             return true;
           }
@@ -934,7 +946,7 @@ export const validateSettleMarketFundsRequest: RequestValidator =
 
             return true;
           } else if (request.marketName) {
-            createRequestValidator([validateOrderMarketName]);
+            createRequestValidator([validateOrderMarketName()]);
 
             return true;
           }
@@ -981,7 +993,7 @@ export const validateSettleMarketsFundsRequest: RequestValidator =
 
             return true;
           } else if (request.marketNames) {
-            createRequestValidator([validateOrderMarketNames]);
+            createRequestValidator([validateOrderMarketNames()]);
 
             return true;
           }
