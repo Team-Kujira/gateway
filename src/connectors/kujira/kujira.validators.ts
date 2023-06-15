@@ -278,29 +278,33 @@ export const validateOrderMarketId = (optional = false): Validator => {
   );
 };
 
-export const validateAllMarketIds: Validator = createValidator(
-  'marketIds',
-  (_, values) => {
-    let ok = true;
-    values === undefined
-      ? (ok = true)
-      : values.map(
-          (item: any) =>
-            (ok = item.trim().length && item.trim().slice(0, 6) === 'kujira')
-        );
+export const validateAllMarketIds = (optional = false): Validator => {
+  return createValidator(
+    'marketIds',
+    (_, values) => {
+      let ok = true;
+      values === undefined
+        ? (ok = true)
+        : values.map(
+            (item: any) =>
+              (ok = item.trim().length && item.trim().slice(0, 6) === 'kujira')
+          );
 
-    return ok;
-  },
-  `Invalid market ids, it needs to be an array of strings.`,
-  true
-);
+      return ok;
+    },
+    `Invalid market ids, it needs to be an array of strings.`,
+    optional
+  );
+};
 
-export const validateOrderOwnerAddress: Validator = createValidator(
-  'ownerAddress',
-  (_, value) => /^kujira[a-z0-9]{39}$/.test(value),
-  (_, value) => `Invalid owner address (${value}).`,
-  true
-);
+export const validateOrderOwnerAddress = (optional = false): Validator => {
+  return createValidator(
+    'ownerAddress',
+    (_, value) => /^kujira[a-z0-9]{39}$/.test(value),
+    (_, value) => `Invalid owner address (${value}).`,
+    optional
+  );
+};
 
 export const validateOrderOwnerAddresses: Validator = createValidator(
   'ownerAddresses',
@@ -582,7 +586,7 @@ export const validateGetOrderRequest: RequestValidator = createRequestValidator(
     ),
     validateOrderClientId,
     validateOrderExchangeId,
-    validateOrderOwnerAddress,
+    validateOrderOwnerAddress(),
   ],
   StatusCodes.BAD_REQUEST,
   (request) => `Error when trying to get order "${request.id}"`
@@ -603,7 +607,7 @@ export const validateGetOrdersRequest: RequestValidator =
       ),
       validateOrderClientIds,
       validateOrderExchangeIds,
-      validateOrderOwnerAddress,
+      validateOrderOwnerAddress(),
     ],
     StatusCodes.BAD_REQUEST
   );
@@ -615,7 +619,7 @@ export const validateGetAllOrdersRequest: RequestValidator =
         null,
         (request) => {
           if (request.ownerAddress) {
-            createRequestValidator([validateOrderOwnerAddress]);
+            createRequestValidator([validateOrderOwnerAddress()]);
 
             return true;
           } else if (request.ownerAddresses) {
@@ -655,7 +659,7 @@ export const validateGetAllOrdersRequest: RequestValidator =
 
             return true;
           } else if (request.marketIds) {
-            createRequestValidator([validateAllMarketIds]);
+            createRequestValidator([validateAllMarketIds()]);
 
             return true;
           } else if (request.marketName) {
@@ -700,7 +704,7 @@ export const validatePlaceOrderRequest: RequestValidator =
         `No market informed. Inform a market id or market name.`,
         false
       ),
-      validateOrderOwnerAddress,
+      validateOrderOwnerAddress(),
       validateOrderSide,
       validateOrderPrice,
       validateOrderAmount,
@@ -720,42 +724,17 @@ export const validatePlaceOrdersRequest: RequestValidator =
         `No orders were informed.`,
         false
       ),
-      validateOrderOwnerAddress ||
-        createBatchValidator(
-          [validateOrderOwnerAddress],
-          (index) => `No ownerAddress were informed in the order "${index}`,
-          'orders'
-        ),
       createBatchValidator(
         [
           createValidator(
             null,
-            (order) => {
-              if (order.marketId) {
-                createBatchValidator(
-                  [validateOrderMarketId()],
-                  (item) => `Invalid marketId at order ${item}`,
-                  '[order]'
-                );
-                return order.marketId;
-              } else if (order.marketName) {
-                createBatchValidator(
-                  [validateOrderMarketName],
-                  (item) => `Invalid marketId at order ${item}`,
-                  '[order]'
-                );
-                return order.marketName;
-              }
-            },
-            `No market informed for any orders...`,
-            true
+            (request) => request.marketId || request.marketName,
+            `marketId or maketName must be informed.`,
+            false
           ),
-        ],
-        (index) => `No market name were informed in the order "${index}`,
-        'orders'
-      ),
-      createBatchValidator(
-        [
+          validateOrderOwnerAddress(),
+          validateOrderMarketId(),
+          validateOrderMarketName,
           validateOrderSide,
           validateOrderPrice,
           validateOrderAmount,
@@ -780,7 +759,7 @@ export const validateCancelOrderRequest: RequestValidator =
       validateOrderMarketId(),
       validateOrderMarketName,
       validateOrderExchangeId,
-      validateOrderOwnerAddress,
+      validateOrderOwnerAddress(),
     ],
     StatusCodes.BAD_REQUEST,
     (request) => `Error when trying to cancel order "${request.id}"`
@@ -800,7 +779,7 @@ export const validateCancelOrdersRequest: RequestValidator =
         `No market informed. Inform a market id or market name.`,
         false
       ),
-      validateOrderMarketId(),
+      validateOrderMarketId(true),
       validateOrderMarketName,
       createValidator(
         null,
@@ -829,7 +808,7 @@ export const validateCancelOrdersRequest: RequestValidator =
         null,
         (request) => {
           if (request.marketIds) {
-            createRequestValidator([validateAllMarketIds]);
+            createRequestValidator([validateAllMarketIds()]);
 
             return true;
           }
@@ -843,7 +822,7 @@ export const validateCancelOrdersRequest: RequestValidator =
         null,
         (request) => {
           if (request.ownerAddress) {
-            createRequestValidator([validateOrderOwnerAddress]);
+            createRequestValidator([validateOrderOwnerAddress()]);
 
             return true;
           } else if (request.ownerAddresses) {
@@ -868,7 +847,7 @@ export const validateCancelAllOrdersRequest: RequestValidator =
         null,
         (request) => {
           if (request.ownerAddress) {
-            createRequestValidator([validateOrderOwnerAddress]);
+            createRequestValidator([validateOrderOwnerAddress()]);
 
             return true;
           } else if (request.ownerAddresses) {
@@ -890,7 +869,7 @@ export const validateCancelAllOrdersRequest: RequestValidator =
 
             return true;
           } else if (request.marketIds) {
-            createRequestValidator([validateAllMarketIds]);
+            createRequestValidator([validateAllMarketIds()]);
 
             return true;
           } else if (request.marketName) {
@@ -919,7 +898,7 @@ export const validateSettleMarketFundsRequest: RequestValidator =
         null,
         (request) => {
           if (request.ownerAddress) {
-            createRequestValidator([validateOrderOwnerAddress]);
+            createRequestValidator([validateOrderOwnerAddress()]);
 
             return true;
           } else if (request.ownerAddresses) {
@@ -964,7 +943,7 @@ export const validateSettleMarketsFundsRequest: RequestValidator =
         null,
         (request) => {
           if (request.ownerAddress) {
-            createRequestValidator([validateOrderOwnerAddress]);
+            createRequestValidator([validateOrderOwnerAddress()]);
 
             return true;
           }
@@ -984,7 +963,7 @@ export const validateSettleMarketsFundsRequest: RequestValidator =
         null,
         (request) => {
           if (request.marketIds) {
-            createRequestValidator([validateAllMarketIds]);
+            createRequestValidator([validateAllMarketIds()]);
 
             return true;
           } else if (request.marketNames) {
@@ -1003,7 +982,10 @@ export const validateSettleMarketsFundsRequest: RequestValidator =
   );
 
 export const validateSettleAllMarketsFundsRequest: RequestValidator =
-  createRequestValidator([validateOrderOwnerAddress], StatusCodes.BAD_REQUEST);
+  createRequestValidator(
+    [validateOrderOwnerAddress()],
+    StatusCodes.BAD_REQUEST
+  );
 
 export const validateGetWalletPublicKeyRequest: RequestValidator =
   createRequestValidator([], StatusCodes.BAD_REQUEST);
