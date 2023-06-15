@@ -306,75 +306,89 @@ export const validateOrderOwnerAddress = (optional = false): Validator => {
   );
 };
 
-export const validateOrderOwnerAddresses: Validator = createValidator(
-  'ownerAddresses',
-  (_, values) => {
-    let ok = true;
-    values === undefined
-      ? (ok = true)
-      : values.map((item: any) => /^kujira[a-z0-9]{39}$/.test(item));
+export const validateOrderOwnerAddresses = (optional = false): Validator => {
+  return createValidator(
+    'ownerAddresses',
+    (_, values) => {
+      let ok = true;
+      values === undefined
+        ? (ok = true)
+        : values.map((item: any) => /^kujira[a-z0-9]{39}$/.test(item));
 
-    return ok;
-  },
-  `Invalid owner addresses...`,
-  true
-);
+      return ok;
+    },
+    `Invalid owner addresses...`,
+    optional
+  );
+};
 
-export const validateOrderSide: Validator = createValidator(
-  'side',
-  (_, value) =>
-    value &&
-    (Object.values(OrderSide) as string[])
-      .map((i) => i.toLowerCase())
-      .includes(value.toLowerCase()),
-  (_, value) => `Invalid order side (${value}).`,
-  false
-);
+export const validateOrderSide = (optional = false): Validator => {
+  return createValidator(
+    'side',
+    (_, value) =>
+      value &&
+      (Object.values(OrderSide) as string[])
+        .map((i) => i.toLowerCase())
+        .includes(value.toLowerCase()),
+    (_, value) => `Invalid order side (${value}).`,
+    optional
+  );
+};
 
-export const validateOrderPrice: Validator = createValidator(
-  'price',
-  (_, value) =>
-    typeof value === 'undefined'
-      ? true
-      : typeof value === 'number' || isFloatString(value),
-  (_, value) => `Invalid order price (${value}).`,
-  true
-);
+export const validateOrderPrice = (optional = false): Validator => {
+  return createValidator(
+    'price',
+    (_, value) =>
+      typeof value === 'undefined'
+        ? true
+        : typeof value === 'number' || isFloatString(value),
+    (_, value) => `Invalid order price (${value}).`,
+    optional
+  );
+};
 
-export const validateOrderAmount: Validator = createValidator(
-  'amount',
-  (_, value) => typeof value === 'number' || isFloatString(value),
-  (_, value) => `Invalid order amount (${value}).`,
-  false
-);
+export const validateOrderAmount = (optional = false): Validator => {
+  return createValidator(
+    'amount',
+    (_, value) => typeof value === 'number' || isFloatString(value),
+    (_, value) => `Invalid order amount (${value}).`,
+    optional
+  );
+};
 
-export const validateOrderType: Validator = createValidator(
-  'type',
-  (_, value) =>
-    value === undefined
-      ? true
-      : Object.values(OrderType)
-          .map((item) => item.toLowerCase())
-          .includes(value.toLowerCase()),
-  (_, value) => `Invalid order type (${value}).`,
-  false
-);
+export const validateOrderType = (optional = false): Validator => {
+  return createValidator(
+    'type',
+    (_, value) =>
+      value === undefined
+        ? true
+        : Object.values(OrderType)
+            .map((item) => item.toLowerCase())
+            .includes(value.toLowerCase()),
+    (_, value) => `Invalid order type (${value}).`,
+    optional
+  );
+};
 
-export const validateOrderStatus: Validator = createValidator(
-  'status',
-  (_, value) =>
-    value === undefined ? true : Object.values(OrderStatus).includes(value),
-  (_, value) => `Invalid order(s) status (${value}).`,
-  false
-);
+export const validateOrderStatus = (optional = false): Validator => {
+  return createValidator(
+    'status',
+    (_, value) =>
+      value === undefined ? true : Object.values(OrderStatus).includes(value),
+    (_, value) => `Invalid order(s) status (${value}).`,
+    optional
+  );
+};
 
-export const validateOrderStatuses: Validator = createValidator(
-  'statuses',
-  (_, values) =>
-    values === undefined ? true : Object.values(OrderStatus).includes(values),
-  (_, values) => `Invalid order(s) status (${values}).`,
-  false
-);
+export const validateOrderStatuses = (optional = false): Validator => {
+  return createValidator(
+    'statuses',
+    (_, values) =>
+      values === undefined ? true : Object.values(OrderStatus).includes(values),
+    (_, values) => `Invalid order(s) status (${values}).`,
+    optional
+  );
+};
 
 export const validateGetTokenRequest: RequestValidator = createRequestValidator(
   [
@@ -623,7 +637,7 @@ export const validateGetAllOrdersRequest: RequestValidator =
 
             return true;
           } else if (request.ownerAddresses) {
-            createRequestValidator([validateOrderOwnerAddresses]);
+            createRequestValidator([validateOrderOwnerAddresses()]);
 
             return true;
           }
@@ -637,11 +651,11 @@ export const validateGetAllOrdersRequest: RequestValidator =
         null,
         (request) => {
           if (request.status) {
-            createRequestValidator([validateOrderStatus]);
+            createRequestValidator([validateOrderStatus()]);
 
             return true;
           } else if (request.statuses) {
-            createRequestValidator([validateOrderStatuses]);
+            createRequestValidator([validateOrderStatuses()]);
 
             return true;
           }
@@ -705,10 +719,10 @@ export const validatePlaceOrderRequest: RequestValidator =
         false
       ),
       validateOrderOwnerAddress(),
-      validateOrderSide,
-      validateOrderPrice,
-      validateOrderAmount,
-      validateOrderType,
+      validateOrderSide(),
+      validateOrderPrice(true),
+      validateOrderAmount(),
+      validateOrderType(),
     ],
     StatusCodes.BAD_REQUEST,
     (request) => `Error when trying to create order "${request.id}"`
@@ -735,10 +749,10 @@ export const validatePlaceOrdersRequest: RequestValidator =
           validateOrderOwnerAddress(),
           validateOrderMarketId(),
           validateOrderMarketName,
-          validateOrderSide,
-          validateOrderPrice,
-          validateOrderAmount,
-          validateOrderType,
+          validateOrderSide(),
+          validateOrderPrice(true),
+          validateOrderAmount(),
+          validateOrderType(),
         ],
         (index) => `Invalid order request body  at position ${index}`,
         'orders'
@@ -826,7 +840,7 @@ export const validateCancelOrdersRequest: RequestValidator =
 
             return true;
           } else if (request.ownerAddresses) {
-            createRequestValidator([validateOrderOwnerAddresses]);
+            createRequestValidator([validateOrderOwnerAddresses()]);
 
             return true;
           }
@@ -851,7 +865,7 @@ export const validateCancelAllOrdersRequest: RequestValidator =
 
             return true;
           } else if (request.ownerAddresses) {
-            createRequestValidator([validateOrderOwnerAddresses]);
+            createRequestValidator([validateOrderOwnerAddresses()]);
 
             return true;
           }
@@ -902,7 +916,7 @@ export const validateSettleMarketFundsRequest: RequestValidator =
 
             return true;
           } else if (request.ownerAddresses) {
-            createRequestValidator([validateOrderOwnerAddresses]);
+            createRequestValidator([validateOrderOwnerAddresses()]);
 
             return true;
           }
