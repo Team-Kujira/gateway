@@ -402,6 +402,19 @@ export const validateOrderStatuses = (optional = false): Validator => {
   );
 };
 
+export const validateGetTokens = (optional = false): Validator => {
+  return createValidator(
+    null,
+    (request) =>
+      // TODO create a validator and reuse it elsewhere!!!
+      (request.names && request.names.length) ||
+      (request.ids && request.ids.length) ||
+      (request.symbols && request.symbols.length),
+    `No tokens were informed. If you want to get all tokens, please do not inform the parameter "names" or "ids".`,
+    optional
+  );
+};
+
 export const validateGetTokenRequest: RequestValidator = createRequestValidator(
   [
     createValidator(
@@ -415,21 +428,7 @@ export const validateGetTokenRequest: RequestValidator = createRequestValidator(
 );
 
 export const validateGetTokensRequest: RequestValidator =
-  createRequestValidator(
-    [
-      createValidator(
-        null,
-        (request) =>
-          // TODO create a validator and reuse it elsewhere!!!
-          (request.names && request.names.length) ||
-          (request.ids && request.ids.length) ||
-          (request.symbols && request.symbols.length),
-        `No tokens were informed. If you want to get all tokens, please do not inform the parameter "names" or "ids".`,
-        false
-      ),
-    ],
-    StatusCodes.BAD_REQUEST
-  );
+  createRequestValidator([validateGetTokens(false)], StatusCodes.BAD_REQUEST);
 
 export const validateGetAllTokensRequest: RequestValidator =
   createRequestValidator(
@@ -443,7 +442,7 @@ export const validateGetMarketRequest: RequestValidator =
       createValidator(
         null,
         (request) => request.id || request.name,
-        `No market was informed. If you want to get a market, please inform the parameter "name".`,
+        `No market was informed. If you want to get a market, please inform the parameter id or name.`,
         false
       ),
     ],
@@ -459,7 +458,8 @@ export const validateGetMarketsRequest: RequestValidator =
           // TODO create a validator and reuse it elsewhere!!!
           (request.ids && request.ids.length) ||
           (request.names && request.names.length),
-        `No markets were informed. If you want to get all markets, please do not inform the parameter "names".`,
+        `No markets were informed. If you want to get the markets, please inform the parameter ids or names.
+        If you want to get all markets, please do not inform any parameter.`,
         false
       ),
     ],
@@ -479,7 +479,7 @@ export const validateGetOrderBookRequest: RequestValidator =
         null,
         // TODO create a validator and reuse it elsewhere!!!
         (request) => request.marketId || request.marketName,
-        `No market name was informed. If you want to get an order book, please inform the parameter "marketId".`,
+        `No market name was informed. If you want to get an order book, please inform the parameter marketId or marketName.`,
         false
       ),
     ],
@@ -495,7 +495,7 @@ export const validateGetOrderBooksRequest: RequestValidator =
           // TODO create a validator and reuse it elsewhere!!!
           (request.marketIds && request.marketIds.length) ||
           (request.marketNames && request.marketNames.length),
-        `No market names were informed. If you want to get all order books, please do not inform the parameter "marketIds".`,
+        `No market names or maket ids were informed. Please inform the parameter marketIds or marketNames. If you want to get all order books, please do not inform the parameter "marketIds".`,
         false
       ),
     ],
