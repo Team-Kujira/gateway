@@ -751,10 +751,10 @@ export const validateCancelOrdersRequest: RequestValidator =
         null,
         (values) => values && values.ids,
         `No orders were informed.`,
-        false
+        true
       ),
-      validateOrderExchangeIds(),
-      validateAllMarketIds(),
+      validateOrderExchangeIds(true),
+      validateAllMarketIds(true),
       createValidator(
         null,
         (request) => request.ownerAddress || request.ownerAddresses,
