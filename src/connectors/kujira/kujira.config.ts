@@ -88,6 +88,12 @@ export namespace KujiraConfig {
         networks: ['mainnet', 'testnet', 'localnet'],
       },
     ],
+    networks: [
+      {
+        chain: 'kujira',
+        networks: ['mainnet', 'testnet', 'localnet'],
+      },
+    ],
     retry: {
       all: {
         maxNumberOfRetries:
