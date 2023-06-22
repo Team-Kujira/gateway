@@ -185,6 +185,14 @@ export class Kujira {
   private isInitializing: boolean = false;
 
   /**
+   *
+   * @private
+   */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  private rpcEndpoint: string;
+
+  /**
    * The correct type for this property would be kujira.js/NETWORK
    *  but the compile method is incompatible with it.
    *
@@ -279,11 +287,11 @@ export class Kujira {
   }
 
   private async getRPCEndpoint(): Promise<string> {
-    if (!config.rpcEndpoint) {
-      config.rpcEndpoint = this.getFastestRpc();
+    if (!this.rpcEndpoint) {
+      this.rpcEndpoint = await this.getFastestRpc();
     }
 
-    return config.rpcEndpoint;
+    return this.rpcEndpoint;
   }
 
   async getDirectSecp256k1HdWallet(
@@ -1963,7 +1971,7 @@ export class Kujira {
     return [client, endpoint];
   }
 
-  async getFastestRpc(): Promise<string | null> {
+  async getFastestRpc(): Promise<string> {
     const latencies: LatencyData[] = [];
 
     await Promise.all(
@@ -1984,7 +1992,7 @@ export class Kujira {
     );
 
     if (latencies.length === 0) {
-      return null;
+      throw new Error('Cannot connect with any RPC.');
     }
 
     latencies.sort((a, b) => a.latency - b.latency);

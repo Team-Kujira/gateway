@@ -1,5 +1,14 @@
 network: 'mainnet'
-rpcEndpoint: # Empty or null means using the default for the chosen network
+networks:
+  mainnet:
+    chainId: mainnet
+    nodeURL: null # Empty or null means choosing the RPC automatically
+  testnet:
+    chainId: testnet
+    nodeURL: null # Empty or null means choosing the RPC automatically
+  devnet:
+    chainId: localnet
+    nodeURL: null # Empty or null means choosing the RPC automatically
 prefix: 'kujira'
 accountNumber: 0
 gasPrice: 0.00125

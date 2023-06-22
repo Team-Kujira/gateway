@@ -4,14 +4,28 @@ import { getNotNullOrThrowError } from './kujira.helpers';
 
 const configManager = ConfigManagerV2.getInstance();
 
+export interface NetworkConfig {
+  name: string;
+  nodeURL: string;
+  chainId: string;
+}
+
 export namespace KujiraConfig {
   export const config = {
     chainType: 'KUJIRA',
     tradingTypes: ['CLOB_SPOT'],
     chain: 'kujira',
     network: configManager.get('kujira.network') || 'mainnet',
+    networks: new Map<string, NetworkConfig>(
+      Object.entries(configManager.get(`kujira.networks`))
+    ),
+    availableNetworks: [
+      {
+        chain: 'kujira',
+        networks: Object.keys(configManager.get(`kujira.networks`)),
+      },
+    ],
     connector: 'kujira',
-    rpcEndpoint: configManager.get('kujira.rpcEndpoint'),
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
     nativeToken: 'KUJI',
@@ -82,18 +96,6 @@ export namespace KujiraConfig {
       offset: configManager.get(`kujira.orderBook.offset`) || 0,
       limit: configManager.get(`kujira.orderBook.limit`) || 255,
     },
-    availableNetworks: [
-      {
-        chain: 'kujira',
-        networks: ['mainnet', 'testnet', 'localnet'],
-      },
-    ],
-    networks: [
-      {
-        chain: 'kujira',
-        networks: ['mainnet', 'testnet', 'localnet'],
-      },
-    ],
     retry: {
       all: {
         maxNumberOfRetries:
