@@ -4,7 +4,11 @@ import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import { Kujira } from '../../connectors/kujira/kujira';
 import { convertToGetTokensResponse } from '../../connectors/kujira/kujira.convertors';
 import { KujiraConfig } from '../../connectors/kujira/kujira.config';
-import { Address } from '../../connectors/kujira/kujira.types';
+import {
+  Address,
+  GetCurrentBlockRequest,
+  GetCurrentBlockResponse,
+} from '../../connectors/kujira/kujira.types';
 import { TokenInfo } from '../ethereum/ethereum-base';
 import { MAINNET, NETWORKS, TESTNET } from 'kujira.js';
 
@@ -90,5 +94,11 @@ export class KujiraChain {
 
   async getTokenForSymbol(symbol: string): Promise<TokenInfo> {
     return convertToGetTokensResponse(await this.kujira.getToken({ symbol }));
+  }
+
+  async getCurrentBlockNumber(
+    _options: GetCurrentBlockRequest
+  ): Promise<GetCurrentBlockResponse> {
+    return await this.kujira.getCurrentBlock(_options);
   }
 }
