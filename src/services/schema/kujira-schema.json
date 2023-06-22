@@ -219,7 +219,7 @@
           "type": "object",
           "properties": {
             "chainId": { "type": "string" },
-            "nodeURL": { "type": "string" }
+            "nodeURL": { "type": ["string", "null"] }
           },
           "required": [ "chainId", "nodeURL" ],
           "additionalProperties": false
