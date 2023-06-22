@@ -6,7 +6,7 @@ const configManager = ConfigManagerV2.getInstance();
 
 export interface NetworkConfig {
   name: string;
-  nodeURL: string;
+  nodeURL: string | null;
   chainId: string;
 }
 
