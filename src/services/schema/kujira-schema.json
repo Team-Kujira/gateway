@@ -217,6 +217,21 @@
           }
         }
       }
+    },
+    "networks": {
+      "type": "object",
+      "patternProperties": {
+        "^\\w+$": {
+          "type": "object",
+          "properties": {
+            "chainId": { "type": "string" },
+            "nodeURL": { "type": "string" }
+          },
+          "required": [ "chainId", "nodeURL" ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": [

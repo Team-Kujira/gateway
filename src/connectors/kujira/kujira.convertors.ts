@@ -576,6 +576,11 @@ export const convertToResponseBody = (input: any): any => {
   let output = input;
 
   if (IMap.isMap(input)) output = input.toJS();
+  for (const key in output) {
+    if (IMap.isMap(output[key])) {
+      output[key] = output[key].toJS();
+    }
+  }
 
   return output;
 };
