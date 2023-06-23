@@ -690,6 +690,7 @@ export const validatePlaceOrdersRequest: RequestValidator =
         `No orders were informed.`,
         false
       ),
+      validateOrderOwnerAddress(),
       createBatchValidator(
         [
           createValidator(
@@ -700,7 +701,6 @@ export const validatePlaceOrdersRequest: RequestValidator =
           ),
           validateOrderMarketId(true),
           validateOrderMarketName(true),
-          validateOrderOwnerAddress(),
           validateOrderSide(),
           validateOrderPrice(true),
           validateOrderAmount(),
