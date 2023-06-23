@@ -220,12 +220,6 @@ beforeAll(async () => {
   const configManager = ConfigManagerV2.getInstance();
 
   configManager.set('kujira.network', 'testnet');
-  configManager.set(
-    'kujira.rpcEndpoint',
-    null
-    // 'https://kujira-testnet-rpc.polkachu.com' //TODO should it be removed? !!!
-    // 'https://test-rpc-kujira.mintthemoon.xyz'
-  );
   configManager.set('kujira.prefix', 'kujira');
   configManager.set('kujira.accountNumber', 0);
   configManager.set('kujira.gasPrice', 0.00125);
