@@ -123,7 +123,7 @@ enablePatches();
 
 enableInputOutputWrapper();
 disableInputOutputWrapper();
-// enableInputOutputWrapper();
+// enableInputOutputWrapper(); //TODO should it be removed? !!!
 
 const requestStrategy = RequestStrategy.RESTful;
 
@@ -223,7 +223,7 @@ beforeAll(async () => {
   configManager.set(
     'kujira.rpcEndpoint',
     null
-    // 'https://kujira-testnet-rpc.polkachu.com'
+    // 'https://kujira-testnet-rpc.polkachu.com' //TODO should it be removed? !!!
     // 'https://test-rpc-kujira.mintthemoon.xyz'
   );
   configManager.set('kujira.prefix', 'kujira');
@@ -240,11 +240,11 @@ beforeAll(async () => {
   configManager.set('kujira.orders.open.limit', 255);
   configManager.set('kujira.orders.filled.limit', 255);
   configManager.set('kujira.orders.cancel.maxPerTransaction', 25);
-  // configManager.set('kujira.tokens.url', null);
+  // configManager.set('kujira.tokens.url', null); //TODO should they be removed? !!!
   // configManager.set('kujira.tokens.allowed', null);
   // configManager.set('kujira.tokens.disallowed', null);
   configManager.set('kujira.tokens.resolutionStrategy', 'markets');
-  // configManager.set('kujira.markets.url', null);
+  // configManager.set('kujira.markets.url', null); //TODO should they be removed? !!!
   // configManager.set('kujira.markets.allowed', null);
   // configManager.set('kujira.markets.disallowed', null);
   // configManager.set('kujira.tickers.sources.orderBookSimpleAveragePrice', null);
@@ -610,7 +610,7 @@ afterEach(() => {
   unpatch();
 });
 
-// TODO Add tests to test the retrieval of the estimated fees, current block, and one or more transactions or wallet public keys.
+// TODO Add tests to test the retrieval of the estimated fees, current block, and one or more transactions or wallet public keys. !!!
 describe('Kujira', () => {
   const commonRequestBody = {
     chain: config.chain,
@@ -2141,7 +2141,7 @@ describe('Kujira', () => {
                 const tokenSymbol = item.symbol;
                 tokensBalancesHistory.setIn(
                   [tokenSymbol, 'free'],
-                  tokenBalances.free // This order will be OPEN, not FILLED
+                  tokenBalances.free // This order will be OPEN, not FILLED // TODO verify/fix !!!
                 );
                 tokensBalancesHistory.setIn(
                   [tokenSymbol, 'unsettled'],
@@ -2198,7 +2198,7 @@ describe('Kujira', () => {
                 const tokenSymbol = item.symbol;
                 tokensBalancesHistory.setIn(
                   [tokenSymbol, 'free'],
-                  tokenBalances.free // This order will be OPEN, not FILLED
+                  tokenBalances.free // This order will be OPEN, not FILLED // TODO verify/fix !!!
                 );
                 tokensBalancesHistory.setIn(
                   [tokenSymbol, 'unsettled'],
@@ -2221,7 +2221,7 @@ describe('Kujira', () => {
                 );
                 tokensBalancesHistory.setIn(
                   [tokenSymbol, 'unsettled'],
-                  tokenBalances.unsettled // This order will be OPEN, not FILLED
+                  tokenBalances.unsettled // This order will be OPEN, not FILLED // TODO verify/fix !!!
                 );
                 tokensBalancesHistory.setIn(
                   [tokenSymbol, 'lockedInOrders'],
@@ -2273,6 +2273,7 @@ describe('Kujira', () => {
         }
       }
 
+      // TODO verify/fix !!!
       // Updating Quote Balance
       // userBalances.tokens.set(candidate.market.quoteToken.id, {
       //   token: candidate.market.quoteToken,

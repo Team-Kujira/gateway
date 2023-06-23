@@ -63,8 +63,6 @@ export type Chain<T> = T extends Algorand
   ? Xdcish
   : T extends Injective
   ? Injective
-  : T extends Cosmos
-  ? Cosmos
   : T extends KujiraChain
   ? KujiraChain
   : never;

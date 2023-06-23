@@ -7,8 +7,8 @@ import { KujiraChain as Kujira } from '../../chains/kujira/kujira.chain';
 import {
   AddWalletRequest,
   AddWalletResponse,
-  GetWalletResponse,
   RemoveWalletRequest,
+  GetWalletResponse,
   WalletSignRequest,
   WalletSignResponse,
 } from './wallet.requests';
@@ -16,10 +16,10 @@ import {
 import { ConfigManagerCertPassphrase } from '../config-manager-cert-passphrase';
 
 import {
-  ACCOUNT_NOT_SPECIFIED_CODE,
-  ACCOUNT_NOT_SPECIFIED_ERROR_MESSAGE,
   ERROR_RETRIEVING_WALLET_ADDRESS_ERROR_CODE,
   ERROR_RETRIEVING_WALLET_ADDRESS_ERROR_MESSAGE,
+  ACCOUNT_NOT_SPECIFIED_CODE,
+  ACCOUNT_NOT_SPECIFIED_ERROR_MESSAGE,
   HttpException,
   UNKNOWN_CHAIN_ERROR_CODE,
   UNKNOWN_KNOWN_CHAIN_ERROR_MESSAGE,

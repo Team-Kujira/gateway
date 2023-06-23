@@ -1,7 +1,7 @@
 import {
   isFloatString,
-  mkRequestValidator,
   mkValidator,
+  mkRequestValidator,
   RequestValidator,
   Validator,
 } from '../services/validators';
@@ -13,8 +13,8 @@ import {
 } from '../chains/ethereum/ethereum.validators';
 
 import {
-  validateAmount,
   validateConnector,
+  validateAmount,
   validateSide,
 } from '../amm/amm.validators';
 import { isValidKujiraPublicKey } from '../connectors/kujira/kujira.helpers';

@@ -1,4 +1,4 @@
-network: 'mainnet'
+network: 'mainnet' # TODO should it have a lot of comments? !!!
 networks:
   mainnet:
     chainId: mainnet
@@ -12,7 +12,7 @@ networks:
 prefix: 'kujira'
 accountNumber: 0
 gasPrice: 0.00125
-gasPriceSuffix: 'ukuji' # TODO - Add support for other currencies that can be configured in Fin to pay Fee
+gasPriceSuffix: 'ukuji' # TODO - Add support for other currencies that can be configured in Fin to pay Fee !!!
 gasLimitEstimate: 0.009147
 orderBook:
   offset: 0

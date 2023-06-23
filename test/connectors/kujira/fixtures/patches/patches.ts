@@ -40,7 +40,7 @@ export const createPatches = (
     patch(global, 'fetch', async (...any: any[]) => {
       const inputArguments = any;
 
-      // const serializedArguments = Serializer.serialize(inputArguments);
+      // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
       if (!ordinalMap.has(testTitle)) {
         ordinalMap.set(testTitle, 0);
@@ -74,7 +74,7 @@ export const createPatches = (
     patch(kujira, 'decryptWallet', async (...any: any[]) => {
       const inputArguments = any;
 
-      // const serializedArguments = Serializer.serialize(inputArguments);
+      // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
       if (!ordinalMap.has(testTitle)) {
         ordinalMap.set(testTitle, 0);
@@ -87,7 +87,7 @@ export const createPatches = (
 
       const dataKey = ['kujira', 'decryptWallet', testTitle, ordinal];
 
-      // const key: string = JSON.stringify(dataKey);
+      // const key: string = JSON.stringify(dataKey); //TODO verify/fix !!!
 
       if (useInputOutputWrapper) {
         return await inputOutputWrapper<any>(
@@ -112,7 +112,7 @@ export const createPatches = (
     patch(kujira, 'getFastestRpc', async (...any: any[]) => {
       const inputArguments = any;
 
-      // const serializedArguments = Serializer.serialize(inputArguments);
+      // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
       if (!ordinalMap.has(testTitle)) {
         ordinalMap.set(testTitle, 0);
@@ -148,7 +148,7 @@ export const createPatches = (
       patch(kujira, 'kujiraGetHttpBatchClient', async (...any: any[]) => {
         const inputArguments = any;
 
-        // const serializedArguments = Serializer.serialize(inputArguments);
+        // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
         if (!ordinalMap.has(testTitle)) {
           ordinalMap.set(testTitle, 0);
@@ -190,7 +190,7 @@ export const createPatches = (
       patch(kujira, 'kujiraGetTendermint34Client', async (...any: any[]) => {
         const inputArguments = any;
 
-        // const serializedArguments = Serializer.serialize(inputArguments);
+        // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
         if (!ordinalMap.has(testTitle)) {
           ordinalMap.set(testTitle, 0);
@@ -232,7 +232,7 @@ export const createPatches = (
       patch(kujira, 'kujiraGetKujiraQueryClient', async (...any: any[]) => {
         const inputArguments = any;
 
-        // const serializedArguments = Serializer.serialize(inputArguments);
+        // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
         if (!ordinalMap.has(testTitle)) {
           ordinalMap.set(testTitle, 0);
@@ -274,7 +274,7 @@ export const createPatches = (
       patch(kujira, 'kujiraGetStargateClient', async (...any: any[]) => {
         const inputArguments = any;
 
-        // const serializedArguments = Serializer.serialize(inputArguments);
+        // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
         if (!ordinalMap.has(testTitle)) {
           ordinalMap.set(testTitle, 0);
@@ -316,7 +316,7 @@ export const createPatches = (
       patch(kujira, 'kujiraGetSigningStargateClient', async (...any: any[]) => {
         const inputArguments = any;
 
-        // const serializedArguments = Serializer.serialize(inputArguments);
+        // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
         if (!ordinalMap.has(testTitle)) {
           ordinalMap.set(testTitle, 0);
@@ -358,7 +358,7 @@ export const createPatches = (
       patch(kujira, 'kujiraGetSigningCosmWasmClient', async (...any: any[]) => {
         const inputArguments = any;
 
-        // const serializedArguments = Serializer.serialize(inputArguments);
+        // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
         if (!ordinalMap.has(testTitle)) {
           ordinalMap.set(testTitle, 0);
@@ -411,7 +411,7 @@ export const createPatches = (
         ): Promise<ExecuteResult> => {
           const inputArguments = [finClient, orderIdxs, fee, memo, funds];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -457,7 +457,7 @@ export const createPatches = (
         async (): Promise<IMap<MarketId, BasicKujiraMarket>> => {
           const inputArguments: any[] = [];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -506,7 +506,7 @@ export const createPatches = (
         async (): Promise<IMap<TokenId, BasicKujiraToken>> => {
           const inputArguments: any[] = [];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -555,7 +555,7 @@ export const createPatches = (
         async (address: string, query: JsonObject): Promise<JsonObject> => {
           const inputArguments = [address, query];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -613,7 +613,7 @@ export const createPatches = (
             memo,
           ];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -659,7 +659,7 @@ export const createPatches = (
         async (address: string): Promise<readonly Coin[]> => {
           const inputArguments = [address];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -705,7 +705,7 @@ export const createPatches = (
         async (address: string): Promise<Coin | null> => {
           const inputArguments = [address];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -751,7 +751,7 @@ export const createPatches = (
         async (): Promise<number> => {
           const inputArguments: any[] = [];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -797,7 +797,7 @@ export const createPatches = (
         async (id: string): Promise<IndexedTx | null> => {
           const inputArguments = [id];
 
-          // const serializedArguments = Serializer.serialize(inputArguments);
+          // const serializedArguments = Serializer.serialize(inputArguments); //TODO verify/fix !!!
 
           if (!ordinalMap.has(testTitle)) {
             ordinalMap.set(testTitle, 0);
@@ -848,7 +848,7 @@ const inputOutputWrapper = async <R>(
   targetFunctionName: string,
   targetFunctionArguments: any[] = []
 ): Promise<R> => {
-  // console.log('key:\n', dataKey);
+  // console.log('key:\n', dataKey); //TODO verify/fix !!!
 
   // console.log('input:\n', targetFunctionArguments);
 
@@ -860,7 +860,7 @@ const inputOutputWrapper = async <R>(
     targetFunctionArguments
   );
 
-  // console.log('output:\n', JSON.stringify(result));
+  // console.log('output:\n', JSON.stringify(result)); //TODO verify/fix !!!
 
   const key: string = JSON.stringify(dataKey);
 
@@ -869,7 +869,7 @@ const inputOutputWrapper = async <R>(
       return result as R;
     }
 
-    // dataKey[dataKey.length - 1] = `${
+    // dataKey[dataKey.length - 1] = `${ //TODO verify/fix !!!
     //   parseInt(dataKey[dataKey.length - 1]) + 1
     // }`;
     //

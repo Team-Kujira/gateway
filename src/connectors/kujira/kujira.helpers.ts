@@ -181,6 +181,7 @@ export const isKujiraPrivateKey = (privateKey: string): boolean => {
 };
 
 export namespace Serializer {
+  // TODO verify/fix !!!
   // enum Category {
   //   PRIMITIVE = 'primitive',
   //   FUNCTION = 'function',
@@ -349,11 +350,13 @@ export namespace Serializer {
   // }
 
   export function serialize(target: any): string {
+    // TODO verify/fix !!!
     // return flattedStringify(parse(target));
     return flattedStringify(target);
   }
 
   export function deserialize<T>(target: string): T {
+    // TODO verify/fix !!!
     // return revive(flattedParse(target)) as T;
     return flattedParse(target) as T;
   }

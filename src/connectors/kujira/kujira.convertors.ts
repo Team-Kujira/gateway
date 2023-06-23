@@ -45,6 +45,7 @@ import { TokenInfo } from '../../services/base';
 const config = KujiraConfig.config;
 
 export const convertToGetTokensResponse = (_tokens: Token): TokenInfo => {
+  // TODO fix this!!!
   return {
     chainId: undefined,
     address: undefined,

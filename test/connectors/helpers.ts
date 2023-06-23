@@ -46,7 +46,7 @@ export const sendRequest: SendRequestFunction = async <R>(
 
     return result;
   } else if (options.strategy == RequestStrategy.Controller) {
-    // const result = await getNotNullOrThrowError<any>(
+    // const result = await getNotNullOrThrowError<any>( // TODO verify/fix !!!
     //   options.controllerFunction
     // ).apply([
     //   options.controller,
@@ -84,14 +84,14 @@ export function logResponse(target: any, title: string) {
   log(target, title, 'response');
 }
 
-// export function logOutput(target: any, title: string) {
+// export function logOutput(target: any, title: string) { // TODO verify/fix !!!
 //   log(target, title, 'output');
 // }
 
 export function printStackTrace() {
   const error = new Error();
   const stackTrace = error.stack || '';
-  const stackLines = stackTrace.split('\n').slice(1); // Ignoring this function itself
+  const stackLines = stackTrace.split('\n').slice(1); // Ignoring this function itself // TODO verify/fix !!!
 
   let output = '';
 

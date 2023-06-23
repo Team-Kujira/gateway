@@ -435,6 +435,7 @@ export class Kujira {
 
         basicMarkets = IMap<MarketId, BasicKujiraMarket>(data).asMutable();
       } else {
+        // TODO verify/fix !!!
         // kujira.js/src/resources/contracts.json
         const contracts = require(marketsURL);
 
@@ -1155,7 +1156,7 @@ export class Kujira {
         ids: [options.id],
         ownerAddresses: [options.ownerAddress],
       })) as IMap<OrderId, Order>
-    ) // Cast because we only have one ownerAddress.
+    ) // Cast because we only have one ownerAddress.  // TODO verify?/fix? !!!
       .first();
   }
 
@@ -1394,7 +1395,7 @@ export class Kujira {
         marketId: options.marketId,
         marketName: options.marketName,
       })) as IMap<OrderId, Order>
-    ) // Cast because we only have one ownerAddress.
+    ) // Cast because we only have one ownerAddress.  // TODO verify?/fix? !!!
       .first();
   }
 
@@ -1649,6 +1650,7 @@ export class Kujira {
         ownerAddress,
       });
 
+      // TODO verify/fix !!!
       // let finClient: fin.FinClient;
 
       // if (walletArtifacts.finClients.has(ownerAddress)) {
@@ -1725,7 +1727,7 @@ export class Kujira {
         const results = (await this.withdrawFromMarket({
           marketId: options.marketId,
           ownerAddresses: ownerAddresses,
-        })) as Withdraw; // Cast because we have only one ownerAddress
+        })) as Withdraw; // Cast because we have only one ownerAddress  // TODO verify?/fix? !!!
 
         output.setIn([ownerAddress, options.marketId], results);
       };
@@ -1737,6 +1739,7 @@ export class Kujira {
         });
       }
 
+      // TODO verify/fix !!!
       // await promiseAllInBatches<HelperSettleFundsOptions, void>(
       //   settleMarketFunds,
       //   options.marketIds.map((id) => {
