@@ -26,8 +26,7 @@ export const isAlgorandPrivateKeyOrMnemonic = (str: string): boolean => {
   return parts.length === 25;
 };
 
-export const invalidKujiraPrivateKeyError: string =
-  'The privateKey param is not a valid Kujira private key.';
+export const invalidKujiraPrivateKeyError: string = 'Invalid Kujira mnemonic.';
 
 // test if a string matches the shape of an Ethereum private key
 export const isEthPrivateKey = (str: string): boolean => {

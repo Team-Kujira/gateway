@@ -173,7 +173,7 @@ export namespace ConnectorsRoutes {
             available_networks: KujiraConfig.config.availableNetworks,
             additional_add_wallet_prompts: {
               accountId:
-                'Enter your kujira account number wallet key (input 0 if unsure) >>> ',
+                'Enter your kujira account number (input 0 if unsure) >>> ',
             },
           },
         ],
