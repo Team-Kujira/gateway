@@ -44,14 +44,14 @@ import { TokenInfo } from '../../services/base';
 
 const config = KujiraConfig.config;
 
-export const convertToGetTokensResponse = (_tokens: Token): TokenInfo => {
+export const convertToGetTokensResponse = (token: Token): TokenInfo => {
   // TODO fix this!!!
   return {
-    chainId: undefined,
+    chainId: token.id,
     address: undefined,
-    name: undefined,
-    symbol: undefined,
-    decimals: undefined,
+    name: token.name,
+    symbol: token.symbol,
+    decimals: token.decimals,
   } as unknown as TokenInfo;
 };
 

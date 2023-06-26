@@ -42,13 +42,11 @@ export const IMap = ImmutableMap;
 export type BasicKujiraToken = Denom;
 export type BasicKujiraMarket = fin.Pair;
 
-export type KujiraOrderParams = any; // TODO unused verify/fix !!!
 export type KujiraWithdraw = ExecuteResult;
 
 export type Address = string;
 export type OwnerAddress = Address;
 export type PayerAddress = Address;
-// export type FloatingNumber = number; // TODO unused verify/fix !!!
 export type Price = BigNumber;
 export type Amount = BigNumber;
 export type Fee = BigNumber;
@@ -94,7 +92,6 @@ export type OrderFee = Fee;
 export type OrderCreationTimestamp = Timestamp;
 export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionHashes = TransactionHashes;
-export type OrderReplaceIfExists = boolean; // TODO unused verify/fix !!!
 
 export type Withdraw = {
   hash: TransactionHash;
@@ -108,8 +105,6 @@ export type EstimatedFeesToken = string;
 export type EstimatedFeesPrice = Price;
 export type EstimateFeesLimit = BigNumber;
 export type EstimateFeesCost = BigNumber;
-
-export type MaxNumberOfFilledOrders = number; // TODO unused verify/fix !!!
 
 export type Mnemonic = string;
 export type Password = string;

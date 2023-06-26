@@ -435,8 +435,6 @@ export class Kujira {
 
         basicMarkets = IMap<MarketId, BasicKujiraMarket>(data).asMutable();
       } else {
-        // TODO verify/fix !!!
-        // kujira.js/src/resources/contracts.json
         const contracts = require(marketsURL);
 
         const data = contracts[this.kujiraNetwork].fin.reduce(
@@ -1650,23 +1648,6 @@ export class Kujira {
         ownerAddress,
       });
 
-      // TODO verify/fix !!!
-      // let finClient: fin.FinClient;
-
-      // if (walletArtifacts.finClients.has(ownerAddress)) {
-      //   finClient = getNotNullOrThrowError<fin.FinClient>(
-      //     walletArtifacts.finClients.get(ownerAddress)
-      //   );
-      // } else {
-      //   finClient = new fin.FinClient(
-      //     walletArtifacts.signingCosmWasmClient,
-      //     ownerAddress,
-      //     market.id
-      //   );
-      //
-      //   walletArtifacts.finClients.set(ownerAddress, finClient);
-      // }
-
       const finClient: fin.FinClient = new fin.FinClient(
         walletArtifacts.signingCosmWasmClient,
         ownerAddress,
@@ -1738,14 +1719,6 @@ export class Kujira {
           ownerAddresses: [ownerAddress],
         });
       }
-
-      // TODO verify/fix !!!
-      // await promiseAllInBatches<HelperSettleFundsOptions, void>(
-      //   settleMarketFunds,
-      //   options.marketIds.map((id) => {
-      //     return { marketId: id, ownerAddresses: [ownerAddress] };
-      //   })
-      // );
     }
 
     if (ownerAddresses.length == 1) {

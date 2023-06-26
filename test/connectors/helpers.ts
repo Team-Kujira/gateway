@@ -46,13 +46,6 @@ export const sendRequest: SendRequestFunction = async <R>(
 
     return result;
   } else if (options.strategy == RequestStrategy.Controller) {
-    // const result = await getNotNullOrThrowError<any>( // TODO verify/fix !!!
-    //   options.controllerFunction
-    // ).apply([
-    //   options.controller,
-    //   options.controllerFunctionParameters || options.RESTRequest,
-    // ]);
-
     const result = await getNotNullOrThrowError<any>(
       options.controllerFunction
     )(
@@ -83,10 +76,6 @@ export function logRequest(target: any, title: string) {
 export function logResponse(target: any, title: string) {
   log(target, title, 'response');
 }
-
-// export function logOutput(target: any, title: string) { // TODO verify/fix !!!
-//   log(target, title, 'output');
-// }
 
 export function printStackTrace() {
   const error = new Error();

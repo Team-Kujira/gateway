@@ -234,23 +234,7 @@ beforeAll(async () => {
   configManager.set('kujira.orders.open.limit', 255);
   configManager.set('kujira.orders.filled.limit', 255);
   configManager.set('kujira.orders.cancel.maxPerTransaction', 25);
-  // configManager.set('kujira.tokens.url', null); //TODO should they be removed? !!!
-  // configManager.set('kujira.tokens.allowed', null);
-  // configManager.set('kujira.tokens.disallowed', null);
   configManager.set('kujira.tokens.resolutionStrategy', 'markets');
-  // configManager.set('kujira.markets.url', null); //TODO should they be removed? !!!
-  // configManager.set('kujira.markets.allowed', null);
-  // configManager.set('kujira.markets.disallowed', null);
-  // configManager.set('kujira.tickers.sources.orderBookSimpleAveragePrice', null);
-  // configManager.set(
-  //   'kujira.tickers.sources.orderBookWeightedAveragePrice',
-  //   null
-  // );
-  // configManager.set(
-  //   'kujira.tickers.sources.orderBookVolumeWeightedAveragePrice',
-  //   null
-  // );
-  // configManager.set('kujira.tickers.sources.lastFilledOrder', null);
   configManager.set(
     'kujira.tickers.sources.nomics.url',
     'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&interval=1m&market=${marketAddress}'
@@ -2266,28 +2250,6 @@ describe('Kujira', () => {
           }
         }
       }
-
-      // TODO verify/fix !!!
-      // Updating Quote Balance
-      // userBalances.tokens.set(candidate.market.quoteToken.id, {
-      //   token: candidate.market.quoteToken,
-      //   free: BigNumber(
-      //     getNotNullOrThrowError<any>(
-      //       userBalances.tokens.get(candidate.market.quoteToken.id)?.free
-      //     )
-      //   ).minus(candidate.amount),
-      //   lockedInOrders: BigNumber(
-      //     getNotNullOrThrowError<any>(
-      //       userBalances.tokens.get(candidate.market.quoteToken.id)
-      //         ?.lockedInOrders
-      //     )
-      //   ).plus(candidate.amount),
-      //   unsettled: BigNumber(
-      //     getNotNullOrThrowError<any>(
-      //       userBalances.tokens.get(candidate.market.quoteToken.id)?.unsettled
-      //     )
-      //   ),
-      // });
     });
 
     it('Check the available wallet balances from the tokens 1 and 2', async () => {

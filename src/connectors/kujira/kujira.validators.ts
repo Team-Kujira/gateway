@@ -680,7 +680,6 @@ export const validatePlaceOrderRequest: RequestValidator =
     (request) => `Error when trying to create order "${request.id}"`
   );
 
-// TODO fix!!!
 export const validatePlaceOrdersRequest: RequestValidator =
   createRequestValidator(
     [
@@ -732,7 +731,6 @@ export const validateCancelOrderRequest: RequestValidator =
     (request) => `Error when trying to cancel order "${request.id}"`
   );
 
-// TODO fix!!!
 export const validateCancelOrdersRequest: RequestValidator =
   createRequestValidator(
     [
