@@ -3,9 +3,30 @@ networks:
   mainnet:
     chainId: mainnet
     nodeURL: null # Empty or null means choosing the RPC automatically
+#    nodeURL: 'https://kujira-mainnet-rpc.autostake.com'
+#    nodeURL: 'https://kujira-rpc.ibs.team'
+#    nodeURL: 'https://kujira-rpc.lavenderfive.com'
+#    nodeURL: 'https://kujira-rpc.nodes.defiantlabs.net'
+#    nodeURL: 'https://kujira-rpc.openbitlab.com'
+#    nodeURL: 'https://kujira-rpc.theamsolutions.info'
+#    nodeURL: 'https://kujira.rpc.ghostinnet.com'
+#    nodeURL: 'https://kujira.rpc.kjnodes.com'
+#    nodeURL: 'https://rpc-kujira.mintthemoon.xyz'
+#    nodeURL: 'https://rpc-kujira.mms.team'
+#    nodeURL: 'https://rpc-kujira.starsquid.io'
+#    nodeURL: 'https://rpc-kujira.synergynodes.com'
+#    nodeURL: 'https://rpc.kujira.rektdao.club'
+#    nodeURL: 'https://kuji-rpc.kleomedes.network'
+#    nodeURL: 'https://kujira-rpc.polkachu.com'
+#    nodeURL: 'https://rpc-kujira.whispernode.com'
+#    nodeURL: 'https://rpc.kaiyo.kujira.setten.io'
   testnet:
     chainId: testnet
     nodeURL: null # Empty or null means choosing the RPC automatically
+#    nodeURL: 'https://kujira-testnet-rpc.polkachu.com'
+#    nodeURL: 'https://rpc.harpoon.kujira.setten.io'
+#    nodeURL: 'https://test-rpc-kujira.mintthemoon.xyz'
+#    nodeURL: 'https://dev-rpc-kujira.mintthemoon.xyz'
   devnet:
     chainId: localnet
     nodeURL: null # Empty or null means choosing the RPC automatically
