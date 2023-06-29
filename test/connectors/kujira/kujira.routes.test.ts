@@ -103,10 +103,16 @@ import lodash from 'lodash';
 import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
 import {
   createPatches,
-  disableInputOutputWrapper,
-  disablePatches,
-  enableInputOutputWrapper,
   enablePatches,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  disablePatches,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  enableInputOutputWrapper,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  disableInputOutputWrapper,
   getPatch as helperGetPatch,
   useInputOutputWrapper,
   usePatches,
@@ -118,12 +124,10 @@ import { Express } from 'express-serve-static-core';
 import data from './fixtures/patches/data';
 
 enablePatches();
-disablePatches();
-enablePatches();
+// disablePatches();
 
-enableInputOutputWrapper();
+// enableInputOutputWrapper();
 disableInputOutputWrapper();
-// enableInputOutputWrapper(); //TODO should it be removed? !!!
 
 const requestStrategy = RequestStrategy.RESTful;
 
