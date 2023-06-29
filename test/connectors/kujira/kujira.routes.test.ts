@@ -591,7 +591,6 @@ afterEach(() => {
   unpatch();
 });
 
-// TODO Add tests to test the retrieval of the estimated fees, current block, and one or more transactions or wallet public keys. !!!
 describe('Kujira', () => {
   const commonRequestBody = {
     chain: config.chain,
