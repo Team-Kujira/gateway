@@ -188,9 +188,9 @@ for (let i = 0; i < tokensIdsArray.length; i++) {
 }
 
 const transactionsHashes = {
-  1: 'F45B97B3AC6C85D8CB5D0A2A270343E222AB1BFCB551F74910D4B2C755F28761',
-  2: 'A3D7E2C1A74D20D9FB803D47AF3F2A198A2E943872D548D15A9602FACD9DCD7C',
-  3: '78FD306418D44BA0481E2B318311266CEAE2F7CB58DD59A3C19916A39D78D9C4',
+  1: 'D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9',
+  2: '50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91',
+  3: '66DBF37EAE15E28AD70E3292216DEE3D6B61E5C5913EBCE584E4971D2A6A2F2B',
 };
 
 const orders: IMap<OrderClientId, Order> = IMap<
@@ -1784,8 +1784,8 @@ describe('Kujira', () => {
       expect(responseBody.gasUsed).toBeGreaterThan(0);
       expect(responseBody.gasWanted).toBeGreaterThan(0);
       expect(responseBody.code).toBe(0);
-      expect(responseBody.data).toContain('retract_order');
-      expect(responseBody.data).toContain('order_idx');
+      expect(responseBody.data).toContain('retract_orders');
+      expect(responseBody.data).toContain('order_idxs');
     });
 
     it('Get transactions 2 and 3', async () => {
