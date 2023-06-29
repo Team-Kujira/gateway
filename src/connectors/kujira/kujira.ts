@@ -1281,7 +1281,6 @@ export class Kujira {
    * @param options
    */
   async placeOrders(options: PlaceOrdersRequest): Promise<PlaceOrdersResponse> {
-    // TODO Make this method support multiple owner addresses!!!
     const ownerAddress =
       options.ownerAddress ||
       getNotNullOrThrowError<OrderOwnerAddress>(options.orders[0].ownerAddress);

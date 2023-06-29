@@ -412,7 +412,6 @@ export const validateGetTokens = (optional = false): Validator => {
   return createValidator(
     null,
     (request) =>
-      // TODO create a validator and reuse it elsewhere!!!
       (request.names && request.names.length) ||
       (request.ids && request.ids.length) ||
       (request.symbols && request.symbols.length),
