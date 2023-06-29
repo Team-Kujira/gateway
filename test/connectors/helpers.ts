@@ -80,7 +80,7 @@ export function logResponse(target: any, title: string) {
 export function printStackTrace() {
   const error = new Error();
   const stackTrace = error.stack || '';
-  const stackLines = stackTrace.split('\n').slice(1); // Ignoring this function itself // TODO verify/fix !!!
+  const stackLines = stackTrace.split('\n').slice(1); // Ignoring this function itself
 
   let output = '';
 

@@ -12,7 +12,7 @@ networks:
 prefix: 'kujira'
 accountNumber: 0
 gasPrice: 0.00125
-gasPriceSuffix: 'ukuji' # TODO - Add support for other currencies that can be configured in Fin to pay Fee !!!
+gasPriceSuffix: 'ukuji'
 gasLimitEstimate: 0.009147
 orderBook:
   offset: 0
@@ -64,6 +64,3 @@ parallel:
   all:
     batchSize: 100 # 0 means no batching, group all
     delayBetweenBatches: 200 # in milliseconds, 0 means no delay
-
-#TODO Change the gateway command `gateway list` to show fin as the Kujira exchange!!!
-#TODO add a more explicit message while asking for the Kujira mnemonic in the Client!!!
