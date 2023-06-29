@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 import { HttpException } from '../../services/error-handler';
+import { BigNumber } from 'bignumber.js';
 import {
   isFloatString,
   isNaturalNumberString,
@@ -353,7 +354,9 @@ export const validateOrderPrice = (optional = false): Validator => {
     (_, value) =>
       typeof value === 'undefined'
         ? true
-        : typeof value === 'number' || isFloatString(value),
+        : typeof value === 'number' ||
+          value instanceof BigNumber ||
+          isFloatString(value),
     (_, value) => `Invalid order price (${value}).`,
     optional
   );
@@ -362,7 +365,10 @@ export const validateOrderPrice = (optional = false): Validator => {
 export const validateOrderAmount = (optional = false): Validator => {
   return createValidator(
     'amount',
-    (_, value) => typeof value === 'number' || isFloatString(value),
+    (_, value) =>
+      typeof value === 'number' ||
+      value instanceof BigNumber ||
+      isFloatString(value),
     (_, value) => `Invalid order amount (${value}).`,
     optional
   );
