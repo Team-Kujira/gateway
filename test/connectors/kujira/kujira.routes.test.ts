@@ -128,8 +128,8 @@ import express from 'express';
 import { Express } from 'express-serve-static-core';
 import data from './fixtures/patches/data';
 
-// enablePatches();
-disablePatches();
+enablePatches();
+// disablePatches();
 
 // enableInputOutputWrapper();
 disableInputOutputWrapper();
