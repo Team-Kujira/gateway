@@ -816,10 +816,10 @@
 					]
 				},
 				{
-					"name": "!!! order(s)", // TODO verify/fix !!!
+					"name": "!!! order(s)",
 					"item": [
 						{
-							"name": "!!! owner", // TODO verify/fix !!!
+							"name": "!!! owner",
 							"item": [
 								{
 									"name": "order",
@@ -1004,7 +1004,7 @@
 									]
 								},
 								{
-									"name": "!!!  orders", // TODO verify/fix !!!
+									"name": "!!!  orders",
 									"item": [
 										{
 											"name": "orders",
@@ -1280,7 +1280,7 @@
 											"response": []
 										},
 										{
-											"name": "!!!  orders (all by owner & marketId)", // TODO verify/fix !!!
+											"name": "!!!  orders (all by owner & marketId)",
 											"request": {
 												"method": "DELETE",
 												"header": [],
@@ -1308,7 +1308,7 @@
 											"response": []
 										},
 										{
-											"name": "!!!  orders (all by owner & marketIds)", // TODO verify/fix !!!
+											"name": "!!!  orders (all by owner & marketIds)",
 											"request": {
 												"method": "DELETE",
 												"header": [],
@@ -1336,7 +1336,7 @@
 											"response": []
 										},
 										{
-											"name": "!!!  orders (all by owner & marketName)", // TODO verify/fix !!!
+											"name": "!!!  orders (all by owner & marketName)",
 											"request": {
 												"method": "DELETE",
 												"header": [],
@@ -1364,7 +1364,7 @@
 											"response": []
 										},
 										{
-											"name": "!!!  orders (all by owner & marketNames)", // TODO verify/fix !!!
+											"name": "!!!  orders (all by owner & marketNames)",
 											"request": {
 												"method": "DELETE",
 												"header": [],
@@ -1425,10 +1425,10 @@
 							]
 						},
 						{
-							"name": "!!! owners", // TODO verify/fix !!!
+							"name": "!!! owners",
 							"item": [
 								{
-									"name": "!!! orders", // TODO verify/fix !!!
+									"name": "!!! orders",
 									"item": [
 										{
 											"name": "orders [OPEN] (all by marketId)",
@@ -1462,7 +1462,7 @@
 											"response": []
 										},
 										{
-											"name": "!!! orders [OPEN] (all by marketIds)", // TODO verify/fix !!!
+											"name": "!!! orders [OPEN] (all by marketIds)",
 											"protocolProfileBehavior": {
 												"disableBodyPruning": true
 											},
@@ -1493,7 +1493,7 @@
 											"response": []
 										},
 										{
-											"name": "!!!  orders [OPEN] (all by marketName)", // TODO verify/fix !!!
+											"name": "!!!  orders [OPEN] (all by marketName)",
 											"protocolProfileBehavior": {
 												"disableBodyPruning": true
 											},
@@ -1524,7 +1524,7 @@
 											"response": []
 										},
 										{
-											"name": "!!!  orders [OPEN] (all by marketNames)", // TODO verify/fix !!!
+											"name": "!!!  orders [OPEN] (all by marketNames)",
 											"protocolProfileBehavior": {
 												"disableBodyPruning": true
 											},
@@ -1555,7 +1555,7 @@
 											"response": []
 										},
 										{
-											"name": "!!! orders (all by statuses)", // TODO verify/fix !!!
+											"name": "!!! orders (all by statuses)",
 											"protocolProfileBehavior": {
 												"disableBodyPruning": true
 											},
@@ -1703,7 +1703,7 @@
 											"response": []
 										},
 										{
-											"name": "!!! orders (all by owners & marketName)", // TODO verify/fix !!!
+											"name": "!!! orders (all by owners & marketName)",
 											"request": {
 												"method": "DELETE",
 												"header": [],
@@ -1732,7 +1732,7 @@
 											"response": []
 										},
 										{
-											"name": "!!! orders (all by owners & marketNames)", // TODO verify/fix !!!
+											"name": "!!! orders (all by owners & marketNames)",
 											"request": {
 												"method": "DELETE",
 												"header": [],
@@ -1761,7 +1761,7 @@
 											"response": []
 										},
 										{
-											"name": "!!! orders (all by owners & all markets)", // TODO verify/fix !!!
+											"name": "!!! orders (all by owners & all markets)",
 											"request": {
 												"method": "DELETE",
 												"header": [],
@@ -1796,10 +1796,10 @@
 					]
 				},
 				{
-					"name": "!!!  withdraw(s)", // TODO verify/fix !!!
+					"name": "!!!  withdraw(s)",
 					"item": [
 						{
-							"name": "!!! owner", // TODO verify/fix !!!
+							"name": "!!! owner",
 							"item": [
 								{
 									"name": "withdraw (by owner & marketId)",
@@ -1831,7 +1831,7 @@
 									"response": []
 								},
 								{
-									"name": "!!! withdraw (by owner & marketName)", // TODO verify/fix !!!
+									"name": "!!! withdraw (by owner & marketName)",
 									"request": {
 										"method": "POST",
 										"header": [],
@@ -1889,7 +1889,7 @@
 									"response": []
 								},
 								{
-									"name": "!!!  withdraws (by owner & marketNames)", // TODO verify/fix !!!
+									"name": "!!!  withdraws (by owner & marketNames)",
 									"request": {
 										"method": "POST",
 										"header": [],
@@ -1950,7 +1950,7 @@
 							]
 						},
 						{
-							"name": "!!! owners", // TODO verify/fix !!!
+							"name": "!!! owners",
 							"item": [
 								{
 									"name": "withdraw (by owners & marketId)",
@@ -1982,7 +1982,7 @@
 									"response": []
 								},
 								{
-									"name": "!!! withdraw (by owners & marketName)", // TODO verify/fix !!!
+									"name": "!!! withdraw (by owners & marketName)",
 									"request": {
 										"method": "POST",
 										"header": [],
@@ -2040,7 +2040,7 @@
 									"response": []
 								},
 								{
-									"name": "!!! withdraws (by owners & marketNames)", // TODO verify/fix !!!
+									"name": "!!! withdraws (by owners & marketNames)",
 									"request": {
 										"method": "POST",
 										"header": [],
@@ -2103,10 +2103,10 @@
 					]
 				},
 				{
-					"name": "!!!  transaction(s)", // TODO verify/fix !!!
+					"name": "!!!  transaction(s)",
 					"item": [
 						{
-							"name": "!!!  transaction", // TODO verify/fix !!!
+							"name": "!!!  transaction",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2137,7 +2137,7 @@
 							"response": []
 						},
 						{
-							"name": "!!! transactions", // TODO verify/fix !!!
+							"name": "!!! transactions",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2366,13 +2366,13 @@
 			]
 		},
 		{
-			"name": "!!!  clob", // TODO verify/fix !!!
+			"name": "!!!  clob",
 			"item": [
 				{
-					"name": "!!! orders", // TODO verify/fix !!!
+					"name": "!!! orders",
 					"item": [
 						{
-							"name": "!!! order", // TODO verify/fix !!!
+							"name": "!!! order",
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -2400,7 +2400,7 @@
 							"response": []
 						},
 						{
-							"name": "!!!  order", // TODO verify/fix !!!
+							"name": "!!!  order",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2431,7 +2431,7 @@
 							"response": []
 						},
 						{
-							"name": "!!! batchOrders", // TODO verify/fix !!!
+							"name": "!!! batchOrders",
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -2459,7 +2459,7 @@
 							"response": []
 						},
 						{
-							"name": "!!!  order", // TODO verify/fix !!!
+							"name": "!!!  order",
 							"request": {
 								"method": "DELETE",
 								"header": [],
@@ -2489,10 +2489,10 @@
 					]
 				},
 				{
-					"name": "!!! others", // TODO verify/fix !!!
+					"name": "!!! others",
 					"item": [
 						{
-							"name": "!!! market", // TODO verify/fix !!!
+							"name": "!!! market",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2541,7 +2541,7 @@
 							"response": []
 						},
 						{
-							"name": "!!! orderBook", // TODO verify/fix !!!
+							"name": "!!! orderBook",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2590,7 +2590,7 @@
 							"response": []
 						},
 						{
-							"name": "!!! ticker", // TODO verify/fix !!!
+							"name": "!!! ticker",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2639,7 +2639,7 @@
 							"response": []
 						},
 						{
-							"name": "!!! estimateGas", // TODO verify/fix !!!
+							"name": "!!! estimateGas",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -2688,10 +2688,10 @@
 			]
 		},
 		{
-			"name": "!!! injective", // TODO verify/fix !!!
+			"name": "!!! injective",
 			"item": [
 				{
-					"name": "!!! balances (injective) JSON Request", // TODO verify/fix !!!
+					"name": "!!! balances (injective) JSON Request",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -2720,7 +2720,7 @@
 					"response": []
 				},
 				{
-					"name": "!!! balances (injective)", // TODO verify/fix !!!
+					"name": "!!! balances (injective)",
 					"request": {
 						"method": "POST",
 						"header": [],
