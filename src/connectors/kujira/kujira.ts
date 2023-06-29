@@ -1154,8 +1154,7 @@ export class Kujira {
         ids: [options.id],
         ownerAddresses: [options.ownerAddress],
       })) as IMap<OrderId, Order>
-    ) // Cast because we only have one ownerAddress.  // TODO verify?/fix? !!!
-      .first();
+    ).first();
   }
 
   /**
@@ -1393,8 +1392,7 @@ export class Kujira {
         marketId: options.marketId,
         marketName: options.marketName,
       })) as IMap<OrderId, Order>
-    ) // Cast because we only have one ownerAddress.  // TODO verify?/fix? !!!
-      .first();
+    ).first();
   }
 
   /**
@@ -1708,7 +1706,7 @@ export class Kujira {
         const results = (await this.withdrawFromMarket({
           marketId: options.marketId,
           ownerAddresses: ownerAddresses,
-        })) as Withdraw; // Cast because we have only one ownerAddress  // TODO verify?/fix? !!!
+        })) as Withdraw;
 
         output.setIn([ownerAddress, options.marketId], results);
       };
