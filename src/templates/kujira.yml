@@ -1,4 +1,4 @@
-network: 'mainnet' # TODO should it have a lot of comments? !!!
+network: 'mainnet'
 networks:
   mainnet:
     chainId: mainnet
