@@ -79,7 +79,7 @@
     "http-status-codes": "2.2.0",
     "immutable": "^4.2.4",
     "js-yaml": "^4.1.0",
-    "kujira.js": "https://github.com/Team-Kujira/kujira.js",
+    "kujira.js": "https://github.com/Team-Kujira/kujira.js#911a8acbfa28909cc0ad31a5007ee23fc8fd7c5a",
     "level": "^8.0.0",
     "libsodium-wrappers": "^0.7.11",
     "libsodium-wrappers-sumo": "^0.7.11",
