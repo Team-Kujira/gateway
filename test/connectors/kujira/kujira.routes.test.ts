@@ -136,6 +136,7 @@ enablePatches();
 disableInputOutputWrapper();
 
 const requestStrategy = RequestStrategy.RESTful;
+// const requestStrategy = RequestStrategy.Controller;
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -569,12 +570,12 @@ beforeEach(async () => {
   logRequest = (target: any) => helperLogRequest(target, testTitle);
   logResponse = (target: any) => helperLogResponse(target, testTitle);
 
-  logRequest = (_target: any) => {
-    return;
-  };
-  logResponse = (_target: any) => {
-    return;
-  };
+  // logRequest = (_target: any) => {
+  //   return;
+  // };
+  // logResponse = (_target: any) => {
+  //   return;
+  // };
 
   await getPatch(['kujira', 'decryptWallet'])(testTitle);
   await getPatch(['kujira', 'kujiraFinClientWithdrawOrders'])(testTitle);
