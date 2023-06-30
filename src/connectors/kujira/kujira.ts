@@ -102,7 +102,7 @@ import {
   TransactionHash,
   Withdraw,
 } from './kujira.types';
-import { KujiraConfig } from './kujira.config';
+import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import {
   getNotNullOrThrowError,
@@ -288,7 +288,12 @@ export class Kujira {
 
   private async getRPCEndpoint(): Promise<string> {
     if (!this.rpcEndpoint) {
-      this.rpcEndpoint = await this.getFastestRpc();
+      this.rpcEndpoint =
+        getNotNullOrThrowError<NetworkConfig>(
+          getNotNullOrThrowError<Map<string, NetworkConfig>>(
+            config.networks
+          ).get(config.network)
+        ).nodeURL || (await this.getFastestRpc());
     }
 
     return this.rpcEndpoint;
