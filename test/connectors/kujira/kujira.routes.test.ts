@@ -149,7 +149,9 @@ const requestStrategy = RequestStrategy.RESTful;
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
-jest.setTimeout(30 * 60 * 1000);
+if (!usePatches || (usePatches && useInputOutputWrapper)) {
+  jest.setTimeout(30 * 60 * 1000);
+}
 
 let getPatch: any;
 
@@ -633,6 +635,56 @@ describe('Kujira', () => {
       expect(responseBody.connector).toBe(config.connector);
       expect(responseBody.connection).toBe(true);
       expect(responseBody.timestamp).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Block Hashes', () => {
+    it('Get Current Block', async () => {
+      const request = {
+        ...commonRequestBody,
+      } as GetCurrentBlockRequest;
+
+      logRequest(request);
+
+      const response = await sendRequest<GetCurrentBlockResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/block/current',
+        RESTRequest: request,
+        controllerFunction: KujiraController.getCurrentBlock,
+      });
+
+      const responseBody = response.body as GetCurrentBlockResponse;
+
+      logResponse(responseBody);
+
+      expect(responseBody).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Fees', () => {
+    it('Estimated Fees', async () => {
+      const request = {
+        ...commonRequestBody,
+      } as GetEstimatedFeesRequest;
+
+      logRequest(request);
+
+      const response = await sendRequest<GetEstimatedFeesResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/fees/estimated',
+        RESTRequest: request,
+        controllerFunction: KujiraController.getEstimatedFees,
+      });
+
+      const responseBody = response.body as GetEstimatedFeesResponse;
+
+      logResponse(responseBody);
+
+      expect(responseBody).not.toBeEmpty();
+      expect(responseBody.token).toBe(KUJI.symbol);
+      expect(BigNumber(responseBody.price).gte(0)).toBeTrue();
+      expect(BigNumber(responseBody.limit).gte(0)).toBeTrue();
+      expect(BigNumber(responseBody.cost).gte(0)).toBeTrue();
     });
   });
 
@@ -4765,56 +4817,6 @@ describe('Kujira', () => {
         expect(publicKey).toStartWith('kujira');
         expect(publicKey).toHaveLength(45);
       }
-    });
-  });
-
-  describe('Block Hashes', () => {
-    it('Get Current Block', async () => {
-      const request = {
-        ...commonRequestBody,
-      } as GetCurrentBlockRequest;
-
-      logRequest(request);
-
-      const response = await sendRequest<GetCurrentBlockResponse>({
-        RESTMethod: RESTfulMethod.GET,
-        RESTRoute: '/block/current',
-        RESTRequest: request,
-        controllerFunction: KujiraController.getCurrentBlock,
-      });
-
-      const responseBody = response.body as GetCurrentBlockResponse;
-
-      logResponse(responseBody);
-
-      expect(responseBody).toBeGreaterThan(0);
-    });
-  });
-
-  describe('Fees', () => {
-    it('Estimated Fees', async () => {
-      const request = {
-        ...commonRequestBody,
-      } as GetEstimatedFeesRequest;
-
-      logRequest(request);
-
-      const response = await sendRequest<GetEstimatedFeesResponse>({
-        RESTMethod: RESTfulMethod.GET,
-        RESTRoute: '/fees/estimated',
-        RESTRequest: request,
-        controllerFunction: KujiraController.getEstimatedFees,
-      });
-
-      const responseBody = response.body as GetEstimatedFeesResponse;
-
-      logResponse(responseBody);
-
-      expect(responseBody).not.toBeEmpty();
-      expect(responseBody.token).toBe(KUJI.symbol);
-      expect(BigNumber(responseBody.price).gte(0)).toBeTrue();
-      expect(BigNumber(responseBody.limit).gte(0)).toBeTrue();
-      expect(BigNumber(responseBody.cost).gte(0)).toBeTrue();
     });
   });
 });
