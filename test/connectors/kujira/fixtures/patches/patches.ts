@@ -20,7 +20,7 @@ import { isMap } from 'immutable';
 import { getNotNullOrThrowError } from '../../../../../src/connectors/kujira/kujira.helpers';
 
 export let usePatches = true;
-export let useInputOutputWrapper = true;
+export let useInputOutputWrapper = false;
 
 export const enablePatches = () => (usePatches = true);
 export const disablePatches = () => (usePatches = false);
