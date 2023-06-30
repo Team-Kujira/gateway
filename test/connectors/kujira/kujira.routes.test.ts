@@ -38,6 +38,8 @@ import {
   GetBalancesResponse,
   GetCurrentBlockRequest,
   GetCurrentBlockResponse,
+  GetEstimatedFeesRequest,
+  GetEstimatedFeesResponse,
   GetMarketRequest,
   GetMarketResponse,
   GetMarketsRequest,
@@ -50,6 +52,8 @@ import {
   GetOrderResponse,
   GetOrdersRequest,
   GetOrdersResponse,
+  GetRootRequest,
+  GetRootResponse,
   GetTickerRequest,
   GetTickerResponse,
   GetTickersRequest,
@@ -66,8 +70,6 @@ import {
   GetWalletPublicKeyResponse,
   GetWalletsPublicKeysRequest,
   GetWalletsPublicKeysResponse,
-  GetEstimatedFeesRequest,
-  GetEstimatedFeesResponse,
   IMap,
   Market,
   MarketId,
@@ -285,7 +287,7 @@ beforeAll(async () => {
   getPatch = <R = AsyncFunctionType<any, any>>(keyPath: string[]): R =>
     helperGetPatch<R>(patches, keyPath);
 
-  await getPatch(['global', 'fetch'])('beforeAll');
+  // await getPatch(['global', 'fetch'])('beforeAll');
   await getPatch(['kujira', 'getFastestRpc'])('beforeAll');
   await getPatch(['kujira', 'kujiraGetHttpBatchClient'])('beforeAll');
   await getPatch(['kujira', 'kujiraGetTendermint34Client'])('beforeAll');
@@ -610,20 +612,27 @@ describe('Kujira', () => {
     it('Root Info', async () => {
       const request = {
         ...commonRequestBody,
-      };
+      } as GetRootRequest;
 
       logRequest(request);
 
-      const response = await sendRequest<undefined>({
+      const response = await sendRequest<GetRootResponse>({
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/',
         RESTRequest: request,
-        controllerFunction: undefined,
+        controllerFunction: KujiraController.getRoot,
       });
 
-      const responseBody = response.body;
+      const responseBody = response.body as GetRootResponse;
 
       logResponse(responseBody);
+
+      expect(responseBody).not.toBeEmpty();
+      expect(responseBody.chain).toBe(config.chain);
+      expect(responseBody.network).toBe(config.network);
+      expect(responseBody.connector).toBe(config.connector);
+      expect(responseBody.connection).toBe(true);
+      expect(responseBody.timestamp).toBeGreaterThan(0);
     });
   });
 
@@ -4725,6 +4734,9 @@ describe('Kujira', () => {
       const responseBody = response.body as GetWalletPublicKeyResponse;
 
       logResponse(responseBody);
+
+      expect(responseBody).toStartWith('kujira');
+      expect(responseBody).toHaveLength(45);
     });
 
     it('Get Wallets Public Keys', async () => {
@@ -4747,6 +4759,12 @@ describe('Kujira', () => {
       const responseBody = response.body as GetWalletsPublicKeysResponse;
 
       logResponse(responseBody);
+
+      expect(responseBody).toBeArray();
+      for (const publicKey of responseBody) {
+        expect(publicKey).toStartWith('kujira');
+        expect(publicKey).toHaveLength(45);
+      }
     });
   });
 
@@ -4754,11 +4772,11 @@ describe('Kujira', () => {
     it('Get Current Block', async () => {
       const request = {
         ...commonRequestBody,
-      };
+      } as GetCurrentBlockRequest;
 
       logRequest(request);
 
-      const response = await sendRequest<GetCurrentBlockRequest>({
+      const response = await sendRequest<GetCurrentBlockResponse>({
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/block/current',
         RESTRequest: request,
@@ -4768,6 +4786,8 @@ describe('Kujira', () => {
       const responseBody = response.body as GetCurrentBlockResponse;
 
       logResponse(responseBody);
+
+      expect(responseBody).toBeGreaterThan(0);
     });
   });
 
@@ -4775,11 +4795,11 @@ describe('Kujira', () => {
     it('Estimated Fees', async () => {
       const request = {
         ...commonRequestBody,
-      };
+      } as GetEstimatedFeesRequest;
 
       logRequest(request);
 
-      const response = await sendRequest<GetEstimatedFeesRequest>({
+      const response = await sendRequest<GetEstimatedFeesResponse>({
         RESTMethod: RESTfulMethod.GET,
         RESTRoute: '/fees/estimated',
         RESTRequest: request,
@@ -4789,6 +4809,12 @@ describe('Kujira', () => {
       const responseBody = response.body as GetEstimatedFeesResponse;
 
       logResponse(responseBody);
+
+      expect(responseBody).not.toBeEmpty();
+      expect(responseBody.token).toBe(KUJI.symbol);
+      expect(BigNumber(responseBody.price).gte(0)).toBeTrue();
+      expect(BigNumber(responseBody.limit).gte(0)).toBeTrue();
+      expect(BigNumber(responseBody.cost).gte(0)).toBeTrue();
     });
   });
 });
