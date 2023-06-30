@@ -36,6 +36,8 @@ import {
   GetBalanceResponse,
   GetBalancesRequest,
   GetBalancesResponse,
+  GetCurrentBlockRequest,
+  GetCurrentBlockResponse,
   GetMarketRequest,
   GetMarketResponse,
   GetMarketsRequest,
@@ -60,6 +62,12 @@ import {
   GetTransactionResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
+  GetWalletPublicKeyRequest,
+  GetWalletPublicKeyResponse,
+  GetWalletsPublicKeysRequest,
+  GetWalletsPublicKeysResponse,
+  GetEstimatedFeesRequest,
+  GetEstimatedFeesResponse,
   IMap,
   Market,
   MarketId,
@@ -219,6 +227,12 @@ let ownerAddress: OwnerAddress;
 
 let expressApp: Express;
 
+const mnemonic: string = getNotNullOrThrowError<string>(
+  usePatches && !useInputOutputWrapper
+    ? data.get('KUJIRA_MNEMONIC')
+    : process.env.TEST_KUJIRA_MNEMONIC
+);
+
 beforeAll(async () => {
   const configManager = ConfigManagerV2.getInstance();
 
@@ -255,12 +269,6 @@ beforeAll(async () => {
   expressApp.use(express.json());
 
   expressApp.use('/kujira', KujiraRoutes.router);
-
-  const mnemonic: string = getNotNullOrThrowError<string>(
-    usePatches && !useInputOutputWrapper
-      ? data.get('KUJIRA_MNEMONIC')
-      : process.env.TEST_KUJIRA_MNEMONIC
-  );
 
   const accountNumber: number = getNotNullOrThrowError<number>(
     Number(
@@ -597,6 +605,27 @@ describe('Kujira', () => {
     network: config.network,
     connector: config.connector,
   };
+
+  describe('Root', () => {
+    it('Root Info', async () => {
+      const request = {
+        ...commonRequestBody,
+      };
+
+      logRequest(request);
+
+      const response = await sendRequest<undefined>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/',
+        RESTRequest: request,
+        controllerFunction: undefined,
+      });
+
+      const responseBody = response.body;
+
+      logResponse(responseBody);
+    });
+  });
 
   describe('Tokens', () => {
     it('Get token 1 by id', async () => {
@@ -4669,6 +4698,97 @@ describe('Kujira', () => {
       const targetMarketsIds = Object.values(marketsIds);
       const responseMarketsIds = responseBody.keySeq().toArray();
       expect(responseMarketsIds).toIncludeAllMembers(targetMarketsIds);
+    });
+  });
+
+  describe('Wallets', () => {
+    it('Get Wallet Public Key', async () => {
+      const requestBody = {
+        mnemonic: mnemonic,
+        accountNumber: 0,
+      } as GetWalletPublicKeyRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      logRequest(request);
+
+      const response = await sendRequest<GetWalletPublicKeyResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/wallet/publicKey',
+        RESTRequest: request,
+        controllerFunction: KujiraController.getWalletPublicKey,
+      });
+
+      const responseBody = response.body as GetWalletPublicKeyResponse;
+
+      logResponse(responseBody);
+    });
+
+    it('Get Wallets Public Keys', async () => {
+      const requestBody = {} as GetWalletsPublicKeysRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      logRequest(request);
+
+      const response = await sendRequest<GetWalletsPublicKeysResponse>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/wallet/publicKeys',
+        RESTRequest: request,
+        controllerFunction: KujiraController.getWalletsPublicKeys,
+      });
+
+      const responseBody = response.body as GetWalletsPublicKeysResponse;
+
+      logResponse(responseBody);
+    });
+  });
+
+  describe('Block Hashes', () => {
+    it('Get Current Block', async () => {
+      const request = {
+        ...commonRequestBody,
+      };
+
+      logRequest(request);
+
+      const response = await sendRequest<GetCurrentBlockRequest>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/block/current',
+        RESTRequest: request,
+        controllerFunction: KujiraController.getCurrentBlock,
+      });
+
+      const responseBody = response.body as GetCurrentBlockResponse;
+
+      logResponse(responseBody);
+    });
+  });
+
+  describe('Fees', () => {
+    it('Estimated Fees', async () => {
+      const request = {
+        ...commonRequestBody,
+      };
+
+      logRequest(request);
+
+      const response = await sendRequest<GetEstimatedFeesRequest>({
+        RESTMethod: RESTfulMethod.GET,
+        RESTRoute: '/fees/estimated',
+        RESTRequest: request,
+        controllerFunction: KujiraController.getEstimatedFees,
+      });
+
+      const responseBody = response.body as GetEstimatedFeesResponse;
+
+      logResponse(responseBody);
     });
   });
 });
