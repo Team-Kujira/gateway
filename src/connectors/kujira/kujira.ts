@@ -47,6 +47,8 @@ import {
   GetOrderResponse,
   GetOrdersRequest,
   GetOrdersResponse,
+  GetRootRequest,
+  GetRootResponse,
   GetTickerRequest,
   GetTickerResponse,
   GetTickersRequest,
@@ -456,6 +458,16 @@ export class Kujira {
     }
 
     return basicMarkets;
+  }
+
+  getRoot(_options: GetRootRequest): GetRootResponse {
+    return {
+      chain: this.chain,
+      network: this.network,
+      connector: this.connector,
+      connection: this.isReady,
+      timestamp: Date.now(),
+    } as GetRootResponse;
   }
 
   getWalletsPublicKeys(_options: GetWalletsPublicKeysRequest): Address[] {

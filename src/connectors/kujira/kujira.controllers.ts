@@ -43,6 +43,8 @@ import {
   GetOrderResponse,
   GetOrdersRequest,
   GetOrdersResponse,
+  GetRootRequest,
+  GetRootResponse,
   GetTickerRequest,
   GetTickerResponse,
   GetTickersRequest,
@@ -109,6 +111,19 @@ import {
   validateSettleMarketFundsRequest,
   validateSettleMarketsFundsRequest,
 } from './kujira.validators';
+
+export async function getRoot(
+  connector: Connector,
+  request: GetRootRequest
+): Promise<ResponseWrapper<GetRootResponse>> {
+  const response = new ResponseWrapper<GetRootResponse>();
+
+  response.body = convertToResponseBody(await connector.getRoot(request));
+
+  response.status = StatusCodes.OK;
+
+  return response;
+}
 
 export async function getToken(
   connector: Connector,

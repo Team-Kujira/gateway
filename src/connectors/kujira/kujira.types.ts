@@ -340,6 +340,18 @@ export class WalletPublicKeyNotFoundError extends CLOBishError {}
 //  Main methods options
 //
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetRootRequest {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetRootResponse {
+  chain: string;
+  network: string;
+  connector: string;
+  connection: boolean;
+  timestamp: number;
+}
+
 export interface GetTokenRequest {
   id?: TokenId;
   name?: TokenName;

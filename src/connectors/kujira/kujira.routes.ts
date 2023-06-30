@@ -1,5 +1,4 @@
 import { Request, Response, Router } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import { asyncHandler } from '../../services/error-handler';
 import { Kujira } from './kujira';
 import { verifyKujiraIsAvailable } from './kujira.helpers';
@@ -22,6 +21,7 @@ import {
   getOrderBook,
   getOrderBooks,
   getOrders,
+  getRoot,
   getTicker,
   getTickers,
   getToken,
@@ -32,8 +32,8 @@ import {
   getWalletsPublicKeys,
   placeOrder,
   placeOrders,
-  withdrawFromMarket,
   withdrawFromAllMarkets,
+  withdrawFromMarket,
   withdrawFromMarkets,
 } from './kujira.controllers';
 import {
@@ -124,15 +124,11 @@ export namespace KujiraRoutes {
     '/',
     asyncHandler(
       async (request: Request<any>, response: Response<any, any>) => {
-        const kujira = await getController(request);
+        const controller = await getController(request);
 
-        response.status(StatusCodes.OK).json({
-          chain: kujira.chain,
-          network: kujira.network,
-          connector: kujira.connector,
-          connection: kujira.isReady,
-          timestamp: Date.now(),
-        });
+        const result = await getRoot(controller, request.body);
+
+        return await response.status(result.status).json(result.body);
       }
     )
   );
