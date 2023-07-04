@@ -7,6 +7,7 @@
 # export BSC_ADDRESS='put-your-binance-smart-chain-key-here'
 # export INJECTIVE_SUBACCOUNTID='put-your-injective-subaccount-id-here'
 # export POLYGON_ADDRESS='<put-your-public-key-here>'
+# export INJECTIVE_SUBACCOUNTID='put-your-injective-subaccount-id-here'
 # export KUJIRA_ADDRESS='put-your-kujira-subaccount-id-here'
 # export KUJIRA_MNEMONIC='put-your-kujira-mnemonic-here'
 
@@ -73,6 +74,8 @@ curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: app
 curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/add_injective_key.json)" https://localhost:15888/wallet/add | jq
 
 curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/add_polygon_key.json)" https://localhost:15888/wallet/add | jq
+
+curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/add_injective_key.json)" https://localhost:15888/wallet/add | jq
 
 curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/add_xdc_key.json)" https://localhost:15888/wallet/add | jq
 
