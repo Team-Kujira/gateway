@@ -2,9 +2,7 @@ import winston from 'winston';
 import https from 'https';
 import querystring from 'querystring';
 
-export type LogCallback =
-  | ((err: any, res: any) => void)
-  | ((args: void) => void);
+export type LogCallback = (err: any, res: any) => void;
 
 // Inherit from `winston-transport Http` so you can take advantage
 // of the base functionality and `.exceptions.handle()`.
@@ -78,7 +76,7 @@ export class TelemetryTransport extends winston.transports.Http {
     this.processData(data);
 
     if (callback) {
-      setImmediate(callback as any);
+      setImmediate(callback);
     }
   }
 
