@@ -272,7 +272,7 @@ beforeAll(async () => {
   expressApp = express();
   expressApp.use(express.json());
 
-  expressApp.use('/kujira', KujiraRoutes.router);
+  expressApp.use('/chain/kujira', KujiraRoutes.router);
 
   const accountNumber: number = getNotNullOrThrowError<number>(
     Number(
