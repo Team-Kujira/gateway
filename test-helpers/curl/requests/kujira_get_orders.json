@@ -1,0 +1,10 @@
+{
+  "chain": "kujira",
+  "network": "testnet",
+  "ids": [
+    "11034",
+    "136689"
+  ],
+  "ownerAddress": "$KUJIRA_ADDRESS",
+  "status": "OPEN"
+}

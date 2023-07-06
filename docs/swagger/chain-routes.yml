@@ -1,0 +1,120 @@
+paths:
+  /chain/nonce:
+    post:
+      tags:
+        - 'chain'
+      summary: 'Get the current nonce for the provided private key'
+      operationId: 'nonce'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/NonceRequest'
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/NonceResponse'
+
+  /chain/nextNonce:
+    post:
+      tags:
+        - 'chain'
+      summary: 'Get the next nonce for the provided private key'
+      operationId: 'nonce'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/NonceRequest'
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/NonceResponse'
+            
+  /chain/allowances:
+    post:
+      tags:
+        - 'chain'
+      summary: 'Get the ERC20 allowances for a spender on a given private key'
+      operationId: 'allowances'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/AllowancesRequest'
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/AllowancesResponse'
+  /chain/approve:
+    post:
+      tags:
+        - 'chain'
+      summary: 'Create an ERC20 approval for a spender on an private key'
+      operationId: 'approve'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/ApproveRequest'
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/ApproveResponse'
+
+  /chain/cancel:
+    post:
+      tags:
+        - 'chain'
+      summary: 'Cancel transaction'
+      operationId: 'cancel'
+      consumes:
+        - 'application/json'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/CancelRequest'
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/CancelResponse'
+
+  /chain/transfer:
+    post:
+      tags:
+        - 'chain'
+      summary: 'Transfer balance'
+      parameters:
+        - in: 'body'
+          name: 'body'
+          required: true
+          schema:
+            $ref: '#/definitions/TransferRequest'
+      produces:
+        - 'application/json'          
+      responses:
+        '200'

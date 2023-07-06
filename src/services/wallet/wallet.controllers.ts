@@ -2,6 +2,7 @@ import fse from 'fs-extra';
 import { Xdc } from '../../chains/xdc/xdc';
 import { Cosmos } from '../../chains/cosmos/cosmos';
 import { Injective } from '../../chains/injective/injective';
+import { KujiraChain as Kujira } from '../../chains/kujira/kujira.chain';
 
 import {
   AddWalletRequest,
@@ -132,6 +133,20 @@ export async function addWallet(
         );
       } else {
         throw new Error('Injective wallet requires a subaccount id');
+      }
+    } else if (connection instanceof Kujira) {
+      const mnemonic = req.privateKey;
+      const accountNumber = Number(req.accountId);
+      address = await connection.getWalletPublicKey(mnemonic, accountNumber);
+
+      if (accountNumber !== undefined) {
+        encryptedPrivateKey = await connection.encrypt(
+          mnemonic,
+          accountNumber,
+          address
+        );
+      } else {
+        throw new Error('Kujira wallet requires an account number.');
       }
     }
 

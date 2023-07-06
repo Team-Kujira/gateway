@@ -1,3 +1,4 @@
+import { isKujiraPrivateKey } from '../../connectors/kujira/kujira.helpers';
 import {
   mkValidator,
   mkRequestValidator,
@@ -24,6 +25,8 @@ export const isAlgorandPrivateKeyOrMnemonic = (str: string): boolean => {
   const parts = str.split(' ');
   return parts.length === 25;
 };
+
+export const invalidKujiraPrivateKeyError: string = 'Invalid Kujira mnemonic.';
 
 // test if a string matches the shape of an Ethereum private key
 export const isEthPrivateKey = (str: string): boolean => {
@@ -96,7 +99,6 @@ export const validatePrivateKey: Validator = mkSelectingValidator(
       invalidEthPrivateKeyError,
       (val) => typeof val === 'string' && isEthPrivateKey(val)
     ),
-
     injective: mkValidator(
       'privateKey',
       invalidEthPrivateKeyError,
@@ -107,11 +109,16 @@ export const validatePrivateKey: Validator = mkSelectingValidator(
       invalidEthPrivateKeyError,
       (val) => typeof val === 'string' && isEthPrivateKey(val)
     ),
+    kujira: mkValidator(
+      'privateKey',
+      invalidKujiraPrivateKeyError,
+      (val) => typeof val === 'string' && isKujiraPrivateKey(val)
+    ),
   }
 );
 
 export const invalidChainError: string =
-  'chain must be "ethereum", "avalanche", "near", "harmony", "cosmos", "binance-smart-chain" or "injective"';
+  'chain must be "ethereum", "avalanche", "near", "harmony", "cosmos", "binance-smart-chain", "injective", or "kujira"';
 
 export const invalidNetworkError: string =
   'expected a string for the network key';
@@ -138,7 +145,8 @@ export const validateChain: Validator = mkValidator(
       val === 'cronos' ||
       val === 'cosmos' ||
       val === 'binance-smart-chain' ||
-      val === 'injective')
+      val === 'injective' ||
+      val === 'kujira')
 );
 
 export const validateNetwork: Validator = mkValidator(

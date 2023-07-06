@@ -39,6 +39,8 @@ import { DexalotCLOB } from '../connectors/dexalot/dexalot';
 import { Algorand } from '../chains/algorand/algorand';
 import { Cosmos } from '../chains/cosmos/cosmos';
 import { Tinyman } from '../connectors/tinyman/tinyman';
+import { KujiraChain } from '../chains/kujira/kujira.chain';
+import { KujiraConnector } from '../connectors/kujira/kujira.connector';
 
 export type ChainUnion =
   | Algorand
@@ -46,7 +48,8 @@ export type ChainUnion =
   | Ethereumish
   | Nearish
   | Injective
-  | Xdcish;
+  | Xdcish
+  | KujiraChain;
 
 export type Chain<T> = T extends Algorand
   ? Algorand
@@ -60,6 +63,8 @@ export type Chain<T> = T extends Algorand
   ? Xdcish
   : T extends Injective
   ? Injective
+  : T extends KujiraChain
+  ? KujiraChain
   : never;
 
 export class UnsupportedChainException extends Error {
@@ -78,7 +83,7 @@ export async function getInitializedChain<T>(
   chain: string,
   network: string
 ): Promise<Chain<T>> {
-  const chainInstance = getChainInstance(chain, network);
+  const chainInstance = await getChainInstance(chain, network);
 
   if (chainInstance === undefined) {
     throw new UnsupportedChainException(`unsupported chain ${chain}`);
@@ -91,10 +96,10 @@ export async function getInitializedChain<T>(
   return chainInstance as Chain<T>;
 }
 
-export function getChainInstance(
+export async function getChainInstance(
   chain: string,
   network: string
-): ChainUnion | undefined {
+): Promise<ChainUnion | undefined> {
   let connection: ChainUnion | undefined;
 
   if (chain === 'algorand') {
@@ -119,6 +124,8 @@ export function getChainInstance(
     connection = Xdc.getInstance(network);
   } else if (chain === 'injective') {
     connection = Injective.getInstance(network);
+  } else if (chain === 'kujira') {
+    connection = await KujiraChain.getInstance(network);
   } else {
     connection = undefined;
   }
@@ -134,7 +141,8 @@ export type ConnectorUnion =
   | CLOBish
   | ZigZag
   | InjectiveClobPerp
-  | Tinyman;
+  | Tinyman
+  | KujiraConnector;
 
 export type Connector<T> = T extends Uniswapish
   ? Uniswapish
@@ -152,6 +160,8 @@ export type Connector<T> = T extends Uniswapish
   ? InjectiveClobPerp
   : T extends Tinyman
   ? Tinyman
+  : T extends KujiraConnector
+  ? KujiraConnector
   : never;
 
 export async function getConnector<T>(
@@ -208,6 +218,8 @@ export async function getConnector<T>(
     connectorInstance = ZigZag.getInstance(network);
   } else if (chain == 'algorand' && connector == 'tinyman') {
     connectorInstance = Tinyman.getInstance(network);
+  } else if (chain === 'kujira' && connector === 'kujira') {
+    connectorInstance = await KujiraConnector.getInstance(chain, network);
   } else {
     throw new Error('unsupported chain or connector');
   }

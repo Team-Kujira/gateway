@@ -675,13 +675,16 @@ export interface BasicChainMethods {
   chain: string;
 }
 
-export interface Ethereumish extends BasicChainMethods, EthereumBase {
+export interface Chain extends BasicChainMethods, EthereumBase {
+  controller: any;
   cancelTx(wallet: Wallet, nonce: number): Promise<Transaction>;
   getContract(
     tokenAddress: string,
     signerOrProvider?: Wallet | Provider
   ): Contract;
 }
+
+export type Ethereumish = Chain;
 
 export interface Xdcish extends BasicChainMethods, XdcBase {
   cancelTx(wallet: XdcWallet, nonce: number): Promise<XdcTransaction>;
@@ -756,6 +759,8 @@ export interface NetworkSelectionRequest {
   network: string; // the target network of the chain (e.g. mainnet)
   connector?: string; //the target connector (e.g. uniswap or pangolin)
 }
+
+export type RequestWrapper<T> = NetworkSelectionRequest & T;
 
 export class ResponseWrapper<T> {
   get status(): number {

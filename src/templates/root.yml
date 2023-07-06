@@ -115,3 +115,7 @@ configurations:
   $namespace zigzag:
     configurationPath: zigzag.yml
     schemaPath: zigzag-schema.json
+
+  $namespace kujira:
+    configurationPath: kujira.yml
+    schemaPath: kujira-schema.json

@@ -1,9 +1,4 @@
-import {
-  StatusRequest,
-  StatusResponse,
-  TokensRequest,
-  TokensResponse,
-} from './network.requests';
+import { StatusRequest, StatusResponse } from './network.requests';
 import { Avalanche } from '../chains/avalanche/avalanche';
 import { BinanceSmartChain } from '../chains/binance-smart-chain/binance-smart-chain';
 import { Ethereum } from '../chains/ethereum/ethereum';
@@ -11,15 +6,14 @@ import { Harmony } from '../chains/harmony/harmony';
 import { Polygon } from '../chains/polygon/polygon';
 import { Injective } from '../chains/injective/injective';
 import { Xdc } from '../chains/xdc/xdc';
+import { KujiraChain as Kujira } from '../chains/kujira/kujira.chain';
 import {
   HttpException,
   UNKNOWN_CHAIN_ERROR_CODE,
   UNKNOWN_KNOWN_CHAIN_ERROR_MESSAGE,
 } from '../services/error-handler';
-import { EthereumBase, TokenInfo } from '../chains/ethereum/ethereum-base';
 import { Cronos } from '../chains/cronos/cronos';
 import { Near } from '../chains/near/near';
-import { Nearish, Xdcish } from '../services/common-interfaces';
 import { Algorand } from '../chains/algorand/algorand';
 import {
   getInitializedChain,
@@ -101,6 +95,11 @@ export async function getStatus(
     connections = connections.concat(
       injectiveConnections ? Object.values(injectiveConnections) : []
     );
+
+    const kujiraConnections = Kujira.getConnectedInstances();
+    connections = connections.concat(
+      kujiraConnections ? Object.values(kujiraConnections) : []
+    );
   }
 
   for (const connection of connections) {
@@ -126,44 +125,4 @@ export async function getStatus(
   }
 
   return req.chain ? statuses[0] : statuses;
-}
-
-export async function getTokens(req: TokensRequest): Promise<TokensResponse> {
-  type connectionType = EthereumBase | Nearish | Injective | Xdcish;
-  let connection: connectionType;
-  let tokens: TokenInfo[] = [];
-
-  if (req.chain && req.network) {
-    try {
-      connection = (await getInitializedChain(
-        req.chain as string,
-        req.network as string
-      )) as connectionType;
-    } catch (e) {
-      if (e instanceof UnsupportedChainException) {
-        throw new HttpException(
-          500,
-          UNKNOWN_KNOWN_CHAIN_ERROR_MESSAGE(req.chain),
-          UNKNOWN_CHAIN_ERROR_CODE
-        );
-      }
-      throw e;
-    }
-  } else {
-    throw new HttpException(
-      500,
-      UNKNOWN_KNOWN_CHAIN_ERROR_MESSAGE(req.chain),
-      UNKNOWN_CHAIN_ERROR_CODE
-    );
-  }
-
-  if (!req.tokenSymbols) {
-    tokens = connection.storedTokenList;
-  } else {
-    for (const t of req.tokenSymbols as []) {
-      tokens.push(connection.getTokenForSymbol(t) as TokenInfo);
-    }
-  }
-
-  return { tokens };
 }

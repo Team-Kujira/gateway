@@ -21,6 +21,7 @@ import { ConnectorsResponse } from './connectors.request';
 import { DexalotCLOBConfig } from './dexalot/dexalot.clob.config';
 import { ZigZagConfig } from './zigzag/zigzag.config';
 import { TinymanConfig } from './tinyman/tinyman.config';
+import { KujiraConfig } from './kujira/kujira.config';
 
 export namespace ConnectorsRoutes {
   export const router = Router();
@@ -164,6 +165,16 @@ export namespace ConnectorsRoutes {
             trading_type: TinymanConfig.config.tradingTypes,
             chain_type: TinymanConfig.config.chainType,
             available_networks: TinymanConfig.config.availableNetworks,
+          },
+          {
+            name: 'kujira',
+            trading_type: KujiraConfig.config.tradingTypes,
+            chain_type: KujiraConfig.config.chainType,
+            available_networks: KujiraConfig.config.availableNetworks,
+            additional_add_wallet_prompts: {
+              accountId:
+                'Enter your kujira account number (input 0 if unsure) >>> ',
+            },
           },
         ],
       });

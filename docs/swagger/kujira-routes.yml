@@ -1,0 +1,1165 @@
+paths:
+  /:
+    get:
+      description: Returns information about the Kujira API
+      parameters:
+        - in: body
+          name: root
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+              network:
+                type: string
+              connector:
+                type: string
+              connection:
+                type: boolean
+              timestamp:
+                type: integer
+  /token:
+    get:
+      description: Retrieves information about a specific token
+      parameters:
+        - in: body
+          name: get token
+          description: The ID or name of the token and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              id:
+                type: string
+                example: "ukuji"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/KujiraTokenResponse_KUJI"
+  /tokens:
+    get:
+      description: Retrieves information about multiple tokens
+      parameters:
+        - in: body
+          name: get tokens
+          description: The IDs or names of the tokens and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              ids:
+                type: array
+                example: [
+                  "ukuji",
+                  "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+                ]
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: "object"
+            properties:
+              ukuji:
+                type: object
+                $ref: "#/definitions/KujiraTokenResponse_KUJI"
+              factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk:
+                type: object
+                $ref: "#/definitions/KujiraTokenResponse_DEMO"
+  /tokens/all:
+    get:
+      description: Retrieves information about all tokens
+      parameters:
+        - in: body
+          name: get all tokens
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: "object"
+            properties:
+              ukuji:
+                type: object
+                $ref: "#/definitions/KujiraTokenResponse_KUJI"
+              "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo":
+                type: object
+                $ref: "#/definitions/KujiraTokenResponse_DEMO"
+              "factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk":
+                type: object
+                $ref: "#/definitions/KujiraTokenResponse_USK"
+              "ibc/F91EA2C0A23697A1048E08C2F787E3A58AC6F706A1CD2257A504925158CFC0F3":
+                type: "object"
+                properties:
+                  id:
+                    type: string
+                    example: "ibc/F91EA2C0A23697A1048E08C2F787E3A58AC6F706A1CD2257A504925158CFC0F3"
+                  name:
+                    type: string
+                    example: "axlUSDC"
+                  symbol:
+                    type: string
+                    example: "axlUSDC"
+                  decimals:
+                    type: integer
+                    example: 6
+  /market:
+    get:
+      description: Retrieves information about a specific market
+      parameters:
+        - in: body
+          name: get market
+          description: The ID or name of the market and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              id:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+  /markets:
+    get:
+      description: Retrieves information about multiple markets
+      parameters:
+        - in: body
+          name: get markets
+          description: The IDs or names of the markets and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              id:
+                type: string
+                example: [
+                  "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+                  "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+                ]
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: "object"
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+              kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
+                type: object
+                $ref: "#/definitions/KujiraMarketResponse_KUJI_USK"
+  /markets/all:
+    get:
+      description: Retrieves information about all markets
+      parameters:
+        - in: body
+          name: get all markets
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: "object"
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                $ref: "#/definitions/KujiraMarketResponse_KUJI_DEMO"
+              kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
+                type: object
+                $ref: "#/definitions/KujiraMarketResponse_KUJI_USK"
+              kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg:
+                type: object
+                $ref: "#/definitions/KujiraMarketResponse_DEMO_USK"
+  /orderBook:
+    get:
+      description: Retrieves the order book for a specific market
+      parameters:
+        - in: body
+          name: get order book
+          description: The ID or name of the market and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/KujiraOrderBookResponse"
+  /orderBooks:
+    get:
+      description: Retrieves the order books for multiple markets
+      parameters:
+        - in: body
+          name: get order books
+          description: The IDs or names of the markets and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              marketIds:
+                type: string
+                example: [
+                  "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+                  "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+                ]
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                $ref: "#/definitions/KujiraOrderBookResponse"
+              kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg:
+                type: object
+                $ref: "#/definitions/KujiraOrderBookResponse_2"
+  /orderBooks/all:
+    get:
+      description: Retrieves the order books for all markets
+      parameters:
+        - in: body
+          name: get all order books
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                $ref: "#/definitions/KujiraOrderBookResponse"
+              kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg:
+                type: object
+                $ref: "#/definitions/KujiraOrderBookResponse_2"
+              kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
+                type: object
+                $ref: "#/definitions/KujiraOrderBookResponse_3"
+  /ticker:
+    get:
+      description: Retrieves the ticker for a specific market
+      parameters:
+        - in: body
+          name: get ticker
+          description: The ID or name of the market and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            $ref: "#/definitions/KujiraTickerResponse_KUJI_DEMO"
+  /tickers:
+    get:
+      description: Retrieves the tickers for multiple markets
+      parameters:
+        - in: body
+          name: get tickers
+          description: The IDs or names of the markets and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              marketIds:
+                type: string
+                example: [
+                  "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+                  "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+                ]
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                $ref: "#/definitions/KujiraTickerResponse_KUJI_DEMO"
+              kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
+                type: object
+                $ref: "#/definitions/KujiraTickerResponse_KUJI_USK"
+  /ticker/all:
+    get:
+      description: Retrieves the tickers for all markets
+      parameters:
+        - in: body
+          name: get all tickers
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                $ref: "#/definitions/KujiraTickerResponse_KUJI_DEMO"
+              kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
+                type: object
+                $ref: "#/definitions/KujiraTickerResponse_KUJI_USK"
+              kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg:
+                type: object
+                $ref: "#/definitions/KujiraTickerResponse_DEMO_USK"
+  /balance:
+    get:
+      description: Retrieves the balance for a specific token
+      parameters:
+        - in: body
+          name: get balance
+          description: The ID or symbol of the token, owner public key and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              tokenId:
+                type: string
+                example: "ukuji"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            $ref: "#/definitions/KujiraBalanceResponse_KUJI"
+  /balances:
+    get:
+      description: Retrieves the balances for multiple tokens
+      parameters:
+        - in: body
+          name: get balances
+          description: The IDs or symbols of the tokens, owner public key and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              tokenIds:
+                type: string
+                example: [
+                  "ukuji",
+                  "factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo"
+                ]
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              tokens:
+                type: object
+                properties:
+                  ukuji:
+                    type: object
+                    $ref: "#/definitions/KujiraBalanceResponse_KUJI"
+                  factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo:
+                    type: object
+                    $ref: "#/definitions/KujiraBalanceResponse_DEMO"
+              total:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "total"
+                  free:
+                    type: string
+                    example: "16797.827241"
+                  lockedInOrders:
+                    type: string
+                    example: "1"
+                  unsettled:
+                    type: string
+                    example: "0"
+  /balances/all:
+    get:
+      description: Retrieves the balances for all tokens
+      parameters:
+        - in: body
+          name: get all balances
+          description: The owner public key and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              tokens:
+                type: object
+                properties:
+                  factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo:
+                    type: object
+                    $ref: "#/definitions/KujiraBalanceResponse_DEMO"
+                  factory/kujira1r85reqy6h0lu02vyz0hnzhv5whsns55gdt4w0d7ft87utzk7u0wqr4ssll/uusk:
+                    type: object
+                    properties:
+                      token:
+                        $ref: "#/definitions/KujiraTokenResponse_USK"
+                      free:
+                        type: string
+                        example: "2876.343666"
+                      lockedInOrders:
+                        type: string
+                        example: "0"
+                      unsettled:
+                        type: string
+                        example: "0"
+                  ukuji:
+                    type: object
+                    $ref: "#/definitions/KujiraBalanceResponse_KUJI"
+              total:
+                type: object
+                properties:
+                  token:
+                    type: object
+                    $ref: "#/definitions/KujiraTokenResponse_USK"
+                  free:
+                    type: string
+                    example: "72109.735229948"
+                  lockedInOrders:
+                    type: string
+                    example: "11.084"
+                  unsettled:
+                    type: string
+                    example: "0"
+  /order:
+    get:
+      description: Retrieves information about a specific order
+      parameters:
+        - in: body
+          name: get order
+          description: The order ID, order market id, owner public key and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              id:
+                type: string
+                example: "182442"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/KujiraGetOrderResponse_KUJI_DEMO_BUY_OPEN"
+    post:
+      description: Places a new order
+      parameters:
+        - in: body
+          name: place order
+          description: The order details with owner public key and chain and network. Note >> The wallet needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              connector:
+                type: string
+                example: "kujira"
+              clientId:
+                type: string
+                example: "1"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+              payerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+              price:
+                type: string
+                example: "0.001"
+              amount:
+                type: string
+                example: "1"
+              side:
+                type: string
+                example: "BUY"
+              "type":
+                type: string
+                example: "LIMIT"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/KujiraPlaceOrderResponse_KUJI_DEMO_BUY_OPEN"
+    delete:
+      description: Cancels a specific order
+      parameters:
+        - in: body
+          name: cancel order
+          description: The order ID, order market ID, owner public key and chain and network. Note >> The wallet needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              connector:
+                type: string
+                example: "kujira"
+              id:
+                type: string
+                example: "182442"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/KujiraCancelOrderResponse_KUJI_DEMO_BUY"
+  /orders:
+    get:
+      description: Retrieves information about multiple orders
+      parameters:
+        - in: body
+          name: get orders
+          description: The orders IDs, orders market IDs, owner(s) public key(s) and chain and network.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              ids:
+                type: string
+                example: [ "182442", "182565" ]
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              182442:
+                $ref: "#/definitions/KujiraGetOrderResponse_KUJI_DEMO_BUY_OPEN"
+              182565:
+                $ref: "#/definitions/KujiraGetOrderResponse_KUJI_DEMO_SELL_OPEN"
+    post:
+      description: Places multiple orders
+      parameters:
+        - in: body
+          name: place orders
+          description: The list of order details with owner public key and chain and network. Note >> The wallet needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              connector:
+                type: string
+                example: "kujira"
+              orders:
+                properties:
+                  "4":
+                    type: object
+                    properties:
+                      clientId:
+                        type: string
+                        example: "4"
+                      marketId:
+                        type: string
+                        example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+                      ownerAddress:
+                        type: string
+                        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+                      payerAddress:
+                        type: string
+                        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+                      price:
+                        type: string
+                        example: "0.001"
+                      amount:
+                        type: string
+                        example: "1"
+                      side:
+                        type: string
+                        example: "BUY"
+                      "type":
+                        type: string
+                        example: "LIMIT"
+                  "5":
+                    type: object
+                    properties:
+                      clientId:
+                        type: string
+                        example: "5"
+                      marketId:
+                        type: string
+                        example: "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+                      ownerAddress:
+                        type: string
+                        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+                      payerAddress:
+                        type: string
+                        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+                      price:
+                        type: string
+                        example: "999.999"
+                      amount:
+                        type: string
+                        example: "1"
+                      side:
+                        type: string
+                        example: "SELL"
+                      "type":
+                        type: string
+                        example: "LIMIT"
+                  "6":
+                    type: object
+                    properties:
+                      clientId:
+                        type: string
+                        example: "6"
+                      marketId:
+                        type: string
+                        example: "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+                      ownerAddress:
+                        type: string
+                        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+                      payerAddress:
+                        type: string
+                        example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+                      price:
+                        type: string
+                        example: "0.001"
+                      amount:
+                        type: string
+                        example: "1"
+                      side:
+                        type: string
+                        example: "BUY"
+                      "type":
+                        type: string
+                        example: "LIMIT"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              182442:
+                $ref: "#/definitions/KujiraPlaceOrderResponse_KUJI_DEMO_BUY_OPEN"
+              182565:
+                $ref: "#/definitions/KujiraPlaceOrderResponse_KUJI_DEMO_SELL_OPEN"
+    delete:
+      description: Cancels multiple orders
+      parameters:
+        - in: body
+          name: cancel orders
+          description: The order IDs, orders makret ID(s), owner(s) public key(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              connector:
+                type: string
+                example: "kujira"
+              ids:
+                type: array
+                example: [ "182503", "5679", "25951" ]
+              marketIds:
+                type: array
+                example: [
+                  "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+                  "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6",
+                  "kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg"
+                ]
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              182442:
+                $ref: "#/definitions/KujiraCancelOrderResponse_KUJI_DEMO_BUY"
+              182565:
+                $ref: "#/definitions/KujiraCancelOrderResponse_KUJI_DEMO_SELL"
+  /orders/all:
+    get:
+      description: Get all orders considering the given parameters
+      parameters:
+        - in: body
+          name: get all orders
+          description: The owner(s) public key(s) and chain and network.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              182442:
+                $ref: "#/definitions/KujiraGetOrderResponse_KUJI_DEMO_BUY_OPEN"
+              182565:
+                $ref: "#/definitions/KujiraGetOrderResponse_KUJI_DEMO_SELL_OPEN"
+              25951:
+                $ref: "#/definitions/KujiraGetOrderResponse_KUJI_USK_BUY_OPEN"
+    delete:
+      description: Cancels all orders considering the given parameters
+      parameters:
+        - in: body
+          name: cancel all orders
+          description: The owner(s) public key(s), market ID(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              182442:
+                $ref: "#/definitions/KujiraCancelOrderResponse_KUJI_DEMO_BUY"
+              182565:
+                $ref: "#/definitions/KujiraCancelOrderResponse_KUJI_DEMO_SELL"
+              25951:
+                $ref: "#/definitions/KujiraCancelOrderResponse_DEMO_USK_BUY"
+  /market/withdraw:
+    post:
+      description: Withdraws funds from a specific market
+      parameters:
+        - in: body
+          name: withdraw
+          description: The owner(s) public key(s), market ID and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              connector:
+                type: string
+                example: "kujira"
+              marketId:
+                type: string
+                example: "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              hash:
+                type: string
+                example: "CB3FA81C2A3035D9E8EE1F73D072C8E9465503065911FB0C6D90B6E377BAC737"
+  /market/withdraws:
+    post:
+      description: Withdraws funds from multiple markets
+      parameters:
+        - in: body
+          name: withdraws
+          description: The owner(s) public key(s), market ID(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              connector:
+                type: string
+                example: "kujira"
+              marketIds:
+                type: array
+                example: [
+                  "kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh",
+                  "kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6"
+                ]
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                properties:
+                  hash:
+                    type: string
+                    example: "E9F9B681BA9778ABE0B68F911BC9B634A87F5C7B09F6D0A5CC116F5776BA3331"
+              kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
+                type: object
+                properties:
+                  hash:
+                    type: string
+                    example: "EEA2E221B8FC7E05E02BE0C9F5046EF90D41B2C74A71A52AA1D0117E3A2F68E3"
+  /market/withdraws/all:
+    post:
+      description: Withdraws funds from all markets
+      parameters:
+        - in: body
+          name: withdraws all markets
+          description: The owner(s) public key(s) and chain and network. Note >> The wallet(s) needs to have been added to the Gateway beforehand.
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              connector:
+                type: string
+                example: "kujira"
+              ownerAddress:
+                type: string
+                example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh:
+                type: object
+                properties:
+                  hash:
+                    type: string
+                    example: "E9F9B681BA9778ABE0B68F911BC9B634A87F5C7B09F6D0A5CC116F5776BA3331"
+              kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6:
+                type: object
+                properties:
+                  hash:
+                    type: string
+                    example: "EEA2E221B8FC7E05E02BE0C9F5046EF90D41B2C74A71A52AA1D0117E3A2F68E3"
+              kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg:
+                type: object
+                properties:
+                  hash:
+                    type: string
+                    example: "6975AE200A86AC0F1851AF2CC6E1BCA239DC976F299F03CA9A024AC31F518C14"
+  /transaction:
+    get:
+      description: Retrieves information about a specific transaction
+      parameters:
+        - in: body
+          name: transaction
+          description: The hash of the transaction and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              signature:
+                type: string
+                example: "3931621667DAC5CF2AB9266B185055DF5DC712A60659581020211836F9B2D934"
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/KujiraTransactionResponse"
+  /transactions:
+    get:
+      description: Retrieves information about multiple transactions
+      parameters:
+        - in: body
+          name: transactions
+          description: The hashes of the transactions and chain and network
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              signatures:
+                type: string
+                example: [
+                  "3931621667DAC5CF2AB9266B185055DF5DC712A60659581020211836F9B2D934",
+                  "AB77153A4175C72103B26F284C7FF4975DAB5E134489A391A3725F693BDE1A8E"
+                ]
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9:
+                $ref: "#/definitions/KujiraTransactionResponse"
+              50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91:
+                $ref: "#/definitions/KujiraTransactionResponse_2"
+  /wallet/publicKey:
+    get:
+      description: Retrieves the public key of the wallet
+      parameters:
+        - in: body
+          name: get wallet
+          description: The mnemonic, an account number like 0 and chain and network. Note >> the wallet needs to have been used in the current gateway run to work
+          required: true
+          schema:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: "kujira"
+              network:
+                type: string
+                example: "testnet"
+              mnemonic:
+                type: string
+                example: "**** **** **** **** **** **** **** **** **** **** **** ****"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+            example: "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc"
+  /wallet/publicKeys:
+    get:
+      description: Retrieves the public keys of multiple wallets
+      parameters:
+        - in: body
+          name: get wallets
+          description: The chain and network. Note >> wallets need to have been used in the current gateway run to work
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: array
+            example: [ "kujira1ga9qk68ne00wfflv7y2v92epaajt59e554uulc",
+                       "kujira1ecxw2jvl0ac2zjs3wvfm79zaz94tc98dxzah3c" ]
+  /block/current:
+    get:
+      description: Retrieves information about the current block
+      parameters:
+        - in: body
+          name: current block
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+            example: 14137158
+  /fees/estimated:
+    get:
+      description: Retrieves information about the estimated fees
+      parameters:
+        - in: body
+          name: estimated fees
+          description: The chain and network
+          required: true
+          schema:
+            $ref: "#/definitions/KujiraCommonRequestBody"
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+            properties:
+              toke:
+                type: string
+                example: "KUJI"
+              price:
+                type: string
+                example: "0.00125"
+              limit:
+                type: string
+                example: "0.009147"
+              cost:
+                type: string
+                example: "0.00001143375"
