@@ -53,7 +53,7 @@ gatewayApp.use('/network', NetworkRoutes.router);
 gatewayApp.use('/evm', EVMRoutes.router);
 gatewayApp.use('/algorand', AlgorandRoutes.router);
 gatewayApp.use('/injective', InjectiveRoutes.router);
-gatewayApp.use('/kujira', KujiraConnectorRoutes.router);
+gatewayApp.use('/chain/kujira', KujiraConnectorRoutes.router);
 gatewayApp.use('/connectors', ConnectorsRoutes.router);
 
 gatewayApp.use('/amm', AmmRoutes.router);
