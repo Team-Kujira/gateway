@@ -372,36 +372,6 @@ curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: app
 curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT "https://localhost:15888/clob/perp/lastTradePrice?chain=injective&network=mainnet&connector=injective_perpetual&market=INJ-USDT" | jq
 
 ### get balances
-## Kujira
-
-### get markets
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT "https://localhost:15888/clob/markets?chain=kujira&network=mainnet&connector=kujira" | jq
-
-### get order books
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT "https://localhost:15888/clob/orderBook?chain=kujira&network=mainnet&connector=kujira&market=WETH-USDC" | jq
-
-### get tickers
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT "https://localhost:15888/clob/ticker?chain=kujira&network=mainnet&connector=kujira" | jq
-
-### get orders
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT "https://localhost:15888/clob/orders?chain=kujira&network=mainnet&connector=kujira&market=INJ-USDT&orderId=XXXX&address=XXXX" | jq
-
-### post orders
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_order.json)" https://localhost:15888/clob/orders | jq
-
-### delete orders
-curl -s -X DELETE -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_delete_order.json)" https://localhost:15888/clob/orders | jq
-
-### post batch orders create
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_batch_create.json)" https://localhost:15888/clob/batchOrders | jq
-
-### post batch orders delete
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_batch_delete.json)" https://localhost:15888/clob/batchOrders | jq
-
-# Chains
-
-## Injective
-
 curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/injective_balances.json)" https://localhost:15888/chain/balances | jq
 
 curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/injective_poll.json)" https://localhost:15888/chain/poll | jq
@@ -446,100 +416,100 @@ curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: app
 ## Kujira
 
 # /
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_root.json)" https://localhost:15888/kujira | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_root.json)" https://localhost:15888/chain/kujira | jq
 
 # /token
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_token.json)" https://localhost:15888/kujira/token | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_token.json)" https://localhost:15888/chain/kujira/token | jq
 
 # /tokens
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_tokens.json)" https://localhost:15888/kujira/tokens | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_tokens.json)" https://localhost:15888/chain/kujira/tokens | jq
 
 # /tokens/all
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_tokens.json)" https://localhost:15888/kujira/tokens/all | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_tokens.json)" https://localhost:15888/chain/kujira/tokens/all | jq
 
 # /market
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_market.json)" https://localhost:15888/kujira/market | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_market.json)" https://localhost:15888/chain/kujira/market | jq
 
 # /markets
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_markets.json)" https://localhost:15888/kujira/markets | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_markets.json)" https://localhost:15888/chain/kujira/markets | jq
 
 # /markets/all
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_markets.json)" https://localhost:15888/kujira/markets/all | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_markets.json)" https://localhost:15888/chain/kujira/markets/all | jq
 
 # /orderBook
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_order_book.json)" https://localhost:15888/kujira/orderBook | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_order_book.json)" https://localhost:15888/chain/kujira/orderBook | jq
 
 # /orderBooks
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_order_books.json)" https://localhost:15888/kujira/orderBooks | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_order_books.json)" https://localhost:15888/chain/kujira/orderBooks | jq
 
 # /orderBooks/all
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_order_books.json)" https://localhost:15888/kujira/orderBooks/all | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_order_books.json)" https://localhost:15888/chain/kujira/orderBooks/all | jq
 
 # /ticker
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_ticker.json)" https://localhost:15888/kujira/ticker | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_ticker.json)" https://localhost:15888/chain/kujira/ticker | jq
 
 # /tickers
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_tickers.json)" https://localhost:15888/kujira/tickers | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_tickers.json)" https://localhost:15888/chain/kujira/tickers | jq
 
 # /ticker/all
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_tickers.json)" https://localhost:15888/kujira/tickers/all | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_tickers.json)" https://localhost:15888/chain/kujira/tickers/all | jq
 
 # /balance
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_balance.json)" https://localhost:15888/kujira/balance | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_balance.json)" https://localhost:15888/chain/kujira/balance | jq
 
 # /balances
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_balances.json)" https://localhost:15888/kujira/balances | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_balances.json)" https://localhost:15888/chain/kujira/balances | jq
 
 # /balances/all
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_balances.json)" https://localhost:15888/kujira/balances/all | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_all_balances.json)" https://localhost:15888/chain/kujira/balances/all | jq
 
 # /order
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_order.json)" https://localhost:15888/kujira/order | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_order.json)" https://localhost:15888/chain/kujira/order | jq
 
 # /orders
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_orders.json)" https://localhost:15888/kujira/orders | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_orders.json)" https://localhost:15888/chain/kujira/orders | jq
 
 # /order (POST)
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_order.json)" https://localhost:15888/kujira/order | jq
+curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_order.json)" https://localhost:15888/chain/kujira/order | jq
 
 # /orders (POST)
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_orders.json)" https://localhost:15888/kujira/orders | jq
+curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_orders.json)" https://localhost:15888/chain/kujira/orders | jq
 
 # /order (DELETE)
-curl -s -X DELETE -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_delete_order.json)" https://localhost:15888/kujira/order | jq
+curl -s -X DELETE -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_delete_order.json)" https://localhost:15888/chain/kujira/order | jq
 
 # /orders (DELETE)
-curl -s -X DELETE -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_delete_orders.json)" https://localhost:15888/kujira/orders | jq
+curl -s -X DELETE -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_delete_orders.json)" https://localhost:15888/chain/kujira/orders | jq
 
 # /orders/all (DELETE)
-curl -s -X DELETE -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_delete_all_orders.json)" https://localhost:15888/kujira/orders/all | jq
+curl -s -X DELETE -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_delete_all_orders.json)" https://localhost:15888/chain/kujira/orders/all | jq
 
 # /market/withdraw (POST)
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_market_withdraw.json)" https://localhost:15888/kujira/market/withdraw | jq
+curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_market_withdraw.json)" https://localhost:15888/chain/kujira/market/withdraw | jq
 
 # /market/withdraws (POST)
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_market_withdraws.json)" https://localhost:15888/kujira/market/withdraws | jq
+curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_market_withdraws.json)" https://localhost:15888/chain/kujira/market/withdraws | jq
 
 # /market/withdraws/all (POST)
-curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_all_markets_withdraws.json)" https://localhost:15888/kujira/market/withdraws/all | jq
+curl -s -X POST -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_post_all_markets_withdraws.json)" https://localhost:15888/chain/kujira/market/withdraws/all | jq
 
 # /transaction
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_transaction.json)" https://localhost:15888/kujira/transaction | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_transaction.json)" https://localhost:15888/chain/kujira/transaction | jq
 
 # /transactions
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_transactions.json)" https://localhost:15888/kujira/transactions | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_transactions.json)" https://localhost:15888/chain/kujira/transactions | jq
 
 # /wallet/publicKey
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_wallet_public_key.json)" https://localhost:15888/kujira/wallet/publicKey | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_wallet_public_key.json)" https://localhost:15888/chain/kujira/wallet/publicKey | jq
 
 # /wallet/publicKeys
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_wallets_public_keys.json)" https://localhost:15888/kujira/wallet/publicKeys | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_wallets_public_keys.json)" https://localhost:15888/chain/kujira/wallet/publicKeys | jq
 
 # /block/current
 curl -s -X GET -k --key $GATEWAY
 
 # /block/current
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_current_block.json)" https://localhost:15888/kujira/block/current | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_current_block.json)" https://localhost:15888/chain/kujira/block/current | jq
 
 # /fees/estimated
-curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_estimated_fees.json)" https://localhost:15888/kujira/fees/estimated | jq
+curl -s -X GET -k --key $GATEWAY_KEY --cert $GATEWAY_CERT -H "Content-Type: application/json" -d "$(envsubst < ./requests/kujira_get_estimated_fees.json)" https://localhost:15888/chain/kujira/fees/estimated | jq
