@@ -29,6 +29,8 @@ tags:
     description: 'Interact with AMM LP contracts'
   - name: 'chain'
     description: 'Interact with primary chain properties'
+  - name: 'chain/kujira'
+    description: 'Kujira specific routes'
 
 schemes:
   - 'http'
