@@ -564,7 +564,7 @@ beforeEach(async () => {
   sendRequest = <R>(options: SendRequestOptions<R>) => {
     options.strategy = options.strategy || requestStrategy;
     options.RESTExpress = options.RESTExpress || expressApp;
-    options.RESTRoute = `/kujira${options.RESTRoute}`;
+    options.RESTRoute = `/chain/kujira${options.RESTRoute}`;
     options.model = options.model || kujira;
 
     return helperSendRequest(options);
