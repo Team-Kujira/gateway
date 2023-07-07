@@ -1,21 +1,20 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import express from 'express';
-import { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { ConfigRoutes } from './services/config/config.routes';
 import { WalletRoutes } from './services/wallet/wallet.routes';
 import { logger } from './services/logger';
 import { addHttps } from './https';
 import {
   asyncHandler,
+  gatewayErrorMiddleware,
   HttpException,
   NodeError,
-  gatewayErrorMiddleware,
 } from './services/error-handler';
 import { ConfigManagerV2 } from './services/config-manager-v2';
 import { SwaggerManager } from './services/swagger-manager';
 import { ConnectorsRoutes } from './connectors/connectors.routes';
-import { AmmRoutes, AmmLiquidityRoutes, PerpAmmRoutes } from './amm/amm.routes';
-import { KujiraRoutes as KujiraConnectorRoutes } from './connectors/kujira/kujira.routes';
+import { AmmLiquidityRoutes, AmmRoutes, PerpAmmRoutes } from './amm/amm.routes';
+import { KujiraRoutes } from './connectors/kujira/kujira.routes';
 import { CLOBRoutes, PerpClobRoutes } from './clob/clob.routes';
 
 import morgan from 'morgan';
@@ -45,7 +44,7 @@ gatewayApp.use(
 // mount sub routers
 gatewayApp.use('/config', ConfigRoutes.router);
 gatewayApp.use('/chain', ChainRoutes.router);
-gatewayApp.use('/chain/kujira', KujiraConnectorRoutes.router);
+gatewayApp.use('/chain/kujira', KujiraRoutes.router);
 gatewayApp.use('/connectors', ConnectorsRoutes.router);
 
 gatewayApp.use('/amm', AmmRoutes.router);
