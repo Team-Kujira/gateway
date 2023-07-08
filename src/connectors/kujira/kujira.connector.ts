@@ -25,6 +25,7 @@ import {
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   GetAllMarketsResponse,
+  OrderAmount,
   OrderPrice,
   OrderSide,
   OrderStatus,
@@ -151,8 +152,8 @@ export class KujiraConnector implements CLOBish {
     const buys = [];
     for (const order of orderBook.bids.valueSeq()) {
       buys.push({
-        price: order.price ? order.price.toString() : '',
-        quantity: order.amount.toString(),
+        price: getNotNullOrThrowError<OrderPrice>(order.price).toString(),
+        quantity: getNotNullOrThrowError<OrderAmount>(order.amount).toString(),
         timestamp: order.creationTimestamp ? order.creationTimestamp : 0,
       });
     }
@@ -160,8 +161,8 @@ export class KujiraConnector implements CLOBish {
     const sells = [];
     for (const order of orderBook.asks.valueSeq()) {
       sells.push({
-        price: order.price ? order.price.toString() : '',
-        quantity: order.amount.toString(),
+        price: getNotNullOrThrowError<OrderPrice>(order.price).toString(),
+        quantity: getNotNullOrThrowError<OrderAmount>(order.amount).toString(),
         timestamp: order.creationTimestamp ? order.creationTimestamp : 0,
       });
     }
