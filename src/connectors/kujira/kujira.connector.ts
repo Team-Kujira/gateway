@@ -221,7 +221,9 @@ export class KujiraConnector implements CLOBish {
   public async ticker(
     req: ClobTickerRequest
   ): Promise<{ markets: MarketInfo }> {
-    // TODO check the output format!!!
+    // TODO This seems to be wrong but Injective is doing like that
+    //  if the ticker should return the current price, Injective is not reloading them.
+    // We have the method getTicker for that, which returns the current price, if needed.
     return await this.markets(req);
   }
 }
