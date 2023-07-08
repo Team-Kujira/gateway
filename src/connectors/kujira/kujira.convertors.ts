@@ -8,6 +8,7 @@ import {
   KujiraTicker,
   KujiraWithdraw,
   Market,
+  MarketName,
   Order,
   OrderAmount,
   OrderBook,
@@ -27,12 +28,12 @@ import { KujiraConfig } from './kujira.config';
 import {
   Denom,
   fin,
+  KUJI,
   MAINNET,
   NETWORKS,
   TESTNET,
   USK,
   USK_TESTNET,
-  KUJI,
 } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
@@ -61,6 +62,18 @@ export const convertKujiraTokenToToken = (token: Denom): Token => {
     symbol: token.symbol,
     decimals: token.decimals,
   };
+};
+
+export const convertHumingbotMarketNameToMarketName = (
+  input: string
+): MarketName => {
+  return input.replace('-', '/');
+};
+
+export const convertMarketNameToHumingbotMarketName = (
+  input: string
+): string => {
+  return input.replace('/', '-');
 };
 
 export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {

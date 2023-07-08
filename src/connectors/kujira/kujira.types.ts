@@ -546,7 +546,7 @@ export interface CancelOrderRequest {
   id: OrderId;
   clientId?: OrderClientId;
   ownerAddress: OrderOwnerAddress;
-  marketId: MarketId;
+  marketId?: MarketId;
   marketName?: MarketName;
 }
 
@@ -556,7 +556,7 @@ export interface CancelOrderResponse extends Order {}
 export interface CancelOrdersRequest {
   ids: OrderId[];
   clientIds?: OrderClientId[];
-  marketId: MarketId;
+  marketId?: MarketId;
   marketIds?: MarketId[];
   marketName?: MarketName;
   marketNames?: MarketName[];
