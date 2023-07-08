@@ -104,6 +104,21 @@ import {
   TransactionHash,
   Withdraw,
 } from './kujira.types';
+import {
+  ClobMarketsRequest,
+  ClobOrderbookRequest,
+  ClobTickerRequest,
+  ClobGetOrderRequest,
+  ClobPostOrderRequest,
+  ClobDeleteOrderRequest,
+  ClobGetOrderResponse,
+} from '../../clob/clob.requests';
+import {
+  CLOBish,
+  MarketInfo,
+  NetworkSelectionRequest,
+  Orderbook,
+} from '../../services/common-interfaces';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import {
@@ -179,7 +194,7 @@ const config = KujiraConfig.config;
 /**
  *
  */
-export class Kujira {
+export class Kujira implements CLOBish {
   /**
    *
    * @private
@@ -260,6 +275,10 @@ export class Kujira {
    */
   isReady: boolean = false;
 
+  public parsedMarkets: MarketInfo = [];
+
+  marketId = '';
+
   /**
    * Get the Kujira instance for the given chain and network.
    * It's cached forever.
@@ -277,11 +296,15 @@ export class Kujira {
    *
    * @param chain
    * @param network
+   * @param marketId
    * @private
    */
-  private constructor(chain: string, network: string) {
+  private constructor(chain: string, network: string, marketId?: string) {
     this.chain = chain;
     this.network = network;
+    if (marketId) {
+      this.marketId = marketId;
+    }
 
     this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
 
@@ -1988,5 +2011,152 @@ export class Kujira {
     latencies.sort((a, b) => a.latency - b.latency);
 
     return latencies[0].endpoint;
+  }
+
+  async deleteOrder(req: ClobDeleteOrderRequest): Promise<{ txHash: string }> {
+    const market = await this.getMarket({
+      id: this.marketId,
+      name: req.market,
+    });
+
+    const denom: Denom = market.connectorMarket.denoms[0];
+
+    const message = msg.wasm.msgExecuteContract({
+      sender: req.address,
+      contract: market.id,
+      msg: Buffer.from(
+        JSON.stringify({
+          retract_orders: {
+            order_idxs: [req.orderId],
+          },
+        })
+      ),
+      funds: coins(1, denom.reference),
+    });
+
+    const messages: readonly EncodeObject[] = [message];
+
+    const walletArtifacts = await this.getWalletArtifacts({
+      ownerAddress: req.address,
+    });
+
+    const response = await this.kujiraSigningStargateClientSignAndBroadcast(
+      walletArtifacts.signingStargateClient,
+      req.address,
+      messages,
+      config.orders.create.fee
+    );
+
+    return { txHash: response.transactionHash };
+  }
+
+  estimateGas(_req: NetworkSelectionRequest): {
+    gasPrice: number;
+    gasPriceToken: string;
+    gasLimit: number;
+    gasCost: number;
+  } {
+    return { gasCost: 0, gasLimit: 0, gasPrice: 0, gasPriceToken: '' };
+  }
+
+  async loadMarkets(): Promise<void> {
+    const allMarkets = (await this.getAllMarkets()) as GetAllMarketsResponse;
+    for (const market of allMarkets.values()) {
+      this.parsedMarkets[market.name.replace('/', '-').toLowerCase()] = market;
+    }
+  }
+
+  async markets(req: ClobMarketsRequest): Promise<{ markets: MarketInfo }> {
+    if (req.market && req.market in this.parsedMarkets)
+      return { markets: this.parsedMarkets[req.market] };
+    return { markets: Object.values(this.parsedMarkets) };
+  }
+
+  async orderBook(req: ClobOrderbookRequest): Promise<Orderbook> {
+    const orderBook = await this.getOrderBook({ marketName: req.market });
+
+    const buys = [];
+    for (const order of orderBook.bids.valueSeq()) {
+      buys.push({
+        price: order.price ? order.price.toString() : '',
+        quantity: order.amount.toString(),
+        timestamp: order.creationTimestamp ? order.creationTimestamp : 0,
+      });
+    }
+
+    const sells = [];
+    for (const order of orderBook.asks.valueSeq()) {
+      sells.push({
+        price: order.price ? order.price.toString() : '',
+        quantity: order.amount.toString(),
+        timestamp: order.creationTimestamp ? order.creationTimestamp : 0,
+      });
+    }
+    return { buys, sells };
+  }
+
+  async orders(
+    req: ClobGetOrderRequest
+  ): Promise<{ orders: ClobGetOrderResponse['orders'] }> {
+    const order = await this.getOrder({
+      id: req.orderId,
+      marketId: this.marketId,
+      ownerAddress: getNotNullOrThrowError<OwnerAddress>(req.address),
+    });
+
+    return {
+      orders: [
+        {
+          network: this.network ? this.network : '',
+          timestamp: order.creationTimestamp
+            ? order.creationTimestamp.toString()
+            : '',
+          latency: '',
+          id: order.id ? order.id : '',
+          marketName: order.marketName,
+          marketId: order.marketId,
+          market: JSON.stringify(order.market),
+          ownerAddress: order.ownerAddress ? order.ownerAddress : '',
+          price: order.price ? order.price.toString() : '',
+          amount: order.amount ? order.amount.toString() : '',
+          side: order.side,
+          status: order.status ? order.status : '',
+          type: order.type ? order.type : '',
+          fee: order.fee ? order.fee.toString() : '',
+          creationTimestamp: order.creationTimestamp
+            ? order.creationTimestamp.toString()
+            : '',
+          fillingTimestamp: order.fillingTimestamp
+            ? order.fillingTimestamp.toString()
+            : '',
+          hashes: order.hashes ? JSON.stringify(order.hashes) : '',
+        },
+      ],
+    };
+  }
+
+  async postOrder(req: ClobPostOrderRequest): Promise<{ txHash: string }> {
+    const request = {
+      chain: this.chain,
+      network: this.network,
+      marketId: this.marketId,
+      ownerAddress: req.address,
+      side: req.side as OrderSide,
+      price: BigNumber(req.price),
+      amount: BigNumber(req.amount),
+      type: req.orderType as OrderType,
+    };
+    const result = await this.placeOrder(request);
+    return { txHash: getNotNullOrThrowError<string>(result.hashes?.creation) };
+  }
+
+  public ready(): boolean {
+    return this.isReady;
+  }
+
+  public async ticker(
+    req: ClobTickerRequest
+  ): Promise<{ markets: MarketInfo }> {
+    return await this.markets(req);
   }
 }
