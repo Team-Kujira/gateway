@@ -9,7 +9,7 @@ import {
   sendRequest as helperSendRequest,
   SendRequestFunction,
   SendRequestOptions,
-} from '../helpers';
+} from './helpers';
 import {
   AllMarketsWithdrawsRequest,
   AllMarketsWithdrawsResponse,

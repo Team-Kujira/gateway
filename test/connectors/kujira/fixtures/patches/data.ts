@@ -1,5 +1,5 @@
 import { IMap } from "../../../../../src/connectors/kujira/kujira.types";
-import { printStackTrace } from "../../../helpers";
+import { printStackTrace } from "../../helpers";
 import { HttpBatchClient, Tendermint34Client } from "@cosmjs/tendermint-rpc";
 import { SigningStargateClient, StargateClient } from "@cosmjs/stargate";
 import { KujiraQueryClient } from "kujira.js";
