@@ -12,6 +12,7 @@ import {
   ClobDeleteOrderRequest,
   ClobGetOrderRequest,
   ClobGetOrderResponse,
+  CLOBMarkets,
   ClobMarketsRequest,
   ClobOrderbookRequest,
   ClobPostOrderRequest,
@@ -126,17 +127,20 @@ export class KujiraConnector implements CLOBish {
       (await this.kujira.getAllMarkets()) as GetAllMarketsResponse;
 
     for (const market of allMarkets.values()) {
-      // TODO Change the market value format!!!
       this.parsedMarkets[convertMarketNameToHumingbotMarketName(market.name)] =
         market;
     }
   }
 
   async markets(req: ClobMarketsRequest): Promise<{ markets: MarketInfo }> {
-    if (req.market && req.market in this.parsedMarkets)
-      return { markets: this.parsedMarkets[req.market] };
+    if (req.market && req.market.split('-').length === 2) {
+      const resp: CLOBMarkets = {};
+      resp[req.market] = this.parsedMarkets[req.market];
 
-    return { markets: Object.values(this.parsedMarkets) };
+      return { markets: resp };
+    }
+
+    return { markets: this.parsedMarkets };
   }
 
   async orderBook(req: ClobOrderbookRequest): Promise<Orderbook> {
