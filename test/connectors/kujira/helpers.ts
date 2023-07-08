@@ -1,12 +1,12 @@
 import supertest from 'supertest';
 import { Express } from 'express-serve-static-core';
 import { StatusCodes } from 'http-status-codes';
-import { getNotNullOrThrowError } from '../../src/connectors/kujira/kujira.helpers';
+import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
 import {
   RequestStrategy,
   RESTfulMethod,
-} from '../../src/connectors/kujira/kujira.types';
-import { ResponseWrapper } from '../../src/services/common-interfaces';
+} from '../../../src/connectors/kujira/kujira.types';
+import { ResponseWrapper } from '../../../src/services/common-interfaces';
 
 export type SendRequestOptions<R> = {
   strategy?: RequestStrategy;
