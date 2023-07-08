@@ -24,7 +24,9 @@ import {
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
   GetAllMarketsResponse,
+  OrderPrice,
   OrderSide,
+  OrderStatus,
   OrderType,
   OwnerAddress,
   Token,
@@ -42,6 +44,10 @@ export class KujiraConnector implements CLOBish {
   chain: string;
 
   network: string;
+
+  abiDecoder: any;
+
+  public parsedMarkets: MarketInfo = [];
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -63,15 +69,12 @@ export class KujiraConnector implements CLOBish {
   async init() {
     this.kujira = await Kujira.getInstance(this.chain, this.network);
     await this.kujira.init();
+    await this.loadMarkets();
   }
 
   ready(): boolean {
     return this.kujira && this.kujira.isReady;
   }
-
-  abiDecoder: any;
-
-  public parsedMarkets: MarketInfo = [];
 
   async balances(req: BalanceRequest): Promise<Record<string, string>> {
     const balances = await this.kujira.getBalances({
@@ -173,31 +176,25 @@ export class KujiraConnector implements CLOBish {
 
     return {
       orders: [
-        // TODO Check this convertor!!!
         {
-          network: this.network ? this.network : '',
-          timestamp: order.creationTimestamp
-            ? order.creationTimestamp.toString()
-            : '',
-          latency: '',
-          id: order.id ? order.id : '',
-          marketName: order.marketName,
+          orderHash: '',
           marketId: order.marketId,
-          market: JSON.stringify(order.market),
-          ownerAddress: order.ownerAddress ? order.ownerAddress : '',
-          price: order.price ? order.price.toString() : '',
-          amount: order.amount ? order.amount.toString() : '',
-          side: order.side,
-          status: order.status ? order.status : '',
-          type: order.type ? order.type : '',
-          fee: order.fee ? order.fee.toString() : '',
-          creationTimestamp: order.creationTimestamp
+          active: '',
+          subaccountId: '',
+          executionType: '',
+          orderType: getNotNullOrThrowError<OrderType>(order.type),
+          price: getNotNullOrThrowError<OrderPrice>(order.price).toString(),
+          triggerPrice: '',
+          quantity: order.amount.toString(),
+          filledQuantity: '',
+          state: getNotNullOrThrowError<OrderStatus>(order.status),
+          createdAt: order.creationTimestamp
             ? order.creationTimestamp.toString()
             : '',
-          fillingTimestamp: order.fillingTimestamp
+          updatedAt: order.fillingTimestamp
             ? order.fillingTimestamp.toString()
             : '',
-          hashes: order.hashes ? JSON.stringify(order.hashes) : '',
+          direction: order.side,
         },
       ],
     };
