@@ -9,6 +9,7 @@ import {
   Orderbook,
 } from '../../services/common-interfaces';
 import {
+  ClobBatchUpdateRequest,
   ClobDeleteOrderRequest,
   ClobGetOrderRequest,
   ClobGetOrderResponse,
@@ -16,14 +17,18 @@ import {
   ClobMarketsRequest,
   ClobOrderbookRequest,
   ClobPostOrderRequest,
+  ClobPostOrderResponse,
   ClobTickerRequest,
 } from '../../clob/clob.requests';
 import {
   convertHumingbotMarketNameToMarketName,
   convertMarketNameToHumingbotMarketName,
+  convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest,
+  convertClobBatchOrdersRequestToKujiraCancelOrdersRequest,
 } from './kujira.convertors';
 import { getNotNullOrThrowError } from './kujira.helpers';
 import {
+  CancelOrdersResponse,
   GetAllMarketsResponse,
   OrderAmount,
   OrderPrice,
@@ -225,5 +230,56 @@ export class KujiraConnector implements CLOBish {
     //  if the ticker should return the current price, Injective is not reloading them.
     // We have the method getTicker for that, which returns the current price, if needed.
     return await this.markets(req);
+  }
+
+  public async batchOrders(req: ClobBatchUpdateRequest): Promise<{
+    // TODO This method is incomplete!!!
+    firstOrderCreationOrCancellationTxInfo: ClobPostOrderResponse;
+  }> {
+    if (req.createOrderParams || req.cancelOrderParams) {
+      if (!req.cancelOrderParams) {
+        const convertedReq = {
+          chain: req.chain,
+          network: req.network,
+          ownerAddress: req.address,
+          orders: convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
+            req.createOrderParams
+          ),
+        };
+        const originalResponse = await this.kujira.placeOrders(convertedReq);
+        return {
+          firstOrderCreationOrCancellationTxInfo: {
+            network: this.network,
+            timestamp: 0,
+            latency: 0,
+            txHash: getNotNullOrThrowError<string>(
+              originalResponse.first()?.hashes?.creation
+            ),
+          },
+        };
+      } else if (!req.createOrderParams) {
+        const convertedReq =
+          convertClobBatchOrdersRequestToKujiraCancelOrdersRequest(req);
+        const originalResponse: CancelOrdersResponse =
+          await this.kujira.cancelOrders(convertedReq);
+        console.log(originalResponse);
+        return {
+          firstOrderCreationOrCancellationTxInfo: {
+            network: this.network,
+            timestamp: 0,
+            latency: 0,
+            txHash: '',
+          },
+        };
+      }
+    }
+    return {
+      firstOrderCreationOrCancellationTxInfo: {
+        network: this.network,
+        timestamp: 0,
+        latency: 0,
+        txHash: '',
+      },
+    };
   }
 }
