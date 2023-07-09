@@ -232,54 +232,73 @@ export class KujiraConnector implements CLOBish {
     return await this.markets(req);
   }
 
-  public async batchOrders(req: ClobBatchUpdateRequest): Promise<{
-    // TODO This method is incomplete!!!
-    firstOrderCreationOrCancellationTxInfo: ClobPostOrderResponse;
-  }> {
-    if (req.createOrderParams || req.cancelOrderParams) {
-      if (!req.cancelOrderParams) {
-        const convertedReq = {
-          chain: req.chain,
-          network: req.network,
-          ownerAddress: req.address,
-          orders: convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
-            req.createOrderParams
-          ),
-        };
-        const originalResponse = await this.kujira.placeOrders(convertedReq);
-        return {
-          firstOrderCreationOrCancellationTxInfo: {
+  public async batchOrders(req: ClobBatchUpdateRequest): Promise<any> {
+    try {
+      if (req.createOrderParams || req.cancelOrderParams) {
+        if (!req.cancelOrderParams) {
+          const convertedReq = {
+            chain: req.chain,
+            network: req.network,
+            ownerAddress: req.address,
+            orders: convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
+              req.createOrderParams
+            ),
+          };
+          const originalResponse = await this.kujira.placeOrders(convertedReq);
+          return {
             network: this.network,
             timestamp: 0,
             latency: 0,
             txHash: getNotNullOrThrowError<string>(
               originalResponse.first()?.hashes?.creation
             ),
-          },
-        };
-      } else if (!req.createOrderParams) {
-        const convertedReq =
-          convertClobBatchOrdersRequestToKujiraCancelOrdersRequest(req);
-        const originalResponse: CancelOrdersResponse =
-          await this.kujira.cancelOrders(convertedReq);
-        console.log(originalResponse);
-        return {
-          firstOrderCreationOrCancellationTxInfo: {
+          } as ClobPostOrderResponse;
+        } else if (!req.createOrderParams) {
+          const convertedReq =
+            convertClobBatchOrdersRequestToKujiraCancelOrdersRequest(req);
+          const originalResponse: CancelOrdersResponse =
+            await this.kujira.cancelOrders(convertedReq);
+          console.log(originalResponse.valueSeq().toArray());
+          return {
             network: this.network,
             timestamp: 0,
             latency: 0,
-            txHash: '',
-          },
-        };
+            txHash: 'originalResponse.first()?.hashes?.cancellation', // TODO Fix this !!!
+          } as ClobPostOrderResponse;
+        } else if (req.createOrderParams && req.cancelOrderParams) {
+          const creationConvertedReq = {
+            chain: req.chain,
+            network: req.network,
+            ownerAddress: req.address,
+            orders: convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
+              req.createOrderParams
+            ),
+          };
+          const createOrdersOriginalResponse = await this.kujira.placeOrders(
+            creationConvertedReq
+          );
+          const cancelConvertedReq =
+            convertClobBatchOrdersRequestToKujiraCancelOrdersRequest(req);
+          const cancelOrdersOriginalResponse: CancelOrdersResponse =
+            await this.kujira.cancelOrders(cancelConvertedReq);
+          console.log(cancelOrdersOriginalResponse.valueSeq().toArray());
+
+          return {
+            network: this.network,
+            timestamp: Date.now(),
+            latency: 0,
+            txHash: getNotNullOrThrowError<string>(
+              createOrdersOriginalResponse.first()?.hashes?.creation +
+                '' +
+                'cancelOrdersOriginalResponse.first()?.hashes?.cancellation' // TODO Fix this !!!
+            ),
+          } as ClobPostOrderResponse;
+        }
       }
+
+      return {};
+    } catch (error) {
+      console.error(error);
     }
-    return {
-      firstOrderCreationOrCancellationTxInfo: {
-        network: this.network,
-        timestamp: 0,
-        latency: 0,
-        txHash: '',
-      },
-    };
   }
 }
