@@ -143,6 +143,8 @@ export const runWithRetryAndTimeout = async <R>(
 
         allErrors.stack = error.stack;
 
+        console.error(allErrors);
+
         throw allErrors;
       }
     }

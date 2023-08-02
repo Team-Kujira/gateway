@@ -15,7 +15,6 @@ export namespace KujiraConfig {
     chainType: 'KUJIRA',
     tradingTypes: ['CLOB_SPOT'],
     chain: 'kujira',
-    network: configManager.get('kujira.network') || 'mainnet',
     networks: new Map<string, NetworkConfig>(
       Object.entries(configManager.get(`kujira.networks`))
     ),

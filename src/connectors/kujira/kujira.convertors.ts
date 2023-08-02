@@ -8,6 +8,7 @@ import {
   KujiraTicker,
   KujiraWithdraw,
   Market,
+  MarketName,
   Order,
   OrderAmount,
   OrderBook,
@@ -27,12 +28,12 @@ import { KujiraConfig } from './kujira.config';
 import {
   Denom,
   fin,
+  KUJI,
   MAINNET,
   NETWORKS,
   TESTNET,
   USK,
   USK_TESTNET,
-  KUJI,
 } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
@@ -41,8 +42,6 @@ import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
 import { parseCoins } from '@cosmjs/stargate';
 import { TokenInfo } from '../../services/base';
-
-const config = KujiraConfig.config;
 
 export const convertToGetTokensResponse = (token: Token): TokenInfo => {
   return {
@@ -61,6 +60,18 @@ export const convertKujiraTokenToToken = (token: Denom): Token => {
     symbol: token.symbol,
     decimals: token.decimals,
   };
+};
+
+export const convertHumingbotMarketNameToMarketName = (
+  input: string
+): MarketName => {
+  return input.replace('-', '/');
+};
+
+export const convertMarketNameToHumingbotMarketName = (
+  input: string
+): string => {
+  return input.replace('/', '-');
 };
 
 export const convertKujiraMarketToMarket = (market: fin.Pair): Market => {
@@ -399,12 +410,13 @@ export const convertKujiraTickerToTicker = (
 };
 
 export const convertKujiraBalancesToBalances = (
+  network: string,
   balances: readonly Coin[],
   orders: IMap<OrderId, Order>,
   tickers: IMap<TokenId, Ticker>
 ): Balances => {
   const uskToken =
-    config.network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
+    network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
       ? convertKujiraTokenToToken(USK)
       : convertKujiraTokenToToken(USK_TESTNET);
 
@@ -588,16 +600,22 @@ export const convertToResponseBody = (input: any): any => {
 export function convertNonStandardKujiraTokenIds(
   tokensIds: TokenId[]
 ): TokenId[] {
-  return tokensIds.map((tokenId) => {
+  const output: TokenId[] = [];
+
+  for (const tokenId of tokensIds) {
     if (tokenId.startsWith('ibc')) {
       const denom = Denom.from(tokenId);
 
-      return getNotNullOrThrowError<string>(denom.trace?.base_denom).replace(
-        ':',
-        '/'
-      );
+      if (denom.trace && denom.trace.base_denom) {
+        output.push(
+          getNotNullOrThrowError<string>(denom.trace?.base_denom).replace(
+            ':',
+            '/'
+          )
+        );
+      }
     }
+  }
 
-    return tokenId;
-  });
+  return output;
 }

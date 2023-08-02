@@ -35,6 +35,7 @@ import {
   GetCurrentBlockRequest,
   GetCurrentBlockResponse,
   GetEstimatedFeesRequest,
+  GetEstimatedFeesResponse,
   GetMarketRequest,
   GetMarketResponse,
   GetMarketsRequest,
@@ -160,12 +161,13 @@ import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
 import { StdFee } from '@cosmjs/amino';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import { BigNumber } from 'bignumber.js';
-import { fromBase64, toBase64 } from '@cosmjs/encoding';
 import { walletPath } from '../../services/base';
 import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
-import { EncryptedPrivateKey } from '../../chains/cosmos/cosmos-base';
 import * as crypto from 'crypto';
+import util from 'util';
+
+const pbkdf2 = util.promisify(crypto.pbkdf2);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const caches = {
@@ -294,7 +296,7 @@ export class Kujira {
         getNotNullOrThrowError<NetworkConfig>(
           getNotNullOrThrowError<Map<string, NetworkConfig>>(
             config.networks
-          ).get(config.network)
+          ).get(this.network)
         ).nodeURL || (await this.getFastestRpc());
     }
 
@@ -347,7 +349,7 @@ export class Kujira {
 
       await this.kujiraGetStargateClient(rpcEndpoint);
 
-      await this.getAllMarkets();
+      await this.getAllMarkets({}, this.network);
 
       this.isReady = true;
       this.isInitializing = false;
@@ -377,7 +379,9 @@ export class Kujira {
   }
 
   @Cache(caches.tokens, { ttl: config.cache.tokensData })
-  async kujiraGetBasicTokens(): Promise<IMap<TokenId, BasicKujiraToken>> {
+  async kujiraGetBasicTokens(
+    _network?: string
+  ): Promise<IMap<TokenId, BasicKujiraToken>> {
     const basicTokens: IMap<TokenId, BasicKujiraToken> = IMap<
       TokenId,
       BasicKujiraToken
@@ -409,7 +413,7 @@ export class Kujira {
 
       return basicTokens;
     } else if (config.tokens.resolutionStrategy == 'markets') {
-      const basicMarkets = await this.kujiraGetBasicMarkets();
+      const basicMarkets = await this.kujiraGetBasicMarkets(this.network);
 
       for (const basicMarket of basicMarkets.values()) {
         const basicBaseToken = Denom.from(basicMarket.denoms[0].reference);
@@ -424,7 +428,9 @@ export class Kujira {
   }
 
   @Cache(caches.markets, { ttl: config.cache.marketsData })
-  async kujiraGetBasicMarkets(): Promise<IMap<MarketId, BasicKujiraMarket>> {
+  async kujiraGetBasicMarkets(
+    _network?: string
+  ): Promise<IMap<MarketId, BasicKujiraMarket>> {
     const marketsURL = config.markets.url;
 
     let basicMarkets: IMap<MarketId, BasicKujiraMarket>;
@@ -673,7 +679,7 @@ export class Kujira {
         Denom.from(getNotNullOrThrowError<TokenId>(options.id))
       );
     } else {
-      const allTokens = await this.getAllTokens({});
+      const allTokens = await this.getAllTokens({}, this.network);
 
       let token: Token | undefined;
 
@@ -736,9 +742,10 @@ export class Kujira {
    */
   @Cache(caches.tokens, { ttl: config.cache.tokens })
   async getAllTokens(
-    _options: GetAllTokensRequest
+    _options: GetAllTokensRequest,
+    _network?: string
   ): Promise<GetAllTokensResponse> {
-    const basicTokens = await this.kujiraGetBasicTokens();
+    const basicTokens = await this.kujiraGetBasicTokens(this.network);
 
     const tokenIds = basicTokens
       .valueSeq()
@@ -752,9 +759,10 @@ export class Kujira {
 
   @Cache(caches.tokens, { ttl: config.cache.tokens })
   async getTokenSymbolsToTokenIdsMap(
-    options?: GetTokenSymbolsToTokenIdsMapRequest
+    options?: GetTokenSymbolsToTokenIdsMapRequest,
+    _network?: string
   ): Promise<GetTokenSymbolsToTokenIdsMapResponse> {
-    const tokens = await this.getAllTokens({});
+    const tokens = await this.getAllTokens({}, this.network);
 
     let output = IMap<TokenSymbol, TokenId>().asMutable();
 
@@ -773,7 +781,7 @@ export class Kujira {
    * @param options
    */
   async getMarket(options: GetMarketRequest): Promise<GetMarketResponse> {
-    const markets = await this.getAllMarkets();
+    const markets = await this.getAllMarkets({}, this.network);
 
     const marketId =
       options.id || markets.findKey((market) => market.name === options.name);
@@ -792,7 +800,7 @@ export class Kujira {
    * @param options
    */
   async getMarkets(options: GetMarketsRequest): Promise<GetMarketsResponse> {
-    const allMarkets = await this.getAllMarkets();
+    const allMarkets = await this.getAllMarkets({}, this.network);
 
     const markets = allMarkets.filter(
       (market) =>
@@ -800,7 +808,6 @@ export class Kujira {
         options.names?.includes(market.name) ||
         false
     );
-
     return markets;
   }
 
@@ -809,12 +816,13 @@ export class Kujira {
    */
   @Cache(caches.markets, { ttl: config.cache.markets })
   async getAllMarkets(
-    _options?: GetAllMarketsRequest
+    _options?: GetAllMarketsRequest,
+    _network?: string
   ): Promise<GetAllMarketsResponse> {
     const allMarkets = IMap<MarketId, Market>().asMutable();
 
     let basicMarkets: IMap<MarketId, BasicKujiraMarket> =
-      await this.kujiraGetBasicMarkets();
+      await this.kujiraGetBasicMarkets(this.network);
 
     basicMarkets = basicMarkets.filter(
       (item) =>
@@ -913,7 +921,9 @@ export class Kujira {
   async getAllOrderBooks(
     _options: GetAllOrderBooksRequest
   ): Promise<GetAllOrderBooksResponse> {
-    const marketIds = (await this.getAllMarkets()).keySeq().toArray();
+    const marketIds = (await this.getAllMarkets({}, this.network))
+      .keySeq()
+      .toArray();
 
     return this.getOrderBooks({ marketIds });
   }
@@ -1031,7 +1041,9 @@ export class Kujira {
   async getAllTickers(
     _options: GetAllTickersRequest
   ): Promise<GetAllTickersResponse> {
-    const marketIds = (await this.getAllMarkets()).keySeq().toArray();
+    const marketIds = (await this.getAllMarkets({}, this.network))
+      .keySeq()
+      .toArray();
 
     return await this.getTickers({ marketIds });
   }
@@ -1090,9 +1102,12 @@ export class Kujira {
     const tokenIds =
       options.tokenIds ||
       (
-        await this.getTokenSymbolsToTokenIdsMap({
-          symbols: options.tokenSymbols,
-        })
+        await this.getTokenSymbolsToTokenIdsMap(
+          {
+            symbols: options.tokenSymbols,
+          },
+          this.network
+        )
       )
         .valueSeq()
         .toArray();
@@ -1138,11 +1153,11 @@ export class Kujira {
       const tokenIds = kujiraBalances.map((token: Coin) => token.denom);
 
       const uskToken =
-        config.network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
+        this.network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
           ? convertKujiraTokenToToken(USK)
           : convertKujiraTokenToToken(USK_TESTNET);
 
-      const marketIds = (await this.getAllMarkets())
+      const marketIds = (await this.getAllMarkets({}, this.network))
         .valueSeq()
         .filter(
           (market) =>
@@ -1157,7 +1172,12 @@ export class Kujira {
       tickers = IMap<string, Ticker>().asMutable();
     }
 
-    return convertKujiraBalancesToBalances(kujiraBalances, orders, tickers);
+    return convertKujiraBalancesToBalances(
+      this.network,
+      kujiraBalances,
+      orders,
+      tickers
+    );
   }
 
   /**
@@ -1234,7 +1254,8 @@ export class Kujira {
         });
       } else {
         const marketIds =
-          options.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+          options.marketIds ||
+          (await this.getAllMarkets({}, this.network)).keySeq().toArray();
 
         orders = IMap<OrderId, Order>().asMutable();
 
@@ -1458,6 +1479,14 @@ export class Kujira {
           const request = {
             id: id,
             ownerAddress: ownerAddress,
+            marketIds: markets.keySeq().toArray(),
+            statuses: [
+              OrderStatus.OPEN,
+              OrderStatus.CANCELLATION_PENDING,
+              OrderStatus.CREATION_PENDING,
+              OrderStatus.PARTIALLY_FILLED,
+              OrderStatus.UNKNOWN,
+            ],
           };
           const targetOrder = await this.getOrder(request);
           if (targetOrder != undefined) {
@@ -1593,9 +1622,34 @@ export class Kujira {
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
-    const marketIds: MarketId[] = options?.marketId
-      ? [options?.marketId]
-      : options?.marketIds || (await this.getAllMarkets()).keySeq().toArray();
+    let marketIds: MarketId[] = [];
+
+    if (options?.marketId) {
+      marketIds.push(options?.marketId);
+    }
+
+    if (options?.marketIds) {
+      marketIds = [...marketIds, ...options?.marketIds];
+    }
+
+    if (options?.marketName) {
+      marketIds.push((await this.getMarket({ name: options?.marketName })).id);
+    }
+
+    if (options?.marketNames) {
+      marketIds = [
+        ...marketIds,
+        ...(await this.getMarkets({ names: options?.marketNames }))
+          .keySeq()
+          .toArray(),
+      ];
+    }
+
+    if (marketIds && !marketIds.length) {
+      marketIds = (await this.getAllMarkets({}, this.network))
+        .keySeq()
+        .toArray();
+    }
 
     const openOrders = IMap<any, Order>().asMutable();
 
@@ -1749,7 +1803,9 @@ export class Kujira {
   async withdrawFromAllMarkets(
     options: AllMarketsWithdrawsRequest
   ): Promise<AllMarketsWithdrawsResponse> {
-    const marketIds = (await this.getAllMarkets()).keySeq().toArray();
+    const marketIds = (await this.getAllMarkets({}, this.network))
+      .keySeq()
+      .toArray();
 
     const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
@@ -1804,7 +1860,9 @@ export class Kujira {
     return transactions;
   }
 
-  getEstimatedFees(_options: GetEstimatedFeesRequest): GetEstimatedFeesRequest {
+  getEstimatedFees(
+    _options: GetEstimatedFeesRequest
+  ): GetEstimatedFeesResponse {
     return {
       token: config.nativeToken,
       price: config.gasPrice,
@@ -1831,10 +1889,6 @@ export class Kujira {
     )[0].address;
   }
 
-  /**
-   *
-   * @param options
-   */
   async encryptWallet(
     options: EncryptWalletRequest
   ): Promise<EncryptWalletResponse> {
@@ -1843,77 +1897,61 @@ export class Kujira {
       throw new Error('missing passphrase');
     }
 
-    const iv = crypto.webcrypto.getRandomValues(new Uint8Array(16));
-    const salt = crypto.webcrypto.getRandomValues(new Uint8Array(16));
-    const keyMaterial = await crypto.webcrypto.subtle.importKey(
-      'raw',
-      new TextEncoder().encode(passphrase),
-      'PBKDF2',
-      false,
-      ['deriveBits', 'deriveKey']
-    );
-    const keyAlgorithm = {
-      name: 'PBKDF2',
-      salt: salt,
-      iterations: 500000,
-      hash: 'SHA-256',
-    };
-    const key = await crypto.webcrypto.subtle.deriveKey(
-      keyAlgorithm,
-      keyMaterial,
-      { name: 'AES-GCM', length: 256 },
-      true,
-      ['encrypt', 'decrypt']
-    );
-    const cipherAlgorithm = {
-      name: 'AES-GCM',
-      iv: iv,
-    };
-    const enc = new TextEncoder();
-    const ciphertext: Uint8Array = (await crypto.webcrypto.subtle.encrypt(
-      cipherAlgorithm,
-      key,
-      enc.encode(JSON.stringify(options.wallet))
-    )) as Uint8Array;
+    const keyAlgorithm = 'pbkdf2';
+    const cipherAlgorithm = 'aes-256-cbc';
+    const ivSize = 16;
+    const saltSize = 16;
+    const iterations = 500000;
+    const keyLength = 32;
+    const digest = 'sha256';
 
-    const encryptedString = JSON.stringify(
-      {
-        keyAlgorithm,
-        cipherAlgorithm,
-        ciphertext: new Uint8Array(ciphertext),
-      },
-      (key, value) => {
-        switch (key) {
-          case 'ciphertext':
-          case 'salt':
-          case 'iv':
-            return toBase64(Uint8Array.from(Object.values(value)));
-          default:
-            return value;
-        }
-      }
+    const iv = crypto.randomBytes(ivSize);
+    const salt = crypto.randomBytes(saltSize);
+    const keyMaterial = await pbkdf2(
+      passphrase,
+      salt,
+      iterations,
+      keyLength,
+      digest
     );
+    const cipher = crypto.createCipheriv(cipherAlgorithm, keyMaterial, iv);
+
+    const cipherText = Buffer.concat([
+      cipher.update(JSON.stringify(options.wallet), 'utf8'),
+      cipher.final(),
+    ]);
+
+    const encryptedString = JSON.stringify({
+      keyAlgorithm: {
+        name: keyAlgorithm,
+        salt: salt.toString('base64'),
+        iterations: iterations,
+        keyLength: keyLength,
+        digest: digest,
+      },
+      cipherAlgorithm: {
+        name: cipherAlgorithm,
+        iv: iv.toString('base64'),
+      },
+      ciphertext: cipherText.toString('base64'),
+    });
 
     return encryptedString;
   }
 
-  /**
-   *
-   * @param options
-   */
   async decryptWallet(
     options: DecryptWalletRequest
   ): Promise<DecryptWalletResponse> {
     const path = `${walletPath}/${this.chain}`;
 
-    const encryptedPrivateKey: EncryptedPrivateKey = JSON.parse(
+    const encryptedPrivateKey = JSON.parse(
       await fse.readFile(`${path}/${options.accountAddress}.json`, 'utf8'),
       (key, value) => {
         switch (key) {
           case 'ciphertext':
           case 'salt':
           case 'iv':
-            return fromBase64(value);
+            return Buffer.from(value, 'base64');
           default:
             return value;
         }
@@ -1925,28 +1963,22 @@ export class Kujira {
       throw new Error('missing passphrase');
     }
 
-    const enc = new TextEncoder();
-    const keyMaterial = await crypto.webcrypto.subtle.importKey(
-      'raw',
-      enc.encode(passphrase),
-      'PBKDF2',
-      false,
-      ['deriveBits', 'deriveKey']
+    const keyMaterial = await pbkdf2(
+      passphrase,
+      encryptedPrivateKey.keyAlgorithm.salt,
+      encryptedPrivateKey.keyAlgorithm.iterations,
+      encryptedPrivateKey.keyAlgorithm.keyLength,
+      encryptedPrivateKey.keyAlgorithm.digest
     );
-    const key = await crypto.webcrypto.subtle.deriveKey(
-      encryptedPrivateKey.keyAlgorithm,
+    const decipher = crypto.createDecipheriv(
+      encryptedPrivateKey.cipherAlgorithm.name,
       keyMaterial,
-      { name: 'AES-GCM', length: 256 },
-      true,
-      ['encrypt', 'decrypt']
+      encryptedPrivateKey.cipherAlgorithm.iv
     );
-    const decrypted = await crypto.webcrypto.subtle.decrypt(
-      encryptedPrivateKey.cipherAlgorithm,
-      key,
-      encryptedPrivateKey.ciphertext
-    );
-    const dec = new TextDecoder();
-    const decryptedString = dec.decode(decrypted);
+
+    const decryptedString =
+      decipher.update(encryptedPrivateKey.ciphertext, 'utf8') +
+      decipher.final('utf8');
 
     return JSON.parse(decryptedString);
   }

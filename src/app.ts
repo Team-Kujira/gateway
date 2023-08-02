@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { ConfigRoutes } from './services/config/config.routes';
 import { WalletRoutes } from './services/wallet/wallet.routes';
 import { logger } from './services/logger';
 import { addHttps } from './https';
 import {
   asyncHandler,
-  gatewayErrorMiddleware,
   HttpException,
   NodeError,
+  gatewayErrorMiddleware,
 } from './services/error-handler';
 import { ConfigManagerV2 } from './services/config-manager-v2';
 import { SwaggerManager } from './services/swagger-manager';

@@ -105,7 +105,7 @@ import {
   Withdraw,
 } from '../../../src/connectors/kujira/kujira.types';
 import * as KujiraController from '../../../src/connectors/kujira/kujira.controllers';
-import { Denom, fin, KUJI, TESTNET } from 'kujira.js';
+import { Denom, fin, KUJI, NETWORKS, TESTNET } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
@@ -144,8 +144,8 @@ enablePatches();
 // enableInputOutputWrapper();
 disableInputOutputWrapper();
 
-const requestStrategy = RequestStrategy.RESTful;
-// const requestStrategy = RequestStrategy.Controller;
+// const requestStrategy = RequestStrategy.RESTful;
+const requestStrategy = RequestStrategy.Controller;
 
 let patches: IMap<string, AsyncFunctionType<any, any>>;
 
@@ -167,9 +167,11 @@ let kujira: Kujira;
 
 const config = KujiraConfig.config;
 
-const kujiToken = KUJI;
+const network = NETWORKS[TESTNET].toLowerCase();
 
 const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
+
+const kujiToken = KUJI;
 
 const marketsIds = {
   1: networksPairs[
@@ -240,7 +242,6 @@ const mnemonic: string = getNotNullOrThrowError<string>(
 beforeAll(async () => {
   const configManager = ConfigManagerV2.getInstance();
 
-  configManager.set('kujira.network', 'testnet');
   configManager.set('kujira.prefix', 'kujira');
   configManager.set('kujira.accountNumber', 0);
   configManager.set('kujira.gasPrice', 0.00125);
@@ -282,7 +283,7 @@ beforeAll(async () => {
     ) || config.accountNumber
   );
 
-  kujira = await Kujira.getInstance(config.chain, config.network);
+  kujira = await Kujira.getInstance(config.chain, network);
 
   patches = await createPatches(kujira);
 
@@ -302,7 +303,7 @@ beforeAll(async () => {
   ownerAddress = (
     await addWallet({
       chain: config.chain,
-      network: config.network,
+      network: network,
       privateKey: mnemonic,
       address: undefined,
       accountId: accountNumber,
@@ -606,7 +607,7 @@ afterEach(() => {
 describe('Kujira', () => {
   const commonRequestBody = {
     chain: config.chain,
-    network: config.network,
+    network: network,
     connector: config.connector,
   };
 
@@ -631,7 +632,7 @@ describe('Kujira', () => {
 
       expect(responseBody).not.toBeEmpty();
       expect(responseBody.chain).toBe(config.chain);
-      expect(responseBody.network).toBe(config.network);
+      expect(responseBody.network).toBe(network);
       expect(responseBody.connector).toBe(config.connector);
       expect(responseBody.connection).toBe(true);
       expect(responseBody.timestamp).toBeGreaterThan(0);

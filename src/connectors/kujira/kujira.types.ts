@@ -13,6 +13,7 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 import { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate/build/signingcosmwasmclient';
 import { DeliverTxResponse } from '@cosmjs/stargate/build/stargateclient';
 import { Attribute, Event } from '@cosmjs/stargate/build/events';
+import { NetworkSelectionRequest } from '../../services/common-interfaces';
 
 //
 //  Types and Constants
@@ -546,7 +547,7 @@ export interface CancelOrderRequest {
   id: OrderId;
   clientId?: OrderClientId;
   ownerAddress: OrderOwnerAddress;
-  marketId: MarketId;
+  marketId?: MarketId;
   marketName?: MarketName;
 }
 
@@ -556,7 +557,7 @@ export interface CancelOrderResponse extends Order {}
 export interface CancelOrdersRequest {
   ids: OrderId[];
   clientIds?: OrderClientId[];
-  marketId: MarketId;
+  marketId?: MarketId;
   marketIds?: MarketId[];
   marketName?: MarketName;
   marketNames?: MarketName[];
@@ -679,3 +680,5 @@ export interface LatencyData {
   latency: number;
   latestBlockTime: Date;
 }
+
+export type RequestWrapper<T> = NetworkSelectionRequest & T;

@@ -2,9 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "network": {
-      "type": "string"
-    },
     "prefix": {
       "type": "string"
     },
@@ -37,7 +34,10 @@
     },
     "cache": {
       "type": "object",
-      "required": ["marketsData", "markets"],
+      "required": [
+        "marketsData",
+        "markets"
+      ],
       "properties": {
         "marketsInformation": {
           "type": "integer"
@@ -47,54 +47,69 @@
         }
       }
     },
-		"orders": {
+    "orders": {
       "type": "object",
-      "required": ["create", "filled", "cancel"],
+      "required": [
+        "create",
+        "filled",
+        "cancel"
+      ],
       "properties": {
         "create": {
           "type": "object",
-					"required": ["fee", "maxPerTransaction"],
-					"properties": {
+          "required": [
+            "fee",
+            "maxPerTransaction"
+          ],
+          "properties": {
             "free": {
               "type": "string"
             },
-						"maxPerTransaction": {
-							"type": "integer"
-						}
-					}
+            "maxPerTransaction": {
+              "type": "integer"
+            }
+          }
         },
         "open": {
           "type": "object",
-					"required": ["limit"],
-					"properties": {
-						"limit": {
-							"type": "integer"
-						}
-					}
+          "required": [
+            "limit"
+          ],
+          "properties": {
+            "limit": {
+              "type": "integer"
+            }
+          }
         },
         "filled": {
           "type": "object",
-					"required": ["limit"],
-					"properties": {
-						"limit": {
-							"type": "integer"
-						}
-					}
+          "required": [
+            "limit"
+          ],
+          "properties": {
+            "limit": {
+              "type": "integer"
+            }
+          }
         },
         "cancel": {
           "type": "object",
-					"required": ["maxPerTransaction"],
-					"properties": {
-						"maxPerTransaction": {
-							"type": "integer"
-						}
-					}
+          "required": [
+            "maxPerTransaction"
+          ],
+          "properties": {
+            "maxPerTransaction": {
+              "type": "integer"
+            }
+          }
         }
       }
     },
     "tokens": {
       "type": "object",
-      "required": ["url"],
+      "required": [
+        "url"
+      ],
       "properties": {
         "url": {
           "type": [
@@ -103,10 +118,16 @@
           ]
         },
         "allowed": {
-          "type": ["array", "null"]
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "disallowed": {
-          "type": ["array", "null"]
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "resolutionStrategy": {
           "type": [
@@ -118,7 +139,9 @@
     },
     "markets": {
       "type": "object",
-      "required": ["url"],
+      "required": [
+        "url"
+      ],
       "properties": {
         "url": {
           "type": [
@@ -127,22 +150,33 @@
           ]
         },
         "allowed": {
-          "type": ["array", "null"]
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "disallowed": {
-          "type": ["array", "null"]
+          "type": [
+            "array",
+            "null"
+          ]
         }
       }
     },
     "tickers": {
       "type": "object",
-      "required": ["sources"],
+      "required": [
+        "sources"
+      ],
       "properties": {
         "sources": {
           "type": "object",
           "patternProperties": {
             "^..+$": {
-              "type": ["object", "null"],
+              "type": [
+                "object",
+                "null"
+              ],
               "properties": {
                 "url": {
                   "type": [
@@ -158,30 +192,49 @@
         }
       }
     },
-		"transactions": {
+    "transactions": {
       "type": "object",
-      "required": ["merge"],
+      "required": [
+        "merge"
+      ],
       "properties": {
         "merge": {
           "type": "object",
-					"required": ["createOrders", "cancelOrders", "settleFunds"],
-					"properties": {
-						"createOrders": { "type": "boolean" },
-						"cancelOrders": { "type": "boolean" },
-						"settleFunds": { "type": "boolean" }
-					}
+          "required": [
+            "createOrders",
+            "cancelOrders",
+            "settleFunds"
+          ],
+          "properties": {
+            "createOrders": {
+              "type": "boolean"
+            },
+            "cancelOrders": {
+              "type": "boolean"
+            },
+            "settleFunds": {
+              "type": "boolean"
+            }
+          }
         }
       }
     },
     "retry": {
       "type": "object",
-      "required": ["all"],
+      "required": [
+        "all"
+      ],
       "properties": {
         "all": {
           "type": "object",
-          "required": ["maxNumberOfRetries", "delayBetweenRetries"],
+          "required": [
+            "maxNumberOfRetries",
+            "delayBetweenRetries"
+          ],
           "properties": {
-            "maxNumberOfRetries": { "type": "integer" },
+            "maxNumberOfRetries": {
+              "type": "integer"
+            },
             "delayBetweenRetries": {
               "type": "integer"
             }
@@ -191,20 +244,31 @@
     },
     "timeout": {
       "type": "object",
-      "required": ["all"],
+      "required": [
+        "all"
+      ],
       "properties": {
-        "all": { "type": "integer" }
+        "all": {
+          "type": "integer"
+        }
       }
     },
     "parallel": {
       "type": "object",
-      "required": ["all"],
+      "required": [
+        "all"
+      ],
       "properties": {
         "all": {
           "type": "object",
-          "required": ["batchSize", "delayBetweenBatches"],
+          "required": [
+            "batchSize",
+            "delayBetweenBatches"
+          ],
           "properties": {
-            "batchSize": { "type": "integer" },
+            "batchSize": {
+              "type": "integer"
+            },
             "delayBetweenBatches": {
               "type": "integer"
             }
@@ -218,10 +282,20 @@
         "^\\w+$": {
           "type": "object",
           "properties": {
-            "chainId": { "type": "string" },
-            "nodeURL": { "type": ["string", "null"] }
+            "chainId": {
+              "type": "string"
+            },
+            "nodeURL": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
           },
-          "required": [ "chainId", "nodeURL" ],
+          "required": [
+            "chainId",
+            "nodeURL"
+          ],
           "additionalProperties": false
         }
       },
@@ -229,17 +303,16 @@
     }
   },
   "required": [
-    "network",
     "networks",
     "prefix",
     "accountNumber",
     "gasPrice",
     "orderBook",
-		"cache",
-		"orders",
+    "cache",
+    "orders",
     "markets",
     "tickers",
-		"transactions",
+    "transactions",
     "retry",
     "timeout",
     "parallel"
