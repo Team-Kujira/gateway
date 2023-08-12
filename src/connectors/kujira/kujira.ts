@@ -1096,6 +1096,7 @@ export class Kujira {
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
+        total: BigNumber(0),
       },
     };
 
@@ -1118,14 +1119,21 @@ export class Kujira {
         tokenIds.includes(Denom.from(tokenId).reference)
       ) {
         balances.tokens.set(tokenId, balance);
+      }
+    }
 
-        balances.total.free = balances.total.free.plus(balance.free);
+    if (tokenIds.length > 1) {
+      for (const tokenBalance of balances.tokens.valueSeq()) {
+        balances.total.free = balances.total.free.plus(tokenBalance.free);
         balances.total.lockedInOrders = balances.total.lockedInOrders.plus(
-          balance.lockedInOrders
+            tokenBalance.lockedInOrders
         );
         balances.total.unsettled = balances.total.unsettled.plus(
-          balance.unsettled
+            tokenBalance.unsettled
         );
+        balances.total.total = balances.total.total.plus(
+            tokenBalance.total
+        )
       }
     }
 

@@ -427,6 +427,7 @@ export const convertKujiraBalancesToBalances = (
       free: BigNumber(0),
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
+      total: BigNumber(0),
     },
   };
 
@@ -450,6 +451,7 @@ export const convertKujiraBalancesToBalances = (
       free: amount,
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
+      total: BigNumber(0),
     });
 
     output.total.free = output.total.free.plus(amount.multipliedBy(price));
@@ -480,6 +482,7 @@ export const convertKujiraBalancesToBalances = (
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
+        total: BigNumber(0),
       });
     }
 
@@ -499,6 +502,12 @@ export const convertKujiraBalancesToBalances = (
       );
     }
   }
+
+  for (const balance of output.tokens.valueSeq()) {
+    balance.total = balance.total.plus(balance.free).plus(balance.lockedInOrders).plus(balance.unsettled)
+  }
+
+  output.total.total = output.total.total.plus(output.total.free).plus(output.total.lockedInOrders).plus(output.total.unsettled);
 
   return output;
 };

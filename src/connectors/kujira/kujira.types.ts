@@ -231,6 +231,7 @@ export interface Balance {
   free: Amount;
   lockedInOrders: Amount;
   unsettled: Amount;
+  total: Amount
 }
 
 export interface Balances {
