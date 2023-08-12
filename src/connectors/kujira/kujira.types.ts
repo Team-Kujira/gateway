@@ -481,7 +481,6 @@ export interface GetBalancesResponse extends Balances {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllBalancesRequest {
   ownerAddress: OwnerAddress;
-  onlyFree?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

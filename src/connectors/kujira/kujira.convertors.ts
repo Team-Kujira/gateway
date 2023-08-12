@@ -409,54 +409,6 @@ export const convertKujiraTickerToTicker = (
   };
 };
 
-export const convertKujiraBalancesToOnlyFreeBalances = (
-  network: string,
-  balances: readonly Coin[],
-  tickers: IMap<TokenId, Ticker>
-): Balances => {
-  const uskToken =
-    network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
-      ? convertKujiraTokenToToken(USK)
-      : convertKujiraTokenToToken(USK_TESTNET);
-
-  const output: Balances = {
-    tokens: IMap<TokenId, Balance>().asMutable(),
-    total: {
-      token: uskToken,
-      free: BigNumber(0),
-      lockedInOrders: BigNumber(0),
-      unsettled: BigNumber(0),
-    },
-  };
-
-  for (const balance of balances) {
-    const token = convertKujiraTokenToToken(Denom.from(balance.denom));
-    const ticker = tickers
-      .valueSeq()
-      .filter(
-        (ticker) =>
-          ticker.market.baseToken.id == token.id &&
-          ticker.market.quoteToken.id == uskToken.id
-      )
-      .first();
-    const amount = BigNumber(balance.amount).div(
-      BigNumber(10).pow(token.decimals)
-    );
-    const price = token.id == uskToken.id ? 1 : ticker?.price || 0;
-    output.tokens.set(token.id, {
-      token: token,
-      ticker: ticker,
-      free: amount,
-      lockedInOrders: BigNumber(0),
-      unsettled: BigNumber(0),
-    });
-
-    output.total.free = output.total.free.plus(amount.multipliedBy(price));
-  }
-
-  return output;
-};
-
 export const convertKujiraBalancesToBalances = (
   network: string,
   balances: readonly Coin[],

@@ -129,7 +129,6 @@ import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
   convertKujiraBalancesToBalances,
-  convertKujiraBalancesToOnlyFreeBalances,
   convertKujiraEventsToMapOfEvents,
   convertKujiraMarketToMarket,
   convertKujiraOrderBookToOrderBook,
@@ -1144,6 +1143,10 @@ export class Kujira {
       options.ownerAddress
     );
 
+    const orders = (await this.getOrders({
+      ownerAddress: options.ownerAddress,
+    })) as IMap<OrderId, Order>;
+
     let tickers: IMap<MarketId, Ticker>;
 
     try {
@@ -1169,24 +1172,12 @@ export class Kujira {
       tickers = IMap<string, Ticker>().asMutable();
     }
 
-    if (options.onlyFree) {
-      return convertKujiraBalancesToOnlyFreeBalances(
-        this.network,
-        kujiraBalances,
-        tickers
-      );
-    } else {
-      const orders = (await this.getOrders({
-        ownerAddress: options.ownerAddress,
-      })) as IMap<OrderId, Order>;
-
-      return convertKujiraBalancesToBalances(
-        this.network,
-        kujiraBalances,
-        orders,
-        tickers
-      );
-    }
+    return convertKujiraBalancesToBalances(
+      this.network,
+      kujiraBalances,
+      orders,
+      tickers
+    );
   }
 
   /**
