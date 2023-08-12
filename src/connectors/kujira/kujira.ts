@@ -1100,18 +1100,21 @@ export class Kujira {
       },
     };
 
-    const tokenIds =
-      options.tokenIds ||
-      (
-        await this.getTokenSymbolsToTokenIdsMap(
-          {
-            symbols: options.tokenSymbols,
-          },
-          this.network
+    const optionsTokenIds = [];
+
+    for (const id of getNotNullOrThrowError<[TokenId]>(options.tokenIds?.values())) {
+      optionsTokenIds.push(id)
+    }
+
+    const concatTokenIds = new Set(
+        optionsTokenIds.concat((
+            await this.getTokenSymbolsToTokenIdsMap({
+              symbols: options.tokenSymbols
+            }, this.network)).valueSeq().toArray()
         )
-      )
-        .valueSeq()
-        .toArray();
+    );
+
+    const tokenIds = [...concatTokenIds];
 
     for (const [tokenId, balance] of allBalances.tokens) {
       if (
