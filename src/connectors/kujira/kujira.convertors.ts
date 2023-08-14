@@ -415,6 +415,10 @@ export const convertKujiraBalancesToBalances = (
   orders: IMap<OrderId, Order>,
   tickers: IMap<TokenId, Ticker>
 ): Balances => {
+  // const usdcPrice= getNotNullOrThrowError<Ticker>(
+  //     tickers.find(ticker => ticker.market.name == "axlUSDC/USDC")
+  // ).price;
+
   const uskToken =
     network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
       ? convertKujiraTokenToToken(USK)
@@ -503,10 +507,20 @@ export const convertKujiraBalancesToBalances = (
     }
   }
 
-  for (const balance of output.tokens.valueSeq()) {
-    balance.total = balance.total.plus(balance.free).plus(balance.lockedInOrders).plus(balance.unsettled)
+  const allFreeBalancesSum = BigNumber(0);
+  const allLockedInOrdersBalancesSum = BigNumber(0);
+  const allUnsettledBalancesSum = BigNumber(0);
+  output.total.total = BigNumber(0);
+
+  for (const tokenBalance of output.tokens.valueSeq()) {
+    allFreeBalancesSum.plus(tokenBalance.free)
+    allLockedInOrdersBalancesSum.plus(tokenBalance.lockedInOrders)
+    allUnsettledBalancesSum.plus(tokenBalance.unsettled)
   }
 
+  output.total.free = output.total.free.plus(allFreeBalancesSum);
+  output.total.lockedInOrders = output.total.lockedInOrders.plus(allLockedInOrdersBalancesSum);
+  output.total.unsettled = output.total.unsettled.plus(allUnsettledBalancesSum);
   output.total.total = output.total.total.plus(output.total.free).plus(output.total.lockedInOrders).plus(output.total.unsettled);
 
   return output;
