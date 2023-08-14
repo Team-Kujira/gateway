@@ -172,6 +172,11 @@ export interface KujiraTicker {
   price: Price;
 }
 
+export interface TokenPriceInDolar {
+  token: TokenName;
+  price: Price;
+}
+
 export interface KujiraOrderBookItem {
   quote_price: string;
   offer_denom: {
@@ -225,6 +230,13 @@ export interface Ticker {
   ticker: ConnectorTicker;
 }
 
+export interface BalanceInUSDC {
+  free: Amount;
+  lockedInOrders: Amount;
+  unsettled: Amount;
+  total: Amount
+}
+
 export interface Balance {
   token: Token | 'total';
   ticker?: Ticker;
@@ -232,6 +244,7 @@ export interface Balance {
   lockedInOrders: Amount;
   unsettled: Amount;
   total: Amount
+  inDolar?: BalanceInUSDC;
 }
 
 export interface Balances {
