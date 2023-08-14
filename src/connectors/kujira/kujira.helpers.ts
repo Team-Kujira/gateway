@@ -7,6 +7,7 @@ import { promisify } from 'util';
 import {
   GetAllTickersResponse,
   IMap,
+  MarketId,
   MarketName,
   Ticker,
   TokenName,
@@ -233,10 +234,10 @@ export const quoteABaseTokenInDolars = async (
     allTickers = await connector.getAllTickers({});
   }
 
-  const usdcAsQuote: IMap<MarketName, Ticker> = getNotNullOrThrowError<GetAllTickersResponse>(
-      allTickers?.valueSeq
-  ).filter(
-      ticker => ticker.market.quoteToken.symbol.toUpperCase() == "USDC"
+  const usdcAsQuote: IMap<MarketName, Ticker> = getNotNullOrThrowError<IMap<MarketId, Ticker>>(
+      allTickers?.valueSeq().toArray().filter(
+          ticker => ticker.market.quoteToken.symbol.toUpperCase() == "USDC"
+      )
   )
 
   const priceSource = usdcAsQuote.filter(
@@ -244,12 +245,12 @@ export const quoteABaseTokenInDolars = async (
   )
 
   const targetTokenAsQuote: IMap<MarketName, Ticker> = getNotNullOrThrowError<GetAllTickersResponse>(
-      allTickers?.valueSeq
-  ).filter(
-      ticker => ticker.market.quoteToken.symbol.toUpperCase() == targetToken.toUpperCase()
+      allTickers?.valueSeq().toArray().filter(
+          ticker => ticker.market.quoteToken.symbol.toUpperCase() == targetToken.toUpperCase()
+      )
   )
 
-  if (priceSource) {
+  if (priceSource.size > 0) {
     return {
       token: getNotNullOrThrowError<Ticker>(
           priceSource.valueSeq().first()

@@ -409,16 +409,12 @@ export const convertKujiraTickerToTicker = (
   };
 };
 
-export const convertKujiraBalancesToBalances = (
+export const convertKujiraBalancesToBalances = async (
   network: string,
   balances: readonly Coin[],
   orders: IMap<OrderId, Order>,
   tickers: IMap<TokenId, Ticker>
-): Balances => {
-  // const usdcPrice= getNotNullOrThrowError<Ticker>(
-  //     tickers.find(ticker => ticker.market.name == "axlUSDC/USDC")
-  // ).price;
-
+): Promise<Balances> => {
   const uskToken =
     network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
       ? convertKujiraTokenToToken(USK)
@@ -437,6 +433,11 @@ export const convertKujiraBalancesToBalances = (
 
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
+
+    // const tokenPrice = await quoteABaseTokenInDolars(
+    //     "kujira", network, token.symbol, tickers
+    // );
+
     const ticker = tickers
       .valueSeq()
       .filter(

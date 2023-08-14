@@ -1183,7 +1183,7 @@ export class Kujira {
       tickers = IMap<string, Ticker>().asMutable();
     }
 
-    return convertKujiraBalancesToBalances(
+    return await convertKujiraBalancesToBalances(
       this.network,
       kujiraBalances,
       orders,
