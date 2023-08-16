@@ -2,7 +2,7 @@ import {
   Address,
   AllMarketsWithdrawsRequest,
   AllMarketsWithdrawsResponse,
-  Balance,
+  TokenBalance,
   Balances,
   BasicKujiraMarket,
   BasicKujiraToken,
@@ -113,17 +113,14 @@ import {
   runWithRetryAndTimeout,
 } from './kujira.helpers';
 import {
+  axlUSDC,
   Denom,
   fin,
   KujiraQueryClient,
   kujiraQueryClient,
-  MAINNET,
   msg,
-  NETWORKS,
   registry,
   RPCS,
-  USK,
-  USK_TESTNET,
 } from 'kujira.js';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
@@ -1066,7 +1063,7 @@ export class Kujira {
 
     if (options.tokenId) {
       if (balances.tokens.has(options.tokenId)) {
-        return getNotNullOrThrowError<Balance>(
+        return getNotNullOrThrowError<TokenBalance>(
           balances.tokens.get(options.tokenId)
         );
       }
@@ -1090,13 +1087,12 @@ export class Kujira {
     });
 
     const balances: Balances = {
-      tokens: IMap<TokenId, Balance>().asMutable(),
+      tokens: IMap<TokenId, TokenBalance>().asMutable(),
       total: {
-        token: 'total',
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
-        total: BigNumber(0),
+        total: BigNumber(0)
       },
     };
 
@@ -1163,17 +1159,14 @@ export class Kujira {
     try {
       const tokenIds = kujiraBalances.map((token: Coin) => token.denom);
 
-      const uskToken =
-        this.network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
-          ? convertKujiraTokenToToken(USK)
-          : convertKujiraTokenToToken(USK_TESTNET);
+      const quoteToken = convertKujiraTokenToToken(axlUSDC);
 
       const marketIds = (await this.getAllMarkets({}, this.network))
         .valueSeq()
         .filter(
           (market) =>
             tokenIds.includes(market.baseToken.id) &&
-            market.quoteToken.id == uskToken.id
+            market.quoteToken.id == quoteToken.id
         )
         .map((market) => market.id)
         .toArray();
@@ -1184,7 +1177,6 @@ export class Kujira {
     }
 
     return await convertKujiraBalancesToBalances(
-      this.network,
       kujiraBalances,
       orders,
       tickers

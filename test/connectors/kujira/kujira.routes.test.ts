@@ -14,7 +14,7 @@ import {
   AllMarketsWithdrawsRequest,
   AllMarketsWithdrawsResponse,
   AsyncFunctionType,
-  Balance,
+  TokenBalance,
   Balances,
   CancelAllOrdersRequest,
   CancelAllOrdersResponse,
@@ -1753,7 +1753,7 @@ describe('Kujira', () => {
       for (const tokenId of getNotNullOrThrowError<TokenId[]>(
         request.tokenIds
       )) {
-        const balance = getNotNullOrThrowError<Balance>(
+        const balance = getNotNullOrThrowError<TokenBalance>(
           IMap(responseBody.tokens).get(tokenId)
         );
         expect(balance).not.toBeUndefined();
@@ -1797,7 +1797,7 @@ describe('Kujira', () => {
       for (const tokenSymbol of getNotNullOrThrowError<TokenSymbol[]>(
         requestBody.tokenSymbols
       )) {
-        const balance = getNotNullOrThrowError<Balance>(
+        const balance = getNotNullOrThrowError<TokenBalance>(
           IMap(responseBody.tokens)
             .filter(
               (token) =>
@@ -1837,7 +1837,7 @@ describe('Kujira', () => {
       logResponse(responseBody);
 
       Object.values(tokensIds).forEach((tokenId) => {
-        const balance = getNotNullOrThrowError<Balance>(
+        const balance = getNotNullOrThrowError<TokenBalance>(
           IMap(responseBody.tokens).get(tokenId)
         );
         expect(balance).not.toBeUndefined();
@@ -2208,7 +2208,7 @@ describe('Kujira', () => {
         )
       ).toEqual(currentBaseBalance);
 
-      const userBalancesSetter = getNotNullOrThrowError<Balance>(
+      const userBalancesSetter = getNotNullOrThrowError<TokenBalance>(
         userBalances.tokens.get(targetOrder.market.baseToken.id)
       );
       userBalancesSetter.free = currentBaseBalance;
@@ -2425,7 +2425,7 @@ describe('Kujira', () => {
           userBalances.tokens.get(targetOrder.market.quoteToken.id)
         ).free
       ).minus(
-        getNotNullOrThrowError<Balance>(
+        getNotNullOrThrowError<TokenBalance>(
           responseBody.tokens.get(targetOrder.market.quoteToken.id)
         ).unsettled
       );
@@ -2807,11 +2807,11 @@ describe('Kujira', () => {
       const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
-        const baseBalance = getNotNullOrThrowError<Balance>(
+        const baseBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.baseToken.id)
         );
 
-        const quoteBalance = getNotNullOrThrowError<Balance>(
+        const quoteBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.quoteToken.id)
         );
 
@@ -2880,14 +2880,14 @@ describe('Kujira', () => {
         }
       }
 
-      const kujiBalance = getNotNullOrThrowError<Balance>(
+      const kujiBalance = getNotNullOrThrowError<TokenBalance>(
         currentBalances.tokens.get(kujiToken.reference)
       );
 
       kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
 
       for (const balance of userBalances.tokens.values()) {
-        const currentBalance = getNotNullOrThrowError<Balance>(
+        const currentBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get((balance.token as Token).id)
         );
 
@@ -3284,11 +3284,11 @@ describe('Kujira', () => {
       const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
-        const baseBalance = getNotNullOrThrowError<Balance>(
+        const baseBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.baseToken.id)
         );
 
-        const quoteBalance = getNotNullOrThrowError<Balance>(
+        const quoteBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.quoteToken.id)
         );
 
@@ -3357,14 +3357,14 @@ describe('Kujira', () => {
         }
       }
 
-      const kujiBalance = getNotNullOrThrowError<Balance>(
+      const kujiBalance = getNotNullOrThrowError<TokenBalance>(
         currentBalances.tokens.get(kujiToken.reference)
       );
 
       kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
 
       for (const balance of userBalances.tokens.values()) {
-        const currentBalance = getNotNullOrThrowError<Balance>(
+        const currentBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get((balance.token as Token).id)
         );
 
@@ -3699,11 +3699,11 @@ describe('Kujira', () => {
       const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
-        const baseBalance = getNotNullOrThrowError<Balance>(
+        const baseBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.baseToken.id)
         );
 
-        const quoteBalance = getNotNullOrThrowError<Balance>(
+        const quoteBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.quoteToken.id)
         );
 
@@ -3772,14 +3772,14 @@ describe('Kujira', () => {
         }
       }
 
-      const kujiBalance = getNotNullOrThrowError<Balance>(
+      const kujiBalance = getNotNullOrThrowError<TokenBalance>(
         currentBalances.tokens.get(kujiToken.reference)
       );
 
       kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
 
       for (const balance of userBalances.tokens.values()) {
-        const currentBalance = getNotNullOrThrowError<Balance>(
+        const currentBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get((balance.token as Token).id)
         );
 
@@ -3998,11 +3998,11 @@ describe('Kujira', () => {
       const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
-        const baseBalance = getNotNullOrThrowError<Balance>(
+        const baseBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.baseToken.id)
         );
 
-        const quoteBalance = getNotNullOrThrowError<Balance>(
+        const quoteBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.quoteToken.id)
         );
 
@@ -4071,14 +4071,14 @@ describe('Kujira', () => {
         }
       }
 
-      const kujiBalance = getNotNullOrThrowError<Balance>(
+      const kujiBalance = getNotNullOrThrowError<TokenBalance>(
         currentBalances.tokens.get(kujiToken.reference)
       );
 
       kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
 
       for (const balance of userBalances.tokens.values()) {
-        const currentBalance = getNotNullOrThrowError<Balance>(
+        const currentBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get((balance.token as Token).id)
         );
 
@@ -4309,11 +4309,11 @@ describe('Kujira', () => {
       const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
-        const baseBalance = getNotNullOrThrowError<Balance>(
+        const baseBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.baseToken.id)
         );
 
-        const quoteBalance = getNotNullOrThrowError<Balance>(
+        const quoteBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.quoteToken.id)
         );
 
@@ -4382,14 +4382,14 @@ describe('Kujira', () => {
         }
       }
 
-      const kujiBalance = getNotNullOrThrowError<Balance>(
+      const kujiBalance = getNotNullOrThrowError<TokenBalance>(
         currentBalances.tokens.get(kujiToken.reference)
       );
 
       kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
 
       for (const balance of userBalances.tokens.values()) {
-        const currentBalance = getNotNullOrThrowError<Balance>(
+        const currentBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get((balance.token as Token).id)
         );
 
@@ -4484,11 +4484,11 @@ describe('Kujira', () => {
       const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
-        const baseBalance = getNotNullOrThrowError<Balance>(
+        const baseBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.baseToken.id)
         );
 
-        const quoteBalance = getNotNullOrThrowError<Balance>(
+        const quoteBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.quoteToken.id)
         );
 
@@ -4557,14 +4557,14 @@ describe('Kujira', () => {
         }
       }
 
-      const kujiBalance = getNotNullOrThrowError<Balance>(
+      const kujiBalance = getNotNullOrThrowError<TokenBalance>(
         currentBalances.tokens.get(kujiToken.reference)
       );
 
       kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
 
       for (const balance of userBalances.tokens.values()) {
-        const currentBalance = getNotNullOrThrowError<Balance>(
+        const currentBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get((balance.token as Token).id)
         );
 
@@ -4641,11 +4641,11 @@ describe('Kujira', () => {
       const currentBalances = lodash.cloneDeep(responseBody);
 
       for (const order of targetOrders.values()) {
-        const baseBalance = getNotNullOrThrowError<Balance>(
+        const baseBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.baseToken.id)
         );
 
-        const quoteBalance = getNotNullOrThrowError<Balance>(
+        const quoteBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get(order.market.quoteToken.id)
         );
 
@@ -4714,14 +4714,14 @@ describe('Kujira', () => {
         }
       }
 
-      const kujiBalance = getNotNullOrThrowError<Balance>(
+      const kujiBalance = getNotNullOrThrowError<TokenBalance>(
         currentBalances.tokens.get(kujiToken.reference)
       );
 
       kujiBalance.free = kujiBalance.free.plus(lastPayedFeeSum);
 
       for (const balance of userBalances.tokens.values()) {
-        const currentBalance = getNotNullOrThrowError<Balance>(
+        const currentBalance = getNotNullOrThrowError<TokenBalance>(
           currentBalances.tokens.get((balance.token as Token).id)
         );
 

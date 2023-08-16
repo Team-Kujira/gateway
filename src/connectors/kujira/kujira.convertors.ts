@@ -1,5 +1,5 @@
 import {
-  Balance,
+  TokenBalance,
   Balances,
   ConvertOrderType,
   IMap,
@@ -30,10 +30,8 @@ import {
   fin,
   KUJI,
   MAINNET,
-  NETWORKS,
   TESTNET,
-  USK,
-  USK_TESTNET,
+  axlUSDC,
 } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
@@ -410,56 +408,86 @@ export const convertKujiraTickerToTicker = (
 };
 
 export const convertKujiraBalancesToBalances = async (
-  network: string,
   balances: readonly Coin[],
   orders: IMap<OrderId, Order>,
   tickers: IMap<TokenId, Ticker>
 ): Promise<Balances> => {
-  const uskToken =
-    network.toLowerCase() == NETWORKS[MAINNET].toLowerCase()
-      ? convertKujiraTokenToToken(USK)
-      : convertKujiraTokenToToken(USK_TESTNET);
+  const quoteToken = convertKujiraTokenToToken(axlUSDC);
 
   const output: Balances = {
-    tokens: IMap<TokenId, Balance>().asMutable(),
+    tokens: IMap<TokenId, TokenBalance>().asMutable(),
     total: {
-      token: uskToken,
       free: BigNumber(0),
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
-      total: BigNumber(0),
+      total: BigNumber(0)
     },
   };
 
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
 
-    // const tokenPrice = await quoteABaseTokenInDolars(
-    //     "kujira", network, token.symbol, tickers
-    // );
-
     const ticker = tickers
-      .valueSeq()
-      .filter(
-        (ticker) =>
-          ticker.market.baseToken.id == token.id &&
-          ticker.market.quoteToken.id == uskToken.id
-      )
-      .first();
-    const amount = BigNumber(balance.amount).div(
+        .valueSeq()
+        .filter(
+            (ticker) =>
+                ticker.market.baseToken.id == token.id &&
+                ticker.market.quoteToken.id == quoteToken.id
+        ).first() != undefined
+        ?
+        tickers
+            .valueSeq()
+            .filter(
+                (ticker) =>
+                    ticker.market.baseToken.id == token.id &&
+                    ticker.market.quoteToken.id == quoteToken.id
+            ).first()
+        :
+        tickers
+            .valueSeq()
+            .filter(
+                (ticker) =>
+                    ticker.market.quoteToken.id == token.id &&
+                    ticker.market.baseToken.id == quoteToken.id
+            ).first()
+
+    let buySide = false;
+
+    if (getNotNullOrThrowError(ticker?.market.quoteToken.symbol != quoteToken.symbol)) {
+      buySide = true;
+    }
+
+    let price = token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
+
+    if (buySide) {
+      const difference = BigNumber(1).minus(price)
+      price = BigNumber(1).plus(difference);
+    }
+
+    const freeAmount = BigNumber(balance.amount).div(
       BigNumber(10).pow(token.decimals)
     );
-    const price = token.id == uskToken.id ? 1 : ticker?.price || 0;
+
     output.tokens.set(token.id, {
       token: token,
       ticker: ticker,
-      free: amount,
+      free: freeAmount,
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
       total: BigNumber(0),
+      inUSD: {
+        free: BigNumber(0),
+        lockedInOrders: BigNumber(0),
+        unsettled: BigNumber(0),
+        total: BigNumber(0)
+      }
     });
 
-    output.total.free = output.total.free.plus(amount.multipliedBy(price));
+    const tokenBalance = getNotNullOrThrowError<TokenBalance>(output.tokens.get(token.id));
+    tokenBalance.free = freeAmount;
+    tokenBalance.inUSD.free = freeAmount.multipliedBy(price);
+
+    output.total.free = output.total.free.plus(freeAmount.multipliedBy(price));
   }
 
   for (const order of orders.values()) {
@@ -468,17 +496,45 @@ export const convertKujiraBalancesToBalances = async (
         ? order.market.quoteToken
         : order.market.baseToken;
 
-    const ticker = tickers
-      .valueSeq()
-      .filter(
-        (ticker) =>
-          ticker.market.baseToken.id == token.id &&
-          ticker.market.quoteToken.id == uskToken.id
-      )
-      .first();
+    const ticker =
+        tickers
+            .valueSeq()
+            .filter(
+                (ticker) =>
+                    ticker.market.baseToken.id == token.id &&
+                    ticker.market.quoteToken.id == quoteToken.id
+            ).first() != undefined
+            ?
+            tickers
+                .valueSeq()
+                .filter(
+                    (ticker) =>
+                        ticker.market.baseToken.id == token.id &&
+                        ticker.market.quoteToken.id == quoteToken.id
+                ).first()
+            :
+            tickers
+                .valueSeq()
+                .filter(
+                    (ticker) =>
+                        ticker.market.quoteToken.id == token.id &&
+                        ticker.market.baseToken.id == quoteToken.id
+                ).first();
 
     const amount = order.amount;
-    const price = token.id == uskToken.id ? 1 : ticker?.price || 0;
+
+    let buySide = false;
+
+    if (getNotNullOrThrowError(ticker?.market.quoteToken.symbol != quoteToken.symbol)) {
+      buySide = true;
+    }
+
+    let price = token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
+
+    if (buySide) {
+      const difference = BigNumber(1).minus(price)
+      price = BigNumber(1).plus(difference);
+    }
 
     if (!output.tokens.has(token.id)) {
       output.tokens.set(token.id, {
@@ -488,35 +544,50 @@ export const convertKujiraBalancesToBalances = async (
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
         total: BigNumber(0),
+        inUSD: {
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+          total: BigNumber(0)
+        }
       });
     }
 
-    const tokenBalance = getNotNullOrThrowError<Balance>(
-      output.tokens.get(token.id)
-    );
+    const tokenBalance = getNotNullOrThrowError<TokenBalance>(output.tokens.get(token.id));
 
     if (order.status == OrderStatus.OPEN) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
-      output.total.lockedInOrders = output.total.lockedInOrders.plus(
-        amount.multipliedBy(price)
-      );
+      tokenBalance.inUSD.lockedInOrders = tokenBalance.lockedInOrders.multipliedBy(price);
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      output.total.unsettled = output.total.unsettled.plus(
-        amount.multipliedBy(price)
-      );
+      tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(price);
     }
   }
 
   const allFreeBalancesSum = BigNumber(0);
   const allLockedInOrdersBalancesSum = BigNumber(0);
   const allUnsettledBalancesSum = BigNumber(0);
-  output.total.total = BigNumber(0);
 
   for (const tokenBalance of output.tokens.valueSeq()) {
-    allFreeBalancesSum.plus(tokenBalance.free)
-    allLockedInOrdersBalancesSum.plus(tokenBalance.lockedInOrders)
-    allUnsettledBalancesSum.plus(tokenBalance.unsettled)
+    tokenBalance.total = tokenBalance.total.plus(
+        tokenBalance.free
+    ).plus(
+        tokenBalance.lockedInOrders
+    ).plus(
+        tokenBalance.unsettled
+    )
+
+    tokenBalance.inUSD.total = tokenBalance.inUSD.total.plus(
+        tokenBalance.inUSD.free
+    ).plus(
+        tokenBalance.inUSD.lockedInOrders
+    ).plus(
+        tokenBalance.inUSD.unsettled
+    )
+
+    allFreeBalancesSum.plus(tokenBalance.inUSD.free)
+    allLockedInOrdersBalancesSum.plus(tokenBalance.inUSD.lockedInOrders)
+    allUnsettledBalancesSum.plus(tokenBalance.inUSD.unsettled)
   }
 
   output.total.free = output.total.free.plus(allFreeBalancesSum);

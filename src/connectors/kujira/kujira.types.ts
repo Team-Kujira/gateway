@@ -230,26 +230,24 @@ export interface Ticker {
   ticker: ConnectorTicker;
 }
 
-export interface BalanceInUSDC {
+export interface SimplifiedBalance {
   free: Amount;
   lockedInOrders: Amount;
   unsettled: Amount;
   total: Amount
 }
 
-export interface Balance {
-  token: Token | 'total';
+export interface TotalBalance extends SimplifiedBalance {}
+
+export interface TokenBalance extends SimplifiedBalance {
+  token: Token;
   ticker?: Ticker;
-  free: Amount;
-  lockedInOrders: Amount;
-  unsettled: Amount;
-  total: Amount
-  inDolar?: BalanceInUSDC;
+  inUSD: SimplifiedBalance;
 }
 
 export interface Balances {
-  tokens: IMap<TokenId, Balance>;
-  total: Balance;
+  tokens: IMap<TokenId, TokenBalance>;
+  total: TotalBalance;
 }
 
 export interface Order {
@@ -480,7 +478,7 @@ export interface GetBalanceRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetBalanceResponse extends Balance {}
+export interface GetBalanceResponse extends TokenBalance {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetBalancesRequest {
