@@ -2232,17 +2232,32 @@ describe('Kujira', () => {
       userBalances.tokens.set(targetOrder.market.quoteToken.id, {
         token: targetOrder.market.quoteToken,
         free: currentQuoteBalance,
-        lockedInOrders: BigNumber(
-          getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.quoteToken.id)
-              ?.lockedInOrders
-          )
+                lockedInOrders: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id
+                        )?.lockedInOrders
         ).plus(targetOrder.amount),
-        unsettled: BigNumber(
-          getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
-          )
+                unsettled: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id
+                        )?.unsettled
         ),
+                total: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id
+                        )?.total
+                ),
+                inUSD: {
+                    free: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+                    )?.free,
+                    lockedInOrders: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+                    )?.lockedInOrders,
+                    unsettled: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+                    )?.unsettled,
+                    total: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+                    )?.total
+                }
       });
     });
 
@@ -2412,11 +2427,27 @@ describe('Kujira', () => {
               ?.lockedInOrders
           )
         ).plus(targetOrder.amount),
-        unsettled: BigNumber(
+                unsettled:
           getNotNullOrThrowError<any>(
             userBalances.tokens.get(targetOrder.market.baseToken.id)?.unsettled
-          )
+                ),
+                total: getNotNullOrThrowError<any>(
+                userBalances.tokens.get(targetOrder.market.baseToken.id)?.total
+            ),
+                inUSD: {
+                    free: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.free
+                    ),
+                    lockedInOrders: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.lockedInOrders
+                    ),
+                    unsettled: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.unsettled
         ),
+                    total: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.total
+                    )
+                }
       });
 
       // Verifying token 2 (quote) balance
@@ -2442,17 +2473,32 @@ describe('Kujira', () => {
       userBalances.tokens.set(targetOrder.market.quoteToken.id, {
         token: targetOrder.market.quoteToken,
         free: currentQuoteBalance,
-        lockedInOrders: BigNumber(
-          getNotNullOrThrowError<any>(
+                lockedInOrders: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(targetOrder.market.quoteToken.id
+                    )?.lockedInOrders
+                ).plus(targetOrder.amount),
+                unsettled: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(targetOrder.market.quoteToken.id
+                    )?.unsettled
+                ),
+                total: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(targetOrder.market.quoteToken.id
+                    )?.total
+                ),
+                inUSD: {
+                    free: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+                    )?.free,
+                    lockedInOrders: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+                    )?.lockedInOrders,
+                    unsettled: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
+                    )?.unsettled,
+                    total: getNotNullOrThrowError<any>(
             userBalances.tokens.get(targetOrder.market.quoteToken.id)
-              ?.lockedInOrders
-          )
-        ),
-        unsettled: BigNumber(
-          getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
-          )
-        ).plus(getNotNullOrThrowError<any>(targetOrder.price)),
+                    )?.total
+                }
       });
     });
 
@@ -2601,13 +2647,28 @@ describe('Kujira', () => {
             userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
               ?.lockedInOrders
           )
-        ),
-        unsettled: BigNumber(
+                ).plus(primaryTargetOrder.amount),
+                unsettled:
           getNotNullOrThrowError<any>(
-            userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
-              ?.unsettled
-          )
+                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.unsettled
+                    ),
+                total: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.total
+                ),
+                inUSD: {
+                    free: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.free
+                    ),
+                    lockedInOrders: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.lockedInOrders
+                    ),
+                    unsettled: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.unsettled
         ),
+                    total: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.total
+                    )
+                }
       });
 
       // Verifying token 3 (quote) balance
@@ -2630,18 +2691,32 @@ describe('Kujira', () => {
       userBalances.tokens.set(primaryTargetOrder.market.quoteToken.id, {
         token: primaryTargetOrder.market.quoteToken,
         free: expectedCurrentQuoteFreeBalance,
-        lockedInOrders: BigNumber(
-          getNotNullOrThrowError<any>(
+                lockedInOrders: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id
+                    )?.lockedInOrders
+                ).plus(primaryTargetOrder.amount),
+                unsettled: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(secundaryTargetOrder.market.quoteToken.id
+                    )?.unsettled
+                ),
+                total: getNotNullOrThrowError<any>(
+                    userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id
+                    )?.total
+                ),
+                inUSD: {
+                    free: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+                    )?.free,
+                    lockedInOrders: getNotNullOrThrowError<any>(
             userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
-              ?.lockedInOrders
-          )
-        ),
-        unsettled: BigNumber(
-          getNotNullOrThrowError<any>(
-            userBalances.tokens.get(secundaryTargetOrder.market.quoteToken.id)
-              ?.unsettled
-          )
-        ).plus(getNotNullOrThrowError<any>(primaryTargetOrder.price)),
+                    )?.lockedInOrders,
+                    unsettled: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+                    )?.unsettled,
+                    total: getNotNullOrThrowError<any>(
+                        userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+                    )?.total
+                }
       });
     });
 
