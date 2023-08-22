@@ -234,9 +234,10 @@ export interface SimplifiedBalance {
   free: Amount;
   lockedInOrders: Amount;
   unsettled: Amount;
-  total: Amount
+  total: Amount;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TotalBalance extends SimplifiedBalance {}
 
 export interface TokenBalance extends SimplifiedBalance {
