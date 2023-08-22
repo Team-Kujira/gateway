@@ -11,8 +11,8 @@ import {
   MarketName,
   Ticker,
   TokenName,
-  TokenPriceInDolar
-} from "./kujira.types";
+  TokenPriceInDolar,
+} from './kujira.types';
 import { BigNumber } from 'bignumber.js';
 
 /**
@@ -215,49 +215,60 @@ export namespace Serializer {
 }
 
 export const quoteABaseTokenInDolars = async (
-    chain: string,
-    network: string,
-    targetToken: TokenName,
-    allTickers?: GetAllTickersResponse
+  chain: string,
+  network: string,
+  targetToken: TokenName,
+  allTickers?: GetAllTickersResponse
 ): Promise<TokenPriceInDolar> => {
-
   if (targetToken.toUpperCase() == 'USDC') {
     return {
       token: targetToken,
-      price: BigNumber(1)
-    } as TokenPriceInDolar
+      price: BigNumber(1),
+    } as TokenPriceInDolar;
   }
 
   if (!allTickers) {
-    const connector = getNotNullOrThrowError<Kujira>(Kujira.getInstance(chain, network))
+    const connector = getNotNullOrThrowError<Kujira>(
+      Kujira.getInstance(chain, network)
+    );
 
     allTickers = await connector.getAllTickers({});
   }
 
-  const usdcAsQuote: IMap<MarketName, Ticker> = getNotNullOrThrowError<IMap<MarketId, Ticker>>(
-      allTickers?.valueSeq().toArray().filter(
-          ticker => ticker.market.quoteToken.symbol.toUpperCase() == "USDC"
+  const usdcAsQuote: IMap<MarketName, Ticker> = getNotNullOrThrowError<
+    IMap<MarketId, Ticker>
+  >(
+    allTickers
+      ?.valueSeq()
+      .toArray()
+      .filter(
+        (ticker) => ticker.market.quoteToken.symbol.toUpperCase() == 'USDC'
       )
-  )
+  );
 
   const priceSource = usdcAsQuote.filter(
-      ticker => ticker.market.baseToken.symbol.toUpperCase() == targetToken.toUpperCase()
-  )
+    (ticker) =>
+      ticker.market.baseToken.symbol.toUpperCase() == targetToken.toUpperCase()
+  );
 
-  const targetTokenAsQuote: IMap<MarketName, Ticker> = getNotNullOrThrowError<GetAllTickersResponse>(
-      allTickers?.valueSeq().toArray().filter(
-          ticker => ticker.market.quoteToken.symbol.toUpperCase() == targetToken.toUpperCase()
-      )
-  )
+  const targetTokenAsQuote: IMap<MarketName, Ticker> =
+    getNotNullOrThrowError<GetAllTickersResponse>(
+      allTickers
+        ?.valueSeq()
+        .toArray()
+        .filter(
+          (ticker) =>
+            ticker.market.quoteToken.symbol.toUpperCase() ==
+            targetToken.toUpperCase()
+        )
+    );
 
   if (priceSource.size > 0) {
     return {
-      token: getNotNullOrThrowError<Ticker>(
-          priceSource.valueSeq().first()
-      ).market.name,
-      price: getNotNullOrThrowError<Ticker>(
-          priceSource.valueSeq().first()
-      ).price
+      token: getNotNullOrThrowError<Ticker>(priceSource.valueSeq().first())
+        .market.name,
+      price: getNotNullOrThrowError<Ticker>(priceSource.valueSeq().first())
+        .price,
     } as TokenPriceInDolar;
   } else {
     // const pricesIntersection = usdcAsQuote.filter(
@@ -275,8 +286,10 @@ export const quoteABaseTokenInDolars = async (
 
     for (const aTicker of usdcAsQuote.valueSeq().toArray()) {
       for (const bTicker of targetTokenAsQuote.valueSeq().toArray()) {
-        if (aTicker.market.baseToken.symbol == bTicker.market.baseToken.symbol
-            && bTicker.market.quoteToken.symbol.toUpperCase() == targetToken.toUpperCase()
+        if (
+          aTicker.market.baseToken.symbol == bTicker.market.baseToken.symbol &&
+          bTicker.market.quoteToken.symbol.toUpperCase() ==
+            targetToken.toUpperCase()
         ) {
           reference.token = aTicker.market.baseToken.symbol;
           reference.price = aTicker.price;

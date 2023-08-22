@@ -1092,22 +1092,31 @@ export class Kujira {
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
-        total: BigNumber(0)
+        total: BigNumber(0),
       },
     };
 
     const optionsTokenIds = [];
 
-    for (const id of getNotNullOrThrowError<[TokenId]>(options.tokenIds?.values())) {
-      optionsTokenIds.push(id)
+    for (const id of getNotNullOrThrowError<[TokenId]>(
+      options.tokenIds?.values()
+    )) {
+      optionsTokenIds.push(id);
     }
 
     const concatTokenIds = new Set(
-        optionsTokenIds.concat((
-            await this.getTokenSymbolsToTokenIdsMap({
-              symbols: options.tokenSymbols
-            }, this.network)).valueSeq().toArray()
+      optionsTokenIds.concat(
+        (
+          await this.getTokenSymbolsToTokenIdsMap(
+            {
+              symbols: options.tokenSymbols,
+            },
+            this.network
+          )
         )
+          .valueSeq()
+          .toArray()
+      )
     );
 
     const tokenIds = [...concatTokenIds];
@@ -1125,14 +1134,12 @@ export class Kujira {
       for (const tokenBalance of balances.tokens.valueSeq()) {
         balances.total.free = balances.total.free.plus(tokenBalance.free);
         balances.total.lockedInOrders = balances.total.lockedInOrders.plus(
-            tokenBalance.lockedInOrders
+          tokenBalance.lockedInOrders
         );
         balances.total.unsettled = balances.total.unsettled.plus(
-            tokenBalance.unsettled
+          tokenBalance.unsettled
         );
-        balances.total.total = balances.total.total.plus(
-            tokenBalance.total
-        )
+        balances.total.total = balances.total.total.plus(tokenBalance.total);
       }
     }
 
