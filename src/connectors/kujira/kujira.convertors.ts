@@ -25,14 +25,7 @@ import {
   Withdraw,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
-import {
-  Denom,
-  fin,
-  KUJI,
-  MAINNET,
-  TESTNET,
-  axlUSDC,
-} from 'kujira.js';
+import { Denom, fin, KUJI, MAINNET, TESTNET, axlUSDC } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import { getNotNullOrThrowError } from './kujira.helpers';
@@ -420,47 +413,54 @@ export const convertKujiraBalancesToBalances = async (
       free: BigNumber(0),
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
-      total: BigNumber(0)
+      total: BigNumber(0),
     },
   };
 
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
 
-    const ticker = tickers
+    const ticker =
+      tickers
         .valueSeq()
         .filter(
-            (ticker) =>
+          (ticker) =>
+            ticker.market.baseToken.id == token.id &&
+            ticker.market.quoteToken.id == quoteToken.id
+        )
+        .first() != undefined
+        ? tickers
+            .valueSeq()
+            .filter(
+              (ticker) =>
                 ticker.market.baseToken.id == token.id &&
                 ticker.market.quoteToken.id == quoteToken.id
-        ).first() != undefined
-        ?
-        tickers
+            )
+            .first()
+        : tickers
             .valueSeq()
             .filter(
-                (ticker) =>
-                    ticker.market.baseToken.id == token.id &&
-                    ticker.market.quoteToken.id == quoteToken.id
-            ).first()
-        :
-        tickers
-            .valueSeq()
-            .filter(
-                (ticker) =>
-                    ticker.market.quoteToken.id == token.id &&
-                    ticker.market.baseToken.id == quoteToken.id
-            ).first()
+              (ticker) =>
+                ticker.market.quoteToken.id == token.id &&
+                ticker.market.baseToken.id == quoteToken.id
+            )
+            .first();
 
     let buySide = false;
 
-    if (getNotNullOrThrowError(ticker?.market.quoteToken.symbol != quoteToken.symbol)) {
+    if (
+      getNotNullOrThrowError(
+        ticker?.market.quoteToken.symbol != quoteToken.symbol
+      )
+    ) {
       buySide = true;
     }
 
-    let price = token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
+    let price =
+      token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
 
     if (buySide) {
-      const difference = BigNumber(1).minus(price)
+      const difference = BigNumber(1).minus(price);
       price = BigNumber(1).plus(difference);
     }
 
@@ -479,11 +479,13 @@ export const convertKujiraBalancesToBalances = async (
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
-        total: BigNumber(0)
-      }
+        total: BigNumber(0),
+      },
     });
 
-    const tokenBalance = getNotNullOrThrowError<TokenBalance>(output.tokens.get(token.id));
+    const tokenBalance = getNotNullOrThrowError<TokenBalance>(
+      output.tokens.get(token.id)
+    );
     tokenBalance.free = freeAmount;
     tokenBalance.inUSD.free = freeAmount.multipliedBy(price);
 
@@ -497,42 +499,48 @@ export const convertKujiraBalancesToBalances = async (
         : order.market.baseToken;
 
     const ticker =
-        tickers
+      tickers
+        .valueSeq()
+        .filter(
+          (ticker) =>
+            ticker.market.baseToken.id == token.id &&
+            ticker.market.quoteToken.id == quoteToken.id
+        )
+        .first() != undefined
+        ? tickers
             .valueSeq()
             .filter(
-                (ticker) =>
-                    ticker.market.baseToken.id == token.id &&
-                    ticker.market.quoteToken.id == quoteToken.id
-            ).first() != undefined
-            ?
-            tickers
-                .valueSeq()
-                .filter(
-                    (ticker) =>
-                        ticker.market.baseToken.id == token.id &&
-                        ticker.market.quoteToken.id == quoteToken.id
-                ).first()
-            :
-            tickers
-                .valueSeq()
-                .filter(
-                    (ticker) =>
-                        ticker.market.quoteToken.id == token.id &&
-                        ticker.market.baseToken.id == quoteToken.id
-                ).first();
+              (ticker) =>
+                ticker.market.baseToken.id == token.id &&
+                ticker.market.quoteToken.id == quoteToken.id
+            )
+            .first()
+        : tickers
+            .valueSeq()
+            .filter(
+              (ticker) =>
+                ticker.market.quoteToken.id == token.id &&
+                ticker.market.baseToken.id == quoteToken.id
+            )
+            .first();
 
     const amount = order.amount;
 
     let buySide = false;
 
-    if (getNotNullOrThrowError(ticker?.market.quoteToken.symbol != quoteToken.symbol)) {
+    if (
+      getNotNullOrThrowError(
+        ticker?.market.quoteToken.symbol != quoteToken.symbol
+      )
+    ) {
       buySide = true;
     }
 
-    let price = token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
+    let price =
+      token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
 
     if (buySide) {
-      const difference = BigNumber(1).minus(price)
+      const difference = BigNumber(1).minus(price);
       price = BigNumber(1).plus(difference);
     }
 
@@ -548,16 +556,19 @@ export const convertKujiraBalancesToBalances = async (
           free: BigNumber(0),
           lockedInOrders: BigNumber(0),
           unsettled: BigNumber(0),
-          total: BigNumber(0)
-        }
+          total: BigNumber(0),
+        },
       });
     }
 
-    const tokenBalance = getNotNullOrThrowError<TokenBalance>(output.tokens.get(token.id));
+    const tokenBalance = getNotNullOrThrowError<TokenBalance>(
+      output.tokens.get(token.id)
+    );
 
     if (order.status == OrderStatus.OPEN) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
-      tokenBalance.inUSD.lockedInOrders = tokenBalance.lockedInOrders.multipliedBy(price);
+      tokenBalance.inUSD.lockedInOrders =
+        tokenBalance.lockedInOrders.multipliedBy(price);
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
       tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(price);
@@ -569,31 +580,30 @@ export const convertKujiraBalancesToBalances = async (
   const allUnsettledBalancesSum = BigNumber(0);
 
   for (const tokenBalance of output.tokens.valueSeq()) {
-    tokenBalance.total = tokenBalance.total.plus(
-        tokenBalance.free
-    ).plus(
-        tokenBalance.lockedInOrders
-    ).plus(
-        tokenBalance.unsettled
-    )
+    tokenBalance.total = tokenBalance.total
+      .plus(tokenBalance.free)
+      .plus(tokenBalance.lockedInOrders)
+      .plus(tokenBalance.unsettled);
 
-    tokenBalance.inUSD.total = tokenBalance.inUSD.total.plus(
-        tokenBalance.inUSD.free
-    ).plus(
-        tokenBalance.inUSD.lockedInOrders
-    ).plus(
-        tokenBalance.inUSD.unsettled
-    )
+    tokenBalance.inUSD.total = tokenBalance.inUSD.total
+      .plus(tokenBalance.inUSD.free)
+      .plus(tokenBalance.inUSD.lockedInOrders)
+      .plus(tokenBalance.inUSD.unsettled);
 
-    allFreeBalancesSum.plus(tokenBalance.inUSD.free)
-    allLockedInOrdersBalancesSum.plus(tokenBalance.inUSD.lockedInOrders)
-    allUnsettledBalancesSum.plus(tokenBalance.inUSD.unsettled)
+    allFreeBalancesSum.plus(tokenBalance.inUSD.free);
+    allLockedInOrdersBalancesSum.plus(tokenBalance.inUSD.lockedInOrders);
+    allUnsettledBalancesSum.plus(tokenBalance.inUSD.unsettled);
   }
 
   output.total.free = output.total.free.plus(allFreeBalancesSum);
-  output.total.lockedInOrders = output.total.lockedInOrders.plus(allLockedInOrdersBalancesSum);
+  output.total.lockedInOrders = output.total.lockedInOrders.plus(
+    allLockedInOrdersBalancesSum
+  );
   output.total.unsettled = output.total.unsettled.plus(allUnsettledBalancesSum);
-  output.total.total = output.total.total.plus(output.total.free).plus(output.total.lockedInOrders).plus(output.total.unsettled);
+  output.total.total = output.total.total
+    .plus(output.total.free)
+    .plus(output.total.lockedInOrders)
+    .plus(output.total.unsettled);
 
   return output;
 };
