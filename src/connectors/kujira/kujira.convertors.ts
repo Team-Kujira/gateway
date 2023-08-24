@@ -471,7 +471,7 @@ export const convertKujiraBalancesToBalances = async (
     output.tokens.set(token.id, {
       token: token,
       ticker: ticker,
-      free: freeAmount,
+      free: BigNumber(0),
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
       total: BigNumber(0),
@@ -488,8 +488,6 @@ export const convertKujiraBalancesToBalances = async (
     );
     tokenBalance.free = freeAmount;
     tokenBalance.inUSD.free = freeAmount.multipliedBy(price);
-
-    output.total.free = output.total.free.plus(freeAmount.multipliedBy(price));
   }
 
   for (const order of orders.values()) {
@@ -567,17 +565,18 @@ export const convertKujiraBalancesToBalances = async (
 
     if (order.status == OrderStatus.OPEN) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
-      tokenBalance.inUSD.lockedInOrders =
-        tokenBalance.lockedInOrders.multipliedBy(price);
+      tokenBalance.inUSD.lockedInOrders = tokenBalance.inUSD.lockedInOrders.plus(
+          tokenBalance.lockedInOrders.multipliedBy(price)
+      );
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
       tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(price);
     }
   }
 
-  const allFreeBalancesSum = BigNumber(0);
-  const allLockedInOrdersBalancesSum = BigNumber(0);
-  const allUnsettledBalancesSum = BigNumber(0);
+  let allFreeBalancesSum = BigNumber(0);
+  let allLockedInOrdersBalancesSum = BigNumber(0);
+  let allUnsettledBalancesSum = BigNumber(0);
 
   for (const tokenBalance of output.tokens.valueSeq()) {
     tokenBalance.total = tokenBalance.total
@@ -590,9 +589,9 @@ export const convertKujiraBalancesToBalances = async (
       .plus(tokenBalance.inUSD.lockedInOrders)
       .plus(tokenBalance.inUSD.unsettled);
 
-    allFreeBalancesSum.plus(tokenBalance.inUSD.free);
-    allLockedInOrdersBalancesSum.plus(tokenBalance.inUSD.lockedInOrders);
-    allUnsettledBalancesSum.plus(tokenBalance.inUSD.unsettled);
+    allFreeBalancesSum = allFreeBalancesSum.plus(tokenBalance.inUSD.free);
+    allLockedInOrdersBalancesSum = allLockedInOrdersBalancesSum.plus(tokenBalance.inUSD.lockedInOrders);
+    allUnsettledBalancesSum = allUnsettledBalancesSum.plus(tokenBalance.inUSD.unsettled);
   }
 
   output.total.free = output.total.free.plus(allFreeBalancesSum);
