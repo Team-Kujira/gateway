@@ -1096,30 +1096,15 @@ export class Kujira {
       },
     };
 
-    const optionsTokenIds = [];
-
-    for (const id of getNotNullOrThrowError<[TokenId]>(
-      options.tokenIds?.values()
-    )) {
-      optionsTokenIds.push(id);
-    }
-
-    const concatTokenIds = new Set(
-      optionsTokenIds.concat(
-        (
-          await this.getTokenSymbolsToTokenIdsMap(
-            {
-              symbols: options.tokenSymbols,
-            },
-            this.network
-          )
-        )
-          .valueSeq()
-          .toArray()
+    const tokenIds =
+      [...new Set(options.tokenIds ||
+      (
+        await this.getTokenSymbolsToTokenIdsMap({
+          symbols: options.tokenSymbols,
+        })
       )
-    );
-
-    const tokenIds = [...concatTokenIds];
+        .valueSeq()
+        .toArray())];
 
     for (const [tokenId, balance] of allBalances.tokens) {
       if (
