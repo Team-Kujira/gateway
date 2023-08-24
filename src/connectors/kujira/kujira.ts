@@ -1096,15 +1096,18 @@ export class Kujira {
       },
     };
 
-    const tokenIds =
-      [...new Set(options.tokenIds ||
-      (
-        await this.getTokenSymbolsToTokenIdsMap({
-          symbols: options.tokenSymbols,
-        })
-      )
-        .valueSeq()
-        .toArray())];
+    const tokenIds = [
+      ...new Set(
+        options.tokenIds ||
+          (
+            await this.getTokenSymbolsToTokenIdsMap({
+              symbols: options.tokenSymbols,
+            })
+          )
+            .valueSeq()
+            .toArray()
+      ),
+    ];
 
     for (const [tokenId, balance] of allBalances.tokens) {
       if (
@@ -1124,7 +1127,9 @@ export class Kujira {
         balances.total.unsettled = balances.total.unsettled.plus(
           tokenBalance.inUSD.unsettled
         );
-        balances.total.total = balances.total.total.plus(tokenBalance.inUSD.total);
+        balances.total.total = balances.total.total.plus(
+          tokenBalance.inUSD.total
+        );
       }
     }
 
