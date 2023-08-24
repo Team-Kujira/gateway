@@ -1132,14 +1132,14 @@ export class Kujira {
 
     if (tokenIds.length > 1) {
       for (const tokenBalance of balances.tokens.valueSeq()) {
-        balances.total.free = balances.total.free.plus(tokenBalance.free);
+        balances.total.free = balances.total.free.plus(tokenBalance.inUSD.free);
         balances.total.lockedInOrders = balances.total.lockedInOrders.plus(
-          tokenBalance.lockedInOrders
+          tokenBalance.inUSD.lockedInOrders
         );
         balances.total.unsettled = balances.total.unsettled.plus(
-          tokenBalance.unsettled
+          tokenBalance.inUSD.unsettled
         );
-        balances.total.total = balances.total.total.plus(tokenBalance.total);
+        balances.total.total = balances.total.total.plus(tokenBalance.inUSD.total);
       }
     }
 
