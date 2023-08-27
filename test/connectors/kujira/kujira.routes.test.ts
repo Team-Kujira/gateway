@@ -4523,11 +4523,11 @@ describe('Kujira', () => {
                 controllerFunction: KujiraController.withdrawFromMarket,
             });
 
-            const responseBody = response.body as MarketWithdrawResponse;
+            const responseBody = response.body;
 
             logResponse(responseBody);
 
-            expect((responseBody as Withdraw).hash.length).toBeCloseTo(64);
+            expect((responseBody.first()).hash.length).toBeCloseTo(64);
         });
 
         it.skip('Check the wallet balances from the tokens 1, 2 and 3', async () => {

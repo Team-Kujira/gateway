@@ -23,6 +23,7 @@ import {
   Transaction,
   TransactionHashes,
   Withdraw,
+  Withdraws,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Denom, fin, KUJI, MAINNET, TESTNET, axlUSDC } from 'kujira.js';
@@ -621,11 +622,61 @@ export const convertKujiraTransactionToTransaction = (
 };
 
 export const convertKujiraSettlementToSettlement = (
-  input: KujiraWithdraw
-): Withdraw => {
-  return {
-    hash: input.transactionHash,
-  };
+    input: KujiraWithdraw
+): Withdraws => {
+  let amounts = [];
+  for (const event of input.events) {
+    for (const attributes of event.attributes) {
+      if (attributes.key == "amount") {
+        amounts.push(attributes.value)
+      }
+    }
+  }
+  amounts = [...new Set(amounts)];
+  const amountsByIds: Withdraws = IMap<TokenId, Withdraw>().asMutable();
+  for (const amount of amounts) {
+    const match = amount.match(/^\d+/);
+    if (match && match[0].length > 3) {
+    } else {
+      const initialStringAmount = BigNumber(
+          getNotNullOrThrowError<Array<string>>(
+              amount.match(/^\d+/)
+          )[0]
+      );
+
+      let finalStringAmount = BigNumber(0);
+      if (getNotNullOrThrowError<Array<any>>(
+          amount.split(",")[0]
+      ).length < 45) {
+        finalStringAmount = BigNumber(0);
+      } else {
+        finalStringAmount = BigNumber(
+            getNotNullOrThrowError<Array<string>>(
+                amount.split(",")[1].match(/^\d+/)
+            )[0]
+        );
+      }
+
+      const tokenId = amount.split(',')[0].split(/^\d+/)[1];
+      const denom = Denom.from(tokenId);
+
+      const totalAmount = initialStringAmount.plus(
+          finalStringAmount
+      ).multipliedBy(Math.pow(10, -denom.decimals));
+
+      amountsByIds.set(tokenId, {
+        amount: totalAmount,
+        hash: input.transactionHash,
+        denom: {
+          reference: denom.reference,
+          decimals: denom.decimals,
+          symbol: denom.symbol
+        }
+      } as Withdraw)
+    }
+  }
+
+  return amountsByIds;
 };
 
 export const convertNetworkToKujiraNetwork = (

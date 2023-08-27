@@ -104,6 +104,7 @@ import {
   Transaction,
   TransactionHash,
   Withdraw,
+  Withdraws,
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -1705,7 +1706,7 @@ export class Kujira {
   ): Promise<MarketWithdrawResponse> {
     const market = await this.getMarket({ id: options.marketId });
 
-    const output = IMap<OwnerAddress, Withdraw>().asMutable();
+    const output = IMap<OwnerAddress, Withdraws>().asMutable();
 
     const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
@@ -1776,7 +1777,7 @@ export class Kujira {
         const results = (await this.withdrawFromMarket({
           marketId: options.marketId,
           ownerAddresses: ownerAddresses,
-        })) as Withdraw;
+        }));
 
         output.setIn([ownerAddress, options.marketId], results);
       };

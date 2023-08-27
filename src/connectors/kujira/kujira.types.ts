@@ -95,7 +95,13 @@ export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionHashes = TransactionHashes;
 
 export type Withdraw = {
+  amount: Amount;
   hash: TransactionHash;
+  denom: {
+    reference: TokenId,
+    decimals: TokenDecimals,
+    symbol: TokenSymbol
+  }
 };
 
 export type FeeMaker = Fee;
@@ -167,6 +173,8 @@ export enum RESTfulMethod {
 //
 //  Interfaces
 //
+
+export type Withdraws = IMap<TokenId, Withdraw>
 
 export interface KujiraTicker {
   price: Price;
@@ -601,7 +609,7 @@ export interface MarketWithdrawRequest {
   ownerAddresses?: OrderOwnerAddress[];
 }
 
-export type MarketWithdrawResponse = Withdraw | IMap<OwnerAddress, Withdraw>;
+export type MarketWithdrawResponse = Withdraws | IMap<OwnerAddress, Withdraws>;
 
 export interface MarketsWithdrawsRequest {
   marketIds?: MarketId[];
