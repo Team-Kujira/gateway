@@ -360,8 +360,7 @@ it('Withdraw Fee Sum', async () => {
         }
     }
     amounts = [...new Set(amounts)];
-    let tokenIds = [];
-    const amountsByIds = IMap<string, BigNumber>().asMutable();
+    const amountsByIds = IMap<string, any>().asMutable();
     for (const amount of amounts) {
         const match = amount.match(/^\d+/);
         if (match && match[0].length > 3) {
@@ -373,7 +372,9 @@ it('Withdraw Fee Sum', async () => {
             );
 
             let finalStringAmount = BigNumber(0);
-            if (getNotNullOrThrowError<Array<any>>(amount.split(",")[0]).length < 45) {
+            if (getNotNullOrThrowError<Array<any>>(
+                amount.split(",")[0]
+            ).length < 45) {
                 finalStringAmount = BigNumber(0);
             } else {
                 finalStringAmount = BigNumber(
@@ -383,15 +384,22 @@ it('Withdraw Fee Sum', async () => {
                 );
             }
 
-            const id = amount.split(',')[0].split(/^\d+/)[1];
-            tokenIds.push(id);
-            const denom = Denom.from(id);
+            const tokenId = amount.split(',')[0].split(/^\d+/)[1];
+            const denom = Denom.from(tokenId);
 
             const totalAmount = initialStringAmount.plus(
                 finalStringAmount
             ).multipliedBy(Math.pow(10, -denom.decimals));
 
-            amountsByIds.set(id, totalAmount)
+            amountsByIds.set(tokenId, {
+                amount: totalAmount,
+                hash: obj.transactionHash,
+                denom: {
+                    reference: denom.reference,
+                    decimals: denom.decimals,
+                    symbol: denom.symbol
+                }
+            })
         }
     }
 
