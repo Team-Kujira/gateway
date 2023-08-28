@@ -103,7 +103,6 @@ import {
   TokenSymbol,
   Transaction,
   TransactionHash,
-  Withdraw,
   Withdraws,
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
@@ -1712,6 +1711,10 @@ export class Kujira {
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
+    const tickers = await this.getAllTickers({
+      marketIds: [getNotNullOrThrowError<MarketId>(options.marketId)]
+    })
+
     for (const ownerAddress of ownerAddresses) {
       const walletArtifacts = await this.getWalletArtifacts({
         ownerAddress,
@@ -1739,7 +1742,7 @@ export class Kujira {
         orderIdxs: filledOrdersIds,
       });
 
-      output.set(ownerAddress, convertKujiraSettlementToSettlement(result));
+      output.set(ownerAddress, convertKujiraSettlementToSettlement(result, tickers));
     }
 
     if (ownerAddresses.length == 1) {
@@ -1759,7 +1762,7 @@ export class Kujira {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
-    const output = IMap<OwnerAddress, IMap<MarketId, Withdraw>>().asMutable();
+    const output = IMap<OwnerAddress, IMap<MarketId, Withdraws>>().asMutable();
 
     interface HelperSettleFundsOptions {
       marketId: MarketId;

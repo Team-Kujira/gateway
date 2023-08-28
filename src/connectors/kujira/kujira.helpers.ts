@@ -9,11 +9,16 @@ import {
   IMap,
   MarketId,
   MarketName,
+  Token,
   Ticker,
+  Price,
+  TokenId,
   TokenName,
   TokenPriceInDolar,
 } from './kujira.types';
 import { BigNumber } from 'bignumber.js';
+import { axlUSDC } from "kujira.js";
+import { convertKujiraTokenToToken } from "./kujira.convertors";
 
 /**
  *
@@ -299,4 +304,53 @@ export const quoteABaseTokenInDolars = async (
 
     return reference;
   }
+};
+
+export const quotationInDolars = (
+   token: Token,
+    tickers: IMap<TokenId, Ticker>
+): { price: Price } => {
+  const quoteToken = convertKujiraTokenToToken(axlUSDC);
+
+  const tickerValues = tickers
+      .valueSeq()
+      .filter(
+          (ticker) =>
+              ticker.market.baseToken.id == token.id &&
+              ticker.market.quoteToken.id == quoteToken.id
+      )
+      .first();
+
+  const ticker =
+      tickerValues != undefined
+          ? tickerValues
+          : tickers
+              .valueSeq()
+              .filter(
+                  (ticker) =>
+                      ticker.market.quoteToken.id == token.id &&
+                      ticker.market.baseToken.id == quoteToken.id
+              )
+              .first();
+
+  let buySide = false;
+
+  if (
+      getNotNullOrThrowError(
+          ticker?.market.quoteToken.symbol != quoteToken.symbol
+      )
+  ) {
+    buySide = true;
+  }
+  let price =
+      token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
+
+  if (buySide) {
+    const difference = BigNumber(1).minus(price);
+    price = BigNumber(1).plus(difference);
+  }
+
+  return {
+    price: price
+  };
 };

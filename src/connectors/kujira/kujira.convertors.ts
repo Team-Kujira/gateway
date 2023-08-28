@@ -26,10 +26,10 @@ import {
   Withdraws,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
-import { Denom, fin, KUJI, MAINNET, TESTNET, axlUSDC } from 'kujira.js';
+import { Denom, fin, KUJI, MAINNET, TESTNET } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import { getNotNullOrThrowError } from './kujira.helpers';
+import { getNotNullOrThrowError, quotationInDolars } from './kujira.helpers';
 import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
 import { parseCoins } from '@cosmjs/stargate';
@@ -406,8 +406,6 @@ export const convertKujiraBalancesToBalances = async (
   orders: IMap<OrderId, Order>,
   tickers: IMap<TokenId, Ticker>
 ): Promise<Balances> => {
-  const quoteToken = convertKujiraTokenToToken(axlUSDC);
-
   const output: Balances = {
     tokens: IMap<TokenId, TokenBalance>().asMutable(),
     total: {
@@ -421,49 +419,7 @@ export const convertKujiraBalancesToBalances = async (
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
 
-    const ticker =
-      tickers
-        .valueSeq()
-        .filter(
-          (ticker) =>
-            ticker.market.baseToken.id == token.id &&
-            ticker.market.quoteToken.id == quoteToken.id
-        )
-        .first() != undefined
-        ? tickers
-            .valueSeq()
-            .filter(
-              (ticker) =>
-                ticker.market.baseToken.id == token.id &&
-                ticker.market.quoteToken.id == quoteToken.id
-            )
-            .first()
-        : tickers
-            .valueSeq()
-            .filter(
-              (ticker) =>
-                ticker.market.quoteToken.id == token.id &&
-                ticker.market.baseToken.id == quoteToken.id
-            )
-            .first();
-
-    let buySide = false;
-
-    if (
-      getNotNullOrThrowError(
-        ticker?.market.quoteToken.symbol != quoteToken.symbol
-      )
-    ) {
-      buySide = true;
-    }
-
-    let price =
-      token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
-
-    if (buySide) {
-      const difference = BigNumber(1).minus(price);
-      price = BigNumber(1).plus(difference);
-    }
+    const quotation = quotationInDolars(token, tickers);
 
     const freeAmount = BigNumber(balance.amount).div(
       BigNumber(10).pow(token.decimals)
@@ -471,7 +427,6 @@ export const convertKujiraBalancesToBalances = async (
 
     output.tokens.set(token.id, {
       token: token,
-      ticker: ticker,
       free: BigNumber(0),
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
@@ -488,7 +443,7 @@ export const convertKujiraBalancesToBalances = async (
       output.tokens.get(token.id)
     );
     tokenBalance.free = freeAmount;
-    tokenBalance.inUSD.free = freeAmount.multipliedBy(price);
+    tokenBalance.inUSD.free = freeAmount.multipliedBy(quotation.price);
   }
 
   for (const order of orders.values()) {
@@ -497,56 +452,12 @@ export const convertKujiraBalancesToBalances = async (
         ? order.market.quoteToken
         : order.market.baseToken;
 
-    const ticker =
-      tickers
-        .valueSeq()
-        .filter(
-          (ticker) =>
-            ticker.market.baseToken.id == token.id &&
-            ticker.market.quoteToken.id == quoteToken.id
-        )
-        .first() != undefined
-        ? tickers
-            .valueSeq()
-            .filter(
-              (ticker) =>
-                ticker.market.baseToken.id == token.id &&
-                ticker.market.quoteToken.id == quoteToken.id
-            )
-            .first()
-        : tickers
-            .valueSeq()
-            .filter(
-              (ticker) =>
-                ticker.market.quoteToken.id == token.id &&
-                ticker.market.baseToken.id == quoteToken.id
-            )
-            .first();
-
-    const amount = order.amount;
-
-    let buySide = false;
-
-    if (
-      getNotNullOrThrowError(
-        ticker?.market.quoteToken.symbol != quoteToken.symbol
-      )
-    ) {
-      buySide = true;
-    }
-
-    let price =
-      token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
-
-    if (buySide) {
-      const difference = BigNumber(1).minus(price);
-      price = BigNumber(1).plus(difference);
-    }
+    const quotation = quotationInDolars(token, tickers);
 
     if (!output.tokens.has(token.id)) {
+
       output.tokens.set(token.id, {
         token: token,
-        ticker: ticker,
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
@@ -559,19 +470,20 @@ export const convertKujiraBalancesToBalances = async (
         },
       });
     }
-
     const tokenBalance = getNotNullOrThrowError<TokenBalance>(
       output.tokens.get(token.id)
     );
 
+    const amount = order.amount;
+
     if (order.status == OrderStatus.OPEN) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
       tokenBalance.inUSD.lockedInOrders = tokenBalance.inUSD.lockedInOrders.plus(
-          tokenBalance.lockedInOrders.multipliedBy(price)
+          tokenBalance.lockedInOrders.multipliedBy(quotation.price)
       );
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(price);
+      tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(quotation.price);
     }
   }
 
@@ -622,7 +534,8 @@ export const convertKujiraTransactionToTransaction = (
 };
 
 export const convertKujiraSettlementToSettlement = (
-    input: KujiraWithdraw
+    input: KujiraWithdraw,
+    tickers: IMap<TokenId, Ticker>
 ): Withdraws => {
   let amounts = [];
   for (const event of input.events) {
@@ -633,7 +546,17 @@ export const convertKujiraSettlementToSettlement = (
     }
   }
   amounts = [...new Set(amounts)];
-  const amountsByIds: Withdraws = IMap<TokenId, Withdraw>().asMutable();
+
+  const  tokenWithdraw = IMap<TokenId, Withdraw>().asMutable()
+
+  const withdraws = {
+    hash: "TransactionHash",
+    tokens: tokenWithdraw,
+    total: {
+      fees: BigNumber(0)
+    }
+  } as Withdraws
+
   for (const amount of amounts) {
     const match = amount.match(/^\d+/);
     if (match && match[0].length > 3) {
@@ -660,23 +583,31 @@ export const convertKujiraSettlementToSettlement = (
       const tokenId = amount.split(',')[0].split(/^\d+/)[1];
       const denom = Denom.from(tokenId);
 
+      const token = convertKujiraTokenToToken(denom);
+
       const totalAmount = initialStringAmount.plus(
           finalStringAmount
       ).multipliedBy(Math.pow(10, -denom.decimals));
 
-      amountsByIds.set(tokenId, {
-        amount: totalAmount,
-        hash: input.transactionHash,
-        denom: {
-          reference: denom.reference,
-          decimals: denom.decimals,
-          symbol: denom.symbol
-        }
+      const quotation = quotationInDolars(token, tickers);
+
+      const totalAmountInUSD = totalAmount.multipliedBy(quotation.price);
+
+      tokenWithdraw.set(tokenId, {
+        fees: {
+          "token": totalAmount,
+          "USD": totalAmountInUSD
+        },
+        token: token
       } as Withdraw)
+
+      withdraws.hash = input.transactionHash;
+
+      withdraws.total.fees = withdraws.total.fees.plus(totalAmountInUSD)
     }
   }
 
-  return amountsByIds;
+  return withdraws;
 };
 
 export const convertNetworkToKujiraNetwork = (

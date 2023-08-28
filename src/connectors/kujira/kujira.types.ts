@@ -94,16 +94,6 @@ export type OrderCreationTimestamp = Timestamp;
 export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionHashes = TransactionHashes;
 
-export type Withdraw = {
-  amount: Amount;
-  hash: TransactionHash;
-  denom: {
-    reference: TokenId,
-    decimals: TokenDecimals,
-    symbol: TokenSymbol
-  }
-};
-
 export type FeeMaker = Fee;
 export type FeeTaker = Fee;
 export type FeeServiceProvider = Fee;
@@ -174,7 +164,21 @@ export enum RESTfulMethod {
 //  Interfaces
 //
 
-export type Withdraws = IMap<TokenId, Withdraw>
+export interface Withdraw {
+  fees: {
+    "token": Amount,
+    "USD": Amount
+  };
+  token?: Token
+}
+
+export interface Withdraws {
+  hash: TransactionHash;
+  tokens: IMap<TokenId, Withdraw>
+  total: {
+    fees: Amount
+  }
+}
 
 export interface KujiraTicker {
   price: Price;
@@ -250,7 +254,6 @@ export interface TotalBalance extends SimplifiedBalance {}
 
 export interface TokenBalance extends SimplifiedBalance {
   token: Token;
-  ticker?: Ticker;
   inUSD: SimplifiedBalance;
 }
 
@@ -619,8 +622,8 @@ export interface MarketsWithdrawsRequest {
 }
 
 export type MarketsWithdrawsFundsResponse =
-  | IMap<MarketId, Withdraw>
-  | IMap<OwnerAddress, IMap<MarketId, Withdraw>>;
+  | IMap<MarketId, Withdraws>
+  | IMap<OwnerAddress, IMap<MarketId, Withdraws>>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AllMarketsWithdrawsRequest extends MarketsWithdrawsRequest {}

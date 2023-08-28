@@ -102,7 +102,7 @@ import {
     TokenSymbol,
     Transaction,
     TransactionHash,
-    Withdraw,
+    Withdraws,
 } from '../../../src/connectors/kujira/kujira.types';
 import * as KujiraController from '../../../src/connectors/kujira/kujira.controllers';
 import {Denom, fin, KUJI, NETWORKS, TESTNET} from 'kujira.js';
@@ -4679,11 +4679,11 @@ describe('Kujira', () => {
                 getNotNullOrThrowError<MarketId[]>(request.marketIds).length
             );
 
-            for (const [marketId, withdraw] of (
-                responseBody as IMap<MarketId, Withdraw>
+            for (const [marketId, withdraws] of (
+                responseBody as IMap<MarketId, Withdraws>
             ).entries()) {
                 expect(request.marketIds).toInclude(marketId);
-                expect(withdraw.hash.length).toBeCloseTo(64);
+                expect(withdraws.hash.length).toBeCloseTo(64);
             }
         });
 
