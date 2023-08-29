@@ -5,7 +5,6 @@ import {
   IMap,
   KujiraEvent,
   KujiraOrderBook,
-  KujiraTicker,
   KujiraWithdraw,
   Market,
   MarketName,
@@ -387,17 +386,17 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 };
 
 export const convertKujiraTickerToTicker = (
-  input: KujiraTicker,
+  input: object,
   market: Market
 ): Ticker => {
-  const price = BigNumber(input.price);
+  const price = BigNumber(Object.values(input)[0].usd / Object.values(input)[1].usd);
   const timestamp = Date.now();
 
   return {
     market: market,
     price: price,
     timestamp: timestamp,
-    ticker: input,
+    tokens: input,
   };
 };
 

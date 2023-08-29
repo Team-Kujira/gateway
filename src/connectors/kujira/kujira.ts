@@ -104,6 +104,7 @@ import {
   Transaction,
   TransactionHash,
   Withdraws,
+  CoinGeckoToken,
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -964,13 +965,19 @@ export class Kujira {
           throw Error('Not implemented.');
         } else if (source === TickerSource.LAST_FILLED_ORDER) {
           throw Error('Not implemented.');
-        } else if (source === TickerSource.NOMICS) {
+        } else if (source === TickerSource.COINGECKO) {
+          let baseToken = 'baseToken';
+          if (market.baseToken.name == 'KUJI') {
+            baseToken = 'kujira';
+          } else {
+            baseToken = market.baseToken.name.toLowerCase()
+          }
           const finalUrl = configuration.url.replace(
-            '${marketAddress}',
-            market.connectorMarket.address
+            '{targets}',
+              baseToken.concat(',').concat(market.quoteToken.name.toLowerCase())
           );
 
-          const result: { price: any; last_updated_at: any } = (
+          let result: any = (
             await runWithRetryAndTimeout(
               axios,
               axios.get,
@@ -978,7 +985,11 @@ export class Kujira {
               config.retry.all.maxNumberOfRetries,
               0
             )
-          ).data.items[0];
+          ).data;
+
+          for (const [key, value] of Object.entries(result)) {
+            result[CoinGeckoToken[key].value] = (value as unknown).usd;
+          }
 
           return convertKujiraTickerToTicker(result, market);
         } else {

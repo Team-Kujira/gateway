@@ -138,7 +138,7 @@ export enum TickerSource {
   ORDER_BOOK_WAP = 'orderBookWeightedAveragePrice',
   ORDER_BOOK_VWAP = 'orderBookVolumeWeightedAveragePrice',
   LAST_FILLED_ORDER = 'lastFilledOrder',
-  NOMICS = 'nomics',
+  COINGECKO = 'coinGecko',
 }
 
 export enum ConvertOrderType {
@@ -158,6 +158,11 @@ export enum RESTfulMethod {
   PUT = 'PUT',
   PATCH = 'PATCH',
   DELETE = 'DELETE',
+}
+
+export enum CoinGeckoToken {
+  kujira = 'KUJI',
+  usk = 'USK',
 }
 
 //
@@ -239,7 +244,7 @@ export interface Ticker {
   market: Market;
   price: TickerPrice;
   timestamp: TickerTimestamp;
-  ticker: ConnectorTicker;
+  tokens: ConnectorTicker;
 }
 
 export interface SimplifiedBalance {

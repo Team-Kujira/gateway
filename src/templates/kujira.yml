@@ -65,7 +65,9 @@ markets:
   disallowed:
 tickers:
   sources:
-    orderBookSimpleAveragePrice:
+    coinGecko:
+      url: "https://api.coingecko.com/api/v3/simple/price?ids=stride-staked-atom,cosmos,kujira,wrapped-steth,weth,pepe,injective-protocol,wrapped-bitcoin,jackal-protocol,mantadao,local-money,terra-luna-2,eris-amplified-luna,osmosis,shade-protocol,sommelier,stargaze,usd-coin,wrapped-avax,binancecoin,comdex,polkadot,evmos,juno-network,loop,mars-protocol-a7fcbcfb-fd61-4017-92f0-7ee9f9cc6da3,neutron,pax-gold,secret,bittensor,tether,arable-protocol,usk,akash-network,arbitrum,archway,astroport-fi,axelar,composite,ciento-exchange,crescent-network,crypto-com-chain,sentinel,omniflix-network,fantom,fanfury,graviton,chainlink,terra-luna,matic-network,assetmantle,planq,racoon,regen,lion-dao,stride,switcheo,teritori,white-whale&vs_currencies=usd"
+#    orderBookSimpleAveragePrice:
 #    orderBookWeightedAveragePrice:
 #    orderBookVolumeWeightedAveragePrice:
 #    lastFilledOrder:
