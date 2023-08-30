@@ -222,23 +222,25 @@ export enum CoinGeckoToken {
   WHALE = 'white-whale',
 }
 
-namespace CoinGeckoTokenManipulate {
-  export function getByCoinGeckoId(coinGeckoId: string): CoinGeckoToken {
-    // Object.values(CoinGeckoToken).forEach((value) => value === coinGeckoId)
-
-    for (const value of Object.values(CoinGeckoToken)) {
-      return value === coinGeckoId;
+export namespace CoinGeckoToken {
+  export function getByCoinGeckoId(coinGeckoId: string): string {
+    for (const [key, value] of Object.entries(CoinGeckoToken)) {
+      if (value === coinGeckoId) {
+        return key;
+      }
     }
 
-    throw new Error(`CoinGecko token ${coinGeckoId} not found.`)
+    throw new Error(`CoinGecko token "${coinGeckoId}" not found.`);
   }
 
   export function getByKujiraSymbol(kujiraSymbol: string): CoinGeckoToken {
-    for (const key of Object.keys(CoinGeckoToken)) {
-      return key === kujiraSymbol;
+    for (const [key, value] of Object.entries(CoinGeckoToken)) {
+      if (key === kujiraSymbol) {
+        return value as CoinGeckoToken;
+      }
     }
 
-    throw new Error(`Kujira token ${kujiraSymbol} not found.`)
+    throw new Error(`Kujira token "${kujiraSymbol}" not found.`);
   }
 }
 
@@ -248,18 +250,18 @@ namespace CoinGeckoTokenManipulate {
 
 export interface Withdraw {
   fees: {
-    "token": Amount,
-    "USD": Amount
+    token: Amount;
+    USD: Amount;
   };
-  token?: Token
+  token: Token;
 }
 
 export interface Withdraws {
   hash: TransactionHash;
-  tokens: IMap<TokenId, Withdraw>
+  tokens: IMap<TokenId, Withdraw>;
   total: {
-    fees: Amount
-  }
+    fees: Amount;
+  };
 }
 
 export interface KujiraTicker {

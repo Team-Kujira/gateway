@@ -105,7 +105,6 @@ import {
   TransactionHash,
   Withdraws,
   CoinGeckoToken,
-  CoinGeckoTokenManipulate
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -959,7 +958,7 @@ export class Kujira {
             price: simpleAveragePrice,
           };
 
-          return convertKujiraTickerToTicker(result, market);
+          return convertKujiraTickerToTicker(source, result, market, null);
         } else if (source === TickerSource.ORDER_BOOK_WAP) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.ORDER_BOOK_VWAP) {
@@ -967,18 +966,20 @@ export class Kujira {
         } else if (source === TickerSource.LAST_FILLED_ORDER) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.COINGECKO) {
-          let baseToken = 'baseToken';
-          if (market.baseToken.name == 'KUJI') {
-            baseToken = 'kujira';
-          } else {
-            baseToken = market.baseToken.name.toLowerCase()
-          }
-          const finalUrl = configuration.url.replace(
-            '{targets}',
-              baseToken.concat(',').concat(market.quoteToken.name.toLowerCase())
+          const coinGeckoBaseToken = CoinGeckoToken.getByKujiraSymbol(
+            market.baseToken.symbol
           );
 
-          let result: any = (
+          const coinGeckoQuoteToken = CoinGeckoToken.getByKujiraSymbol(
+            market.quoteToken.symbol
+          );
+
+          const finalUrl = configuration.url.replace(
+            '{targets}',
+            coinGeckoBaseToken.concat(',').concat(coinGeckoQuoteToken)
+          );
+
+          const result: any = (
             await runWithRetryAndTimeout(
               axios,
               axios.get,
@@ -988,18 +989,12 @@ export class Kujira {
             )
           ).data;
 
-          const tokensEnum = CoinGeckoToken;
+          const tokens = {
+            base: coinGeckoBaseToken,
+            quote: coinGeckoQuoteToken,
+          };
 
-          console.log(tokensEnum);
-
-          CoinGeckoTokenManipulate.getByCoinGeckoId('white-whale');
-          CoinGeckoTokenManipulate.getByKujiraSymbol('WHALE');
-
-          // for (const [key, value] of Object.entries(result)) {
-          //   result[CoinGeckoToken[key].value] = (value as unknown).usd;
-          // }
-
-          return convertKujiraTickerToTicker(result, market);
+          return convertKujiraTickerToTicker(source, result, market, tokens);
         } else {
           throw new TickerNotFoundError(
             `Ticker source (${source}) not supported, check your kujira configuration file.`
@@ -1731,8 +1726,8 @@ export class Kujira {
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
     const tickers = await this.getAllTickers({
-      marketIds: [getNotNullOrThrowError<MarketId>(options.marketId)]
-    })
+      marketIds: [getNotNullOrThrowError<MarketId>(options.marketId)],
+    });
 
     for (const ownerAddress of ownerAddresses) {
       const walletArtifacts = await this.getWalletArtifacts({
@@ -1761,7 +1756,10 @@ export class Kujira {
         orderIdxs: filledOrdersIds,
       });
 
-      output.set(ownerAddress, convertKujiraSettlementToSettlement(result, tickers));
+      output.set(
+        ownerAddress,
+        convertKujiraSettlementToSettlement(result, tickers)
+      );
     }
 
     if (ownerAddresses.length == 1) {
@@ -1796,10 +1794,10 @@ export class Kujira {
       const settleMarketFunds = async (
         options: HelperSettleFundsOptions
       ): Promise<void> => {
-        const results = (await this.withdrawFromMarket({
+        const results = await this.withdrawFromMarket({
           marketId: options.marketId,
           ownerAddresses: ownerAddresses,
-        }));
+        });
 
         output.setIn([ownerAddress, options.marketId], results);
       };

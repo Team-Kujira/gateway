@@ -17,8 +17,8 @@ import {
   TokenPriceInDolar,
 } from './kujira.types';
 import { BigNumber } from 'bignumber.js';
-import { axlUSDC } from "kujira.js";
-import { convertKujiraTokenToToken } from "./kujira.convertors";
+import { axlUSDC } from 'kujira.js';
+import { convertKujiraTokenToToken } from './kujira.convertors';
 
 /**
  *
@@ -307,43 +307,43 @@ export const quoteABaseTokenInDolars = async (
 };
 
 export const quotationInDolars = (
-   token: Token,
-    tickers: IMap<TokenId, Ticker>
+  token: Token,
+  tickers: IMap<TokenId, Ticker>
 ): { price: Price } => {
   const quoteToken = convertKujiraTokenToToken(axlUSDC);
 
   const tickerValues = tickers
-      .valueSeq()
-      .filter(
-          (ticker) =>
-              ticker.market.baseToken.id == token.id &&
-              ticker.market.quoteToken.id == quoteToken.id
-      )
-      .first();
+    .valueSeq()
+    .filter(
+      (ticker) =>
+        ticker.market.baseToken.id == token.id &&
+        ticker.market.quoteToken.id == quoteToken.id
+    )
+    .first();
 
   const ticker =
-      tickerValues != undefined
-          ? tickerValues
-          : tickers
-              .valueSeq()
-              .filter(
-                  (ticker) =>
-                      ticker.market.quoteToken.id == token.id &&
-                      ticker.market.baseToken.id == quoteToken.id
-              )
-              .first();
+    tickerValues != undefined
+      ? tickerValues
+      : tickers
+          .valueSeq()
+          .filter(
+            (ticker) =>
+              ticker.market.quoteToken.id == token.id &&
+              ticker.market.baseToken.id == quoteToken.id
+          )
+          .first();
 
   let buySide = false;
 
   if (
-      getNotNullOrThrowError(
-          ticker?.market.quoteToken.symbol != quoteToken.symbol
-      )
+    getNotNullOrThrowError(
+      ticker?.market.quoteToken.symbol != quoteToken.symbol
+    )
   ) {
     buySide = true;
   }
   let price =
-      token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
+    token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
 
   if (buySide) {
     const difference = BigNumber(1).minus(price);
@@ -351,6 +351,6 @@ export const quotationInDolars = (
   }
 
   return {
-    price: price
+    price: price,
   };
 };

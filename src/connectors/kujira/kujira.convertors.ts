@@ -23,6 +23,8 @@ import {
   TransactionHashes,
   Withdraw,
   Withdraws,
+  TickerSource,
+  CoinGeckoToken,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Denom, fin, KUJI, MAINNET, TESTNET } from 'kujira.js';
@@ -386,17 +388,36 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 };
 
 export const convertKujiraTickerToTicker = (
-  input: object,
-  market: Market
+  source: string,
+  input: any,
+  market: Market,
+  coinGeckTokens: any
 ): Ticker => {
-  const price = BigNumber(Object.values(input)[0].usd / Object.values(input)[1].usd);
+  let price: BigNumber;
+  const tokens: any = {};
+
+  if (source === TickerSource.ORDER_BOOK_SAP) {
+    price = BigNumber(input.price);
+  } else if (source === TickerSource.COINGECKO) {
+    price = BigNumber(input[coinGeckTokens['base']]['usd']).div(
+      BigNumber(input[coinGeckTokens['quote']]['usd'])
+    );
+    tokens[CoinGeckoToken.getByCoinGeckoId(coinGeckTokens['base'])] = BigNumber(
+      input[coinGeckTokens['base']]['usd']
+    );
+    tokens[CoinGeckoToken.getByCoinGeckoId(coinGeckTokens['quote'])] =
+      BigNumber(input[coinGeckTokens['quote']]['usd']);
+  } else {
+    throw new Error('Not implemented.');
+  }
+
   const timestamp = Date.now();
 
   return {
     market: market,
     price: price,
     timestamp: timestamp,
-    tokens: input,
+    tokens: tokens,
   };
 };
 
@@ -454,7 +475,6 @@ export const convertKujiraBalancesToBalances = async (
     const quotation = quotationInDolars(token, tickers);
 
     if (!output.tokens.has(token.id)) {
-
       output.tokens.set(token.id, {
         token: token,
         free: BigNumber(0),
@@ -477,12 +497,15 @@ export const convertKujiraBalancesToBalances = async (
 
     if (order.status == OrderStatus.OPEN) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
-      tokenBalance.inUSD.lockedInOrders = tokenBalance.inUSD.lockedInOrders.plus(
+      tokenBalance.inUSD.lockedInOrders =
+        tokenBalance.inUSD.lockedInOrders.plus(
           tokenBalance.lockedInOrders.multipliedBy(quotation.price)
-      );
+        );
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(quotation.price);
+      tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(
+        quotation.price
+      );
     }
   }
 
@@ -502,8 +525,12 @@ export const convertKujiraBalancesToBalances = async (
       .plus(tokenBalance.inUSD.unsettled);
 
     allFreeBalancesSum = allFreeBalancesSum.plus(tokenBalance.inUSD.free);
-    allLockedInOrdersBalancesSum = allLockedInOrdersBalancesSum.plus(tokenBalance.inUSD.lockedInOrders);
-    allUnsettledBalancesSum = allUnsettledBalancesSum.plus(tokenBalance.inUSD.unsettled);
+    allLockedInOrdersBalancesSum = allLockedInOrdersBalancesSum.plus(
+      tokenBalance.inUSD.lockedInOrders
+    );
+    allUnsettledBalancesSum = allUnsettledBalancesSum.plus(
+      tokenBalance.inUSD.unsettled
+    );
   }
 
   output.total.free = output.total.free.plus(allFreeBalancesSum);
@@ -533,49 +560,46 @@ export const convertKujiraTransactionToTransaction = (
 };
 
 export const convertKujiraSettlementToSettlement = (
-    input: KujiraWithdraw,
-    tickers: IMap<TokenId, Ticker>
+  input: KujiraWithdraw,
+  tickers: IMap<TokenId, Ticker>
 ): Withdraws => {
   let amounts = [];
   for (const event of input.events) {
     for (const attributes of event.attributes) {
-      if (attributes.key == "amount") {
-        amounts.push(attributes.value)
+      if (attributes.key == 'amount') {
+        amounts.push(attributes.value);
       }
     }
   }
   amounts = [...new Set(amounts)];
 
-  const  tokenWithdraw = IMap<TokenId, Withdraw>().asMutable()
+  const tokenWithdraw = IMap<TokenId, Withdraw>().asMutable();
 
   const withdraws = {
-    hash: "TransactionHash",
+    hash: 'TransactionHash',
     tokens: tokenWithdraw,
     total: {
-      fees: BigNumber(0)
-    }
-  } as Withdraws
+      fees: BigNumber(0),
+    },
+  } as Withdraws;
 
   for (const amount of amounts) {
     const match = amount.match(/^\d+/);
-    if (match && match[0].length > 3) {
-    } else {
+    if (!(match && match[0].length > 3)) {
       const initialStringAmount = BigNumber(
-          getNotNullOrThrowError<Array<string>>(
-              amount.match(/^\d+/)
-          )[0]
+        getNotNullOrThrowError<Array<string>>(amount.match(/^\d+/))[0]
       );
 
       let finalStringAmount = BigNumber(0);
-      if (getNotNullOrThrowError<Array<any>>(
-          amount.split(",")[0]
-      ).length < 45) {
+      if (
+        getNotNullOrThrowError<Array<any>>(amount.split(',')[0]).length < 45
+      ) {
         finalStringAmount = BigNumber(0);
       } else {
         finalStringAmount = BigNumber(
-            getNotNullOrThrowError<Array<string>>(
-                amount.split(",")[1].match(/^\d+/)
-            )[0]
+          getNotNullOrThrowError<Array<string>>(
+            amount.split(',')[1].match(/^\d+/)
+          )[0]
         );
       }
 
@@ -584,9 +608,9 @@ export const convertKujiraSettlementToSettlement = (
 
       const token = convertKujiraTokenToToken(denom);
 
-      const totalAmount = initialStringAmount.plus(
-          finalStringAmount
-      ).multipliedBy(Math.pow(10, -denom.decimals));
+      const totalAmount = initialStringAmount
+        .plus(finalStringAmount)
+        .multipliedBy(Math.pow(10, -denom.decimals));
 
       const quotation = quotationInDolars(token, tickers);
 
@@ -594,15 +618,15 @@ export const convertKujiraSettlementToSettlement = (
 
       tokenWithdraw.set(tokenId, {
         fees: {
-          "token": totalAmount,
-          "USD": totalAmountInUSD
+          token: totalAmount,
+          USD: totalAmountInUSD,
         },
-        token: token
-      } as Withdraw)
+        token: token,
+      } as Withdraw);
 
       withdraws.hash = input.transactionHash;
 
-      withdraws.total.fees = withdraws.total.fees.plus(totalAmountInUSD)
+      withdraws.total.fees = withdraws.total.fees.plus(totalAmountInUSD);
     }
   }
 
