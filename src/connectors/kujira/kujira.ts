@@ -104,6 +104,8 @@ import {
   Transaction,
   TransactionHash,
   Withdraws,
+  CoinGeckoTokenHelper,
+  Price,
   CoinGeckoToken,
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
@@ -114,7 +116,6 @@ import {
   runWithRetryAndTimeout,
 } from './kujira.helpers';
 import {
-  axlUSDC,
   Denom,
   fin,
   KujiraQueryClient,
@@ -126,6 +127,7 @@ import {
 import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
+  convertCoinGeckoQuotationsToQuotations,
   convertKujiraBalancesToBalances,
   convertKujiraEventsToMapOfEvents,
   convertKujiraMarketToMarket,
@@ -966,11 +968,11 @@ export class Kujira {
         } else if (source === TickerSource.LAST_FILLED_ORDER) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.COINGECKO) {
-          const coinGeckoBaseToken = CoinGeckoToken.getByKujiraSymbol(
+          const coinGeckoBaseToken = CoinGeckoTokenHelper.getByKujiraSymbol(
             market.baseToken.symbol
           );
 
-          const coinGeckoQuoteToken = CoinGeckoToken.getByKujiraSymbol(
+          const coinGeckoQuoteToken = CoinGeckoTokenHelper.getByKujiraSymbol(
             market.quoteToken.symbol
           );
 
@@ -1057,6 +1059,34 @@ export class Kujira {
       .toArray();
 
     return await this.getTickers({ marketIds });
+  }
+
+  async getAllTokensQuotationsInUSD(
+    _options: any
+  ): Promise<IMap<TokenId, Price>> {
+    const finalUrl = getNotNullOrThrowError<{ url: string }>(
+      config.tickers.sources.get(TickerSource.COINGECKO)
+    ).url.replace('{targets}', Object.values(CoinGeckoToken).join(','));
+
+    const result: any = (
+      await runWithRetryAndTimeout(
+        axios,
+        axios.get,
+        [finalUrl],
+        config.retry.all.maxNumberOfRetries,
+        0
+      )
+    ).data;
+
+    const tokensSymbolsToTokensIdsMap = await this.getTokenSymbolsToTokenIdsMap(
+      {},
+      this.network
+    );
+
+    return convertCoinGeckoQuotationsToQuotations(
+      result,
+      tokensSymbolsToTokensIdsMap
+    );
   }
 
   async getBalance(options: GetBalanceRequest): Promise<GetBalanceResponse> {
@@ -1165,32 +1195,12 @@ export class Kujira {
       ownerAddress: options.ownerAddress,
     })) as IMap<OrderId, Order>;
 
-    let tickers: IMap<MarketId, Ticker>;
-
-    try {
-      const tokenIds = kujiraBalances.map((token: Coin) => token.denom);
-
-      const quoteToken = convertKujiraTokenToToken(axlUSDC);
-
-      const marketIds = (await this.getAllMarkets({}, this.network))
-        .valueSeq()
-        .filter(
-          (market) =>
-            tokenIds.includes(market.baseToken.id) &&
-            market.quoteToken.id == quoteToken.id
-        )
-        .map((market) => market.id)
-        .toArray();
-
-      tickers = await this.getAllTickers({ marketIds });
-    } catch (exception) {
-      tickers = IMap<string, Ticker>().asMutable();
-    }
+    const quotations = await this.getAllTokensQuotationsInUSD({});
 
     return await convertKujiraBalancesToBalances(
       kujiraBalances,
       orders,
-      tickers
+      quotations
     );
   }
 
@@ -1725,10 +1735,6 @@ export class Kujira {
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
       : [getNotNullOrThrowError<OrderOwnerAddress>(options.ownerAddress)];
 
-    const tickers = await this.getAllTickers({
-      marketIds: [getNotNullOrThrowError<MarketId>(options.marketId)],
-    });
-
     for (const ownerAddress of ownerAddresses) {
       const walletArtifacts = await this.getWalletArtifacts({
         ownerAddress,
@@ -1756,9 +1762,11 @@ export class Kujira {
         orderIdxs: filledOrdersIds,
       });
 
+      const quotations = await this.getAllTokensQuotationsInUSD({});
+
       output.set(
         ownerAddress,
-        convertKujiraSettlementToSettlement(result, tickers)
+        convertKujiraSettlementToSettlement(result, quotations)
       );
     }
 

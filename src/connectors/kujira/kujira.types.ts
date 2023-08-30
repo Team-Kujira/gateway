@@ -222,7 +222,7 @@ export enum CoinGeckoToken {
   WHALE = 'white-whale',
 }
 
-export namespace CoinGeckoToken {
+export namespace CoinGeckoTokenHelper {
   export function getByCoinGeckoId(coinGeckoId: string): string {
     for (const [key, value] of Object.entries(CoinGeckoToken)) {
       if (value === coinGeckoId) {

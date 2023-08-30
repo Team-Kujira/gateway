@@ -306,7 +306,7 @@ export const quoteABaseTokenInDolars = async (
   }
 };
 
-export const quotationInDolars = (
+export const getQuotationInUSD = (
   token: Token,
   tickers: IMap<TokenId, Ticker>
 ): { price: Price } => {

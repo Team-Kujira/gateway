@@ -1,7 +1,8 @@
 import {
-  TokenBalance,
   Balances,
+  CoinGeckoTokenHelper,
   ConvertOrderType,
+  GetTokenSymbolsToTokenIdsMapResponse,
   IMap,
   KujiraEvent,
   KujiraOrderBook,
@@ -16,21 +17,22 @@ import {
   OrderSide,
   OrderStatus,
   OrderType,
+  Price,
   Ticker,
+  TickerSource,
   Token,
+  TokenBalance,
   TokenId,
   Transaction,
   TransactionHashes,
   Withdraw,
   Withdraws,
-  TickerSource,
-  CoinGeckoToken,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
 import { Denom, fin, KUJI, MAINNET, TESTNET } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
-import { getNotNullOrThrowError, quotationInDolars } from './kujira.helpers';
+import { getNotNullOrThrowError } from './kujira.helpers';
 import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
 import { parseCoins } from '@cosmjs/stargate';
@@ -402,10 +404,9 @@ export const convertKujiraTickerToTicker = (
     price = BigNumber(input[coinGeckTokens['base']]['usd']).div(
       BigNumber(input[coinGeckTokens['quote']]['usd'])
     );
-    tokens[CoinGeckoToken.getByCoinGeckoId(coinGeckTokens['base'])] = BigNumber(
-      input[coinGeckTokens['base']]['usd']
-    );
-    tokens[CoinGeckoToken.getByCoinGeckoId(coinGeckTokens['quote'])] =
+    tokens[CoinGeckoTokenHelper.getByCoinGeckoId(coinGeckTokens['base'])] =
+      BigNumber(input[coinGeckTokens['base']]['usd']);
+    tokens[CoinGeckoTokenHelper.getByCoinGeckoId(coinGeckTokens['quote'])] =
       BigNumber(input[coinGeckTokens['quote']]['usd']);
   } else {
     throw new Error('Not implemented.');
@@ -421,10 +422,35 @@ export const convertKujiraTickerToTicker = (
   };
 };
 
+export const convertCoinGeckoQuotationsToQuotations = (
+  input: any,
+  tokensSymbolsToTokensIdsMap: GetTokenSymbolsToTokenIdsMapResponse
+): IMap<TokenId, Price> => {
+  const output = IMap<TokenId, Price>().asMutable();
+
+  for (const [tokenSymbol, tokenId] of tokensSymbolsToTokensIdsMap.entries()) {
+    let coinGeckoId;
+
+    try {
+      coinGeckoId = CoinGeckoTokenHelper.getByKujiraSymbol(tokenSymbol);
+    } catch (_e) {
+      coinGeckoId = null;
+    }
+
+    if (coinGeckoId) {
+      output.set(tokenId, BigNumber(input[coinGeckoId]['usd']));
+    } else {
+      output.set(tokenId, BigNumber(0));
+    }
+  }
+
+  return output;
+};
+
 export const convertKujiraBalancesToBalances = async (
   balances: readonly Coin[],
   orders: IMap<OrderId, Order>,
-  tickers: IMap<TokenId, Ticker>
+  quotations: IMap<TokenId, Price>
 ): Promise<Balances> => {
   const output: Balances = {
     tokens: IMap<TokenId, TokenBalance>().asMutable(),
@@ -439,7 +465,9 @@ export const convertKujiraBalancesToBalances = async (
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
 
-    const quotation = quotationInDolars(token, tickers);
+    const quotation = getNotNullOrThrowError<BigNumber>(
+      quotations.get(token.id)
+    );
 
     const freeAmount = BigNumber(balance.amount).div(
       BigNumber(10).pow(token.decimals)
@@ -463,7 +491,7 @@ export const convertKujiraBalancesToBalances = async (
       output.tokens.get(token.id)
     );
     tokenBalance.free = freeAmount;
-    tokenBalance.inUSD.free = freeAmount.multipliedBy(quotation.price);
+    tokenBalance.inUSD.free = freeAmount.multipliedBy(quotation);
   }
 
   for (const order of orders.values()) {
@@ -472,7 +500,9 @@ export const convertKujiraBalancesToBalances = async (
         ? order.market.quoteToken
         : order.market.baseToken;
 
-    const quotation = quotationInDolars(token, tickers);
+    const quotation = getNotNullOrThrowError<BigNumber>(
+      quotations.get(token.id)
+    );
 
     if (!output.tokens.has(token.id)) {
       output.tokens.set(token.id, {
@@ -499,13 +529,12 @@ export const convertKujiraBalancesToBalances = async (
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
       tokenBalance.inUSD.lockedInOrders =
         tokenBalance.inUSD.lockedInOrders.plus(
-          tokenBalance.lockedInOrders.multipliedBy(quotation.price)
+          tokenBalance.lockedInOrders.multipliedBy(quotation)
         );
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(
-        quotation.price
-      );
+      tokenBalance.inUSD.unsettled =
+        tokenBalance.unsettled.multipliedBy(quotation);
     }
   }
 
@@ -561,7 +590,7 @@ export const convertKujiraTransactionToTransaction = (
 
 export const convertKujiraSettlementToSettlement = (
   input: KujiraWithdraw,
-  tickers: IMap<TokenId, Ticker>
+  quotations: IMap<TokenId, Price>
 ): Withdraws => {
   let amounts = [];
   for (const event of input.events) {
@@ -612,9 +641,11 @@ export const convertKujiraSettlementToSettlement = (
         .plus(finalStringAmount)
         .multipliedBy(Math.pow(10, -denom.decimals));
 
-      const quotation = quotationInDolars(token, tickers);
+      const quotation = getNotNullOrThrowError<BigNumber>(
+        quotations.get(token.id)
+      );
 
-      const totalAmountInUSD = totalAmount.multipliedBy(quotation.price);
+      const totalAmountInUSD = totalAmount.multipliedBy(quotation);
 
       tokenWithdraw.set(tokenId, {
         fees: {
