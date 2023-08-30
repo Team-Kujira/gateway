@@ -105,6 +105,7 @@ import {
   TransactionHash,
   Withdraws,
   CoinGeckoToken,
+  CoinGeckoTokenManipulate
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -987,9 +988,16 @@ export class Kujira {
             )
           ).data;
 
-          for (const [key, value] of Object.entries(result)) {
-            result[CoinGeckoToken[key].value] = (value as unknown).usd;
-          }
+          const tokensEnum = CoinGeckoToken;
+
+          console.log(tokensEnum);
+
+          CoinGeckoTokenManipulate.getByCoinGeckoId('white-whale');
+          CoinGeckoTokenManipulate.getByKujiraSymbol('WHALE');
+
+          // for (const [key, value] of Object.entries(result)) {
+          //   result[CoinGeckoToken[key].value] = (value as unknown).usd;
+          // }
 
           return convertKujiraTickerToTicker(result, market);
         } else {
