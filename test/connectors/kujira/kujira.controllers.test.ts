@@ -105,7 +105,7 @@ import {
   Withdraw,
 } from '../../../src/connectors/kujira/kujira.types';
 import * as KujiraController from '../../../src/connectors/kujira/kujira.controllers';
-import { Denom, fin, KUJI, NETWORKS, TESTNET } from 'kujira.js';
+import { Denom, fin, KUJI, MAINNET, NETWORKS } from 'kujira.js';
 // import { addWallet } from '../../../src/services/wallet/wallet.controllers';
 // import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
@@ -154,22 +154,22 @@ let kujira: KujiraModel;
 
 const config = KujiraConfig.config;
 
-const network = NETWORKS[TESTNET].toLowerCase();
+const network = NETWORKS[MAINNET].toLowerCase();
 
-const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
+const networksPairs: Record<string, fin.Pair> = fin.PAIRS[MAINNET];
 
 const kujiToken = KUJI;
 
 const marketsIds = {
   1: networksPairs[
-    'kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh'
-  ].address, // KUJI/DEMO
-  2: networksPairs[
-    'kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6'
+    'kujira193dzcmy7lwuj4eda3zpwwt9ejal00xva0vawcvhgsyyp5cfh6jyq66wfrf'
   ].address, // KUJI/USK
+  2: networksPairs[
+    'kujira14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sl4e867'
+  ].address, // KUJI/axlUSDC
   3: networksPairs[
-    'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg'
-  ].address, // DEMO/USK
+    'kujira1rwx6w02alc4kaz7xpyg3rlxpjl4g63x5jq292mkxgg65zqpn5llq202vh5'
+  ].address, // axlUSDC/USK
 };
 
 const tokensIdsArray = [
@@ -189,9 +189,9 @@ for (let i = 0; i < tokensIdsArray.length; i++) {
 }
 
 const transactionsHashes = {
-  1: 'D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9',
-  2: '50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91',
-  3: '66DBF37EAE15E28AD70E3292216DEE3D6B61E5C5913EBCE584E4971D2A6A2F2B',
+  1: '34F53728E0A3E877A2140D21D69C0E4DC62600A061CD9B7677B43DCCE49B83F4',
+  2: '8C80FA65ED1CAD8B79D45AEA6593E1A0E17BAEFBEF69D9677CD7DD10045FF283',
+  3: '445FDABE49898EA2B6503D7741B779C527CDD8FAB7E75C095F5CA3A0BB28AD0C',
 };
 
 const orders: IMap<OrderClientId, Order> = IMap<
@@ -236,18 +236,12 @@ beforeAll(async () => {
   configManager.set('kujira.gasLimitEstimate', 0.009147);
   configManager.set('kujira.orderBook.offset', 0);
   configManager.set('kujira.orderBook.limit', 255);
-  configManager.set('kujira.cache.marketsData', 3600);
-  configManager.set('kujira.cache.markets', 3600);
   configManager.set('kujira.orders.create.fee', 'auto');
   configManager.set('kujira.orders.create.maxPerTransaction', 8);
   configManager.set('kujira.orders.open.limit', 255);
   configManager.set('kujira.orders.filled.limit', 255);
   configManager.set('kujira.orders.cancel.maxPerTransaction', 25);
   configManager.set('kujira.tokens.resolutionStrategy', 'markets');
-  configManager.set(
-    'kujira.tickers.sources.nomics.url',
-    'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&interval=1m&market=${marketAddress}'
-  );
   configManager.set('kujira.transactions.merge.createOrders', true);
   configManager.set('kujira.transactions.merge.cancelOrders', true);
   configManager.set('kujira.transactions.merge.settleFunds', true);
@@ -322,7 +316,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -340,7 +334,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -358,7 +352,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.MARKET,
@@ -376,7 +370,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -394,7 +388,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.999),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -412,7 +406,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -430,7 +424,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -448,7 +442,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -466,7 +460,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.999),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -484,7 +478,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.MARKET,
@@ -502,7 +496,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.MARKET,
@@ -520,7 +514,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -538,7 +532,7 @@ beforeAll(async () => {
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -2326,7 +2320,7 @@ describe('Kujira', () => {
         BigNumber(getNotNullOrThrowError(responseBody.amount)).toString()
       ).toEqual(candidate.amount.toString());
       expect(responseBody.side).toBe(candidate.side);
-      expect(responseBody.marketName).toBe('KUJI/USK');
+      expect(responseBody.marketName).toBe('KUJI/axlUSDC');
       expect(responseBody.payerAddress).toBe(candidate.payerAddress);
       expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
 
