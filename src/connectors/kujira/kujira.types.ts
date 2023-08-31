@@ -161,7 +161,7 @@ export enum RESTfulMethod {
 }
 
 export enum CoinGeckoToken {
-  STATOM = 'stride-staked-atom',
+  stATOM = 'stride-staked-atom',
   ATOM = 'cosmos',
   KUJI = 'kujira',
   wstETH = 'wrapped-steth',
@@ -173,7 +173,7 @@ export enum CoinGeckoToken {
   MNTA = 'mantadao',
   LOCAL = 'local-money',
   LUNA2 = 'terra-luna-2',
-  AMPLUNA = 'eris-amplified-luna',
+  ampLUNA = 'eris-amplified-luna',
   OSMO = 'osmosis',
   SHD = 'shade-protocol',
   SOMM = 'sommelier',
