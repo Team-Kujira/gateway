@@ -118,6 +118,12 @@ export namespace KujiraConfig {
       marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
       markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
       tokens: configManager.get('kujira.cache.markets') || 3600, // in seconds
+      coinGeckoCoins: configManager.get('kujira.cache.coinGeckoCoins') || 3600, // in seconds
+    },
+    coinGecko: {
+      coinsUrl: 'https://api.coingecko.com/api/v3/coins/list',
+      priceUrl:
+        'https://api.coingecko.com/api/v3/simple/price?ids={targets}&vs_currencies=usd',
     },
   };
 }

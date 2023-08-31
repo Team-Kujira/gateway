@@ -104,9 +104,10 @@ import {
   Transaction,
   TransactionHash,
   Withdraws,
-  CoinGeckoTokenHelper,
   Price,
-  CoinGeckoToken,
+  CoinGeckoId,
+  CoinGeckoSymbol,
+  GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse,
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -174,6 +175,7 @@ const caches = {
   instances: new CacheContainer(new MemoryStorage()),
   tokens: new CacheContainer(new MemoryStorage()),
   markets: new CacheContainer(new MemoryStorage()),
+  coinGeckoCoins: new CacheContainer(new MemoryStorage()),
 };
 
 const config = KujiraConfig.config;
@@ -776,6 +778,50 @@ export class Kujira {
     return output;
   }
 
+  @Cache(caches.coinGeckoCoins, { ttl: config.cache.coinGeckoCoins })
+  async getKujiraTokenSymbolsToCoinGeckoIdsMap(
+    _options?: any,
+    _network?: string
+  ): Promise<GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse> {
+    const output = IMap<TokenSymbol, CoinGeckoId | undefined>().asMutable();
+
+    const url = config.coinGecko.coinsUrl;
+
+    const result: any = (
+      await runWithRetryAndTimeout(
+        axios,
+        axios.get,
+        [url],
+        config.retry.all.maxNumberOfRetries,
+        0
+      )
+    ).data;
+
+    const coinGeckoSymbolsToIdsMap = IMap<
+      CoinGeckoSymbol,
+      CoinGeckoId
+    >().asMutable();
+
+    for (const item of result) {
+      coinGeckoSymbolsToIdsMap.set(item.symbol, item.id);
+    }
+
+    const tokensSymbols = (
+      await this.getTokenSymbolsToTokenIdsMap({}, this.network)
+    )
+      .keySeq()
+      .toArray();
+
+    for (const tokenSymbol of tokensSymbols) {
+      const coinGeckoSymbol: CoinGeckoSymbol = tokenSymbol.toLowerCase();
+      const coinGeckoId: CoinGeckoId | undefined =
+        coinGeckoSymbolsToIdsMap.get(coinGeckoSymbol);
+      output.set(tokenSymbol, coinGeckoId);
+    }
+
+    return output;
+  }
+
   /**
    *
    * @param options
@@ -968,32 +1014,40 @@ export class Kujira {
         } else if (source === TickerSource.LAST_FILLED_ORDER) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.COINGECKO) {
-          const coinGeckoBaseToken = CoinGeckoTokenHelper.getByKujiraSymbol(
+          const kujiraSymbolsToCoinGeckoIdsMap =
+            await this.getKujiraTokenSymbolsToCoinGeckoIdsMap({}, this.network);
+
+          const coinGeckoBaseTokenId = kujiraSymbolsToCoinGeckoIdsMap.get(
             market.baseToken.symbol
           );
-
-          const coinGeckoQuoteToken = CoinGeckoTokenHelper.getByKujiraSymbol(
+          const coinGeckoQuoteTokenId = kujiraSymbolsToCoinGeckoIdsMap.get(
             market.quoteToken.symbol
           );
 
-          const finalUrl = configuration.url.replace(
-            '{targets}',
-            coinGeckoBaseToken.concat(',').concat(coinGeckoQuoteToken)
-          );
+          let result: any;
 
-          const result: any = (
-            await runWithRetryAndTimeout(
-              axios,
-              axios.get,
-              [finalUrl],
-              config.retry.all.maxNumberOfRetries,
-              0
-            )
-          ).data;
+          if (!coinGeckoBaseTokenId || !coinGeckoQuoteTokenId) {
+            result = {};
+          } else {
+            const finalUrl = configuration.url.replace(
+              '{targets}',
+              coinGeckoBaseTokenId.concat(',').concat(coinGeckoQuoteTokenId)
+            );
+
+            result = (
+              await runWithRetryAndTimeout(
+                axios,
+                axios.get,
+                [finalUrl],
+                config.retry.all.maxNumberOfRetries,
+                0
+              )
+            ).data;
+          }
 
           const tokens = {
-            base: coinGeckoBaseToken,
-            quote: coinGeckoQuoteToken,
+            base: coinGeckoBaseTokenId,
+            quote: coinGeckoQuoteTokenId,
           };
 
           return convertKujiraTickerToTicker(source, result, market, tokens);
@@ -1064,9 +1118,17 @@ export class Kujira {
   async getAllTokensQuotationsInUSD(
     _options: any
   ): Promise<IMap<TokenId, Price>> {
+    const kujiraSymbolsToCoinGeckoIdsMap =
+      await this.getKujiraTokenSymbolsToCoinGeckoIdsMap({}, this.network);
+
+    const coinGeckoIds = kujiraSymbolsToCoinGeckoIdsMap
+      .valueSeq()
+      .toArray()
+      .join(',');
+
     const finalUrl = getNotNullOrThrowError<{ url: string }>(
       config.tickers.sources.get(TickerSource.COINGECKO)
-    ).url.replace('{targets}', Object.values(CoinGeckoToken).join(','));
+    ).url.replace('{targets}', coinGeckoIds);
 
     const result: any = (
       await runWithRetryAndTimeout(
@@ -1085,7 +1147,8 @@ export class Kujira {
 
     return convertCoinGeckoQuotationsToQuotations(
       result,
-      tokensSymbolsToTokensIdsMap
+      tokensSymbolsToTokensIdsMap,
+      kujiraSymbolsToCoinGeckoIdsMap
     );
   }
 

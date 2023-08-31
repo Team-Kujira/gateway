@@ -107,6 +107,9 @@ export type Mnemonic = string;
 export type Password = string;
 export type AccountNumber = number;
 
+export type CoinGeckoSymbol = string;
+export type CoinGeckoId = string;
+
 //
 //  Enums
 //
@@ -158,90 +161,6 @@ export enum RESTfulMethod {
   PUT = 'PUT',
   PATCH = 'PATCH',
   DELETE = 'DELETE',
-}
-
-export enum CoinGeckoToken {
-  stATOM = 'stride-staked-atom',
-  ATOM = 'cosmos',
-  KUJI = 'kujira',
-  wstETH = 'wrapped-steth',
-  wETH = 'weth',
-  PEPE = 'pepe',
-  INJ = 'injective-protocol',
-  wBTC = 'wrapped-bitcoin',
-  JKL = 'jackal-protocol',
-  MNTA = 'mantadao',
-  LOCAL = 'local-money',
-  LUNA2 = 'terra-luna-2',
-  ampLUNA = 'eris-amplified-luna',
-  OSMO = 'osmosis',
-  SHD = 'shade-protocol',
-  SOMM = 'sommelier',
-  STARS = 'stargaze',
-  USDC = 'usd-coin',
-  wAVAX = 'wrapped-avax',
-  BNB = 'binancecoin',
-  CMDX = 'comdex',
-  DOT = 'polkadot',
-  EVMOS = 'evmos',
-  JUNO = 'juno-network',
-  LOOP = 'loop',
-  MARS = 'mars-protocol-a7fcbcfb-fd61-4017-92f0-7ee9f9cc6da3',
-  NTRN = 'neutron',
-  PAXG = 'pax-gold',
-  SCRT = 'secret',
-  TAO = 'bittensor',
-  USDT = 'tether',
-  ACRE = 'arable-protocol',
-  USK = 'usk',
-  AKT = 'akash-network',
-  ARB = 'arbitrum',
-  ARCH = 'archway',
-  ASTRO = 'astroport-fi',
-  AXL = 'axelar',
-  CMST = 'composite',
-  CNTO = 'ciento-exchange',
-  CRE = 'crescent-network',
-  CRYPTO_COM = 'crypto-com-chain',
-  DVPN = 'sentinel',
-  FLIX = 'omniflix-network',
-  FTM = 'fantom',
-  FURY = 'fanfury',
-  GRAV = 'graviton',
-  LINK = 'chainlink',
-  LUNC = 'terra-luna',
-  XXX = 'matic-network',
-  MNTL = 'assetmantle',
-  PLQ = 'planq',
-  RACOON = 'racoon',
-  REGEN = 'regen',
-  ROAR = 'lion-dao',
-  STRD = 'stride',
-  SWTH = 'switcheo',
-  TORI = 'teritori',
-  WHALE = 'white-whale',
-}
-
-export namespace CoinGeckoTokenHelper {
-  export function getByCoinGeckoId(coinGeckoId: string): string {
-    for (const [key, value] of Object.entries(CoinGeckoToken)) {
-      if (value === coinGeckoId) {
-        return key;
-      }
-    }
-
-    throw new Error(`CoinGecko token "${coinGeckoId}" not found.`);
-  }
-
-  export function getByKujiraSymbol(kujiraSymbol: string): CoinGeckoToken {
-    for (const [key, value] of Object.entries(CoinGeckoToken)) {
-      if (key === kujiraSymbol) {
-        return value as CoinGeckoToken;
-      }
-    }
-
-    throw new Error(`Kujira token "${kujiraSymbol}" not found.`);
-  }
 }
 
 //
@@ -492,6 +411,10 @@ export interface GetTokenSymbolsToTokenIdsMapRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTokenSymbolsToTokenIdsMapResponse
   extends IMap<TokenSymbol, TokenId> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse
+  extends IMap<TokenSymbol, CoinGeckoId | undefined> {}
 
 export interface GetMarketRequest {
   id?: MarketId;

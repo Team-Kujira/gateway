@@ -1,7 +1,7 @@
 import {
   Balances,
-  CoinGeckoTokenHelper,
   ConvertOrderType,
+  GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse,
   GetTokenSymbolsToTokenIdsMapResponse,
   IMap,
   KujiraEvent,
@@ -401,13 +401,26 @@ export const convertKujiraTickerToTicker = (
   if (source === TickerSource.ORDER_BOOK_SAP) {
     price = BigNumber(input.price);
   } else if (source === TickerSource.COINGECKO) {
-    price = BigNumber(input[coinGeckTokens['base']]['usd']).div(
-      BigNumber(input[coinGeckTokens['quote']]['usd'])
-    );
-    tokens[CoinGeckoTokenHelper.getByCoinGeckoId(coinGeckTokens['base'])] =
-      BigNumber(input[coinGeckTokens['base']]['usd']);
-    tokens[CoinGeckoTokenHelper.getByCoinGeckoId(coinGeckTokens['quote'])] =
-      BigNumber(input[coinGeckTokens['quote']]['usd']);
+    if (!coinGeckTokens['base'] || !coinGeckTokens['base']) {
+      tokens[market.baseToken.symbol] = BigNumber(0);
+      tokens[market.quoteToken.symbol] = BigNumber(0);
+      price = BigNumber(0);
+    } else {
+      tokens[market.baseToken.symbol] = BigNumber(
+        input[coinGeckTokens['base']]['usd']
+      );
+      tokens[market.quoteToken.symbol] = BigNumber(
+        input[coinGeckTokens['quote']]['usd']
+      );
+
+      if (tokens[market.quoteToken.symbol].gt(BigNumber(0))) {
+        price = tokens[market.baseToken.symbol].div(
+          tokens[market.quoteToken.symbol]
+        );
+      } else {
+        price = BigNumber(0);
+      }
+    }
   } else {
     throw new Error('Not implemented.');
   }
@@ -424,18 +437,13 @@ export const convertKujiraTickerToTicker = (
 
 export const convertCoinGeckoQuotationsToQuotations = (
   input: any,
-  tokensSymbolsToTokensIdsMap: GetTokenSymbolsToTokenIdsMapResponse
+  tokensSymbolsToTokensIdsMap: GetTokenSymbolsToTokenIdsMapResponse,
+  kujiraSymbolsToCoinGeckoIdsMap: GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse
 ): IMap<TokenId, Price> => {
   const output = IMap<TokenId, Price>().asMutable();
 
   for (const [tokenSymbol, tokenId] of tokensSymbolsToTokensIdsMap.entries()) {
-    let coinGeckoId;
-
-    try {
-      coinGeckoId = CoinGeckoTokenHelper.getByKujiraSymbol(tokenSymbol);
-    } catch (_e) {
-      coinGeckoId = null;
-    }
+    const coinGeckoId = kujiraSymbolsToCoinGeckoIdsMap.get(tokenSymbol);
 
     if (coinGeckoId) {
       output.set(tokenId, BigNumber(input[coinGeckoId]['usd']));
