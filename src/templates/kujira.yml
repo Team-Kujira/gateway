@@ -58,6 +58,7 @@ tokens:
   disallowed:
   resolutionStrategy: markets
 markets:
+<<<<<<< Updated upstream
   url: # empty means using the default
 #  url: /root/gateway/conf/connectors/kujira/contracts.json
 #  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json
@@ -69,6 +70,13 @@ tickers:
 #    orderBookWeightedAveragePrice:
 #    orderBookVolumeWeightedAveragePrice:
 #    lastFilledOrder:
+=======
+  allowed: # Empty list means all markets are allowed.
+    - KUJI/USK
+    - KUJI/axlUSDC
+    - axlUSDC/USK
+  disallowed: # Empty list means no markets are disallowed.
+>>>>>>> Stashed changes
 transactions:
   merge:
     createOrders: true
