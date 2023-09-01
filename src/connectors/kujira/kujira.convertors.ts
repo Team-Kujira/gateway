@@ -600,72 +600,56 @@ export const convertKujiraSettlementToSettlement = (
   input: KujiraWithdraw,
   quotations: IMap<TokenId, Price>
 ): Withdraws => {
-  let amounts = [];
+  let rawAmounts = [];
   for (const event of input.events) {
     for (const attributes of event.attributes) {
       if (attributes.key == 'amount') {
-        amounts.push(attributes.value);
+        rawAmounts.push(attributes.value);
       }
     }
   }
-  amounts = [...new Set(amounts)];
+  rawAmounts = [...new Set(rawAmounts)];
 
   const tokenWithdraw = IMap<TokenId, Withdraw>().asMutable();
 
   const withdraws = {
-    hash: 'TransactionHash',
+    hash: '',
     tokens: tokenWithdraw,
     total: {
       fees: BigNumber(0),
     },
   } as Withdraws;
 
-  for (const amount of amounts) {
-    const match = amount.match(/^\d+/);
-    if (!(match && match[0].length > 3)) {
-      const initialStringAmount = BigNumber(
-        getNotNullOrThrowError<Array<string>>(amount.match(/^\d+/))[0]
-      );
+  for (const rawAmount of rawAmounts) {
+    const match = rawAmount.match(/^(\d+)(.*)/);
 
-      let finalStringAmount = BigNumber(0);
-      if (
-        getNotNullOrThrowError<Array<any>>(amount.split(',')[0]).length < 45
-      ) {
-        finalStringAmount = BigNumber(0);
-      } else {
-        finalStringAmount = BigNumber(
-          getNotNullOrThrowError<Array<string>>(
-            amount.split(',')[1].match(/^\d+/)
-          )[0]
-        );
-      }
+    if (match) {
+      const partialAmount = BigNumber(match[1]);
+      const tokenId = match[2];
 
-      const tokenId = amount.split(',')[0].split(/^\d+/)[1];
       const denom = Denom.from(tokenId);
-
       const token = convertKujiraTokenToToken(denom);
 
-      const totalAmount = initialStringAmount
-        .plus(finalStringAmount)
-        .multipliedBy(Math.pow(10, -denom.decimals));
+      const amount = partialAmount.multipliedBy(Math.pow(10, -denom.decimals));
 
       const quotation = getNotNullOrThrowError<BigNumber>(
         quotations.get(token.id)
       );
 
-      const totalAmountInUSD = totalAmount.multipliedBy(quotation);
+      const amountInUSD = amount.multipliedBy(quotation);
 
       tokenWithdraw.set(tokenId, {
         fees: {
-          token: totalAmount,
-          USD: totalAmountInUSD,
+          token: amount,
+          USD: amountInUSD,
+          quotation: quotation,
         },
         token: token,
       } as Withdraw);
 
       withdraws.hash = input.transactionHash;
 
-      withdraws.total.fees = withdraws.total.fees.plus(totalAmountInUSD);
+      withdraws.total.fees = withdraws.total.fees.plus(amountInUSD);
     }
   }
 
