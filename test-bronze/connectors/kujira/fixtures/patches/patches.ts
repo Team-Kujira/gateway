@@ -9,7 +9,7 @@ import {
   TokenId,
 } from '../../../../../src/connectors/kujira/kujira.types';
 import data from './data';
-import { patch } from '../../../../services/patch';
+import { patch } from '../../../../../test/services/patch';
 import { ExecuteResult, JsonObject } from '@cosmjs/cosmwasm-stargate';
 import { fin } from 'kujira.js';
 import { StdFee } from '@cosmjs/amino';

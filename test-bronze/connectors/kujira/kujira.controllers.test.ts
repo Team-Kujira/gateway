@@ -1,6 +1,6 @@
 import 'jest-extended';
 import { BigNumber } from 'bignumber.js';
-import { unpatch } from '../../services/patch';
+import { unpatch } from '../../../test/services/patch';
 import { KujiraModel } from '../../../src/connectors/kujira/kujira.model';
 import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
