@@ -473,33 +473,37 @@ export const convertKujiraBalancesToBalances = async (
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
 
-    const quotation = getNotNullOrThrowError<BigNumber>(
-      quotations.get(token.id)
-    );
+    if (!token.symbol.startsWith('x') || token.symbol.startsWith('X')) {
+      let quotation = BigNumber(0);
 
-    const freeAmount = BigNumber(balance.amount).div(
-      BigNumber(10).pow(token.decimals)
-    );
+      quotation = getNotNullOrThrowError<BigNumber>(
+          quotations.get(token.id)
+      );
 
-    output.tokens.set(token.id, {
-      token: token,
-      free: BigNumber(0),
-      lockedInOrders: BigNumber(0),
-      unsettled: BigNumber(0),
-      total: BigNumber(0),
-      inUSD: {
+      const freeAmount = BigNumber(balance.amount).div(
+          BigNumber(10).pow(token.decimals)
+      );
+
+      output.tokens.set(token.id, {
+        token: token,
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
         total: BigNumber(0),
-      },
-    });
+        inUSD: {
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+          total: BigNumber(0),
+        },
+      });
 
-    const tokenBalance = getNotNullOrThrowError<TokenBalance>(
-      output.tokens.get(token.id)
-    );
-    tokenBalance.free = freeAmount;
-    tokenBalance.inUSD.free = freeAmount.multipliedBy(quotation);
+      const tokenBalance = getNotNullOrThrowError<TokenBalance>(
+          output.tokens.get(token.id)
+      );
+      tokenBalance.free = freeAmount;
+      tokenBalance.inUSD.free = freeAmount.multipliedBy(quotation);
+    }
   }
 
   for (const order of orders.values()) {
