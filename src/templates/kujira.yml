@@ -54,15 +54,15 @@ tokens:
   url: # empty means using the default
 #  url: /root/gateway/conf/connectors/kujira/tokens.json
 #  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/tokens.json
-  allowed:
-  disallowed:
+  allowed: # Empty list means all tokens are allowed.
+  disallowed: # Empty list means no tokens are disallowed.
   resolutionStrategy: markets
 markets:
   url: # empty means using the default
 #  url: /root/gateway/conf/connectors/kujira/contracts.json
 #  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json
-  allowed:
-  disallowed:
+  allowed: # Empty list means all markets are allowed.
+  disallowed: # Empty list means no markets are disallowed.
 tickers:
   sources:
     coinGecko:
