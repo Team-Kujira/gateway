@@ -147,7 +147,7 @@ export const validatePostPerpOrderRequest: RequestValidator =
   );
 
 export const validateOrderRequest: RequestValidator = mkRequestValidator(
-  NETWORK_VALIDATIONS.concat([])
+  NETWORK_VALIDATIONS.concat([validateOrderId])
 );
 
 export const validatePerpTradesRequest: RequestValidator = mkRequestValidator(
