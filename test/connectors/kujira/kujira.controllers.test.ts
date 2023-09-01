@@ -6,9 +6,11 @@ import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   logRequest as helperLogRequest,
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   logResponse as helperLogResponse,
   sendRequest as helperSendRequest,
   SendRequestFunction,
@@ -118,15 +120,19 @@ import {
   createPatches,
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enableInputOutputWrapper,
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   disableInputOutputWrapper,
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enablePatches,
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   disablePatches,
   getPatch as helperGetPatch,
   useInputOutputWrapper,
