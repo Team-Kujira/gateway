@@ -80,7 +80,7 @@
     "http-status-codes": "2.2.0",
     "immutable": "^4.2.4",
     "js-yaml": "^4.1.0",
-    "kujira.js": "https://github.com/Team-Kujira/kujira.js#911a8acbfa28909cc0ad31a5007ee23fc8fd7c5a",
+    "kujira.js": "^0.8.145",
     "level": "^8.0.0",
     "lodash": "^4.17.21",
     "lru-cache": "^7.14.1",
