@@ -58,9 +58,6 @@ tokens:
   disallowed: # Empty list means no tokens are disallowed.
 markets:
   allowed: # Empty list means all markets are allowed.
-    - KUJI/USK
-    - KUJI/axlUSDC
-    - axlUSDC/USK
   disallowed: # Empty list means no markets are disallowed.
 transactions:
   merge:

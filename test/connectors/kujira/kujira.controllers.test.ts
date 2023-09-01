@@ -138,7 +138,6 @@ import {
   useInputOutputWrapper,
   usePatches,
 } from './fixtures/patches/patches';
-import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
 import data from './fixtures/patches/data';
@@ -245,29 +244,30 @@ const mnemonic: string = getNotNullOrThrowError<string>(
 );
 
 beforeAll(async () => {
-  const configManager = ConfigManagerV2.getInstance();
-
-  configManager.set('kujira.prefix', 'kujira');
-  configManager.set('kujira.accountNumber', 0);
-  configManager.set('kujira.gasPrice', 0.00125);
-  configManager.set('kujira.gasPriceSuffix', 'ukuji');
-  configManager.set('kujira.gasLimitEstimate', 0.009147);
-  configManager.set('kujira.orderBook.offset', 0);
-  configManager.set('kujira.orderBook.limit', 255);
-  configManager.set('kujira.orders.create.fee', 'auto');
-  configManager.set('kujira.orders.create.maxPerTransaction', 8);
-  configManager.set('kujira.orders.open.limit', 255);
-  configManager.set('kujira.orders.filled.limit', 255);
-  configManager.set('kujira.orders.cancel.maxPerTransaction', 25);
-  configManager.set('kujira.tokens.resolutionStrategy', 'markets');
-  configManager.set('kujira.transactions.merge.createOrders', true);
-  configManager.set('kujira.transactions.merge.cancelOrders', true);
-  configManager.set('kujira.transactions.merge.settleFunds', true);
-  configManager.set('kujira.retry.all.maxNumberOfRetries', 3);
-  configManager.set('kujira.retry.all.delayBetweenRetries', 1000);
-  configManager.set('kujira.timeout.all', 60000);
-  configManager.set('kujira.parallel.all.batchSize', 100);
-  configManager.set('kujira.parallel.all.delayBetweenBatches', 200);
+  config.prefix = 'kujira';
+  config.accountNumber = 0;
+  config.gasPrice = BigNumber(0.00125);
+  config.gasPriceSuffix = 'ukuji';
+  config.gasLimitEstimate = BigNumber(0.009147);
+  config.orderBook.offset = 0;
+  config.orderBook.limit = 255;
+  config.orders.create.fee = 'auto';
+  config.orders.create.maxPerTransaction = 8;
+  config.orders.open.limit = 255;
+  config.orders.filled.limit = 255;
+  config.orders.cancel.maxPerTransaction = 25;
+  config.tokens.allowed = null;
+  config.tokens.disallowed = null;
+  config.markets.allowed = ['KUJI/USK', 'KUJI/axlUSDC', 'axlUSDC/USK'];
+  config.markets.disallowed = null;
+  config.transactions.merge.createOrders = true;
+  config.transactions.merge.cancelOrders = true;
+  config.transactions.merge.settleFunds = true;
+  config.retry.all.maxNumberOfRetries = 3;
+  config.retry.all.delayBetweenRetries = 1000;
+  config.timeout.all = 60000;
+  config.parallel.all.batchSize = 100;
+  config.parallel.all.delayBetweenBatches = 200;
 
   expressApp = express();
   expressApp.use(express.json());
