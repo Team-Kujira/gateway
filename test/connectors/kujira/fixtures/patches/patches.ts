@@ -447,8 +447,8 @@ export const createPatches = (
           const dataKey = [
             'kujira',
             'kujiraGetBasicMarkets',
-            'beforeAll',
-            6,
+            testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);
@@ -494,8 +494,8 @@ export const createPatches = (
           const dataKey = [
             'kujira',
             'kujiraGetBasicTokens',
-            'beforeAll',
-            7,
+            testTitle,
+            ordinal,
           ];
 
           const key: string = JSON.stringify(dataKey);

@@ -4,7 +4,11 @@ import { unpatch } from '../../services/patch';
 import { KujiraModel } from '../../../src/connectors/kujira/kujira.model';
 import { KujiraConfig } from '../../../src/connectors/kujira/kujira.config';
 import {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   logRequest as helperLogRequest,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   logResponse as helperLogResponse,
   sendRequest as helperSendRequest,
   SendRequestFunction,
@@ -112,10 +116,18 @@ import lodash from 'lodash';
 import { getNotNullOrThrowError } from '../../../src/connectors/kujira/kujira.helpers';
 import {
   createPatches,
-  // enableInputOutputWrapper,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  enableInputOutputWrapper,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   disableInputOutputWrapper,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   enablePatches,
-  // disablePatches,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  disablePatches,
   getPatch as helperGetPatch,
   useInputOutputWrapper,
   usePatches,
@@ -553,15 +565,15 @@ beforeEach(async () => {
   };
 
   testTitle = expect.getState().currentTestName;
-  logRequest = (target: any) => helperLogRequest(target, testTitle);
-  logResponse = (target: any) => helperLogResponse(target, testTitle);
+  // logRequest = (target: any) => helperLogRequest(target, testTitle);
+  // logResponse = (target: any) => helperLogResponse(target, testTitle);
 
-  // logRequest = (_target: any) => {
-  //   return;
-  // };
-  // logResponse = (_target: any) => {
-  //   return;
-  // };
+  logRequest = (_target: any) => {
+    return;
+  };
+  logResponse = (_target: any) => {
+    return;
+  };
 
   await getPatch(['kujira', 'decryptWallet'])(testTitle);
   await getPatch(['kujira', 'kujiraFinClientWithdrawOrders'])(testTitle);
