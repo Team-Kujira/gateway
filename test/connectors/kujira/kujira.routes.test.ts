@@ -140,8 +140,8 @@ import data from './fixtures/patches/data';
 enablePatches();
 // disablePatches();
 
-enableInputOutputWrapper();
-// disableInputOutputWrapper();
+// enableInputOutputWrapper();
+disableInputOutputWrapper();
 
 // const requestStrategy = RequestStrategy.RESTful;
 const requestStrategy = RequestStrategy.Controller;
