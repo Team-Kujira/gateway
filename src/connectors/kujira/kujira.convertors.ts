@@ -613,11 +613,14 @@ export const convertKujiraSettlementToSettlement = (
   const rawBaseTokenFees = rawBaseQuoteFees[0];
   const rawQuoteTokenFees = rawBaseQuoteFees[1];
 
-  const rawAmounts: string[] = [
-    nativeFees,
-    rawBaseTokenFees,
-    rawQuoteTokenFees,
-  ];
+  const rawAmounts: string[] = [nativeFees];
+
+  if (!rawBaseTokenFees == undefined) {
+    rawAmounts.push(rawBaseTokenFees)
+  }
+  if (!rawQuoteTokenFees == undefined) {
+    rawAmounts.push(rawQuoteTokenFees)
+  }
 
   const tokenWithdraw = IMap<TokenId, Withdraw>().asMutable();
 
