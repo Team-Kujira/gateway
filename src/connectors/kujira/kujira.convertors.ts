@@ -615,10 +615,10 @@ export const convertKujiraSettlementToSettlement = (
 
   const rawAmounts: string[] = [nativeFees];
 
-  if (!rawBaseTokenFees == undefined) {
+  if (rawBaseTokenFees) {
     rawAmounts.push(rawBaseTokenFees)
   }
-  if (!rawQuoteTokenFees == undefined) {
+  if (rawQuoteTokenFees) {
     rawAmounts.push(rawQuoteTokenFees)
   }
 
@@ -666,8 +666,8 @@ export const convertKujiraSettlementToSettlement = (
 
         tokenWithdraw.set(tokenId, {
           fees: {
-            token: tokenData.fees.amount.plus(amount),
-            USD: tokenData.fees.amountInUSD.plus(amountInUSD),
+            token: tokenData.fees.token.plus(amount),
+            USD: tokenData.fees.USD.plus(amountInUSD),
             quotation: quotation,
           },
           token: token,
