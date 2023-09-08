@@ -252,12 +252,16 @@ export interface SimplifiedBalance {
   total: Amount;
 }
 
+export interface SimplifiedBalanceWithUSD extends SimplifiedBalance {
+  quotation: Amount;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TotalBalance extends SimplifiedBalance {}
 
 export interface TokenBalance extends SimplifiedBalance {
   token: Token;
-  inUSD: SimplifiedBalance;
+  inUSD: SimplifiedBalanceWithUSD;
 }
 
 export interface Balances {

@@ -489,6 +489,7 @@ export const convertKujiraBalancesToBalances = async (
         unsettled: BigNumber(0),
         total: BigNumber(0),
         inUSD: {
+          quotation: BigNumber(0),
           free: BigNumber(0),
           lockedInOrders: BigNumber(0),
           unsettled: BigNumber(0),
@@ -500,6 +501,7 @@ export const convertKujiraBalancesToBalances = async (
         output.tokens.get(token.id)
       );
       tokenBalance.free = freeAmount;
+      tokenBalance.inUSD.quotation = quotation;
       tokenBalance.inUSD.free = freeAmount.multipliedBy(quotation);
     }
   }
@@ -522,6 +524,7 @@ export const convertKujiraBalancesToBalances = async (
         unsettled: BigNumber(0),
         total: BigNumber(0),
         inUSD: {
+          quotation: BigNumber(0),
           free: BigNumber(0),
           lockedInOrders: BigNumber(0),
           unsettled: BigNumber(0),
@@ -534,6 +537,8 @@ export const convertKujiraBalancesToBalances = async (
     );
 
     const amount = order.amount;
+
+    tokenBalance.inUSD.quotation = quotation;
 
     if ([OrderStatus.OPEN, OrderStatus.PARTIALLY_FILLED].includes(
         getNotNullOrThrowError<OrderStatus>(order.status)
