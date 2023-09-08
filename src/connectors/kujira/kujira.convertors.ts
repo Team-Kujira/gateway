@@ -535,16 +535,18 @@ export const convertKujiraBalancesToBalances = async (
 
     const amount = order.amount;
 
-    if (order.status == OrderStatus.OPEN) {
+    if ([OrderStatus.OPEN, OrderStatus.PARTIALLY_FILLED].includes(
+        getNotNullOrThrowError<OrderStatus>(order.status)
+    )) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
       tokenBalance.inUSD.lockedInOrders =
         tokenBalance.inUSD.lockedInOrders.plus(
-          tokenBalance.lockedInOrders.multipliedBy(quotation)
+          amount.multipliedBy(quotation)
         );
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
       tokenBalance.inUSD.unsettled =
-        tokenBalance.unsettled.multipliedBy(quotation);
+          amount.multipliedBy(quotation);
     }
   }
 
