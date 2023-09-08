@@ -540,18 +540,17 @@ export const convertKujiraBalancesToBalances = async (
 
     tokenBalance.inUSD.quotation = quotation;
 
-    if ([OrderStatus.OPEN, OrderStatus.PARTIALLY_FILLED].includes(
+    if (
+      [OrderStatus.OPEN, OrderStatus.PARTIALLY_FILLED].includes(
         getNotNullOrThrowError<OrderStatus>(order.status)
-    )) {
+      )
+    ) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
       tokenBalance.inUSD.lockedInOrders =
-        tokenBalance.inUSD.lockedInOrders.plus(
-          amount.multipliedBy(quotation)
-        );
+        tokenBalance.inUSD.lockedInOrders.plus(amount.multipliedBy(quotation));
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      tokenBalance.inUSD.unsettled =
-          amount.multipliedBy(quotation);
+      tokenBalance.inUSD.unsettled = amount.multipliedBy(quotation);
     }
   }
 
@@ -623,10 +622,10 @@ export const convertKujiraSettlementToSettlement = (
   const rawAmounts: string[] = [nativeFees];
 
   if (rawBaseTokenFees) {
-    rawAmounts.push(rawBaseTokenFees)
+    rawAmounts.push(rawBaseTokenFees);
   }
   if (rawQuoteTokenFees) {
-    rawAmounts.push(rawQuoteTokenFees)
+    rawAmounts.push(rawQuoteTokenFees);
   }
 
   const tokenWithdraw = IMap<TokenId, Withdraw>().asMutable();

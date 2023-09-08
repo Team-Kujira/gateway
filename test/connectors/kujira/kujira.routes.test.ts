@@ -2266,6 +2266,7 @@ describe('Kujira', () => {
           userBalances.tokens.get(targetOrder.market.quoteToken.id)?.total
         ),
         inUSD: {
+          quotation: BigNumber(0),
           free: getNotNullOrThrowError<any>(
             userBalances.tokens.get(targetOrder.market.quoteToken.id)
           )?.free,
@@ -2455,6 +2456,7 @@ describe('Kujira', () => {
           userBalances.tokens.get(targetOrder.market.baseToken.id)?.total
         ),
         inUSD: {
+          quotation: BigNumber(0),
           free: getNotNullOrThrowError<any>(
             userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.free
           ),
@@ -2507,6 +2509,7 @@ describe('Kujira', () => {
           userBalances.tokens.get(targetOrder.market.quoteToken.id)?.total
         ),
         inUSD: {
+          quotation: BigNumber(0),
           free: getNotNullOrThrowError<any>(
             userBalances.tokens.get(targetOrder.market.quoteToken.id)
           )?.free,
@@ -2677,6 +2680,7 @@ describe('Kujira', () => {
           userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.total
         ),
         inUSD: {
+          quotation: BigNumber(0),
           free: getNotNullOrThrowError<any>(
             userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
               ?.inUSD.free
@@ -2729,6 +2733,7 @@ describe('Kujira', () => {
             ?.total
         ),
         inUSD: {
+          quotation: BigNumber(0),
           free: getNotNullOrThrowError<any>(
             userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
           )?.free,
