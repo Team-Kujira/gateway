@@ -1305,9 +1305,9 @@ export class Kujira {
         let partialResponse: JsonObject;
 
         while (
-          (!partialResponse ||
-            partialResponse.orders.length >=
-              KujiraConfig.config.orders.open.paginationLimit) &&
+          partialResponse &&
+          partialResponse.orders.length >=
+            KujiraConfig.config.orders.open.paginationLimit &&
           response.orders.length <= KujiraConfig.config.orders.open.limit
         ) {
           partialResponse = await this.kujiraQueryClientWasmQueryContractSmart(
