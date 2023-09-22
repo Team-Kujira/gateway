@@ -1304,29 +1304,28 @@ export class Kujira {
         const response: JsonObject = { orders: [] };
         let partialResponse: JsonObject;
 
-        while (
-          partialResponse &&
-          partialResponse.orders.length >=
-            KujiraConfig.config.orders.open.paginationLimit &&
-          response.orders.length <= KujiraConfig.config.orders.open.limit
-        ) {
+        do {
           partialResponse = await this.kujiraQueryClientWasmQueryContractSmart(
-            market.connectorMarket.address,
-            {
-              orders_by_user: {
-                address: ownerAddress,
-                limit: KujiraConfig.config.orders.open.limit,
-                start_after: partialResponse
-                  ? partialResponse.orders[
+              market.connectorMarket.address,
+              {
+                orders_by_user: {
+                  address: ownerAddress,
+                  limit: KujiraConfig.config.orders.open.limit,
+                  start_after: partialResponse
+                      ? partialResponse.orders[
                       partialResponse.orders.length - 1
-                    ].idx.toString()
-                  : null,
-              },
-            }
+                          ].idx.toString()
+                      : null,
+                },
+              }
           );
 
           response.orders = [...response.orders, ...partialResponse.orders];
-        }
+        } while ((
+            partialResponse.orders.length >= KujiraConfig.config.orders.open.paginationLimit
+        ) && (
+            response.orders.length <= KujiraConfig.config.orders.open.limit
+        ));
 
         const bundles = IMap<string, any>().asMutable();
 
