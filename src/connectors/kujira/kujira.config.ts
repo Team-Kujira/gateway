@@ -67,12 +67,12 @@ export namespace KujiraConfig {
         ),
       },
       open: {
-        limit: configManager.get(`kujira.orders.open.limit`) | 255,
+        limit: configManager.get(`kujira.orders.open.limit`) | (5 * 31),
         paginationLimit:
           configManager.get(`kujira.orders.open.paginationLimit`) | 31,
       },
       filled: {
-        limit: configManager.get(`kujira.orders.filled.limit`) | 255,
+        limit: configManager.get(`kujira.orders.filled.limit`) | (5 * 31),
       },
       cancel: {
         maxPerTransaction: configManager.get(

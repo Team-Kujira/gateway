@@ -45,9 +45,9 @@ orders:
     fee: 'auto'
     maxPerTransaction: 8
   open:
-    limit: 255
+    limit: 155
   filled:
-    limit: 255
+    limit: 155
   cancel:
     maxPerTransaction: 25
 tokens:
