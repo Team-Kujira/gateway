@@ -1313,16 +1313,23 @@ export class Kujira {
             ).idx;
           }
 
-          partialResponse = await this.kujiraQueryClientWasmQueryContractSmart(
-            market.connectorMarket.address,
-            {
-              orders_by_user: {
-                address: ownerAddress,
-                limit: KujiraConfig.config.orders.open.paginationLimit,
-                start_after: startAfter,
-              },
+          try {
+            partialResponse =
+              await this.kujiraQueryClientWasmQueryContractSmart(
+                market.connectorMarket.address,
+                {
+                  orders_by_user: {
+                    address: ownerAddress,
+                    limit: KujiraConfig.config.orders.open.paginationLimit,
+                    start_after: startAfter,
+                  },
+                }
+              );
+          } catch (error: any) {
+            if (error.message.includes('Cannot Sub with 0 and 1')) {
+              break;
             }
-          );
+          }
 
           const combinedOrders = [
             ...response.orders,
