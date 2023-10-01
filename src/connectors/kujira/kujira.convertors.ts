@@ -671,37 +671,39 @@ export const convertKujiraSettlementToSettlement = (
         tokenFee?.feeAmount.multipliedBy(Math.pow(10, -denom.decimals))
     );
 
-    const quotation = getNotNullOrThrowError<BigNumber>(
-        quotations.get(token.id)
-    );
-
-    const amountInUSD = amount.multipliedBy(quotation);
-
-    if (!tokenWithdraw.has(token.id)) {
-      tokenWithdraw.set(token.id, {
-        fees: {
-          token: amount,
-          USD: amountInUSD,
-          quotation: quotation,
-        },
-        token: token,
-      } as Withdraw);
-    } else {
-      const tokenData = getNotNullOrThrowError<any>(
-          tokenWithdraw.get(token.id)
+    if (amount > BigNumber(0)) {
+      const quotation = getNotNullOrThrowError<BigNumber>(
+          quotations.get(token.id)
       );
 
-      tokenWithdraw.set(token.id, {
-        fees: {
-          token: tokenData.fees.token.plus(amount),
-          USD: tokenData.fees.USD.plus(amountInUSD),
-          quotation: quotation,
-        },
-        token: token,
-      } as Withdraw);
-    }
+      const amountInUSD = amount.multipliedBy(quotation);
 
-    withdraws.total.fees = withdraws.total.fees.plus(amountInUSD);
+      if (!tokenWithdraw.has(token.id)) {
+        tokenWithdraw.set(token.id, {
+          fees: {
+            token: amount,
+            USD: amountInUSD,
+            quotation: quotation,
+          },
+          token: token,
+        } as Withdraw);
+      } else {
+        const tokenData = getNotNullOrThrowError<any>(
+            tokenWithdraw.get(token.id)
+        );
+
+        tokenWithdraw.set(token.id, {
+          fees: {
+            token: tokenData.fees.token.plus(amount),
+            USD: tokenData.fees.USD.plus(amountInUSD),
+            quotation: quotation,
+          },
+          token: token,
+        } as Withdraw);
+      }
+
+      withdraws.total.fees = withdraws.total.fees.plus(amountInUSD);
+    }
   }
 
   return withdraws;
