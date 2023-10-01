@@ -759,15 +759,6 @@ export const convertKujiraRawLogEventsToMapOfEvents = (
     const events = eventLog['events'];
     let transferTokenAmountArray = [];
 
-    // let contractAddress = "";
-    // for (const event of events) {
-    //   if (event.type == "execute") {
-    //     contractAddress = event.attributes.find(
-    //         (attribute: any) => attribute.key == "_contract_address"
-    //     ).value
-    //   }
-    // }
-
     let feePayer: any = undefined;
 
     const txEventArray = events.filter((item: any) => item.type == "tx");
@@ -783,15 +774,10 @@ export const convertKujiraRawLogEventsToMapOfEvents = (
 
     for (const transferEvent of transferEventArray) {
       let recipient = transferEvent.attributes.find((attribute: any) => attribute.key == "recipient");
-      // let sender = transferEvent.attributes.find((attribute: any) => attribute.key == "sender");
 
       if (recipient != undefined) {
         recipient = recipient.value;
       }
-
-      // if (sender != undefined) {
-      //   sender = sender.value;
-      // }
 
       if ((feePayer != recipient)) {
         const transferAmounts = transferEvent.attributes.find((attribute: any) => attribute.key == "amount").value.split(",");
