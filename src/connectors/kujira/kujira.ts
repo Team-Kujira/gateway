@@ -1850,9 +1850,17 @@ export class Kujira {
 
       const quotations = await this.getAllTokensQuotationsInUSD({});
 
+      const marketPair = await this.getMarket({id: options.marketId});
       output.set(
         ownerAddress,
-        convertKujiraSettlementToSettlement(result, quotations)
+        convertKujiraSettlementToSettlement(
+            result,
+            quotations,
+            {
+              base: marketPair.baseToken,
+              quote: marketPair.quoteToken
+            }
+        )
       );
     }
 
