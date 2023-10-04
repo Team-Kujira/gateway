@@ -507,17 +507,38 @@ export const convertKujiraBalancesToBalances = async (
   }
 
   for (const order of orders.values()) {
-    const token =
-      order.side == OrderSide.BUY
-        ? order.market.quoteToken
-        : order.market.baseToken;
+    let token: any = undefined;
+    let amount: any = undefined;
+    if (
+        [OrderStatus.OPEN, OrderStatus.PARTIALLY_FILLED].includes(
+            getNotNullOrThrowError<OrderStatus>(order.status)
+        )
+    ) {
+      token =
+          order.side == OrderSide.BUY
+              ? order.market.quoteToken
+              : order.market.baseToken;
+
+      amount = BigNumber(order.connectorOrder.offer_amount).div(
+          BigNumber(10).pow(token?.decimals)
+      );
+    } else if (order.status == OrderStatus.FILLED) {
+      token =
+          order.side == OrderSide.BUY
+              ? order.market.baseToken
+              : order.market.quoteToken;
+
+      amount = BigNumber(order.connectorOrder.filled_amount).div(
+          BigNumber(10).pow(token?.decimals)
+      );
+    }
 
     const quotation = getNotNullOrThrowError<BigNumber>(
-      quotations.get(token.id)
+      quotations.get(token?.id)
     );
 
-    if (!output.tokens.has(token.id)) {
-      output.tokens.set(token.id, {
+    if (!output.tokens.has(token?.id)) {
+      output.tokens.set(token?.id, {
         token: token,
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
@@ -533,10 +554,8 @@ export const convertKujiraBalancesToBalances = async (
       });
     }
     const tokenBalance = getNotNullOrThrowError<TokenBalance>(
-      output.tokens.get(token.id)
+      output.tokens.get(token?.id)
     );
-
-    const amount = order.amount;
 
     tokenBalance.inUSD.quotation = quotation;
 
@@ -547,10 +566,10 @@ export const convertKujiraBalancesToBalances = async (
     ) {
       tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
       tokenBalance.inUSD.lockedInOrders =
-        tokenBalance.inUSD.lockedInOrders.plus(amount.multipliedBy(quotation));
+        tokenBalance.inUSD.lockedInOrders.plus(amount?.multipliedBy(quotation));
     } else if (order.status == OrderStatus.FILLED) {
       tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      tokenBalance.inUSD.unsettled = amount.multipliedBy(quotation);
+      tokenBalance.inUSD.unsettled = tokenBalance.inUSD.unsettled.plus(amount?.multipliedBy(quotation));
     }
   }
 
