@@ -345,7 +345,7 @@ export class Kujira {
 
       this.kujiraGetHttpBatchClient(rpcEndpoint);
 
-      await this.kujiraGetTendermint34Client();
+      await this.kujiraGetTendermint37Client();
 
       this.kujiraGetKujiraQueryClient();
 
@@ -368,7 +368,7 @@ export class Kujira {
     });
   }
 
-  private async kujiraGetTendermint34Client() {
+  private async kujiraGetTendermint37Client() {
     this.tendermint37Client = await Tendermint37Client.create(
       this.httpBatchClient
     );
