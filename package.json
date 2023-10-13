@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@cosmjs/proto-signing": "^0.30.1",
-    "@cosmjs/stargate": "^0.30.1",
+    "@cosmjs/stargate": "^0.31.1",
     "@crocswap/sdk": "^2.4.5",
     "@ethersproject/abstract-provider": "5.7.0",
     "@ethersproject/address": "5.7.0",
