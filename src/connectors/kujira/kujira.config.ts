@@ -126,6 +126,7 @@ export namespace KujiraConfig {
       priceUrl:
         configManager.get('kujira.coinGecko.priceUrl') ||
         'https://api.coingecko.com/api/v3/simple/price?ids={targets}&vs_currencies=usd',
+      apiKeys: configManager.get('kujira.coinGecko.apiKeys') || [''],
     },
   };
 }

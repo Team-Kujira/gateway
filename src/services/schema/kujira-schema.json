@@ -196,7 +196,8 @@
       "type": "object",
       "required": [
         "coinsUrl",
-        "priceUrl"
+        "priceUrl",
+				"apiKeys"
       ],
       "properties": {
         "coinsUrl": {
@@ -210,7 +211,13 @@
             "string",
             "null"
           ]
-        }
+        },
+				"apiKeys": {
+					"type": [
+						"array",
+						"null"
+					]
+				}
       }
     },
     "transactions": {

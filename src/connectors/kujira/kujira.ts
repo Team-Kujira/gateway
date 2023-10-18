@@ -785,13 +785,17 @@ export class Kujira {
   ): Promise<GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse> {
     const output = IMap<TokenSymbol, CoinGeckoId | undefined>().asMutable();
 
-    const url = config.coinGecko.coinsUrl;
+    const apiKeys = config.coinGecko.apiKeys;
+    const randomIndex = Math.floor(Math.random() * apiKeys.length);
+    const apiKey = apiKeys[randomIndex];
+
+    const finalUrl = config.coinGecko.coinsUrl.replace('{apiKey}', apiKey);
 
     const result: any = (
       await runWithRetryAndTimeout(
         axios,
         axios.get,
-        [url],
+        [finalUrl],
         config.retry.all.maxNumberOfRetries,
         0
       )
@@ -1029,10 +1033,17 @@ export class Kujira {
           if (!coinGeckoBaseTokenId || !coinGeckoQuoteTokenId) {
             result = {};
           } else {
-            const finalUrl = config.coinGecko.priceUrl.replace(
-              '{targets}',
-              coinGeckoBaseTokenId.concat(',').concat(coinGeckoQuoteTokenId)
-            );
+            const coinGeckoIds = coinGeckoBaseTokenId
+              .concat(',')
+              .concat(coinGeckoQuoteTokenId);
+
+            const apiKeys = config.coinGecko.apiKeys;
+            const randomIndex = Math.floor(Math.random() * apiKeys.length);
+            const apiKey = apiKeys[randomIndex];
+
+            const finalUrl = config.coinGecko.priceUrl
+              .replace('{apiKey}', apiKey)
+              .replace('{targets}', coinGeckoIds);
 
             result = (
               await runWithRetryAndTimeout(
@@ -1124,11 +1135,16 @@ export class Kujira {
     const coinGeckoIds = kujiraSymbolsToCoinGeckoIdsMap
       .valueSeq()
       .toArray()
+      .filter((id: any) => id && id.trim() !== '')
       .join(',');
 
-    const finalUrl = getNotNullOrThrowError<{ priceUrl: string }>(
-      config.coinGecko
-    ).priceUrl.replace('{targets}', coinGeckoIds);
+    const apiKeys = config.coinGecko.apiKeys;
+    const randomIndex = Math.floor(Math.random() * apiKeys.length);
+    const apiKey = apiKeys[randomIndex];
+
+    const finalUrl = config.coinGecko.priceUrl
+      .replace('{apiKey}', apiKey)
+      .replace('{targets}', coinGeckoIds);
 
     const result: any = (
       await runWithRetryAndTimeout(
