@@ -1029,7 +1029,7 @@ export class Kujira {
           if (!coinGeckoBaseTokenId || !coinGeckoQuoteTokenId) {
             result = {};
           } else {
-            const finalUrl = configuration.url.replace(
+            const finalUrl = config.coinGecko.priceUrl.replace(
               '{targets}',
               coinGeckoBaseTokenId.concat(',').concat(coinGeckoQuoteTokenId)
             );
