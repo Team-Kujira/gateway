@@ -1852,7 +1852,7 @@ export class Kujira {
 
       output.set(
         ownerAddress,
-        convertKujiraSettlementToSettlement(result, quotations)
+        convertKujiraSettlementToSettlement(result, quotations, market)
       );
     }
 
