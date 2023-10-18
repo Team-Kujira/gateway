@@ -1,6 +1,5 @@
 import { BigNumber } from 'bignumber.js';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
-import { getNotNullOrThrowError } from './kujira.helpers';
 
 const configManager = ConfigManagerV2.getInstance();
 
@@ -121,17 +120,9 @@ export namespace KujiraConfig {
       coinGeckoCoins: configManager.get('kujira.cache.coinGeckoCoins') || 3600, // in seconds
     },
     coinGecko: {
-      coinsUrl: 'https://api.coingecko.com/api/v3/coins/list',
-      priceUrl:
-        'https://api.coingecko.com/api/v3/simple/price?ids={targets}&vs_currencies=usd',
+      coinsUrl: configManager.get('kujira.coinGecko.coinsUrl') || 'https://api.coingecko.com/api/v3/coins/list',
+      priceUrl: configManager.get('kujira.coinGecko.priceUrl') ||
+          'https://api.coingecko.com/api/v3/simple/price?ids={targets}&vs_currencies=usd',
     },
   };
-}
-
-if (KujiraConfig.config.tickers.sources.has('nomics')) {
-  getNotNullOrThrowError<any>(
-    KujiraConfig.config.tickers.sources.get('nomics')
-  ).url =
-    KujiraConfig.config.tickers.sources.get('nomics')?.url ||
-    'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=kujira_dex&interval=1m&market=${marketAddress}';
 }

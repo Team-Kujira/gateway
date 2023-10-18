@@ -192,6 +192,27 @@
         }
       }
     },
+    "coinGecko": {
+      "type": "object",
+      "required": [
+        "coinsUrl",
+        "priceUrl"
+      ],
+      "properties": {
+        "coinsUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "priceUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
     "transactions": {
       "type": "object",
       "required": [
@@ -312,6 +333,7 @@
     "orders",
     "markets",
     "tickers",
+    "coinGecko",
     "transactions",
     "retry",
     "timeout",

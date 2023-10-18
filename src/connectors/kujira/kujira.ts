@@ -1126,9 +1126,9 @@ export class Kujira {
       .toArray()
       .join(',');
 
-    const finalUrl = getNotNullOrThrowError<{ url: string }>(
-      config.tickers.sources.get(TickerSource.COINGECKO)
-    ).url.replace('{targets}', coinGeckoIds);
+    const finalUrl = getNotNullOrThrowError<{ priceUrl: string }>(
+      config.coinGecko
+    ).priceUrl.replace('{targets}', coinGeckoIds);
 
     const result: any = (
       await runWithRetryAndTimeout(

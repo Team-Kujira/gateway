@@ -65,12 +65,13 @@ markets:
   disallowed: # Empty list means no markets are disallowed.
 tickers:
   sources:
-    coinGecko:
-      url: "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&x_cg_demo_api_key=<API_KEY>&ids={targets}"
-#    orderBookSimpleAveragePrice:
+    orderBookSimpleAveragePrice: null
 #    orderBookWeightedAveragePrice:
 #    orderBookVolumeWeightedAveragePrice:
 #    lastFilledOrder:
+coinGecko:
+  coinsUrl: 'https://api.coingecko.com/api/v3/coins/list'
+  priceUrl: "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&x_cg_demo_api_key=<API_KEY>&ids={targets}"
 transactions:
   merge:
     createOrders: true
