@@ -689,11 +689,11 @@ export const convertKujiraSettlementToSettlement = (
 
   const tokenFees = {
     base: {
-      tokenId: market.base.id,
+      tokenId: market.baseToken.id,
       feeAmount: BigNumber(0),
     },
     quote: {
-      tokenId: market.quote.id,
+      tokenId: market.quoteToken.id,
       feeAmount: BigNumber(0),
     },
     native: {
@@ -705,18 +705,21 @@ export const convertKujiraSettlementToSettlement = (
   for (const transferEventFee of transferEventFeeAmountArray) {
     const tokenIdFromFeeMatch = transferEventFee.match(/^(\d+)(.*)/);
 
-    if (tokenIdFromFeeMatch[2] == market.base.id) {
+    if (tokenIdFromFeeMatch[2] == market.baseToken.id) {
       tokenFees.base.feeAmount = tokenFees.base.feeAmount.plus(
         BigNumber(parseInt(tokenIdFromFeeMatch[1]))
       );
-    } else if (tokenIdFromFeeMatch[2] == market.quote.id) {
+    } else if (tokenIdFromFeeMatch[2] == market.quoteToken.id) {
       tokenFees.quote.feeAmount = tokenFees.quote.feeAmount.plus(
         BigNumber(parseInt(tokenIdFromFeeMatch[1]))
       );
     }
   }
 
-  if (market.base.id != nativeToken[2] && market.quote.id != nativeToken[2]) {
+  if (
+    market.baseToken.id != nativeToken[2] &&
+    market.quoteToken.id != nativeToken[2]
+  ) {
     tokenFees.native.feeAmount = tokenFees.native.feeAmount.plus(
       BigNumber(parseInt(nativeToken[1]))
     );
