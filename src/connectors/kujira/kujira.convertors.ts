@@ -671,45 +671,55 @@ export const convertKujiraTransactionToTransaction = (
 export const convertKujiraSettlementToSettlement = (
   input: KujiraWithdraw,
   quotations: IMap<TokenId, Price>,
-  marketPair: {base: any, quote: any}
+  market: Market
 ): Withdraws => {
   const events = convertKujiraRawLogEventsToMapOfEvents([
     { msg_index: 'events', events: input['events'] },
   ]);
 
   const nativeToken = getNotNullOrThrowError<any>(
-      ((events.getIn(['events', 'tx', 'fee']) as string).match(/^(\d+)(.*)/))
+    (events.getIn(['events', 'tx', 'fee']) as string).match(/^(\d+)(.*)/)
   );
 
-  const transferEventFeeAmountArray: any =  events.getIn(['events', 'transfer', 'amount']);
+  const transferEventFeeAmountArray: any = events.getIn([
+    'events',
+    'transfer',
+    'amount',
+  ]);
 
-  let tokenFees = {
-    "base": {
-      tokenId: marketPair.base.id,
-      feeAmount: BigNumber(0)
+  const tokenFees = {
+    base: {
+      tokenId: market.base.id,
+      feeAmount: BigNumber(0),
     },
-    "quote": {
-      tokenId: marketPair.quote.id,
-      feeAmount: BigNumber(0)
+    quote: {
+      tokenId: market.quote.id,
+      feeAmount: BigNumber(0),
     },
-    "native": {
+    native: {
       tokenId: nativeToken[2],
-      feeAmount: BigNumber(0)
+      feeAmount: BigNumber(0),
     },
   };
 
   for (const transferEventFee of transferEventFeeAmountArray) {
     const tokenIdFromFeeMatch = transferEventFee.match(/^(\d+)(.*)/);
 
-    if (tokenIdFromFeeMatch[2] == marketPair.base.id) {
-      tokenFees["base"].feeAmount = tokenFees["base"].feeAmount.plus(BigNumber(parseInt(tokenIdFromFeeMatch[1])));
-    } else if (tokenIdFromFeeMatch[2] == marketPair.quote.id) {
-      tokenFees["quote"].feeAmount = tokenFees["quote"].feeAmount.plus(BigNumber(parseInt(tokenIdFromFeeMatch[1])));
+    if (tokenIdFromFeeMatch[2] == market.base.id) {
+      tokenFees.base.feeAmount = tokenFees.base.feeAmount.plus(
+        BigNumber(parseInt(tokenIdFromFeeMatch[1]))
+      );
+    } else if (tokenIdFromFeeMatch[2] == market.quote.id) {
+      tokenFees.quote.feeAmount = tokenFees.quote.feeAmount.plus(
+        BigNumber(parseInt(tokenIdFromFeeMatch[1]))
+      );
     }
   }
 
-  if (marketPair.base.id != nativeToken[2] && marketPair.quote.id != nativeToken[2]) {
-    tokenFees["native"].feeAmount = tokenFees.native.feeAmount.plus(BigNumber(parseInt(nativeToken[1])));
+  if (market.base.id != nativeToken[2] && market.quote.id != nativeToken[2]) {
+    tokenFees.native.feeAmount = tokenFees.native.feeAmount.plus(
+      BigNumber(parseInt(nativeToken[1]))
+    );
   }
 
   const tokenWithdraw = IMap<TokenId, Withdraw>().asMutable();
@@ -722,22 +732,17 @@ export const convertKujiraSettlementToSettlement = (
     },
   } as Withdraws;
 
-  for (const item in tokenFees) {
-    let tokenFee = undefined;
-    if (tokenFees.hasOwnProperty(item)) {
-      tokenFee = tokenFees[item as keyof typeof tokenFees];
-    }
-
-    const denom = Denom.from(tokenFee?.tokenId);
+  for (const tokenFee of Object.values(tokenFees)) {
+    const denom = Denom.from(tokenFee.tokenId);
     const token = convertKujiraTokenToToken(denom);
 
     const amount = getNotNullOrThrowError<BigNumber>(
-        tokenFee?.feeAmount.multipliedBy(Math.pow(10, -denom.decimals))
+      tokenFee.feeAmount.multipliedBy(Math.pow(10, -denom.decimals))
     );
 
-    if (amount > BigNumber(0)) {
+    if (amount.gt(BigNumber(0))) {
       const quotation = getNotNullOrThrowError<BigNumber>(
-          quotations.get(token.id)
+        quotations.get(token.id)
       );
 
       const amountInUSD = amount.multipliedBy(quotation);
@@ -753,7 +758,7 @@ export const convertKujiraSettlementToSettlement = (
         } as Withdraw);
       } else {
         const tokenData = getNotNullOrThrowError<any>(
-            tokenWithdraw.get(token.id)
+          tokenWithdraw.get(token.id)
         );
 
         tokenWithdraw.set(token.id, {
@@ -823,48 +828,59 @@ export const convertKujiraRawLogEventsToMapOfEvents = (
   for (const eventLog of eventsLog) {
     const bundleIndex = eventLog['msg_index'];
     const events = eventLog['events'];
-    let transferTokenAmountArray = [];
+    const transferTokenAmountArray = [];
 
     let feePayer: any = undefined;
 
-    const txEventArray = events.filter((item: any) => item.type == "tx");
+    const txEventArray = events.filter((item: any) => item.type == 'tx');
 
     for (const txEvent of txEventArray) {
-      const txFeePayer = txEvent.attributes.find((attribute: any) => attribute.key == "fee_payer");
+      const txFeePayer = txEvent.attributes.find(
+        (attribute: any) => attribute.key == 'fee_payer'
+      );
       if (txFeePayer != undefined && feePayer == undefined) {
         feePayer = txFeePayer.value;
       }
     }
 
-    const transferEventArray = events.filter((item: any) => item.type == "transfer");
+    const transferEventArray = events.filter(
+      (item: any) => item.type == 'transfer'
+    );
 
     for (const transferEvent of transferEventArray) {
-      let recipient = transferEvent.attributes.find((attribute: any) => attribute.key == "recipient");
+      let recipient = transferEvent.attributes.find(
+        (attribute: any) => attribute.key == 'recipient'
+      );
 
       if (recipient != undefined) {
         recipient = recipient.value;
       }
 
-      if ((feePayer != recipient)) {
-        const transferAmounts = transferEvent.attributes.find((attribute: any) => attribute.key == "amount").value.split(",");
+      if (feePayer != recipient) {
+        const transferAmounts = transferEvent.attributes
+          .find((attribute: any) => attribute.key == 'amount')
+          .value.split(',');
 
         for (const transferAmount of transferAmounts) {
           if (transferAmount != undefined) {
-            transferTokenAmountArray.push(transferAmount)
+            transferTokenAmountArray.push(transferAmount);
           }
         }
       }
     }
 
     for (const event of events) {
-      if (event.type != "transfer") {
+      if (event.type != 'transfer') {
         for (const attribute of event.attributes) {
-          output.setIn([bundleIndex, event.type, attribute.key], attribute.value);
+          output.setIn(
+            [bundleIndex, event.type, attribute.key],
+            attribute.value
+          );
         }
       }
     }
 
-    output.setIn([bundleIndex, "transfer", "amount"], transferTokenAmountArray);
+    output.setIn([bundleIndex, 'transfer', 'amount'], transferTokenAmountArray);
   }
 
   return output;
