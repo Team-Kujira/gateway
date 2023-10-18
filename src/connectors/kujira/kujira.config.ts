@@ -120,9 +120,12 @@ export namespace KujiraConfig {
       coinGeckoCoins: configManager.get('kujira.cache.coinGeckoCoins') || 3600, // in seconds
     },
     coinGecko: {
-      coinsUrl: configManager.get('kujira.coinGecko.coinsUrl') || 'https://api.coingecko.com/api/v3/coins/list',
-      priceUrl: configManager.get('kujira.coinGecko.priceUrl') ||
-          'https://api.coingecko.com/api/v3/simple/price?ids={targets}&vs_currencies=usd',
+      coinsUrl:
+        configManager.get('kujira.coinGecko.coinsUrl') ||
+        'https://api.coingecko.com/api/v3/coins/list',
+      priceUrl:
+        configManager.get('kujira.coinGecko.priceUrl') ||
+        'https://api.coingecko.com/api/v3/simple/price?ids={targets}&vs_currencies=usd',
     },
   };
 }
