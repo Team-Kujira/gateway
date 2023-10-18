@@ -51,6 +51,7 @@ export type PayerAddress = Address;
 export type Price = BigNumber;
 export type Amount = BigNumber;
 export type Fee = BigNumber;
+export type Percentage = BigNumber;
 export type Timestamp = number;
 export type Block = number;
 export type EncryptedWallet = string;
@@ -187,6 +188,16 @@ export interface KujiraTicker {
   price: Price;
 }
 
+export interface TokenAmount {
+  token: Token;
+  amount: Amount;
+}
+
+export interface OrderFilling {
+  free: TokenAmount;
+  filled: TokenAmount;
+}
+
 export interface TokenPriceInDolar {
   token: TokenName;
   price: Price;
@@ -283,6 +294,7 @@ export interface Order {
   status?: OrderStatus;
   type?: OrderType;
   fee?: OrderFee;
+  filling?: OrderFilling;
   creationTimestamp?: OrderCreationTimestamp;
   fillingTimestamp?: OrderFillingTimestamp;
   hashes?: OrderTransactionHashes;

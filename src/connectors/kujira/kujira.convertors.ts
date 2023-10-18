@@ -1,4 +1,5 @@
 import {
+  Amount,
   Balances,
   ConvertOrderType,
   GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse,
@@ -12,6 +13,7 @@ import {
   Order,
   OrderAmount,
   OrderBook,
+  OrderFilling,
   OrderId,
   OrderPrice,
   OrderSide,
@@ -328,11 +330,46 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         status: convertKujiraOrderToStatus(bundle),
         type: OrderType.LIMIT,
         fee: undefined,
+        filling: {
+          free: {
+            token: undefined,
+            amount: undefined,
+          },
+          filled: {
+            token: undefined,
+            amount: undefined,
+          },
+        } as unknown as OrderFilling,
         fillingTimestamp: undefined,
         creationTimestamp: Number(bundle['created_at']),
         hashes: undefined,
         connectorOrder: bundle,
       } as Order;
+
+      if (
+        [OrderStatus.PARTIALLY_FILLED, OrderStatus.FILLED].includes(
+          getNotNullOrThrowError<OrderStatus>(order.status)
+        )
+      ) {
+        const filling = getNotNullOrThrowError<OrderFilling>(order.filling);
+        const freeToken =
+          order.side == OrderSide.BUY
+            ? order.market.quoteToken
+            : order.market.baseToken;
+        filling.free.token = freeToken;
+        filling.free.amount = BigNumber(order.connectorOrder.offer_amount).div(
+          BigNumber(10).pow(filling.free.token.decimals)
+        );
+
+        const filledToken =
+          order.side == OrderSide.BUY
+            ? order.market.baseToken
+            : order.market.quoteToken;
+        filling.filled.token = filledToken;
+        filling.filled.amount = BigNumber(
+          order.connectorOrder.filled_amount
+        ).div(BigNumber(10).pow(filling.filled.token.decimals));
+      }
 
       output.set(orderId, order);
     }
@@ -473,7 +510,7 @@ export const convertKujiraBalancesToBalances = async (
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
 
-    if (!token.symbol.startsWith('x') || token.symbol.startsWith('X')) {
+    if (!token.symbol.startsWith('x')) {
       let quotation = BigNumber(0);
 
       quotation = getNotNullOrThrowError<BigNumber>(quotations.get(token.id));
@@ -507,51 +544,78 @@ export const convertKujiraBalancesToBalances = async (
   }
 
   for (const order of orders.values()) {
-    const token =
+    const freeToken: Token =
       order.side == OrderSide.BUY
         ? order.market.quoteToken
         : order.market.baseToken;
+    const filledToken: Token =
+      order.side == OrderSide.BUY
+        ? order.market.baseToken
+        : order.market.quoteToken;
 
-    const quotation = getNotNullOrThrowError<BigNumber>(
-      quotations.get(token.id)
+    let freeAmount: Amount = BigNumber(0);
+    let filledAmount: Amount = BigNumber(0);
+
+    const freeQuotation = getNotNullOrThrowError<BigNumber>(
+      quotations.get(freeToken.id)
     );
 
-    if (!output.tokens.has(token.id)) {
-      output.tokens.set(token.id, {
-        token: token,
-        free: BigNumber(0),
-        lockedInOrders: BigNumber(0),
-        unsettled: BigNumber(0),
-        total: BigNumber(0),
-        inUSD: {
-          quotation: BigNumber(0),
+    const filledQuotation = getNotNullOrThrowError<BigNumber>(
+      quotations.get(filledToken.id)
+    );
+
+    const filling = getNotNullOrThrowError<OrderFilling>(order.filling);
+    if (order.status == OrderStatus.OPEN) {
+      freeAmount = BigNumber(order.amount);
+    } else if (order.status == OrderStatus.PARTIALLY_FILLED) {
+      freeAmount = getNotNullOrThrowError<BigNumber>(filling.free.amount);
+      filledAmount = getNotNullOrThrowError<BigNumber>(filling.filled.amount);
+    } else if (order.status == OrderStatus.FILLED) {
+      filledAmount = getNotNullOrThrowError<BigNumber>(filling.filled.amount);
+    } else {
+      throw Error('Unrecognized order status.');
+    }
+
+    for (const token of [freeToken, filledToken]) {
+      if (!output.tokens.has(token.id)) {
+        output.tokens.set(token.id, {
+          token: token,
           free: BigNumber(0),
           lockedInOrders: BigNumber(0),
           unsettled: BigNumber(0),
           total: BigNumber(0),
-        },
-      });
+          inUSD: {
+            quotation: BigNumber(0),
+            free: BigNumber(0),
+            lockedInOrders: BigNumber(0),
+            unsettled: BigNumber(0),
+            total: BigNumber(0),
+          },
+        });
+      }
     }
-    const tokenBalance = getNotNullOrThrowError<TokenBalance>(
-      output.tokens.get(token.id)
+
+    const freeTokenBalance = getNotNullOrThrowError<TokenBalance>(
+      output.tokens.get(freeToken.id)
     );
+    freeTokenBalance.inUSD.quotation = freeQuotation;
+    freeTokenBalance.lockedInOrders =
+      freeTokenBalance.lockedInOrders.plus(freeAmount);
+    freeTokenBalance.inUSD.lockedInOrders =
+      freeTokenBalance.inUSD.lockedInOrders.plus(
+        freeAmount.multipliedBy(freeQuotation)
+      );
 
-    const amount = order.amount;
-
-    tokenBalance.inUSD.quotation = quotation;
-
-    if (
-      [OrderStatus.OPEN, OrderStatus.PARTIALLY_FILLED].includes(
-        getNotNullOrThrowError<OrderStatus>(order.status)
-      )
-    ) {
-      tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
-      tokenBalance.inUSD.lockedInOrders =
-        tokenBalance.inUSD.lockedInOrders.plus(amount.multipliedBy(quotation));
-    } else if (order.status == OrderStatus.FILLED) {
-      tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      tokenBalance.inUSD.unsettled = amount.multipliedBy(quotation);
-    }
+    const filledTokenBalance = getNotNullOrThrowError<TokenBalance>(
+      output.tokens.get(filledToken.id)
+    );
+    filledTokenBalance.inUSD.quotation = filledQuotation;
+    filledTokenBalance.unsettled =
+      filledTokenBalance.unsettled.plus(filledAmount);
+    filledTokenBalance.inUSD.unsettled =
+      filledTokenBalance.inUSD.unsettled.plus(
+        filledAmount.multipliedBy(filledQuotation)
+      );
   }
 
   let allFreeBalancesSum = BigNumber(0);

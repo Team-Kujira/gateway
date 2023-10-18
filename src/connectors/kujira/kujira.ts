@@ -158,7 +158,7 @@ import {
   DirectSecp256k1HdWallet,
   EncodeObject,
 } from '@cosmjs/proto-signing';
-import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
+import { HttpBatchClient, Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { StdFee } from '@cosmjs/amino';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import { BigNumber } from 'bignumber.js';
@@ -226,7 +226,7 @@ export class Kujira {
    */
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  private tendermint34Client: Tendermint34Client;
+  private tendermint37Client: Tendermint37Client;
 
   /**
    *
@@ -345,7 +345,7 @@ export class Kujira {
 
       this.kujiraGetHttpBatchClient(rpcEndpoint);
 
-      await this.kujiraGetTendermint34Client();
+      await this.kujiraGetTendermint37Client();
 
       this.kujiraGetKujiraQueryClient();
 
@@ -364,12 +364,12 @@ export class Kujira {
 
   private kujiraGetKujiraQueryClient() {
     this.kujiraQueryClient = kujiraQueryClient({
-      client: this.tendermint34Client,
+      client: this.tendermint37Client,
     });
   }
 
-  private async kujiraGetTendermint34Client() {
-    this.tendermint34Client = await Tendermint34Client.create(
+  private async kujiraGetTendermint37Client() {
+    this.tendermint37Client = await Tendermint37Client.create(
       this.httpBatchClient
     );
   }
@@ -2106,8 +2106,8 @@ export class Kujira {
     return JSON.parse(decryptedString);
   }
 
-  async toClient(endpoint: string): Promise<[Tendermint34Client, string]> {
-    const client = await Tendermint34Client.create(
+  async toClient(endpoint: string): Promise<[Tendermint37Client, string]> {
+    const client = await Tendermint37Client.create(
       new HttpBatchClient(endpoint, {
         dispatchInterval: 100,
         batchSizeLimit: 200,
