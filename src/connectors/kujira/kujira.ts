@@ -983,7 +983,7 @@ export class Kujira {
       options.marketId ? { id: options.marketId } : { name: options.marketName }
     );
 
-    for (const [source, configuration] of config.tickers.sources) {
+    for (const [source] of config.tickers.sources) {
       try {
         if (!source || source === TickerSource.ORDER_BOOK_SAP) {
           const orderBook = await this.getOrderBook({ marketId: market.id });
