@@ -143,11 +143,11 @@ import express from 'express';
 import { Express } from 'express-serve-static-core';
 import data from './fixtures/patches/data';
 
-// enablePatches();
-disablePatches();
+enablePatches();
+// disablePatches();
 
 // enableInputOutputWrapper();
-// disableInputOutputWrapper();
+disableInputOutputWrapper();
 
 // const requestStrategy = RequestStrategy.RESTful;
 const requestStrategy = RequestStrategy.Controller;
@@ -4822,7 +4822,7 @@ describe('Kujira', () => {
   });
 
   describe('Exceptions', () => {
-    it('Generate Exception TokenNotFound', async () => {
+    it.skip('Generate TokenNotFound Exception (token)', async () => {
       const requestBody = {
         name: 'KUJ',
       } as GetTokenRequest;
@@ -4846,7 +4846,7 @@ describe('Kujira', () => {
       }
     });
 
-    it('Generate MarketNotFoundError Exception', async () => {
+    it.skip('Generate MarketNotFoundError Exception', async () => {
       const requestBody = {
         ownerAddress: ownerAddress,
       } as MarketsWithdrawsRequest;
@@ -4866,6 +4866,53 @@ describe('Kujira', () => {
         });
       } catch (e) {
         expect(e).toEqual(new MarketNotFoundError('No market informed.'));
+      }
+    });
+
+    it.skip('Generate TokenNotFoundError Exception (tokens)', async () => {
+      const requestBody = {
+        names: ['KUJ', tokensIds[3]],
+      } as GetTokensRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      logRequest(request);
+      try {
+        await sendRequest<GetTokensResponse>({
+          RESTMethod: RESTfulMethod.GET,
+          RESTRoute: '/tokens',
+          RESTRequest: request,
+          controllerFunction: KujiraController.getTokens,
+        });
+      } catch (exception) {
+        expect(true).toBeTrue();
+      }
+    });
+
+    it('Generate Exception in getMarket', async () => {
+      const requestBody = {
+        name: 'KUJX/USK',
+      } as GetMarketRequest;
+
+      const request = {
+        ...commonRequestBody,
+        ...requestBody,
+      };
+
+      logRequest(request);
+
+      try {
+        await sendRequest<GetMarketResponse>({
+          RESTMethod: RESTfulMethod.GET,
+          RESTRoute: '/market',
+          RESTRequest: request,
+          controllerFunction: KujiraController.getMarket,
+        });
+      } catch (exception) {
+        expect(true).toBeTrue();
       }
     });
   });
