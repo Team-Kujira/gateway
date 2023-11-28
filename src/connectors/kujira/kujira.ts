@@ -175,7 +175,12 @@ const caches = {
   instances: new CacheContainer(new MemoryStorage()),
   tokens: new CacheContainer(new MemoryStorage()),
   markets: new CacheContainer(new MemoryStorage()),
-  coinGeckoCoins: new CacheContainer(new MemoryStorage()),
+  fetchCoinGecko: new CacheContainer(new MemoryStorage()),
+  getTicker: new CacheContainer(new MemoryStorage()),
+  getAllTokensQuotationsInUSD: new CacheContainer(new MemoryStorage()),
+  getKujiraTokenSymbolsToCoinGeckoIdsMap: new CacheContainer(
+    new MemoryStorage()
+  ),
 };
 
 const config = KujiraConfig.config;
@@ -778,20 +783,15 @@ export class Kujira {
     return output;
   }
 
-  @Cache(caches.coinGeckoCoins, { ttl: config.cache.coinGeckoCoins })
-  async getKujiraTokenSymbolsToCoinGeckoIdsMap(
-    _options?: any,
-    _network?: string
-  ): Promise<GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse> {
-    const output = IMap<TokenSymbol, CoinGeckoId | undefined>().asMutable();
-
+  @Cache(caches.fetchCoinGecko, { ttl: config.cache.fetchCoinGecko })
+  async fetchCoinGecko(): Promise<any> {
     const apiKeys = config.coinGecko.apiKeys;
     const randomIndex = Math.floor(Math.random() * apiKeys.length);
     const apiKey = apiKeys[randomIndex];
 
     const finalUrl = config.coinGecko.coinsUrl.replace('{apiKey}', apiKey);
 
-    const result: any = (
+    return (
       await runWithRetryAndTimeout(
         axios,
         axios.get,
@@ -800,6 +800,18 @@ export class Kujira {
         0
       )
     ).data;
+  }
+
+  @Cache(caches.getKujiraTokenSymbolsToCoinGeckoIdsMap, {
+    ttl: config.cache.getKujiraTokenSymbolsToCoinGeckoIdsMap,
+  })
+  async getKujiraTokenSymbolsToCoinGeckoIdsMap(
+    _options?: any,
+    _network?: string
+  ): Promise<GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse> {
+    const output = IMap<TokenSymbol, CoinGeckoId | undefined>().asMutable();
+
+    const result: any = await this.fetchCoinGecko();
 
     const coinGeckoSymbolsToIdsMap = IMap<
       CoinGeckoSymbol,
@@ -982,6 +994,7 @@ export class Kujira {
    *
    * @param options
    */
+  @Cache(caches.getTicker, { ttl: config.cache.getTicker })
   async getTicker(options: GetTickerRequest): Promise<GetTickerResponse> {
     const market = await this.getMarket(
       options.marketId ? { id: options.marketId } : { name: options.marketName }
@@ -1126,6 +1139,7 @@ export class Kujira {
     return await this.getTickers({ marketIds });
   }
 
+  @Cache(caches.getAllTokensQuotationsInUSD, { ttl: config.cache.getTicker })
   async getAllTokensQuotationsInUSD(
     _options: any
   ): Promise<IMap<TokenId, Price>> {
