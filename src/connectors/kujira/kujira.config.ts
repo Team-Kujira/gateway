@@ -117,14 +117,8 @@ export namespace KujiraConfig {
       marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
       markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
       tokens: configManager.get('kujira.cache.markets') || 3600, // in seconds
-      fetchCoinGecko: configManager.get('kujira.cache.fetchCoinGecko') || 3600, // in seconds
-      getTicker: configManager.get('kujira.cache.getTicker') || 60 * 5, // in seconds
-      getAllTokensQuotationsInUSD:
-        configManager.get('kujira.cache.getAllTokensQuotationsInUSD') || 3600, // in seconds
-      getKujiraTokenSymbolsToCoinGeckoIdsMap:
-        configManager.get(
-          'kujira.cache.getKujiraTokenSymbolsToCoinGeckoIdsMap'
-        ) || 3600, // in seconds
+      fetchCoinGeckoCoins: configManager.get('kujira.cache.coinGeckoCoins') || 86400, // in seconds
+      fetchCoinGeckoPrices: configManager.get('kujira.cache.coinGeckoPrices') || 300 , // in seconds
     },
     coinGecko: {
       coinsUrl:
