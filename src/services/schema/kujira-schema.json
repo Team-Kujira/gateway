@@ -9,7 +9,10 @@
       "type": "integer"
     },
     "gasPrice": {
-      "type": "number"
+      "type": [
+        "number",
+        "null"
+      ]
     },
     "gasPriceSuffix": {
       "type": "string"
