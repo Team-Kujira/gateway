@@ -1,6 +1,8 @@
 import {
   CLOBish,
   MarketInfo,
+  NetworkSelectionRequest,
+  Orderbook,
 } from '../../services/common-interfaces';
 
 import {
@@ -113,6 +115,8 @@ import {
   CoinGeckoId,
   CoinGeckoSymbol,
   GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse,
+  OrderTransactionHashes,
+  OrderAmount,
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -146,8 +150,19 @@ import {
   convertKujiraTransactionToTransaction,
   convertNetworkToKujiraNetwork,
   convertNonStandardKujiraTokenIds,
+  convertHumingbotMarketNameToMarketName,
   convertMarketNameToHumingbotMarketName,
 } from './kujira.convertors';
+import {
+  ClobDeleteOrderRequest,
+  ClobGetOrderRequest,
+  ClobGetOrderResponse,
+  CLOBMarkets,
+  ClobMarketsRequest,
+  ClobOrderbookRequest,
+  ClobPostOrderRequest,
+  ClobTickerRequest,
+} from '../../clob/clob.requests';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
@@ -2164,11 +2179,10 @@ export class Kujira implements CLOBish {
 
 
   // CLOB section
-  // !!!TODO replace all this.kujira. to this.
 
   async loadMarkets(): Promise<void> {
     const allMarkets =
-      (await this.kujira.getAllMarkets()) as GetAllMarketsResponse;
+      (await this.getAllMarkets()) as GetAllMarketsResponse;
 
     for (const market of allMarkets.values()) {
       this.parsedMarkets[convertMarketNameToHumingbotMarketName(market.name)] =
@@ -2177,7 +2191,7 @@ export class Kujira implements CLOBish {
   }
 
   ready(): boolean { //!!!TODO verify this.kujira statement
-    return this.kujira && this.kujira.isReady;
+    return this.isReady;
   }
 
   async markets(req: ClobMarketsRequest): Promise<{ markets: MarketInfo }> {
@@ -2192,7 +2206,7 @@ export class Kujira implements CLOBish {
   }
 
   async orderBook(req: ClobOrderbookRequest): Promise<Orderbook> {
-    const orderBook = await this.kujira.getOrderBook({
+    const orderBook = await this.getOrderBook({
       marketName: convertHumingbotMarketNameToMarketName(req.market),
     });
 
@@ -2221,13 +2235,13 @@ export class Kujira implements CLOBish {
     req: ClobTickerRequest
   ): Promise<{ markets: MarketInfo }> {
     const requestMarket = getNotNullOrThrowError<string>(req.market);
-    const ticker = await this.kujira.getTicker({
+    const ticker = await this.getTicker({
       marketName: convertHumingbotMarketNameToMarketName(requestMarket),
     });
     const marketMap: { [key: string]: any } = {};
     marketMap[requestMarket] = {
       market: ticker.market,
-      ticker: ticker.ticker,
+      ticker: ticker.tokens, // TODO before was tiker.ticker
       price: ticker.price,
       timestamp: ticker.timestamp,
     };
@@ -2241,7 +2255,7 @@ export class Kujira implements CLOBish {
     let originalOrders;
 
     if (req.orderId) {
-      const originalOrder = await this.kujira.getOrder({
+      const originalOrder = await this.getOrder({
         id: req.orderId,
         marketName: convertHumingbotMarketNameToMarketName(req.market),
         ownerAddress: getNotNullOrThrowError<OwnerAddress>(req.address),
@@ -2250,7 +2264,7 @@ export class Kujira implements CLOBish {
       originalOrders = [originalOrder];
     } else {
       originalOrders = getNotNullOrThrowError<IMap<OrderId, Order>>(
-        await this.kujira.getOrders({
+        await this.getOrders({
           marketName: convertHumingbotMarketNameToMarketName(req.market),
           ownerAddress: getNotNullOrThrowError<OwnerAddress>(req.address),
         })
@@ -2306,7 +2320,7 @@ export class Kujira implements CLOBish {
   async postOrder(
     req: ClobPostOrderRequest
   ): Promise<{ txHash: string; id?: string }> {
-    const result = await this.kujira.placeOrder({
+    const result = await this.placeOrder({
       clientId: req.clientOrderID,
       marketName: convertHumingbotMarketNameToMarketName(req.market),
       ownerAddress: req.address,
@@ -2324,7 +2338,7 @@ export class Kujira implements CLOBish {
 
   async deleteOrder(req: ClobDeleteOrderRequest): Promise<{ txHash: string }> {
     if (req.orderId) {
-      const result = await this.kujira.cancelOrder({
+      const result = await this.cancelOrder({
         id: req.orderId,
         marketName: convertHumingbotMarketNameToMarketName(req.market),
         ownerAddress: req.address,
@@ -2336,7 +2350,7 @@ export class Kujira implements CLOBish {
         ),
       };
     } else {
-      const result = await this.kujira.cancelAllOrders({
+      const result = await this.cancelAllOrders({
         marketName: convertHumingbotMarketNameToMarketName(req.market),
         ownerAddress: req.address,
       });
@@ -2367,7 +2381,7 @@ export class Kujira implements CLOBish {
     gasLimit: number;
     gasCost: number;
   } {
-    const result = this.kujira.getEstimatedFees({});
+    const result = this.getEstimatedFees({});
 
     return {
       gasCost: result.cost.toNumber(),
