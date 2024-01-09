@@ -438,7 +438,7 @@ export const convertKujiraTickerToTicker = (
   if (source === TickerSource.ORDER_BOOK_SAP) {
     price = BigNumber(input.price);
   } else if (source === TickerSource.COINGECKO) {
-    if (!coinGeckTokens['base'] || !coinGeckTokens['base']) {
+    if (!coinGeckTokens['base'] || !coinGeckTokens['quote']) {
       tokens[market.baseToken.symbol] = BigNumber(0);
       tokens[market.quoteToken.symbol] = BigNumber(0);
       price = BigNumber(0);
