@@ -39,6 +39,7 @@ import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
 import { parseCoins } from '@cosmjs/stargate';
 import { TokenInfo } from '../../services/base';
+import { ClobDeleteOrderRequestExtract } from '../../clob/clob.requests';
 
 export const convertToGetTokensResponse = (token: Token): TokenInfo => {
   return {
@@ -923,4 +924,51 @@ export function convertNonStandardKujiraTokenIds(
   }
 
   return output;
+}
+
+export function convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
+  obj: any
+): any {
+  if (Array.isArray(obj)) {
+    return obj.map((item) =>
+      convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(item)
+    );
+  } else if (typeof obj === 'object' && obj !== null) {
+    const updatedObj: any = {};
+    for (const key in obj) {
+      let newKey = key;
+      let value = obj[key];
+      if (key === 'orderType') {
+        newKey = 'type';
+      } else if (key === 'market') {
+        value = value.replace('-', '/');
+        newKey = 'marketId';
+      }
+      updatedObj[newKey] =
+        convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(value);
+    }
+    return updatedObj;
+  } else {
+    return obj;
+  }
+}
+
+export function convertClobBatchOrdersRequestToKujiraCancelOrdersRequest(
+  obj: any
+): any {
+  const { cancelOrderParams, address, ...rest } = obj;
+  const ids = [];
+  const idsFromCancelOrderParams: ClobDeleteOrderRequestExtract[] =
+    cancelOrderParams;
+  for (const key of idsFromCancelOrderParams) {
+    ids.push(key.orderId);
+  }
+  const marketId = cancelOrderParams[0].market;
+
+  return {
+    ...rest,
+    ids: ids,
+    marketId: marketId,
+    ownerAddress: address,
+  };
 }

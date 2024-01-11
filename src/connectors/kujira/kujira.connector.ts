@@ -3,17 +3,24 @@ import { Kujira } from './kujira';
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
 import {
+  ClobBatchUpdateRequest,
   ClobDeleteOrderRequest,
+  ClobPostOrderResponse,
   ClobGetOrderRequest, ClobGetOrderResponse,
   CLOBMarkets,
   ClobMarketsRequest,
   ClobOrderbookRequest, ClobPostOrderRequest,
   ClobTickerRequest
 } from "../../clob/clob.requests";
+import {
+  convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest,
+  convertClobBatchOrdersRequestToKujiraCancelOrdersRequest,
+} from './kujira.convertors';
 import {CLOBish, MarketInfo, NetworkSelectionRequest, Orderbook} from "../../services/common-interfaces";
 import {getNotNullOrThrowError} from "./kujira.helpers";
 import {BigNumber} from "bignumber.js";
 import {
+  CancelOrdersResponse,
   GetAllMarketsResponse,
   IMap,
   Order,
@@ -58,6 +65,7 @@ export class KujiraConnector implements CLOBish {
   async init() {
     this.kujira = await Kujira.getInstance(this.chain, this.network);
     await this.kujira.init();
+    await this.loadMarkets();
   }
 
   ready(): boolean {
@@ -269,5 +277,54 @@ export class KujiraConnector implements CLOBish {
       gasPrice: result.price.toNumber(),
       gasPriceToken: result.token,
     };
+  }
+
+  public async batchOrders(req: ClobBatchUpdateRequest): Promise<any> {
+    try {
+      if (req.createOrderParams || req.cancelOrderParams) {
+        if (req.createOrderParams) {
+          const convertedReq = {
+            chain: req.chain,
+            network: req.network,
+            ownerAddress: req.address,
+            orders: convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
+              req.createOrderParams
+            ),
+          };
+          const originalResponse = await this.kujira.placeOrders(convertedReq);
+          return {
+            network: this.network,
+            timestamp: 0,
+            latency: 0,
+            txHash: getNotNullOrThrowError<string>(
+              originalResponse.first()?.hashes?.creation
+            ),
+            ids: originalResponse.valueSeq().map((order) => order.id),
+          } as ClobPostOrderResponse;
+        } else if (req.cancelOrderParams) {
+          const convertedReq =
+            convertClobBatchOrdersRequestToKujiraCancelOrdersRequest(req);
+          const originalResponse: CancelOrdersResponse =
+            await this.kujira.cancelOrders(convertedReq);
+          return {
+            network: this.network,
+            timestamp: 0,
+            latency: 0,
+            txHash: getNotNullOrThrowError<string>(
+              getNotNullOrThrowError<IMap<OrderId, Order>>(
+                originalResponse
+              ).first()?.hashes?.cancellation
+            ),
+            ids: getNotNullOrThrowError<IMap<OrderId, Order>>(originalResponse)
+              .valueSeq()
+              .map((order) => order.id),
+          } as ClobPostOrderResponse;
+        }
+      }
+
+      return {};
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
