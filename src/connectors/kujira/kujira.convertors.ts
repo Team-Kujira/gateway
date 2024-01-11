@@ -942,7 +942,7 @@ export function convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
         newKey = 'type';
       } else if (key === 'market') {
         value = value.replace('-', '/');
-        newKey = 'marketId';
+        newKey = 'marketName';
       }
       updatedObj[newKey] =
         convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(value);
