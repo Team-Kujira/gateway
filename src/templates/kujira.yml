@@ -31,7 +31,7 @@ networks:
     nodeURL: null # Empty or null means choosing the RPC automatically
 prefix: 'kujira'
 accountNumber: 0
-gasPrice: 0.00125
+gasPrice: null # Empty or null means automatically
 gasPriceSuffix: 'ukuji'
 gasLimitEstimate: 0.009147
 orderBook:

@@ -121,6 +121,7 @@ import {
   runWithRetryAndTimeout,
 } from './kujira.helpers';
 import {
+  CHAIN_INFO,
   Denom,
   fin,
   KujiraQueryClient,
@@ -182,6 +183,7 @@ import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import * as crypto from 'crypto';
 import util from 'util';
+import {ChainInfo, FeeCurrency} from "@keplr-wallet/types";
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
@@ -222,6 +224,24 @@ export class Kujira {
    * @private
    */
   private readonly kujiraNetwork: keyof typeof contracts;
+
+  /**
+   *
+   * @private
+   */
+  private readonly kujiraNetworkInfo: ChainInfo;
+
+  /**
+   *
+   * @private
+   */
+  private readonly kujiraNetworkNativeFees: FeeCurrency;
+
+  /**
+   *
+   * @private
+   */
+  private readonly kujiraNetworkNativeGasPrice: BigNumber;
 
   /**
    *
@@ -305,6 +325,11 @@ export class Kujira {
     this.network = network;
 
     this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
+    this.kujiraNetworkInfo = CHAIN_INFO[this.kujiraNetwork];
+    this.kujiraNetworkNativeFees = getNotNullOrThrowError<FeeCurrency>(
+      this.kujiraNetworkInfo['feeCurrencies'].find(it => it.coinDenom == config.nativeToken)
+    );
+    this.kujiraNetworkNativeGasPrice = config.gasPrice || BigNumber(getNotNullOrThrowError<number>(this.kujiraNetworkNativeFees.gasPriceStep?.low));
 
     this.accounts = IMap<OwnerAddress, KujiraWalletArtifacts>().asMutable();
   }
@@ -516,7 +541,7 @@ export class Kujira {
 
     const prefix: string = config.prefix;
 
-    const gasPrice: string = `${config.gasPrice}${config.gasPriceSuffix}`;
+    const gasPrice: string = `${this.kujiraNetworkNativeGasPrice.toString()}${config.gasPriceSuffix}`;
 
     const mnemonic: string = basicWallet.mnemonic;
 
@@ -2013,9 +2038,9 @@ export class Kujira {
   ): GetEstimatedFeesResponse {
     return {
       token: config.nativeToken,
-      price: config.gasPrice,
+      price: this.kujiraNetworkNativeGasPrice,
       limit: config.gasLimitEstimate,
-      cost: config.gasPrice.multipliedBy(config.gasLimitEstimate),
+      cost: this.kujiraNetworkNativeGasPrice.multipliedBy(config.gasLimitEstimate),
     } as EstimatedFees;
   }
 
