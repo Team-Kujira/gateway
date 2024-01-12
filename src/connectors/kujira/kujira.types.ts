@@ -111,6 +111,15 @@ export type AccountNumber = number;
 export type CoinGeckoSymbol = string;
 export type CoinGeckoId = string;
 
+export interface TransferRequest extends NetworkSelectionRequest {
+  to: string;
+  from: string;
+  amount: string;
+  token: string;
+}
+
+export type TransferResponse = string;
+
 //
 //  Enums
 //
@@ -627,6 +636,16 @@ export interface CancelAllOrdersRequest {
 }
 
 export type CancelAllOrdersResponse = CancelOrdersResponse;
+
+export interface TransferFromToRequest {
+  from: OwnerAddress;
+  to: OwnerAddress;
+  amount: OrderAmount;
+  tokenId?: TokenId;
+  tokenSymbol?: TokenSymbol;
+}
+
+export type TransferFromToResponse = TransactionHash;
 
 export interface MarketWithdrawRequest {
   marketId?: MarketId;

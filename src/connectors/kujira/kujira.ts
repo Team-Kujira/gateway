@@ -108,6 +108,8 @@ import {
   CoinGeckoId,
   CoinGeckoSymbol,
   GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse,
+  TransferFromToRequest,
+  TransferFromToResponse,
   // OrderTransactionHashes,
   // OrderAmount,
 } from './kujira.types';
@@ -2166,6 +2168,12 @@ export class Kujira {
     latencies.sort((a, b) => a.latency - b.latency);
 
     return latencies[0].endpoint;
+  }
+
+  async transferFromTo(
+    _options: TransferFromToRequest
+  ): Promise<TransferFromToResponse> {
+    throw new Error('Not implemented.');
   }
 
 }
