@@ -31,7 +31,7 @@ networks:
     nodeURL: null # Empty or null means choosing the RPC automatically
 prefix: 'kujira'
 accountNumber: 0
-gasPrice: 0.00125
+gasPrice: null # Empty or null means automatically
 gasPriceSuffix: 'ukuji'
 gasLimitEstimate: 0.009147
 orderBook:
@@ -45,30 +45,35 @@ orders:
     fee: 'auto'
     maxPerTransaction: 8
   open:
-    limit: 255
+    limit: 155
   filled:
-    limit: 255
+    limit: 155
   cancel:
     maxPerTransaction: 25
 tokens:
   url: # empty means using the default
 #  url: /root/gateway/conf/connectors/kujira/tokens.json
 #  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/tokens.json
-  allowed:
-  disallowed:
+  allowed: # Empty list means all tokens are allowed.
+  disallowed: # Empty list means no tokens are disallowed.
   resolutionStrategy: markets
 markets:
   url: # empty means using the default
 #  url: /root/gateway/conf/connectors/kujira/contracts.json
 #  url: https://raw.githubusercontent.com/Team-Kujira/kujira.js/master/src/resources/contracts.json
-  allowed:
-  disallowed:
+  allowed: # Empty list means all markets are allowed.
+  disallowed: # Empty list means no markets are disallowed.
 tickers:
   sources:
-    orderBookSimpleAveragePrice:
+    coinGecko:
+#    orderBookSimpleAveragePrice:
 #    orderBookWeightedAveragePrice:
 #    orderBookVolumeWeightedAveragePrice:
 #    lastFilledOrder:
+coinGecko:
+  coinsUrl: 'https://api.coingecko.com/api/v3/coins/list?x_cg_demo_api_key={apiKey}'
+  priceUrl: "https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&x_cg_demo_api_key={apiKey}&ids={targets}"
+  apiKeys: ["<API_KEY>"] # If you don't have any use null
 transactions:
   merge:
     createOrders: true

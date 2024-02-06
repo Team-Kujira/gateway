@@ -51,6 +51,7 @@ export type PayerAddress = Address;
 export type Price = BigNumber;
 export type Amount = BigNumber;
 export type Fee = BigNumber;
+export type Percentage = BigNumber;
 export type Timestamp = number;
 export type Block = number;
 export type EncryptedWallet = string;
@@ -94,10 +95,6 @@ export type OrderCreationTimestamp = Timestamp;
 export type OrderFillingTimestamp = Timestamp;
 export type OrderTransactionHashes = TransactionHashes;
 
-export type Withdraw = {
-  hash: TransactionHash;
-};
-
 export type FeeMaker = Fee;
 export type FeeTaker = Fee;
 export type FeeServiceProvider = Fee;
@@ -110,6 +107,18 @@ export type EstimateFeesCost = BigNumber;
 export type Mnemonic = string;
 export type Password = string;
 export type AccountNumber = number;
+
+export type CoinGeckoSymbol = string;
+export type CoinGeckoId = string;
+
+export interface TransferRequest extends NetworkSelectionRequest {
+  to: string;
+  from: string;
+  amount: string;
+  token: string;
+}
+
+export type TransferResponse = string;
 
 //
 //  Enums
@@ -142,7 +151,7 @@ export enum TickerSource {
   ORDER_BOOK_WAP = 'orderBookWeightedAveragePrice',
   ORDER_BOOK_VWAP = 'orderBookVolumeWeightedAveragePrice',
   LAST_FILLED_ORDER = 'lastFilledOrder',
-  NOMICS = 'nomics',
+  COINGECKO = 'coinGecko',
 }
 
 export enum ConvertOrderType {
@@ -168,8 +177,34 @@ export enum RESTfulMethod {
 //  Interfaces
 //
 
+export interface Withdraw {
+  fees: {
+    token: Amount;
+    USD: Amount;
+  };
+  token: Token;
+}
+
+export interface Withdraws {
+  hash: TransactionHash;
+  tokens: IMap<TokenId, Withdraw>;
+  total: {
+    fees: Amount;
+  };
+}
+
 export interface KujiraTicker {
   price: Price;
+}
+
+export interface TokenAmount {
+  token: Token;
+  amount: Amount;
+}
+
+export interface OrderFilling {
+  free: TokenAmount;
+  filled: TokenAmount;
 }
 
 export interface TokenPriceInDolar {
@@ -227,22 +262,26 @@ export interface Ticker {
   market: Market;
   price: TickerPrice;
   timestamp: TickerTimestamp;
-  ticker: ConnectorTicker;
+  tokens: ConnectorTicker;
 }
 
 export interface SimplifiedBalance {
   free: Amount;
   lockedInOrders: Amount;
   unsettled: Amount;
-  total: Amount
+  total: Amount;
 }
 
+export interface SimplifiedBalanceWithUSD extends SimplifiedBalance {
+  quotation: Amount;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TotalBalance extends SimplifiedBalance {}
 
 export interface TokenBalance extends SimplifiedBalance {
   token: Token;
-  ticker?: Ticker;
-  inUSD: SimplifiedBalance;
+  inUSD: SimplifiedBalanceWithUSD;
 }
 
 export interface Balances {
@@ -264,6 +303,7 @@ export interface Order {
   status?: OrderStatus;
   type?: OrderType;
   fee?: OrderFee;
+  filling?: OrderFilling;
   creationTimestamp?: OrderCreationTimestamp;
   fillingTimestamp?: OrderFillingTimestamp;
   hashes?: OrderTransactionHashes;
@@ -396,6 +436,10 @@ export interface GetTokenSymbolsToTokenIdsMapRequest {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetTokenSymbolsToTokenIdsMapResponse
   extends IMap<TokenSymbol, TokenId> {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse
+  extends IMap<TokenSymbol, CoinGeckoId | undefined> {}
 
 export interface GetMarketRequest {
   id?: MarketId;
@@ -593,6 +637,16 @@ export interface CancelAllOrdersRequest {
 
 export type CancelAllOrdersResponse = CancelOrdersResponse;
 
+export interface TransferFromToRequest {
+  from: OwnerAddress;
+  to: OwnerAddress;
+  amount: OrderAmount;
+  tokenId?: TokenId;
+  tokenSymbol?: TokenSymbol;
+}
+
+export type TransferFromToResponse = TransactionHash;
+
 export interface MarketWithdrawRequest {
   marketId?: MarketId;
   marketName?: MarketName;
@@ -600,7 +654,7 @@ export interface MarketWithdrawRequest {
   ownerAddresses?: OrderOwnerAddress[];
 }
 
-export type MarketWithdrawResponse = Withdraw | IMap<OwnerAddress, Withdraw>;
+export type MarketWithdrawResponse = Withdraws | IMap<OwnerAddress, Withdraws>;
 
 export interface MarketsWithdrawsRequest {
   marketIds?: MarketId[];
@@ -610,8 +664,8 @@ export interface MarketsWithdrawsRequest {
 }
 
 export type MarketsWithdrawsFundsResponse =
-  | IMap<MarketId, Withdraw>
-  | IMap<OwnerAddress, IMap<MarketId, Withdraw>>;
+  | IMap<MarketId, Withdraws>
+  | IMap<OwnerAddress, IMap<MarketId, Withdraws>>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AllMarketsWithdrawsRequest extends MarketsWithdrawsRequest {}

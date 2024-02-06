@@ -103,7 +103,15 @@ import {
   TokenSymbol,
   Transaction,
   TransactionHash,
-  Withdraw,
+  Withdraws,
+  Price,
+  CoinGeckoId,
+  CoinGeckoSymbol,
+  GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse,
+  TransferFromToRequest,
+  TransferFromToResponse,
+  // OrderTransactionHashes,
+  // OrderAmount,
 } from './kujira.types';
 import { KujiraConfig, NetworkConfig } from './kujira.config';
 import { Slip10RawIndex } from '@cosmjs/crypto';
@@ -113,7 +121,7 @@ import {
   runWithRetryAndTimeout,
 } from './kujira.helpers';
 import {
-  axlUSDC,
+  CHAIN_INFO,
   Denom,
   fin,
   KujiraQueryClient,
@@ -125,6 +133,7 @@ import {
 import contracts from 'kujira.js/src/resources/contracts.json';
 import axios from 'axios';
 import {
+  convertCoinGeckoQuotationsToQuotations,
   convertKujiraBalancesToBalances,
   convertKujiraEventsToMapOfEvents,
   convertKujiraMarketToMarket,
@@ -138,6 +147,17 @@ import {
   convertNetworkToKujiraNetwork,
   convertNonStandardKujiraTokenIds,
 } from './kujira.convertors';
+// !!!TODO verify commented code below, remove if necessary.
+// import {
+//   ClobDeleteOrderRequest,
+//   ClobGetOrderRequest,
+//   ClobGetOrderResponse,
+//   CLOBMarkets,
+//   ClobMarketsRequest,
+//   ClobOrderbookRequest,
+//   ClobPostOrderRequest,
+//   ClobTickerRequest,
+// } from '../../clob/clob.requests';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Cache, CacheContainer } from 'node-ts-cache';
 import { MemoryStorage } from 'node-ts-cache-storage-memory';
@@ -154,7 +174,7 @@ import {
   DirectSecp256k1HdWallet,
   EncodeObject,
 } from '@cosmjs/proto-signing';
-import { HttpBatchClient, Tendermint34Client } from '@cosmjs/tendermint-rpc';
+import { HttpBatchClient, Tendermint37Client } from '@cosmjs/tendermint-rpc';
 import { StdFee } from '@cosmjs/amino';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import { BigNumber } from 'bignumber.js';
@@ -163,6 +183,7 @@ import fse from 'fs-extra';
 import { ConfigManagerCertPassphrase } from '../../services/config-manager-cert-passphrase';
 import * as crypto from 'crypto';
 import util from 'util';
+import {ChainInfo, FeeCurrency} from "@keplr-wallet/types";
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
@@ -171,6 +192,7 @@ const caches = {
   instances: new CacheContainer(new MemoryStorage()),
   tokens: new CacheContainer(new MemoryStorage()),
   markets: new CacheContainer(new MemoryStorage()),
+  coinGeckoCoins: new CacheContainer(new MemoryStorage()),
 };
 
 const config = KujiraConfig.config;
@@ -179,6 +201,8 @@ const config = KujiraConfig.config;
  *
  */
 export class Kujira {
+
+
   /**
    *
    * @private
@@ -205,6 +229,24 @@ export class Kujira {
    *
    * @private
    */
+  private readonly kujiraNetworkInfo: ChainInfo;
+
+  /**
+   *
+   * @private
+   */
+  private readonly kujiraNetworkNativeFees: FeeCurrency;
+
+  /**
+   *
+   * @private
+   */
+  private readonly kujiraNetworkNativeGasPrice: BigNumber;
+
+  /**
+   *
+   * @private
+   */
   private accounts: IMap<OwnerAddress, KujiraWalletArtifacts>;
 
   /**
@@ -221,7 +263,7 @@ export class Kujira {
    */
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  private tendermint34Client: Tendermint34Client;
+  private tendermint37Client: Tendermint37Client;
 
   /**
    *
@@ -283,6 +325,11 @@ export class Kujira {
     this.network = network;
 
     this.kujiraNetwork = convertNetworkToKujiraNetwork(this.network);
+    this.kujiraNetworkInfo = CHAIN_INFO[this.kujiraNetwork];
+    this.kujiraNetworkNativeFees = getNotNullOrThrowError<FeeCurrency>(
+      this.kujiraNetworkInfo['feeCurrencies'].find(it => it.coinDenom == config.nativeToken)
+    );
+    this.kujiraNetworkNativeGasPrice = config.gasPrice || BigNumber(getNotNullOrThrowError<number>(this.kujiraNetworkNativeFees.gasPriceStep?.low));
 
     this.accounts = IMap<OwnerAddress, KujiraWalletArtifacts>().asMutable();
   }
@@ -340,7 +387,7 @@ export class Kujira {
 
       this.kujiraGetHttpBatchClient(rpcEndpoint);
 
-      await this.kujiraGetTendermint34Client();
+      await this.kujiraGetTendermint37Client();
 
       this.kujiraGetKujiraQueryClient();
 
@@ -359,12 +406,12 @@ export class Kujira {
 
   private kujiraGetKujiraQueryClient() {
     this.kujiraQueryClient = kujiraQueryClient({
-      client: this.tendermint34Client,
+      client: this.tendermint37Client,
     });
   }
 
-  private async kujiraGetTendermint34Client() {
-    this.tendermint34Client = await Tendermint34Client.create(
+  private async kujiraGetTendermint37Client() {
+    this.tendermint37Client = await Tendermint37Client.create(
       this.httpBatchClient
     );
   }
@@ -494,7 +541,7 @@ export class Kujira {
 
     const prefix: string = config.prefix;
 
-    const gasPrice: string = `${config.gasPrice}${config.gasPriceSuffix}`;
+    const gasPrice: string = `${this.kujiraNetworkNativeGasPrice.toString()}${config.gasPriceSuffix}`;
 
     const mnemonic: string = basicWallet.mnemonic;
 
@@ -773,6 +820,54 @@ export class Kujira {
     return output;
   }
 
+  @Cache(caches.coinGeckoCoins, { ttl: config.cache.coinGeckoCoins })
+  async getKujiraTokenSymbolsToCoinGeckoIdsMap(
+    _options?: any,
+    _network?: string
+  ): Promise<GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse> {
+    const output = IMap<TokenSymbol, CoinGeckoId | undefined>().asMutable();
+
+    const apiKeys = config.coinGecko.apiKeys;
+    const randomIndex = Math.floor(Math.random() * apiKeys.length);
+    const apiKey = apiKeys[randomIndex];
+
+    const finalUrl = config.coinGecko.coinsUrl.replace('{apiKey}', apiKey);
+
+    const result: any = (
+      await runWithRetryAndTimeout(
+        axios,
+        axios.get,
+        [finalUrl],
+        config.retry.all.maxNumberOfRetries,
+        0
+      )
+    ).data;
+
+    const coinGeckoSymbolsToIdsMap = IMap<
+      CoinGeckoSymbol,
+      CoinGeckoId
+    >().asMutable();
+
+    for (const item of result) {
+      coinGeckoSymbolsToIdsMap.set(item.symbol, item.id);
+    }
+
+    const tokensSymbols = (
+      await this.getTokenSymbolsToTokenIdsMap({}, this.network)
+    )
+      .keySeq()
+      .toArray();
+
+    for (const tokenSymbol of tokensSymbols) {
+      const coinGeckoSymbol: CoinGeckoSymbol = tokenSymbol.toLowerCase();
+      const coinGeckoId: CoinGeckoId | undefined =
+        coinGeckoSymbolsToIdsMap.get(coinGeckoSymbol);
+      output.set(tokenSymbol, coinGeckoId);
+    }
+
+    return output;
+  }
+
   /**
    *
    * @param options
@@ -934,7 +1029,7 @@ export class Kujira {
       options.marketId ? { id: options.marketId } : { name: options.marketName }
     );
 
-    for (const [source, configuration] of config.tickers.sources) {
+    for (const [source] of config.tickers.sources) {
       try {
         if (!source || source === TickerSource.ORDER_BOOK_SAP) {
           const orderBook = await this.getOrderBook({ marketId: market.id });
@@ -957,30 +1052,58 @@ export class Kujira {
             price: simpleAveragePrice,
           };
 
-          return convertKujiraTickerToTicker(result, market);
+          return convertKujiraTickerToTicker(source, result, market, null);
         } else if (source === TickerSource.ORDER_BOOK_WAP) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.ORDER_BOOK_VWAP) {
           throw Error('Not implemented.');
         } else if (source === TickerSource.LAST_FILLED_ORDER) {
           throw Error('Not implemented.');
-        } else if (source === TickerSource.NOMICS) {
-          const finalUrl = configuration.url.replace(
-            '${marketAddress}',
-            market.connectorMarket.address
+        } else if (source === TickerSource.COINGECKO) {
+          const kujiraSymbolsToCoinGeckoIdsMap =
+            await this.getKujiraTokenSymbolsToCoinGeckoIdsMap({}, this.network);
+
+          const coinGeckoBaseTokenId = kujiraSymbolsToCoinGeckoIdsMap.get(
+            market.baseToken.symbol
+          );
+          const coinGeckoQuoteTokenId = kujiraSymbolsToCoinGeckoIdsMap.get(
+            market.quoteToken.symbol
           );
 
-          const result: { price: any; last_updated_at: any } = (
-            await runWithRetryAndTimeout(
-              axios,
-              axios.get,
-              [finalUrl],
-              config.retry.all.maxNumberOfRetries,
-              0
-            )
-          ).data.items[0];
+          let result: any;
 
-          return convertKujiraTickerToTicker(result, market);
+          if (!coinGeckoBaseTokenId || !coinGeckoQuoteTokenId) {
+            result = {};
+          } else {
+            const coinGeckoIds = coinGeckoBaseTokenId
+              .concat(',')
+              .concat(coinGeckoQuoteTokenId);
+
+            const apiKeys = config.coinGecko.apiKeys;
+            const randomIndex = Math.floor(Math.random() * apiKeys.length);
+            const apiKey = apiKeys[randomIndex];
+
+            const finalUrl = config.coinGecko.priceUrl
+              .replace('{apiKey}', apiKey)
+              .replace('{targets}', coinGeckoIds);
+
+            result = (
+              await runWithRetryAndTimeout(
+                axios,
+                axios.get,
+                [finalUrl],
+                config.retry.all.maxNumberOfRetries,
+                0
+              )
+            ).data;
+          }
+
+          const tokens = {
+            base: coinGeckoBaseTokenId,
+            quote: coinGeckoQuoteTokenId,
+          };
+
+          return convertKujiraTickerToTicker(source, result, market, tokens);
         } else {
           throw new TickerNotFoundError(
             `Ticker source (${source}) not supported, check your kujira configuration file.`
@@ -1045,6 +1168,48 @@ export class Kujira {
     return await this.getTickers({ marketIds });
   }
 
+  async getAllTokensQuotationsInUSD(
+    _options: any
+  ): Promise<IMap<TokenId, Price>> {
+    const kujiraSymbolsToCoinGeckoIdsMap =
+      await this.getKujiraTokenSymbolsToCoinGeckoIdsMap({}, this.network);
+
+    const coinGeckoIds = kujiraSymbolsToCoinGeckoIdsMap
+      .valueSeq()
+      .toArray()
+      .filter((id: any) => id && id.trim() !== '')
+      .join(',');
+
+    const apiKeys = config.coinGecko.apiKeys;
+    const randomIndex = Math.floor(Math.random() * apiKeys.length);
+    const apiKey = apiKeys[randomIndex];
+
+    const finalUrl = config.coinGecko.priceUrl
+      .replace('{apiKey}', apiKey)
+      .replace('{targets}', coinGeckoIds);
+
+    const result: any = (
+      await runWithRetryAndTimeout(
+        axios,
+        axios.get,
+        [finalUrl],
+        config.retry.all.maxNumberOfRetries,
+        0
+      )
+    ).data;
+
+    const tokensSymbolsToTokensIdsMap = await this.getTokenSymbolsToTokenIdsMap(
+      {},
+      this.network
+    );
+
+    return convertCoinGeckoQuotationsToQuotations(
+      result,
+      tokensSymbolsToTokensIdsMap,
+      kujiraSymbolsToCoinGeckoIdsMap
+    );
+  }
+
   async getBalance(options: GetBalanceRequest): Promise<GetBalanceResponse> {
     if (!options.tokenSymbol && options.tokenId) {
       if (options.tokenId.startsWith('ibc')) {
@@ -1092,25 +1257,22 @@ export class Kujira {
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
-        total: BigNumber(0)
+        total: BigNumber(0),
       },
     };
 
-    const optionsTokenIds = [];
-
-    for (const id of getNotNullOrThrowError<[TokenId]>(options.tokenIds?.values())) {
-      optionsTokenIds.push(id)
-    }
-
-    const concatTokenIds = new Set(
-        optionsTokenIds.concat((
+    const tokenIds = [
+      ...new Set(
+        options.tokenIds ||
+          (
             await this.getTokenSymbolsToTokenIdsMap({
-              symbols: options.tokenSymbols
-            }, this.network)).valueSeq().toArray()
-        )
-    );
-
-    const tokenIds = [...concatTokenIds];
+              symbols: options.tokenSymbols,
+            })
+          )
+            .valueSeq()
+            .toArray()
+      ),
+    ];
 
     for (const [tokenId, balance] of allBalances.tokens) {
       if (
@@ -1123,16 +1285,16 @@ export class Kujira {
 
     if (tokenIds.length > 1) {
       for (const tokenBalance of balances.tokens.valueSeq()) {
-        balances.total.free = balances.total.free.plus(tokenBalance.free);
+        balances.total.free = balances.total.free.plus(tokenBalance.inUSD.free);
         balances.total.lockedInOrders = balances.total.lockedInOrders.plus(
-            tokenBalance.lockedInOrders
+          tokenBalance.inUSD.lockedInOrders
         );
         balances.total.unsettled = balances.total.unsettled.plus(
-            tokenBalance.unsettled
+          tokenBalance.inUSD.unsettled
         );
         balances.total.total = balances.total.total.plus(
-            tokenBalance.total
-        )
+          tokenBalance.inUSD.total
+        );
       }
     }
 
@@ -1154,32 +1316,12 @@ export class Kujira {
       ownerAddress: options.ownerAddress,
     })) as IMap<OrderId, Order>;
 
-    let tickers: IMap<MarketId, Ticker>;
-
-    try {
-      const tokenIds = kujiraBalances.map((token: Coin) => token.denom);
-
-      const quoteToken = convertKujiraTokenToToken(axlUSDC);
-
-      const marketIds = (await this.getAllMarkets({}, this.network))
-        .valueSeq()
-        .filter(
-          (market) =>
-            tokenIds.includes(market.baseToken.id) &&
-            market.quoteToken.id == quoteToken.id
-        )
-        .map((market) => market.id)
-        .toArray();
-
-      tickers = await this.getAllTickers({ marketIds });
-    } catch (exception) {
-      tickers = IMap<string, Ticker>().asMutable();
-    }
+    const quotations = await this.getAllTokensQuotationsInUSD({});
 
     return await convertKujiraBalancesToBalances(
       kujiraBalances,
       orders,
-      tickers
+      quotations
     );
   }
 
@@ -1220,29 +1362,52 @@ export class Kujira {
         const response: JsonObject = { orders: [] };
         let partialResponse: JsonObject;
 
-        while (
-          (!partialResponse ||
-            partialResponse.orders.length >=
-              KujiraConfig.config.orders.open.paginationLimit) &&
-          response.orders.length <= KujiraConfig.config.orders.open.limit
-        ) {
-          partialResponse = await this.kujiraQueryClientWasmQueryContractSmart(
-            market.connectorMarket.address,
-            {
-              orders_by_user: {
-                address: ownerAddress,
-                limit: KujiraConfig.config.orders.open.limit,
-                start_after: partialResponse
-                  ? partialResponse.orders[
-                      partialResponse.orders.length - 1
-                    ].idx.toString()
-                  : null,
-              },
-            }
-          );
+        do {
+          let startAfter = '0';
+          if (partialResponse && partialResponse.orders.length) {
+            startAfter = partialResponse.orders.reduce(
+              (target: any, current: any) =>
+                parseInt(current.idx) > parseInt(target.idx) ? current : target
+            ).idx;
+          }
 
-          response.orders = [...response.orders, ...partialResponse.orders];
-        }
+          try {
+            partialResponse =
+              await this.kujiraQueryClientWasmQueryContractSmart(
+                market.connectorMarket.address,
+                {
+                  orders_by_user: {
+                    address: ownerAddress,
+                    limit: KujiraConfig.config.orders.open.paginationLimit,
+                    start_after: startAfter,
+                  },
+                }
+              );
+          } catch (error: any) {
+            if (error.message.includes('Cannot Sub with 0 and 1')) {
+              break;
+            }
+          }
+
+          const combinedOrders = [
+            ...response.orders,
+            ...partialResponse.orders,
+          ];
+
+          const seenIndices = new Set<number>();
+          response.orders = combinedOrders.filter((order) => {
+            if (!seenIndices.has(order.idx)) {
+              seenIndices.add(order.idx);
+
+              return true;
+            }
+
+            return false;
+          });
+        } while (
+          partialResponse.orders.length > 0 &&
+          response.orders.length < KujiraConfig.config.orders.open.limit
+        );
 
         const bundles = IMap<string, any>().asMutable();
 
@@ -1708,7 +1873,7 @@ export class Kujira {
   ): Promise<MarketWithdrawResponse> {
     const market = await this.getMarket({ id: options.marketId });
 
-    const output = IMap<OwnerAddress, Withdraw>().asMutable();
+    const output = IMap<OwnerAddress, Withdraws>().asMutable();
 
     const ownerAddresses: OrderOwnerAddress[] = options.ownerAddresses
       ? getNotNullOrThrowError<OrderOwnerAddress[]>(options.ownerAddresses)
@@ -1741,7 +1906,12 @@ export class Kujira {
         orderIdxs: filledOrdersIds,
       });
 
-      output.set(ownerAddress, convertKujiraSettlementToSettlement(result));
+      const quotations = await this.getAllTokensQuotationsInUSD({});
+
+      output.set(
+        ownerAddress,
+        convertKujiraSettlementToSettlement(result, quotations, market)
+      );
     }
 
     if (ownerAddresses.length == 1) {
@@ -1761,7 +1931,7 @@ export class Kujira {
     if (!options.marketIds)
       throw new MarketNotFoundError(`No market informed.`);
 
-    const output = IMap<OwnerAddress, IMap<MarketId, Withdraw>>().asMutable();
+    const output = IMap<OwnerAddress, IMap<MarketId, Withdraws>>().asMutable();
 
     interface HelperSettleFundsOptions {
       marketId: MarketId;
@@ -1776,10 +1946,10 @@ export class Kujira {
       const settleMarketFunds = async (
         options: HelperSettleFundsOptions
       ): Promise<void> => {
-        const results = (await this.withdrawFromMarket({
+        const results = await this.withdrawFromMarket({
           marketId: options.marketId,
           ownerAddresses: ownerAddresses,
-        })) as Withdraw;
+        });
 
         output.setIn([ownerAddress, options.marketId], results);
       };
@@ -1868,9 +2038,9 @@ export class Kujira {
   ): GetEstimatedFeesResponse {
     return {
       token: config.nativeToken,
-      price: config.gasPrice,
+      price: this.kujiraNetworkNativeGasPrice,
       limit: config.gasLimitEstimate,
-      cost: config.gasPrice.multipliedBy(config.gasLimitEstimate),
+      cost: this.kujiraNetworkNativeGasPrice.multipliedBy(config.gasLimitEstimate),
     } as EstimatedFees;
   }
 
@@ -1986,8 +2156,8 @@ export class Kujira {
     return JSON.parse(decryptedString);
   }
 
-  async toClient(endpoint: string): Promise<[Tendermint34Client, string]> {
-    const client = await Tendermint34Client.create(
+  async toClient(endpoint: string): Promise<[Tendermint37Client, string]> {
+    const client = await Tendermint37Client.create(
       new HttpBatchClient(endpoint, {
         dispatchInterval: 100,
         batchSizeLimit: 200,
@@ -2024,4 +2194,11 @@ export class Kujira {
 
     return latencies[0].endpoint;
   }
+
+  async transferFromTo(
+    _options: TransferFromToRequest
+  ): Promise<TransferFromToResponse> {
+    throw new Error('Not implemented.');
+  }
+
 }

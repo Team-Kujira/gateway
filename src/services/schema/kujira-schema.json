@@ -9,7 +9,10 @@
       "type": "integer"
     },
     "gasPrice": {
-      "type": "number"
+      "type": [
+        "number",
+        "null"
+      ]
     },
     "gasPriceSuffix": {
       "type": "string"
@@ -192,6 +195,34 @@
         }
       }
     },
+    "coinGecko": {
+      "type": "object",
+      "required": [
+        "coinsUrl",
+        "priceUrl",
+				"apiKeys"
+      ],
+      "properties": {
+        "coinsUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "priceUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+				"apiKeys": {
+					"type": [
+						"array",
+						"null"
+					]
+				}
+      }
+    },
     "transactions": {
       "type": "object",
       "required": [
@@ -312,6 +343,7 @@
     "orders",
     "markets",
     "tickers",
+    "coinGecko",
     "transactions",
     "retry",
     "timeout",

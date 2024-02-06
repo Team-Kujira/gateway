@@ -1,38 +1,37 @@
 import {
-  TokenBalance,
+  Amount,
   Balances,
   ConvertOrderType,
+  GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse,
+  GetTokenSymbolsToTokenIdsMapResponse,
   IMap,
   KujiraEvent,
   KujiraOrderBook,
-  KujiraTicker,
   KujiraWithdraw,
   Market,
   MarketName,
   Order,
   OrderAmount,
   OrderBook,
+  OrderFilling,
   OrderId,
   OrderPrice,
   OrderSide,
   OrderStatus,
   OrderType,
+  Price,
   Ticker,
+  TickerSource,
   Token,
+  TokenBalance,
   TokenId,
   Transaction,
   TransactionHashes,
   Withdraw,
+  Withdraws,
 } from './kujira.types';
 import { KujiraConfig } from './kujira.config';
-import {
-  Denom,
-  fin,
-  KUJI,
-  MAINNET,
-  TESTNET,
-  axlUSDC,
-} from 'kujira.js';
+import { Denom, fin, KUJI, MAINNET, TESTNET } from 'kujira.js';
 import { IndexedTx } from '@cosmjs/stargate/build/stargateclient';
 import contracts from 'kujira.js/src/resources/contracts.json';
 import { getNotNullOrThrowError } from './kujira.helpers';
@@ -40,6 +39,7 @@ import { BigNumber } from 'bignumber.js';
 import { Coin } from '@cosmjs/proto-signing';
 import { parseCoins } from '@cosmjs/stargate';
 import { TokenInfo } from '../../services/base';
+import { ClobDeleteOrderRequestExtract } from '../../clob/clob.requests';
 
 export const convertToGetTokensResponse = (token: Token): TokenInfo => {
   return {
@@ -331,11 +331,46 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
         status: convertKujiraOrderToStatus(bundle),
         type: OrderType.LIMIT,
         fee: undefined,
+        filling: {
+          free: {
+            token: undefined,
+            amount: undefined,
+          },
+          filled: {
+            token: undefined,
+            amount: undefined,
+          },
+        } as unknown as OrderFilling,
         fillingTimestamp: undefined,
         creationTimestamp: Number(bundle['created_at']),
         hashes: undefined,
         connectorOrder: bundle,
       } as Order;
+
+      if (
+        [OrderStatus.PARTIALLY_FILLED, OrderStatus.FILLED].includes(
+          getNotNullOrThrowError<OrderStatus>(order.status)
+        )
+      ) {
+        const filling = getNotNullOrThrowError<OrderFilling>(order.filling);
+        const freeToken =
+          order.side == OrderSide.BUY
+            ? order.market.quoteToken
+            : order.market.baseToken;
+        filling.free.token = freeToken;
+        filling.free.amount = BigNumber(order.connectorOrder.offer_amount).div(
+          BigNumber(10).pow(filling.free.token.decimals)
+        );
+
+        const filledToken =
+          order.side == OrderSide.BUY
+            ? order.market.baseToken
+            : order.market.quoteToken;
+        filling.filled.token = filledToken;
+        filling.filled.amount = BigNumber(
+          order.connectorOrder.filled_amount
+        ).div(BigNumber(10).pow(filling.filled.token.decimals));
+      }
 
       output.set(orderId, order);
     }
@@ -393,207 +428,230 @@ export const convertKujiraOrdersToMapOfOrders = (options: {
 };
 
 export const convertKujiraTickerToTicker = (
-  input: KujiraTicker,
-  market: Market
+  source: string,
+  input: any,
+  market: Market,
+  coinGeckTokens: any
 ): Ticker => {
-  const price = BigNumber(input.price);
+  let price: BigNumber;
+  const tokens: any = {};
+
+  if (source === TickerSource.ORDER_BOOK_SAP) {
+    price = BigNumber(input.price);
+  } else if (source === TickerSource.COINGECKO) {
+    if (!coinGeckTokens['base'] || !coinGeckTokens['quote']) {
+      tokens[market.baseToken.symbol] = BigNumber(0);
+      tokens[market.quoteToken.symbol] = BigNumber(0);
+      price = BigNumber(0);
+    } else {
+      tokens[market.baseToken.symbol] = BigNumber(
+        input[coinGeckTokens['base']]['usd']
+      );
+      tokens[market.quoteToken.symbol] = BigNumber(
+        input[coinGeckTokens['quote']]['usd']
+      );
+
+      if (tokens[market.quoteToken.symbol].gt(BigNumber(0))) {
+        price = tokens[market.baseToken.symbol].div(
+          tokens[market.quoteToken.symbol]
+        );
+      } else {
+        price = BigNumber(0);
+      }
+    }
+  } else {
+    throw new Error('Not implemented.');
+  }
+
   const timestamp = Date.now();
 
   return {
     market: market,
     price: price,
     timestamp: timestamp,
-    ticker: input,
+    tokens: tokens,
   };
+};
+
+export const convertCoinGeckoQuotationsToQuotations = (
+  input: any,
+  tokensSymbolsToTokensIdsMap: GetTokenSymbolsToTokenIdsMapResponse,
+  kujiraSymbolsToCoinGeckoIdsMap: GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse
+): IMap<TokenId, Price> => {
+  const output = IMap<TokenId, Price>().asMutable();
+
+  for (const [tokenSymbol, tokenId] of tokensSymbolsToTokensIdsMap.entries()) {
+    const coinGeckoId = kujiraSymbolsToCoinGeckoIdsMap.get(tokenSymbol);
+
+    if (coinGeckoId) {
+      output.set(tokenId, BigNumber(input[coinGeckoId]['usd']));
+    } else {
+      output.set(tokenId, BigNumber(0));
+    }
+  }
+
+  return output;
 };
 
 export const convertKujiraBalancesToBalances = async (
   balances: readonly Coin[],
   orders: IMap<OrderId, Order>,
-  tickers: IMap<TokenId, Ticker>
+  quotations: IMap<TokenId, Price>
 ): Promise<Balances> => {
-  const quoteToken = convertKujiraTokenToToken(axlUSDC);
-
   const output: Balances = {
     tokens: IMap<TokenId, TokenBalance>().asMutable(),
     total: {
       free: BigNumber(0),
       lockedInOrders: BigNumber(0),
       unsettled: BigNumber(0),
-      total: BigNumber(0)
+      total: BigNumber(0),
     },
   };
 
   for (const balance of balances) {
     const token = convertKujiraTokenToToken(Denom.from(balance.denom));
 
-    const ticker = tickers
-        .valueSeq()
-        .filter(
-            (ticker) =>
-                ticker.market.baseToken.id == token.id &&
-                ticker.market.quoteToken.id == quoteToken.id
-        ).first() != undefined
-        ?
-        tickers
-            .valueSeq()
-            .filter(
-                (ticker) =>
-                    ticker.market.baseToken.id == token.id &&
-                    ticker.market.quoteToken.id == quoteToken.id
-            ).first()
-        :
-        tickers
-            .valueSeq()
-            .filter(
-                (ticker) =>
-                    ticker.market.quoteToken.id == token.id &&
-                    ticker.market.baseToken.id == quoteToken.id
-            ).first()
+    if (!token.symbol.startsWith('x')) {
+      let quotation = BigNumber(0);
 
-    let buySide = false;
+      quotation = getNotNullOrThrowError<BigNumber>(quotations.get(token.id));
 
-    if (getNotNullOrThrowError(ticker?.market.quoteToken.symbol != quoteToken.symbol)) {
-      buySide = true;
-    }
+      const freeAmount = BigNumber(balance.amount).div(
+        BigNumber(10).pow(token.decimals)
+      );
 
-    let price = token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
-
-    if (buySide) {
-      const difference = BigNumber(1).minus(price)
-      price = BigNumber(1).plus(difference);
-    }
-
-    const freeAmount = BigNumber(balance.amount).div(
-      BigNumber(10).pow(token.decimals)
-    );
-
-    output.tokens.set(token.id, {
-      token: token,
-      ticker: ticker,
-      free: freeAmount,
-      lockedInOrders: BigNumber(0),
-      unsettled: BigNumber(0),
-      total: BigNumber(0),
-      inUSD: {
-        free: BigNumber(0),
-        lockedInOrders: BigNumber(0),
-        unsettled: BigNumber(0),
-        total: BigNumber(0)
-      }
-    });
-
-    const tokenBalance = getNotNullOrThrowError<TokenBalance>(output.tokens.get(token.id));
-    tokenBalance.free = freeAmount;
-    tokenBalance.inUSD.free = freeAmount.multipliedBy(price);
-
-    output.total.free = output.total.free.plus(freeAmount.multipliedBy(price));
-  }
-
-  for (const order of orders.values()) {
-    const token =
-      order.side == OrderSide.BUY
-        ? order.market.quoteToken
-        : order.market.baseToken;
-
-    const ticker =
-        tickers
-            .valueSeq()
-            .filter(
-                (ticker) =>
-                    ticker.market.baseToken.id == token.id &&
-                    ticker.market.quoteToken.id == quoteToken.id
-            ).first() != undefined
-            ?
-            tickers
-                .valueSeq()
-                .filter(
-                    (ticker) =>
-                        ticker.market.baseToken.id == token.id &&
-                        ticker.market.quoteToken.id == quoteToken.id
-                ).first()
-            :
-            tickers
-                .valueSeq()
-                .filter(
-                    (ticker) =>
-                        ticker.market.quoteToken.id == token.id &&
-                        ticker.market.baseToken.id == quoteToken.id
-                ).first();
-
-    const amount = order.amount;
-
-    let buySide = false;
-
-    if (getNotNullOrThrowError(ticker?.market.quoteToken.symbol != quoteToken.symbol)) {
-      buySide = true;
-    }
-
-    let price = token.id == quoteToken.id ? BigNumber(1) : ticker?.price || BigNumber(0);
-
-    if (buySide) {
-      const difference = BigNumber(1).minus(price)
-      price = BigNumber(1).plus(difference);
-    }
-
-    if (!output.tokens.has(token.id)) {
       output.tokens.set(token.id, {
         token: token,
-        ticker: ticker,
         free: BigNumber(0),
         lockedInOrders: BigNumber(0),
         unsettled: BigNumber(0),
         total: BigNumber(0),
         inUSD: {
+          quotation: BigNumber(0),
           free: BigNumber(0),
           lockedInOrders: BigNumber(0),
           unsettled: BigNumber(0),
-          total: BigNumber(0)
-        }
+          total: BigNumber(0),
+        },
       });
-    }
 
-    const tokenBalance = getNotNullOrThrowError<TokenBalance>(output.tokens.get(token.id));
-
-    if (order.status == OrderStatus.OPEN) {
-      tokenBalance.lockedInOrders = tokenBalance.lockedInOrders.plus(amount);
-      tokenBalance.inUSD.lockedInOrders = tokenBalance.lockedInOrders.multipliedBy(price);
-    } else if (order.status == OrderStatus.FILLED) {
-      tokenBalance.unsettled = tokenBalance.unsettled.plus(amount);
-      tokenBalance.inUSD.unsettled = tokenBalance.unsettled.multipliedBy(price);
+      const tokenBalance = getNotNullOrThrowError<TokenBalance>(
+        output.tokens.get(token.id)
+      );
+      tokenBalance.free = freeAmount;
+      tokenBalance.inUSD.quotation = quotation;
+      tokenBalance.inUSD.free = freeAmount.multipliedBy(quotation);
     }
   }
 
-  const allFreeBalancesSum = BigNumber(0);
-  const allLockedInOrdersBalancesSum = BigNumber(0);
-  const allUnsettledBalancesSum = BigNumber(0);
+  for (const order of orders.values()) {
+    const freeToken: Token =
+      order.side == OrderSide.BUY
+        ? order.market.quoteToken
+        : order.market.baseToken;
+    const filledToken: Token =
+      order.side == OrderSide.BUY
+        ? order.market.baseToken
+        : order.market.quoteToken;
+
+    let freeAmount: Amount = BigNumber(0);
+    let filledAmount: Amount = BigNumber(0);
+
+    const freeQuotation = getNotNullOrThrowError<BigNumber>(
+      quotations.get(freeToken.id)
+    );
+
+    const filledQuotation = getNotNullOrThrowError<BigNumber>(
+      quotations.get(filledToken.id)
+    );
+
+    const filling = getNotNullOrThrowError<OrderFilling>(order.filling);
+    if (order.status == OrderStatus.OPEN) {
+      freeAmount = BigNumber(order.amount);
+    } else if (order.status == OrderStatus.PARTIALLY_FILLED) {
+      freeAmount = getNotNullOrThrowError<BigNumber>(filling.free.amount);
+      filledAmount = getNotNullOrThrowError<BigNumber>(filling.filled.amount);
+    } else if (order.status == OrderStatus.FILLED) {
+      filledAmount = getNotNullOrThrowError<BigNumber>(filling.filled.amount);
+    } else {
+      throw Error('Unrecognized order status.');
+    }
+
+    for (const token of [freeToken, filledToken]) {
+      if (!output.tokens.has(token.id)) {
+        output.tokens.set(token.id, {
+          token: token,
+          free: BigNumber(0),
+          lockedInOrders: BigNumber(0),
+          unsettled: BigNumber(0),
+          total: BigNumber(0),
+          inUSD: {
+            quotation: BigNumber(0),
+            free: BigNumber(0),
+            lockedInOrders: BigNumber(0),
+            unsettled: BigNumber(0),
+            total: BigNumber(0),
+          },
+        });
+      }
+    }
+
+    const freeTokenBalance = getNotNullOrThrowError<TokenBalance>(
+      output.tokens.get(freeToken.id)
+    );
+    freeTokenBalance.inUSD.quotation = freeQuotation;
+    freeTokenBalance.lockedInOrders =
+      freeTokenBalance.lockedInOrders.plus(freeAmount);
+    freeTokenBalance.inUSD.lockedInOrders =
+      freeTokenBalance.inUSD.lockedInOrders.plus(
+        freeAmount.multipliedBy(freeQuotation)
+      );
+
+    const filledTokenBalance = getNotNullOrThrowError<TokenBalance>(
+      output.tokens.get(filledToken.id)
+    );
+    filledTokenBalance.inUSD.quotation = filledQuotation;
+    filledTokenBalance.unsettled =
+      filledTokenBalance.unsettled.plus(filledAmount);
+    filledTokenBalance.inUSD.unsettled =
+      filledTokenBalance.inUSD.unsettled.plus(
+        filledAmount.multipliedBy(filledQuotation)
+      );
+  }
+
+  let allFreeBalancesSum = BigNumber(0);
+  let allLockedInOrdersBalancesSum = BigNumber(0);
+  let allUnsettledBalancesSum = BigNumber(0);
 
   for (const tokenBalance of output.tokens.valueSeq()) {
-    tokenBalance.total = tokenBalance.total.plus(
-        tokenBalance.free
-    ).plus(
-        tokenBalance.lockedInOrders
-    ).plus(
-        tokenBalance.unsettled
-    )
+    tokenBalance.total = tokenBalance.total
+      .plus(tokenBalance.free)
+      .plus(tokenBalance.lockedInOrders)
+      .plus(tokenBalance.unsettled);
 
-    tokenBalance.inUSD.total = tokenBalance.inUSD.total.plus(
-        tokenBalance.inUSD.free
-    ).plus(
-        tokenBalance.inUSD.lockedInOrders
-    ).plus(
-        tokenBalance.inUSD.unsettled
-    )
+    tokenBalance.inUSD.total = tokenBalance.inUSD.total
+      .plus(tokenBalance.inUSD.free)
+      .plus(tokenBalance.inUSD.lockedInOrders)
+      .plus(tokenBalance.inUSD.unsettled);
 
-    allFreeBalancesSum.plus(tokenBalance.inUSD.free)
-    allLockedInOrdersBalancesSum.plus(tokenBalance.inUSD.lockedInOrders)
-    allUnsettledBalancesSum.plus(tokenBalance.inUSD.unsettled)
+    allFreeBalancesSum = allFreeBalancesSum.plus(tokenBalance.inUSD.free);
+    allLockedInOrdersBalancesSum = allLockedInOrdersBalancesSum.plus(
+      tokenBalance.inUSD.lockedInOrders
+    );
+    allUnsettledBalancesSum = allUnsettledBalancesSum.plus(
+      tokenBalance.inUSD.unsettled
+    );
   }
 
   output.total.free = output.total.free.plus(allFreeBalancesSum);
-  output.total.lockedInOrders = output.total.lockedInOrders.plus(allLockedInOrdersBalancesSum);
+  output.total.lockedInOrders = output.total.lockedInOrders.plus(
+    allLockedInOrdersBalancesSum
+  );
   output.total.unsettled = output.total.unsettled.plus(allUnsettledBalancesSum);
-  output.total.total = output.total.total.plus(output.total.free).plus(output.total.lockedInOrders).plus(output.total.unsettled);
+  output.total.total = output.total.total
+    .plus(output.total.free)
+    .plus(output.total.lockedInOrders)
+    .plus(output.total.unsettled);
 
   return output;
 };
@@ -612,11 +670,116 @@ export const convertKujiraTransactionToTransaction = (
 };
 
 export const convertKujiraSettlementToSettlement = (
-  input: KujiraWithdraw
-): Withdraw => {
-  return {
-    hash: input.transactionHash,
+  input: KujiraWithdraw,
+  quotations: IMap<TokenId, Price>,
+  market: Market
+): Withdraws => {
+  const events = convertKujiraRawLogEventsToMapOfEvents([
+    { msg_index: 'events', events: input['events'] },
+  ]);
+
+  const nativeToken = getNotNullOrThrowError<any>(
+    (events.getIn(['events', 'tx', 'fee']) as string).match(/^(\d+)(.*)/)
+  );
+
+  const transferEventFeeAmountArray: any = events.getIn([
+    'events',
+    'transfer',
+    'amount',
+  ]);
+
+  const tokenFees = {
+    base: {
+      tokenId: market.baseToken.id,
+      feeAmount: BigNumber(0),
+    },
+    quote: {
+      tokenId: market.quoteToken.id,
+      feeAmount: BigNumber(0),
+    },
+    native: {
+      tokenId: nativeToken[2],
+      feeAmount: BigNumber(0),
+    },
   };
+
+  for (const transferEventFee of transferEventFeeAmountArray) {
+    const tokenIdFromFeeMatch = transferEventFee.match(/^(\d+)(.*)/);
+
+    if (tokenIdFromFeeMatch[2] == market.baseToken.id) {
+      tokenFees.base.feeAmount = tokenFees.base.feeAmount.plus(
+        BigNumber(parseInt(tokenIdFromFeeMatch[1]))
+      );
+    } else if (tokenIdFromFeeMatch[2] == market.quoteToken.id) {
+      tokenFees.quote.feeAmount = tokenFees.quote.feeAmount.plus(
+        BigNumber(parseInt(tokenIdFromFeeMatch[1]))
+      );
+    }
+  }
+
+  if (
+    market.baseToken.id != nativeToken[2] &&
+    market.quoteToken.id != nativeToken[2]
+  ) {
+    tokenFees.native.feeAmount = tokenFees.native.feeAmount.plus(
+      BigNumber(parseInt(nativeToken[1]))
+    );
+  }
+
+  const tokenWithdraw = IMap<TokenId, Withdraw>().asMutable();
+
+  const withdraws = {
+    hash: input.transactionHash,
+    tokens: tokenWithdraw,
+    total: {
+      fees: BigNumber(0),
+    },
+  } as Withdraws;
+
+  for (const tokenFee of Object.values(tokenFees)) {
+    const denom = Denom.from(tokenFee.tokenId);
+    const token = convertKujiraTokenToToken(denom);
+
+    const amount = getNotNullOrThrowError<BigNumber>(
+      tokenFee.feeAmount.multipliedBy(Math.pow(10, -denom.decimals))
+    );
+
+    if (amount.gt(BigNumber(0))) {
+      const quotation = getNotNullOrThrowError<BigNumber>(
+        quotations.get(token.id)
+      );
+
+      const amountInUSD = amount.multipliedBy(quotation);
+
+      if (!tokenWithdraw.has(token.id)) {
+        tokenWithdraw.set(token.id, {
+          fees: {
+            token: amount,
+            USD: amountInUSD,
+            quotation: quotation,
+          },
+          token: token,
+        } as Withdraw);
+      } else {
+        const tokenData = getNotNullOrThrowError<any>(
+          tokenWithdraw.get(token.id)
+        );
+
+        tokenWithdraw.set(token.id, {
+          fees: {
+            token: tokenData.fees.token.plus(amount),
+            USD: tokenData.fees.USD.plus(amountInUSD),
+            quotation: quotation,
+          },
+          token: token,
+        } as Withdraw);
+      }
+
+      withdraws.total.fees = withdraws.total.fees.plus(amountInUSD);
+    }
+  }
+
+  return withdraws;
 };
 
 export const convertNetworkToKujiraNetwork = (
@@ -669,11 +832,59 @@ export const convertKujiraRawLogEventsToMapOfEvents = (
   for (const eventLog of eventsLog) {
     const bundleIndex = eventLog['msg_index'];
     const events = eventLog['events'];
-    for (const event of events) {
-      for (const attribute of event.attributes) {
-        output.setIn([bundleIndex, event.type, attribute.key], attribute.value);
+    const transferTokenAmountArray = [];
+
+    let feePayer: any = undefined;
+
+    const txEventArray = events.filter((item: any) => item.type == 'tx');
+
+    for (const txEvent of txEventArray) {
+      const txFeePayer = txEvent.attributes.find(
+        (attribute: any) => attribute.key == 'fee_payer'
+      );
+      if (txFeePayer != undefined && feePayer == undefined) {
+        feePayer = txFeePayer.value;
       }
     }
+
+    const transferEventArray = events.filter(
+      (item: any) => item.type == 'transfer'
+    );
+
+    for (const transferEvent of transferEventArray) {
+      let recipient = transferEvent.attributes.find(
+        (attribute: any) => attribute.key == 'recipient'
+      );
+
+      if (recipient != undefined) {
+        recipient = recipient.value;
+      }
+
+      if (feePayer != recipient) {
+        const transferAmounts = transferEvent.attributes
+          .find((attribute: any) => attribute.key == 'amount')
+          .value.split(',');
+
+        for (const transferAmount of transferAmounts) {
+          if (transferAmount != undefined) {
+            transferTokenAmountArray.push(transferAmount);
+          }
+        }
+      }
+    }
+
+    for (const event of events) {
+      if (event.type != 'transfer') {
+        for (const attribute of event.attributes) {
+          output.setIn(
+            [bundleIndex, event.type, attribute.key],
+            attribute.value
+          );
+        }
+      }
+    }
+
+    output.setIn([bundleIndex, 'transfer', 'amount'], transferTokenAmountArray);
   }
 
   return output;
@@ -713,4 +924,51 @@ export function convertNonStandardKujiraTokenIds(
   }
 
   return output;
+}
+
+export function convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(
+  obj: any
+): any {
+  if (Array.isArray(obj)) {
+    return obj.map((item) =>
+      convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(item)
+    );
+  } else if (typeof obj === 'object' && obj !== null) {
+    const updatedObj: any = {};
+    for (const key in obj) {
+      let newKey = key;
+      let value = obj[key];
+      if (key === 'orderType') {
+        newKey = 'type';
+      } else if (key === 'market') {
+        value = value.replace('-', '/');
+        newKey = 'marketName';
+      }
+      updatedObj[newKey] =
+        convertClobBatchOrdersRequestToKujiraPlaceOrdersRequest(value);
+    }
+    return updatedObj;
+  } else {
+    return obj;
+  }
+}
+
+export function convertClobBatchOrdersRequestToKujiraCancelOrdersRequest(
+  obj: any
+): any {
+  const { cancelOrderParams, address, ...rest } = obj;
+  const ids = [];
+  const idsFromCancelOrderParams: ClobDeleteOrderRequestExtract[] =
+    cancelOrderParams;
+  for (const key of idsFromCancelOrderParams) {
+    ids.push(key.orderId);
+  }
+  const marketId = cancelOrderParams[0].market;
+
+  return {
+    ...rest,
+    ids: ids,
+    marketId: marketId,
+    ownerAddress: address,
+  };
 }

@@ -102,10 +102,10 @@ import {
   TokenSymbol,
   Transaction,
   TransactionHash,
-  Withdraw,
+  Withdraws,
 } from '../../../src/connectors/kujira/kujira.types';
 import * as KujiraController from '../../../src/connectors/kujira/kujira.controllers';
-import { Denom, fin, KUJI, NETWORKS, TESTNET } from 'kujira.js';
+import { Denom, fin, KUJI, MAINNET, NETWORKS } from 'kujira.js';
 import { addWallet } from '../../../src/services/wallet/wallet.controllers';
 import { AddWalletRequest } from '../../../src/services/wallet/wallet.requests';
 import lodash from 'lodash';
@@ -132,7 +132,6 @@ import {
   useInputOutputWrapper,
   usePatches,
 } from './fixtures/patches/patches';
-import { ConfigManagerV2 } from '../../../src/services/config-manager-v2';
 import { KujiraRoutes } from '../../../src/connectors/kujira/kujira.routes';
 import express from 'express';
 import { Express } from 'express-serve-static-core';
@@ -167,22 +166,25 @@ let kujira: Kujira;
 
 const config = KujiraConfig.config;
 
-const network = NETWORKS[TESTNET].toLowerCase();
+const network = NETWORKS[MAINNET].toLowerCase();
 
-const networksPairs: Record<string, fin.Pair> = fin.PAIRS[TESTNET];
+const networksPairs: Record<string, fin.Pair> = fin.PAIRS[MAINNET];
 
 const kujiToken = KUJI;
 
 const marketsIds = {
-  1: networksPairs[
-    'kujira1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrsqq4jjh'
-  ].address, // KUJI/DEMO
-  2: networksPairs[
-    'kujira1wl003xxwqltxpg5pkre0rl605e406ktmq5gnv0ngyjamq69mc2kqm06ey6'
-  ].address, // KUJI/USK
-  3: networksPairs[
-    'kujira14sa4u42n2a8kmlvj3qcergjhy6g9ps06rzeth94f2y6grlat6u6ssqzgtg'
-  ].address, // DEMO/USK
+  'KUJI/USK':
+    networksPairs[
+      'kujira193dzcmy7lwuj4eda3zpwwt9ejal00xva0vawcvhgsyyp5cfh6jyq66wfrf'
+    ].address,
+  'KUJI/axlUSDC':
+    networksPairs[
+      'kujira14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9sl4e867'
+    ].address,
+  'axlUSDC/USK':
+    networksPairs[
+      'kujira1rwx6w02alc4kaz7xpyg3rlxpjl4g63x5jq292mkxgg65zqpn5llq202vh5'
+    ].address,
 };
 
 const tokensIdsArray = [
@@ -202,9 +204,9 @@ for (let i = 0; i < tokensIdsArray.length; i++) {
 }
 
 const transactionsHashes = {
-  1: 'D5C9B4FBD06482C1B40CEA3B1D10E445049F1F19CA5531265FC523973CC65EF9',
-  2: '50F44E09A0617E7506B4F78886C4828A05FC84141A6BB57DA1B87A03EF4ADB91',
-  3: '66DBF37EAE15E28AD70E3292216DEE3D6B61E5C5913EBCE584E4971D2A6A2F2B',
+  1: '34F53728E0A3E877A2140D21D69C0E4DC62600A061CD9B7677B43DCCE49B83F4', // retract_orders
+  2: '8C80FA65ED1CAD8B79D45AEA6593E1A0E17BAEFBEF69D9677CD7DD10045FF283', // submit_order
+  3: '445FDABE49898EA2B6503D7741B779C527CDD8FAB7E75C095F5CA3A0BB28AD0C', // submit_order
 };
 
 const orders: IMap<OrderClientId, Order> = IMap<
@@ -240,35 +242,33 @@ const mnemonic: string = getNotNullOrThrowError<string>(
 );
 
 beforeAll(async () => {
-  const configManager = ConfigManagerV2.getInstance();
-
-  configManager.set('kujira.prefix', 'kujira');
-  configManager.set('kujira.accountNumber', 0);
-  configManager.set('kujira.gasPrice', 0.00125);
-  configManager.set('kujira.gasPriceSuffix', 'ukuji');
-  configManager.set('kujira.gasLimitEstimate', 0.009147);
-  configManager.set('kujira.orderBook.offset', 0);
-  configManager.set('kujira.orderBook.limit', 255);
-  configManager.set('kujira.cache.marketsData', 3600);
-  configManager.set('kujira.cache.markets', 3600);
-  configManager.set('kujira.orders.create.fee', 'auto');
-  configManager.set('kujira.orders.create.maxPerTransaction', 8);
-  configManager.set('kujira.orders.open.limit', 255);
-  configManager.set('kujira.orders.filled.limit', 255);
-  configManager.set('kujira.orders.cancel.maxPerTransaction', 25);
-  configManager.set('kujira.tokens.resolutionStrategy', 'markets');
-  configManager.set(
-    'kujira.tickers.sources.nomics.url',
-    'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=serum_dex&interval=1m&market=${marketAddress}'
-  );
-  configManager.set('kujira.transactions.merge.createOrders', true);
-  configManager.set('kujira.transactions.merge.cancelOrders', true);
-  configManager.set('kujira.transactions.merge.settleFunds', true);
-  configManager.set('kujira.retry.all.maxNumberOfRetries', 3);
-  configManager.set('kujira.retry.all.delayBetweenRetries', 1000);
-  configManager.set('kujira.timeout.all', 60000);
-  configManager.set('kujira.parallel.all.batchSize', 100);
-  configManager.set('kujira.parallel.all.delayBetweenBatches', 200);
+  config.prefix = 'kujira';
+  config.accountNumber = 0;
+  config.gasPrice = BigNumber(0.00125);
+  config.gasPriceSuffix = 'ukuji';
+  config.gasLimitEstimate = BigNumber(0.009147);
+  config.orderBook.offset = 0;
+  config.orderBook.limit = 255;
+  config.cache.marketsData = 3600;
+  config.cache.markets = 3600;
+  config.orders.create.fee = 'auto';
+  config.orders.create.maxPerTransaction = 8;
+  config.orders.open.limit = 255;
+  config.orders.filled.limit = 255;
+  config.orders.cancel.maxPerTransaction = 25;
+  config.tokens.allowed = null;
+  config.tokens.disallowed = null;
+  config.tokens.resolutionStrategy = 'markets';
+  config.markets.allowed = Object.keys(marketsIds);
+  config.markets.disallowed = null;
+  config.transactions.merge.createOrders = true;
+  config.transactions.merge.cancelOrders = true;
+  config.transactions.merge.settleFunds = true;
+  config.retry.all.maxNumberOfRetries = 3;
+  config.retry.all.delayBetweenRetries = 1000;
+  config.timeout.all = 60000;
+  config.parallel.all.batchSize = 100;
+  config.parallel.all.delayBetweenBatches = 200;
 
   expressApp = express();
   expressApp.use(express.json());
@@ -312,30 +312,30 @@ beforeAll(async () => {
 
   // Order  |  Type  |  Side  | Market (ID/Name)
   // ====== + ====== + ====== + ================
-  //  #01   | LIMIT  |  BUY   | 1 / KUJI/DEMO
-  //  #02   | LIMIT  |  SELL  | 2 / KUJI/USK
-  //  #03   | MARKET |  SELL  | 3 / DEMO/USK
-  //  #04   | LIMIT  |  BUY   | 1 / KUJI/DEMO
-  //  #05   | LIMIT  |  SELL  | 2 / KUJI/USK
-  //  #06   | LIMIT  |  BUY   | 3 / DEMO/USK
-  //  #07   | LIMIT  |  SELL  | 1 / KUJI/DEMO
-  //  #08   | LIMIT  |  BUY   | 2 / KUJI/USK
-  //  #09   | LIMIT  |  SELL  | 3 / DEMO/USK
-  //  #10   | MARKET |  BUY   | 1 / KUJI/DEMO
-  //  #11   | MARKET |  SELL  | 2 / KUJI/USK
-  //  #12   | LIMIT  |  BUY   | 3 / DEMO/USK
-  //  #13   | LIMIT  |  SELL  | 1 / KUJI/DEMO
+  //  #01   | LIMIT  |  BUY   | 1 / KUJI/USK
+  //  #02   | LIMIT  |  SELL  | 2 / KUJI/axlUSDC
+  //  #03   | MARKET |  SELL  | 3 / axlUSDC/USK
+  //  #04   | LIMIT  |  BUY   | 1 / KUJI/USK
+  //  #05   | LIMIT  |  SELL  | 2 / KUJI/axlUSDC
+  //  #06   | LIMIT  |  BUY   | 3 / axlUSDC/USK
+  //  #07   | LIMIT  |  SELL  | 1 / KUJI/USK
+  //  #08   | LIMIT  |  BUY   | 2 / KUJI/axlUSDC
+  //  #09   | LIMIT  |  SELL  | 3 / axlUSDC/USK
+  //  #10   | MARKET |  BUY   | 1 / KUJI/USK
+  //  #11   | MARKET |  SELL  | 2 / KUJI/axlUSDC
+  //  #12   | LIMIT  |  BUY   | 3 / axlUSDC/USK
+  //  #13   | LIMIT  |  SELL  | 1 / KUJI/USK
 
   orders.set('1', {
     id: undefined,
     clientId: '1',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[1],
+    marketId: marketsIds['KUJI/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -348,12 +348,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '2',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[2],
+    marketId: marketsIds['KUJI/axlUSDC'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -366,12 +366,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '3',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[3],
+    marketId: marketsIds['axlUSDC/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.MARKET,
@@ -384,12 +384,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '4',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[1],
+    marketId: marketsIds['KUJI/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -402,12 +402,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '5',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[2],
+    marketId: marketsIds['KUJI/axlUSDC'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.999),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -420,12 +420,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '6',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[3],
+    marketId: marketsIds['axlUSDC/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -438,12 +438,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '7',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[1],
+    marketId: marketsIds['KUJI/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -456,12 +456,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '8',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[2],
+    marketId: marketsIds['KUJI/axlUSDC'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -474,12 +474,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '9',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[3],
+    marketId: marketsIds['axlUSDC/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.999),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -492,12 +492,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '10',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[1],
+    marketId: marketsIds['KUJI/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.MARKET,
@@ -510,12 +510,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '11',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[2],
+    marketId: marketsIds['KUJI/axlUSDC'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: undefined,
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.MARKET,
@@ -528,12 +528,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '12',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[3],
+    marketId: marketsIds['axlUSDC/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(0.001),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.BUY,
     status: undefined,
     type: OrderType.LIMIT,
@@ -546,12 +546,12 @@ beforeAll(async () => {
     id: undefined,
     clientId: '13',
     marketName: undefined as unknown as OrderMarketName,
-    marketId: marketsIds[1],
+    marketId: marketsIds['KUJI/USK'],
     market: undefined as unknown as Market,
     ownerAddress: ownerAddress,
     payerAddress: ownerAddress,
     price: BigNumber(999.99),
-    amount: BigNumber(1),
+    amount: BigNumber(0.1),
     side: OrderSide.SELL,
     status: undefined,
     type: OrderType.LIMIT,
@@ -575,12 +575,12 @@ beforeEach(async () => {
   logRequest = (target: any) => helperLogRequest(target, testTitle);
   logResponse = (target: any) => helperLogResponse(target, testTitle);
 
-  // logRequest = (_target: any) => {
-  //   return;
-  // };
-  // logResponse = (_target: any) => {
-  //   return;
-  // };
+  logRequest = (_target: any) => {
+    return;
+  };
+  logResponse = (_target: any) => {
+    return;
+  };
 
   await getPatch(['kujira', 'decryptWallet'])(testTitle);
   await getPatch(['kujira', 'kujiraFinClientWithdrawOrders'])(testTitle);
@@ -986,7 +986,7 @@ describe('Kujira', () => {
   describe('Markets', () => {
     it('Get market 1 by id', async () => {
       const requestBody = {
-        id: marketsIds[1],
+        id: marketsIds['KUJI/USK'],
       } as GetMarketRequest;
 
       const request = {
@@ -1007,8 +1007,8 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      const networkPair = networksPairs[marketsIds[1]];
-      expect(responseBody.id).toEqual(marketsIds[1]);
+      const networkPair = networksPairs[marketsIds['KUJI/USK']];
+      expect(responseBody.id).toEqual(marketsIds['KUJI/USK']);
       expect([responseBody.baseToken.id, responseBody.quoteToken.id]).toEqual([
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
@@ -1023,7 +1023,7 @@ describe('Kujira', () => {
     });
 
     it('Get market 1 by name', async () => {
-      const networkPair = networksPairs[marketsIds[1]];
+      const networkPair = networksPairs[marketsIds['KUJI/USK']];
 
       const requestBody = {
         name: networkPair.denoms[0].symbol + '/' + networkPair.denoms[1].symbol,
@@ -1047,7 +1047,7 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      expect(responseBody.id).toEqual(marketsIds[1]);
+      expect(responseBody.id).toEqual(marketsIds['KUJI/USK']);
       expect([responseBody.baseToken.id, responseBody.quoteToken.id]).toEqual([
         networkPair.denoms[0].reference,
         networkPair.denoms[1].reference,
@@ -1062,7 +1062,10 @@ describe('Kujira', () => {
     });
 
     it('Get markets 2 and 3 by ids', async () => {
-      const targetMarketIds = [marketsIds[2], marketsIds[3]];
+      const targetMarketIds = [
+        marketsIds['KUJI/axlUSDC'],
+        marketsIds['axlUSDC/USK'],
+      ];
 
       const requestBody = {
         ids: targetMarketIds,
@@ -1116,7 +1119,10 @@ describe('Kujira', () => {
     });
 
     it('Get markets 2 and 3 by names', async () => {
-      const targetMarketIds = [marketsIds[2], marketsIds[3]];
+      const targetMarketIds = [
+        marketsIds['KUJI/axlUSDC'],
+        marketsIds['axlUSDC/USK'],
+      ];
       const targetNames = [];
 
       for (const target of targetMarketIds.values()) {
@@ -1179,7 +1185,11 @@ describe('Kujira', () => {
     });
 
     it('Get all markets', async () => {
-      const targetMarketIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
+      const targetMarketIds = [
+        marketsIds['KUJI/USK'],
+        marketsIds['KUJI/axlUSDC'],
+        marketsIds['axlUSDC/USK'],
+      ];
       const requestBody = {} as GetAllMarketsRequest;
 
       const request = {
@@ -1231,7 +1241,7 @@ describe('Kujira', () => {
   describe('Order books', () => {
     it('Get order book from market 1 by id', async () => {
       const requestBody = {
-        marketId: marketsIds[1],
+        marketId: marketsIds['KUJI/USK'],
       } as GetOrderBookRequest;
 
       const request = {
@@ -1267,7 +1277,7 @@ describe('Kujira', () => {
     });
 
     it('Get order book from market 1 by name', async () => {
-      const networkPair = networksPairs[marketsIds[1]];
+      const networkPair = networksPairs[marketsIds['KUJI/USK']];
 
       const requestBody = {
         marketName:
@@ -1294,7 +1304,7 @@ describe('Kujira', () => {
 
       expect(responseBody).not.toBeUndefined();
       expect(responseBody.market.name).toBe(request.marketName);
-      expect(responseBody.market.id).toBe(marketsIds[1]);
+      expect(responseBody.market.id).toBe(marketsIds['KUJI/USK']);
       expect(responseBody.bids).not.toBeUndefined();
       expect(responseBody.asks).not.toBeUndefined();
 
@@ -1309,7 +1319,7 @@ describe('Kujira', () => {
 
     it('Get order books from the markets 2 and 3 by ids', async () => {
       const requestBody = {
-        marketIds: [marketsIds[2], marketsIds[3]],
+        marketIds: [marketsIds['KUJI/axlUSDC'], marketsIds['axlUSDC/USK']],
       } as GetOrderBooksRequest;
 
       const request = {
@@ -1353,7 +1363,10 @@ describe('Kujira', () => {
     });
 
     it('Get order books from the markets 2 and 3 by names', async () => {
-      const targetMarketIds = [marketsIds[2], marketsIds[3]];
+      const targetMarketIds = [
+        marketsIds['KUJI/axlUSDC'],
+        marketsIds['axlUSDC/USK'],
+      ];
       const targetNames = [];
 
       for (const target of targetMarketIds.values()) {
@@ -1451,7 +1464,7 @@ describe('Kujira', () => {
   describe('Tickers', () => {
     it('Get ticker from market 1 by id', async () => {
       const requestBody = {
-        marketId: marketsIds[1],
+        marketId: marketsIds['KUJI/USK'],
       } as GetTickerRequest;
 
       const request = {
@@ -1472,7 +1485,7 @@ describe('Kujira', () => {
 
       logResponse(responseBody);
 
-      expect(responseBody.market.id).toEqual(marketsIds[1]);
+      expect(responseBody.market.id).toEqual(marketsIds['KUJI/USK']);
 
       const price = BigNumber(
         getNotNullOrThrowError<TickerPrice>(responseBody.price)
@@ -1486,7 +1499,7 @@ describe('Kujira', () => {
     });
 
     it('Get ticker from market 1 by name', async () => {
-      const networkPair = networksPairs[marketsIds[1]];
+      const networkPair = networksPairs[marketsIds['KUJI/USK']];
 
       const requestBody = {
         marketName:
@@ -1510,7 +1523,7 @@ describe('Kujira', () => {
       logResponse(responseBody);
 
       expect(responseBody.market.name).toEqual(request.marketName);
-      expect(responseBody.market.id).toEqual(marketsIds[1]);
+      expect(responseBody.market.id).toEqual(marketsIds['KUJI/USK']);
 
       const price = BigNumber(
         getNotNullOrThrowError<TickerPrice>(responseBody.price)
@@ -1526,7 +1539,10 @@ describe('Kujira', () => {
     });
 
     it('Get tickers from markets 2 and 3 by ids', async () => {
-      const targetMarketsIds = [marketsIds[2], marketsIds[3]];
+      const targetMarketsIds = [
+        marketsIds['KUJI/axlUSDC'],
+        marketsIds['axlUSDC/USK'],
+      ];
       const requestBody = {
         marketIds: targetMarketsIds,
       } as GetTickersRequest;
@@ -1570,7 +1586,10 @@ describe('Kujira', () => {
     });
 
     it('Get tickers from markets 2 and 3 by names', async () => {
-      const targetMarketIds = [marketsIds[2], marketsIds[3]];
+      const targetMarketIds = [
+        marketsIds['KUJI/axlUSDC'],
+        marketsIds['axlUSDC/USK'],
+      ];
       const targetNames = [];
 
       for (const target of targetMarketIds.values()) {
@@ -1623,7 +1642,11 @@ describe('Kujira', () => {
     });
 
     it('Get all tickers', async () => {
-      const targetMarketsIds = [marketsIds[1], marketsIds[2], marketsIds[3]];
+      const targetMarketsIds = [
+        marketsIds['KUJI/USK'],
+        marketsIds['KUJI/axlUSDC'],
+        marketsIds['axlUSDC/USK'],
+      ];
       const requestBody = {} as GetAllTickersRequest;
 
       const request = {
@@ -2232,32 +2255,31 @@ describe('Kujira', () => {
       userBalances.tokens.set(targetOrder.market.quoteToken.id, {
         token: targetOrder.market.quoteToken,
         free: currentQuoteBalance,
-                lockedInOrders: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id
-                        )?.lockedInOrders
+        lockedInOrders: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)
+            ?.lockedInOrders
         ).plus(targetOrder.amount),
-                unsettled: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id
-                        )?.unsettled
+        unsettled: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
         ),
-                total: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id
-                        )?.total
-                ),
-                inUSD: {
-                    free: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.free,
-                    lockedInOrders: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.lockedInOrders,
-                    unsettled: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.unsettled,
-                    total: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.total
-                }
+        total: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)?.total
+        ),
+        inUSD: {
+          quotation: BigNumber(0),
+          free: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+          )?.free,
+          lockedInOrders: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+          )?.lockedInOrders,
+          unsettled: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+          )?.unsettled,
+          total: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+          )?.total,
+        },
       });
     });
 
@@ -2354,7 +2376,7 @@ describe('Kujira', () => {
         BigNumber(getNotNullOrThrowError(responseBody.amount)).toString()
       ).toEqual(candidate.amount.toString());
       expect(responseBody.side).toBe(candidate.side);
-      expect(responseBody.marketName).toBe('KUJI/USK');
+      expect(responseBody.marketName).toBe(Object.keys(marketsIds)[1]);
       expect(responseBody.payerAddress).toBe(candidate.payerAddress);
       expect(responseBody.hashes?.creation?.length).toBeCloseTo(64);
 
@@ -2427,27 +2449,30 @@ describe('Kujira', () => {
               ?.lockedInOrders
           )
         ).plus(targetOrder.amount),
-                unsettled:
-          getNotNullOrThrowError<any>(
-            userBalances.tokens.get(targetOrder.market.baseToken.id)?.unsettled
-                ),
-                total: getNotNullOrThrowError<any>(
-                userBalances.tokens.get(targetOrder.market.baseToken.id)?.total
-            ),
-                inUSD: {
-                    free: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.free
-                    ),
-                    lockedInOrders: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.lockedInOrders
-                    ),
-                    unsettled: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.unsettled
+        unsettled: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.baseToken.id)?.unsettled
         ),
-                    total: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.total
-                    )
-                }
+        total: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.baseToken.id)?.total
+        ),
+        inUSD: {
+          quotation: BigNumber(0),
+          free: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD.free
+          ),
+          lockedInOrders: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD
+              .lockedInOrders
+          ),
+          unsettled: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD
+              .unsettled
+          ),
+          total: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.baseToken.id)?.inUSD
+              .total
+          ),
+        },
       });
 
       // Verifying token 2 (quote) balance
@@ -2473,32 +2498,31 @@ describe('Kujira', () => {
       userBalances.tokens.set(targetOrder.market.quoteToken.id, {
         token: targetOrder.market.quoteToken,
         free: currentQuoteBalance,
-                lockedInOrders: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(targetOrder.market.quoteToken.id
-                    )?.lockedInOrders
-                ).plus(targetOrder.amount),
-                unsettled: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(targetOrder.market.quoteToken.id
-                    )?.unsettled
-                ),
-                total: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(targetOrder.market.quoteToken.id
-                    )?.total
-                ),
-                inUSD: {
-                    free: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.free,
-                    lockedInOrders: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.lockedInOrders,
-                    unsettled: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.unsettled,
-                    total: getNotNullOrThrowError<any>(
+        lockedInOrders: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)
+            ?.lockedInOrders
+        ).plus(targetOrder.amount),
+        unsettled: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)?.unsettled
+        ),
+        total: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(targetOrder.market.quoteToken.id)?.total
+        ),
+        inUSD: {
+          quotation: BigNumber(0),
+          free: getNotNullOrThrowError<any>(
             userBalances.tokens.get(targetOrder.market.quoteToken.id)
-                    )?.total
-                }
+          )?.free,
+          lockedInOrders: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+          )?.lockedInOrders,
+          unsettled: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+          )?.unsettled,
+          total: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(targetOrder.market.quoteToken.id)
+          )?.total,
+        },
       });
     });
 
@@ -2647,28 +2671,33 @@ describe('Kujira', () => {
             userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
               ?.lockedInOrders
           )
-                ).plus(primaryTargetOrder.amount),
-                unsettled:
-          getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.unsettled
-                    ),
-                total: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.total
-                ),
-                inUSD: {
-                    free: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.free
-                    ),
-                    lockedInOrders: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.lockedInOrders
-                    ),
-                    unsettled: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.unsettled
+        ).plus(primaryTargetOrder.amount),
+        unsettled: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
+            ?.unsettled
         ),
-                    total: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.inUSD.total
-                    )
-                }
+        total: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)?.total
+        ),
+        inUSD: {
+          quotation: BigNumber(0),
+          free: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
+              ?.inUSD.free
+          ),
+          lockedInOrders: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
+              ?.inUSD.lockedInOrders
+          ),
+          unsettled: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
+              ?.inUSD.unsettled
+          ),
+          total: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(primaryTargetOrder.market.baseToken.id)
+              ?.inUSD.total
+          ),
+        },
       });
 
       // Verifying token 3 (quote) balance
@@ -2691,32 +2720,33 @@ describe('Kujira', () => {
       userBalances.tokens.set(primaryTargetOrder.market.quoteToken.id, {
         token: primaryTargetOrder.market.quoteToken,
         free: expectedCurrentQuoteFreeBalance,
-                lockedInOrders: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id
-                    )?.lockedInOrders
-                ).plus(primaryTargetOrder.amount),
-                unsettled: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(secundaryTargetOrder.market.quoteToken.id
-                    )?.unsettled
-                ),
-                total: getNotNullOrThrowError<any>(
-                    userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id
-                    )?.total
-                ),
-                inUSD: {
-                    free: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
-                    )?.free,
-                    lockedInOrders: getNotNullOrThrowError<any>(
+        lockedInOrders: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+            ?.lockedInOrders
+        ).plus(primaryTargetOrder.amount),
+        unsettled: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(secundaryTargetOrder.market.quoteToken.id)
+            ?.unsettled
+        ),
+        total: getNotNullOrThrowError<any>(
+          userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+            ?.total
+        ),
+        inUSD: {
+          quotation: BigNumber(0),
+          free: getNotNullOrThrowError<any>(
             userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
-                    )?.lockedInOrders,
-                    unsettled: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
-                    )?.unsettled,
-                    total: getNotNullOrThrowError<any>(
-                        userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
-                    )?.total
-                }
+          )?.free,
+          lockedInOrders: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+          )?.lockedInOrders,
+          unsettled: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+          )?.unsettled,
+          total: getNotNullOrThrowError<any>(
+            userBalances.tokens.get(primaryTargetOrder.market.quoteToken.id)
+          )?.total,
+        },
       });
     });
 
@@ -4505,7 +4535,7 @@ describe('Kujira', () => {
 
     it('Settle funds for market 1', async () => {
       const requestBody = {
-        marketId: marketsIds[1],
+        marketId: marketsIds['KUJI/USK'],
         ownerAddress: ownerAddress,
       } as MarketWithdrawRequest;
 
@@ -4523,11 +4553,11 @@ describe('Kujira', () => {
         controllerFunction: KujiraController.withdrawFromMarket,
       });
 
-      const responseBody = response.body as MarketWithdrawResponse;
+      const responseBody = response.body;
 
       logResponse(responseBody);
 
-      expect((responseBody as Withdraw).hash.length).toBeCloseTo(64);
+      expect(responseBody.hash.length).toBeCloseTo(64);
     });
 
     it.skip('Check the wallet balances from the tokens 1, 2 and 3', async () => {
@@ -4653,7 +4683,7 @@ describe('Kujira', () => {
 
     it('Settle funds for markets 2 and 3', async () => {
       const requestBody = {
-        marketIds: [marketsIds[2], marketsIds[3]],
+        marketIds: [marketsIds['KUJI/axlUSDC'], marketsIds['axlUSDC/USK']],
         ownerAddress: ownerAddress,
       } as MarketsWithdrawsRequest;
 
@@ -4679,11 +4709,11 @@ describe('Kujira', () => {
         getNotNullOrThrowError<MarketId[]>(request.marketIds).length
       );
 
-      for (const [marketId, withdraw] of (
-        responseBody as IMap<MarketId, Withdraw>
+      for (const [marketId, withdraws] of (
+        responseBody as IMap<MarketId, Withdraws>
       ).entries()) {
         expect(request.marketIds).toInclude(marketId);
-        expect(withdraw.hash.length).toBeCloseTo(64);
+        expect(withdraws.hash.length).toBeCloseTo(64);
       }
     });
 

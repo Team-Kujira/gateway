@@ -1,6 +1,5 @@
 import { BigNumber } from 'bignumber.js';
 import { ConfigManagerV2 } from '../../services/config-manager-v2';
-import { getNotNullOrThrowError } from './kujira.helpers';
 
 const configManager = ConfigManagerV2.getInstance();
 
@@ -28,7 +27,7 @@ export namespace KujiraConfig {
     prefix: configManager.get('kujira.prefix') || 'kujira',
     accountNumber: configManager.get('kujira.accountNumber') || 0,
     nativeToken: 'KUJI',
-    gasPrice: BigNumber(configManager.get('kujira.gasPrice') || 0.00125),
+    gasPrice: configManager.get('kujira.gasPrice') ? BigNumber(configManager.get('kujira.gasPrice')) : null,
     gasPriceSuffix: 'ukuji',
     gasLimitEstimate: BigNumber(
       configManager.get('kujira.gasLimitEstimate') || 0.009147
@@ -67,12 +66,12 @@ export namespace KujiraConfig {
         ),
       },
       open: {
-        limit: configManager.get(`kujira.orders.open.limit`) | 255,
+        limit: configManager.get(`kujira.orders.open.limit`) | (5 * 31),
         paginationLimit:
           configManager.get(`kujira.orders.open.paginationLimit`) | 31,
       },
       filled: {
-        limit: configManager.get(`kujira.orders.filled.limit`) | 255,
+        limit: configManager.get(`kujira.orders.filled.limit`) | (5 * 31),
       },
       cancel: {
         maxPerTransaction: configManager.get(
@@ -118,14 +117,16 @@ export namespace KujiraConfig {
       marketsData: configManager.get('kujira.cache.marketsData') || 3600, // in seconds
       markets: configManager.get('kujira.cache.markets') || 3600, // in seconds
       tokens: configManager.get('kujira.cache.markets') || 3600, // in seconds
+      coinGeckoCoins: configManager.get('kujira.cache.coinGeckoCoins') || 3600, // in seconds
+    },
+    coinGecko: {
+      coinsUrl:
+        configManager.get('kujira.coinGecko.coinsUrl') ||
+        'https://api.coingecko.com/api/v3/coins/list',
+      priceUrl:
+        configManager.get('kujira.coinGecko.priceUrl') ||
+        'https://api.coingecko.com/api/v3/simple/price?ids={targets}&vs_currencies=usd',
+      apiKeys: configManager.get('kujira.coinGecko.apiKeys') || [''],
     },
   };
-}
-
-if (KujiraConfig.config.tickers.sources.has('nomics')) {
-  getNotNullOrThrowError<any>(
-    KujiraConfig.config.tickers.sources.get('nomics')
-  ).url =
-    KujiraConfig.config.tickers.sources.get('nomics')?.url ||
-    'https://nomics.com/data/exchange-markets-ticker?convert=USD&exchange=kujira_dex&interval=1m&market=${marketAddress}';
 }
