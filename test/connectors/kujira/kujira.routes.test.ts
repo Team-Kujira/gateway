@@ -571,7 +571,7 @@ beforeEach(async () => {
     return helperSendRequest(options);
   };
 
-  testTitle = expect.getState().currentTestName;
+  testTitle = getNotNullOrThrowError<string>(expect.getState().currentTestName);
   logRequest = (target: any) => helperLogRequest(target, testTitle);
   logResponse = (target: any) => helperLogResponse(target, testTitle);
 

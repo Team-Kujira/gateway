@@ -223,7 +223,7 @@ export const validateOrderExchangeId = (optional = false): Validator => {
     null,
     (target, _) =>
       typeof target == 'object' && 'id' in target
-        ? isNaturalNumberString(target.Id)
+        ? isNaturalNumberString(target.id)
         : target,
     (target, _) => {
       const id = typeof target == 'object' ? target.id : target;

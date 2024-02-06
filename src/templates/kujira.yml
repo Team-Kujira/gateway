@@ -1,7 +1,7 @@
 networks:
   mainnet:
     chainId: mainnet
-    nodeURL: null # Empty or null means choosing the RPC automatically
+    nodeURL: null # Empty or null means choosing the RPC automatically (fastest one)
 #    nodeURL: 'https://kujira-mainnet-rpc.autostake.com'
 #    nodeURL: 'https://kujira-rpc.ibs.team'
 #    nodeURL: 'https://kujira-rpc.lavenderfive.com'
