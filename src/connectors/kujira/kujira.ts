@@ -329,7 +329,12 @@ export class Kujira {
     this.kujiraNetworkNativeFees = getNotNullOrThrowError<FeeCurrency>(
       this.kujiraNetworkInfo['feeCurrencies'].find(it => it.coinDenom == config.nativeToken)
     );
-    this.kujiraNetworkNativeGasPrice = config.gasPrice || BigNumber(getNotNullOrThrowError<number>(this.kujiraNetworkNativeFees.gasPriceStep?.low));
+
+    try {
+      this.kujiraNetworkNativeGasPrice = config.gasPrice || BigNumber(getNotNullOrThrowError<number>(this.kujiraNetworkNativeFees.gasPriceStep?.low));
+    } catch (exception) {
+      this.kujiraNetworkNativeGasPrice = config.fallbackGasPrice;
+    }
 
     this.accounts = IMap<OwnerAddress, KujiraWalletArtifacts>().asMutable();
   }

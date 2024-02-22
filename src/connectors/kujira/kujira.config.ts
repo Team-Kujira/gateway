@@ -28,6 +28,7 @@ export namespace KujiraConfig {
     accountNumber: configManager.get('kujira.accountNumber') || 0,
     nativeToken: 'KUJI',
     gasPrice: configManager.get('kujira.gasPrice') ? BigNumber(configManager.get('kujira.gasPrice')) : null,
+    fallbackGasPrice: BigNumber(0.0034),
     gasPriceSuffix: 'ukuji',
     gasLimitEstimate: BigNumber(
       configManager.get('kujira.gasLimitEstimate') || 0.009147
