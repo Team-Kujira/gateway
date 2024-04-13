@@ -493,6 +493,21 @@ export const convertCoinGeckoQuotationsToQuotations = (
   return output;
 };
 
+export const extractQuotation = (quotations: IMap<TokenId, Price>, token: Token) => {
+  let quotation = BigNumber(0);
+
+  try {
+    quotation = getNotNullOrThrowError<BigNumber>(quotations.get(token.id));
+  } catch (exception) {
+    // TODO investigate better!!!
+    if (token.id.includes('usk')) {
+      quotation = BigNumber(1);
+    }
+  }
+
+  return quotation;
+}
+
 export const convertKujiraBalancesToBalances = async (
   balances: readonly Coin[],
   orders: IMap<OrderId, Order>,
@@ -514,7 +529,7 @@ export const convertKujiraBalancesToBalances = async (
     if (!token.symbol.startsWith('x')) {
       let quotation = BigNumber(0);
 
-      quotation = getNotNullOrThrowError<BigNumber>(quotations.get(token.id));
+      quotation = getNotNullOrThrowError<BigNumber>(extractQuotation(quotations, token));
 
       const freeAmount = BigNumber(balance.amount).div(
         BigNumber(10).pow(token.decimals)
@@ -558,11 +573,11 @@ export const convertKujiraBalancesToBalances = async (
     let filledAmount: Amount = BigNumber(0);
 
     const freeQuotation = getNotNullOrThrowError<BigNumber>(
-      quotations.get(freeToken.id)
+      extractQuotation(quotations, freeToken)
     );
 
     const filledQuotation = getNotNullOrThrowError<BigNumber>(
-      quotations.get(filledToken.id)
+      extractQuotation(quotations, filledToken)
     );
 
     const filling = getNotNullOrThrowError<OrderFilling>(order.filling);
@@ -662,8 +677,8 @@ export const convertKujiraTransactionToTransaction = (
   return {
     hash: input.hash,
     blockNumber: input.height,
-    gasUsed: input.gasUsed,
-    gasWanted: input.gasWanted,
+    gasUsed: Number(input.gasUsed),
+    gasWanted: Number(input.gasWanted),
     code: input.code,
     data: new TextDecoder('utf-8').decode(input.tx),
   };
@@ -746,7 +761,7 @@ export const convertKujiraSettlementToSettlement = (
 
     if (amount.gt(BigNumber(0))) {
       const quotation = getNotNullOrThrowError<BigNumber>(
-        quotations.get(token.id)
+        extractQuotation(quotations, token)
       );
 
       const amountInUSD = amount.multipliedBy(quotation);

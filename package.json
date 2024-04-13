@@ -23,8 +23,8 @@
     "test:scripts": "jest -i --verbose ./test-scripts/*.test.ts"
   },
   "dependencies": {
-    "@cosmjs/proto-signing": "^0.31.1",
-    "@cosmjs/stargate": "^0.31.1",
+    "@cosmjs/proto-signing": "^0.32.3",
+    "@cosmjs/stargate": "^0.32.3",
     "@crocswap/sdk": "^2.4.5",
     "@ethersproject/abstract-provider": "5.7.0",
     "@ethersproject/address": "5.7.0",
@@ -84,7 +84,7 @@
     "http-status-codes": "2.2.0",
     "immutable": "^4.2.4",
     "js-yaml": "^4.1.0",
-    "kujira.js": "0.9.142",
+    "kujira.js": "1.0.22",
     "level": "^8.0.0",
     "lodash": "^4.17.21",
     "lru-cache": "^7.14.1",
