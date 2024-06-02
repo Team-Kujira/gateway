@@ -192,7 +192,8 @@ const caches = {
   instances: new CacheContainer(new MemoryStorage()),
   tokens: new CacheContainer(new MemoryStorage()),
   markets: new CacheContainer(new MemoryStorage()),
-  coinGeckoCoins: new CacheContainer(new MemoryStorage()),
+  fetchCoinGeckoCoins: new CacheContainer(new MemoryStorage()),
+  fetchCoinGeckoPrices: new CacheContainer(new MemoryStorage()),
 };
 
 const config = KujiraConfig.config;
@@ -825,20 +826,17 @@ export class Kujira {
     return output;
   }
 
-  @Cache(caches.coinGeckoCoins, { ttl: config.cache.coinGeckoCoins })
-  async getKujiraTokenSymbolsToCoinGeckoIdsMap(
-    _options?: any,
-    _network?: string
-  ): Promise<GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse> {
-    const output = IMap<TokenSymbol, CoinGeckoId | undefined>().asMutable();
-
+  @Cache(caches.fetchCoinGeckoPrices, { ttl: config.cache.fetchCoinGeckoPrices })
+  async fetchCoinGeckoPrices(coinGeckoIds: string): Promise<any> {
     const apiKeys = config.coinGecko.apiKeys;
     const randomIndex = Math.floor(Math.random() * apiKeys.length);
     const apiKey = apiKeys[randomIndex];
 
-    const finalUrl = config.coinGecko.coinsUrl.replace('{apiKey}', apiKey);
+    const finalUrl = config.coinGecko.priceUrl
+      .replace('{apiKey}', apiKey)
+      .replace('{targets}', coinGeckoIds);
 
-    const result: any = (
+    return (
       await runWithRetryAndTimeout(
         axios,
         axios.get,
@@ -847,6 +845,34 @@ export class Kujira {
         0
       )
     ).data;
+  }
+
+  @Cache(caches.fetchCoinGeckoCoins, { ttl: config.cache.fetchCoinGeckoCoins })
+  async fetchCoinGeckoCoins(): Promise<any> {
+    const apiKeys = config.coinGecko.apiKeys;
+    const randomIndex = Math.floor(Math.random() * apiKeys.length);
+    const apiKey = apiKeys[randomIndex];
+
+    const finalUrl = config.coinGecko.coinsUrl.replace('{apiKey}', apiKey);
+
+    return (
+      await runWithRetryAndTimeout(
+        axios,
+        axios.get,
+        [finalUrl],
+        config.retry.all.maxNumberOfRetries,
+        0
+      )
+    ).data;
+  }
+
+  async getKujiraTokenSymbolsToCoinGeckoIdsMap(
+    _options?: any,
+    _network?: string
+  ): Promise<GetKujiraTokenSymbolsToCoinGeckoTokenIdsMapResponse> {
+    const output = IMap<TokenSymbol, CoinGeckoId | undefined>().asMutable();
+
+    const result: any = await this.fetchCoinGeckoCoins();
 
     const coinGeckoSymbolsToIdsMap = IMap<
       CoinGeckoSymbol,
@@ -1084,23 +1110,7 @@ export class Kujira {
               .concat(',')
               .concat(coinGeckoQuoteTokenId);
 
-            const apiKeys = config.coinGecko.apiKeys;
-            const randomIndex = Math.floor(Math.random() * apiKeys.length);
-            const apiKey = apiKeys[randomIndex];
-
-            const finalUrl = config.coinGecko.priceUrl
-              .replace('{apiKey}', apiKey)
-              .replace('{targets}', coinGeckoIds);
-
-            result = (
-              await runWithRetryAndTimeout(
-                axios,
-                axios.get,
-                [finalUrl],
-                config.retry.all.maxNumberOfRetries,
-                0
-              )
-            ).data;
+            result = await this.fetchCoinGeckoPrices(coinGeckoIds)
           }
 
           const tokens = {
@@ -1185,23 +1195,7 @@ export class Kujira {
       .filter((id: any) => id && id.trim() !== '')
       .join(',');
 
-    const apiKeys = config.coinGecko.apiKeys;
-    const randomIndex = Math.floor(Math.random() * apiKeys.length);
-    const apiKey = apiKeys[randomIndex];
-
-    const finalUrl = config.coinGecko.priceUrl
-      .replace('{apiKey}', apiKey)
-      .replace('{targets}', coinGeckoIds);
-
-    const result: any = (
-      await runWithRetryAndTimeout(
-        axios,
-        axios.get,
-        [finalUrl],
-        config.retry.all.maxNumberOfRetries,
-        0
-      )
-    ).data;
+    const result: any = await this.fetchCoinGeckoPrices(coinGeckoIds)
 
     const tokensSymbolsToTokensIdsMap = await this.getTokenSymbolsToTokenIdsMap(
       {},

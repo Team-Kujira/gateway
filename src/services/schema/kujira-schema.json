@@ -47,6 +47,12 @@
         },
         "markets": {
           "type": "integer"
+        },
+        "coinGeckoCoins": {
+          "type": "integer"
+        },
+        "coinGeckoPrices": {
+          "type": "integer"
         }
       }
     },

@@ -40,6 +40,8 @@ orderBook:
 cache:
   marketsData: 3600 # in seconds
   markets: 3600 # in seconds
+  coinGeckoCoins: 86400 # in seconds
+  coinGeckoPrices: 300 # in seconds
 orders:
   create:
     fee: 'auto'
