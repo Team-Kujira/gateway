@@ -1395,8 +1395,8 @@ export class Kujira {
           }
 
           const combinedOrders = [
-            ...response.orders,
-            ...partialResponse.orders,
+            ...response?.orders || [],
+            ...partialResponse?.orders || [],
           ];
 
           const seenIndices = new Set<number>();
@@ -1410,8 +1410,8 @@ export class Kujira {
             return false;
           });
         } while (
-          partialResponse.orders.length > 0 &&
-          response.orders.length < KujiraConfig.config.orders.open.limit
+          (partialResponse?.orders || []).length > 0 &&
+          (response?.orders || []).length < KujiraConfig.config.orders.open.limit
         );
 
         const bundles = IMap<string, any>().asMutable();
@@ -1419,7 +1419,7 @@ export class Kujira {
         bundles.setIn(['common', 'response'], response);
         bundles.setIn(['common', 'status'], options.status);
         bundles.setIn(['common', 'market'], market);
-        bundles.setIn(['orders'], response.orders);
+        bundles.setIn(['orders'], response.orders || []);
 
         orders = convertKujiraOrdersToMapOfOrders({
           type: ConvertOrderType.GET_ORDERS,
