@@ -1428,9 +1428,14 @@ export class Kujira {
           bundles,
         });
       } else {
+        // TODO Handle better the case when no market is informed. The ideal is to fetch the orders only from the markets who have them!!!
+        // const marketIds =
+        //   options.marketIds ||
+        //   (await this.getAllMarkets({}, this.network)).keySeq().toArray();
+
         const marketIds =
           options.marketIds ||
-          (await this.getAllMarkets({}, this.network)).keySeq().toArray();
+          [];
 
         orders = IMap<OrderId, Order>().asMutable();
 
@@ -2198,6 +2203,9 @@ export class Kujira {
     }
 
     latencies.sort((a, b) => a.latency - b.latency);
+
+    console.log('RPCs latencies:', latencies);
+    console.log(`Chosen RPC: ${latencies[0].endpoint}`);
 
     return latencies[0].endpoint;
   }
