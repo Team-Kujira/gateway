@@ -1365,7 +1365,7 @@ export class Kujira {
         });
 
         const response: JsonObject = { orders: [] };
-        let partialResponse: JsonObject;
+        let  partialResponse: JsonObject;
 
         do {
           let startAfter = '0';
@@ -1389,6 +1389,8 @@ export class Kujira {
                 }
               );
           } catch (error: any) {
+            console.error(error);
+
             if (error.message.includes('Cannot Sub with 0 and 1')) {
               break;
             }
