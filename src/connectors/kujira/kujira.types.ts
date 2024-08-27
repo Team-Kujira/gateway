@@ -519,6 +519,10 @@ export interface GetBalanceRequest {
   tokenId: TokenId;
   tokenSymbol: TokenSymbol;
   ownerAddress: OwnerAddress;
+  marketId?: MarketId;
+  marketName?: MarketName;
+  marketIds?: MarketId[];
+  marketNames?: MarketName[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -529,6 +533,10 @@ export interface GetBalancesRequest {
   tokenIds?: TokenId[];
   tokenSymbols?: TokenSymbol[];
   ownerAddress: OwnerAddress;
+  marketId?: MarketId;
+  marketName?: MarketName;
+  marketIds?: MarketId[];
+  marketNames?: MarketName[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -537,6 +545,10 @@ export interface GetBalancesResponse extends Balances {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GetAllBalancesRequest {
   ownerAddress: OwnerAddress;
+  marketId?: MarketId;
+  marketName?: MarketName;
+  marketIds?: MarketId[];
+  marketNames?: MarketName[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

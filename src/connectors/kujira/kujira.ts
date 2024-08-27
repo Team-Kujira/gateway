@@ -1229,6 +1229,10 @@ export class Kujira {
       ownerAddress: options.ownerAddress,
       tokenIds: options.tokenId ? [options.tokenId] : undefined,
       tokenSymbols: options.tokenSymbol ? [options.tokenSymbol] : undefined,
+      marketId: options.marketId,
+      marketName: options.marketName,
+      marketIds: options.marketIds,
+      marketNames: options.marketNames,
     });
 
     if (options.tokenId) {
@@ -1254,6 +1258,10 @@ export class Kujira {
   async getBalances(options: GetBalancesRequest): Promise<GetBalancesResponse> {
     const allBalances = await this.getAllBalances({
       ownerAddress: options.ownerAddress,
+      marketId: options.marketId,
+      marketName: options.marketName,
+      marketIds: options.marketIds,
+      marketNames: options.marketNames,
     });
 
     const balances: Balances = {
@@ -1319,6 +1327,10 @@ export class Kujira {
 
     const orders = (await this.getOrders({
       ownerAddress: options.ownerAddress,
+      marketId: options.marketId,
+      marketName: options.marketName,
+      marketIds: options.marketIds,
+      marketNames: options.marketNames,
     })) as IMap<OrderId, Order>;
 
     const quotations = await this.getAllTokensQuotationsInUSD({});
@@ -1428,14 +1440,9 @@ export class Kujira {
           bundles,
         });
       } else {
-        // TODO Handle better the case when no market is informed. The ideal is to fetch the orders only from the markets who have them!!!
-        // const marketIds =
-        //   options.marketIds ||
-        //   (await this.getAllMarkets({}, this.network)).keySeq().toArray();
-
         const marketIds =
           options.marketIds ||
-          [];
+          (await this.getAllMarkets({}, this.network)).keySeq().toArray();
 
         orders = IMap<OrderId, Order>().asMutable();
 
