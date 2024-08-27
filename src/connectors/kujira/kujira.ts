@@ -1352,6 +1352,10 @@ export class Kujira {
         ...options,
         ids: [options.id],
         ownerAddresses: [options.ownerAddress],
+        marketId: options.marketId,
+        marketName: options.marketName,
+        marketIds: options.marketIds,
+        marketNames: options.marketNames,
       })) as IMap<OrderId, Order>
     ).first();
   }
@@ -1424,7 +1428,7 @@ export class Kujira {
             return false;
           });
         } while (
-          (partialResponse?.orders || []).length > 0 &&
+          (partialResponse?.orders || []).length >= KujiraConfig.config.orders.open.paginationLimit &&
           (response?.orders || []).length < KujiraConfig.config.orders.open.limit
         );
 
@@ -1915,6 +1919,8 @@ export class Kujira {
         (await this.getOrders({
           ownerAddresses: [ownerAddress],
           status: OrderStatus.FILLED,
+          marketId: options.marketId,
+          marketName: options.marketName,
         })) as IMap<OrderId, Order> // Cast because we have only one ownerAddress
       )
         .valueSeq()
